@@ -47,4 +47,14 @@ constexpr bool callable(F&&, Args&&...) noexcept {
 }
 
 
+template <typename ...Args>
+struct Overload : public Args... {
+    using Args::operator()...;
+};
+
+
+template <typename ...Args>
+Overload(Args...) -> Overload<Args...>;
+
+
 } // namespace rp

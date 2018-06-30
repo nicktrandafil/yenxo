@@ -56,3 +56,7 @@ target_link_libraries(
     PRIVATE
     Catch2::Catch
     ${PROJECT_NAME}_core)
+
+add_test(
+    check_to_and_from_integral test_${PROJECT_NAME}_core
+    "Check to and from integral types")

@@ -62,12 +62,6 @@ Variant::Variant(Map&& x)
 {}
 
 
-template <typename T, typename>
-Variant::Variant(T&& x) : Variant(T::toVariant(std::forward<T>(x))) {
-    static_assert(rp::callable(T::toVariant, x), "`T` should provide");
-}
-
-
 Variant::Variant(Variant const&) = default;
 
 
@@ -78,6 +72,16 @@ Variant::Variant(Variant&&) noexcept = default;
 
 
 Variant& Variant::operator=(Variant&&) noexcept = default;
+
+
+int Variant::integer() const {
+    return std::visit(
+        rp::Overload{
+            [](int x) { return x; },
+            [](std::monostate) [[noreturn]]  -> int { throw VariantEmpty(); },
+            [](auto&&) [[noreturn]] -> int { throw VariantBadType(); }},
+        impl->m);
+}
 
 
 struct Variant::Vec::Impl {};

@@ -10,12 +10,27 @@
 
 
 ///
-/// \brief An error identifying `Variant` error
+/// An error identifying `Variant` error
 ///
 class VariantErr : public std::runtime_error {
+public:
     explicit VariantErr(std::string const& x) : runtime_error(x) {}
 };
 
+
+///
+/// Empty Variant error
+///
+class VariantEmpty : public VariantErr {
+public:
+    explicit VariantEmpty() : VariantErr("Attempt to get empty `Variant`") {}
+};
+
+
+class VariantBadType : public VariantErr {
+public:
+    explicit VariantBadType() : VariantErr("Attempt to get wrong type") {}
+};
 
 ///
 /// Serialized object reprezentation class
@@ -46,15 +61,6 @@ public:
     explicit Variant(Map const&);
     explicit Variant(Map&&);
 
-    ///
-    /// Construction from a type
-    /// Disable for Variant type to not confuse with copy constructor
-    ///
-    template <typename T,
-              typename = std::enable_if_t<
-                  !std::is_same<Variant, T>::value, void>>
-    explicit Variant(T&& x);
-
     // copy
     Variant(Variant const& rhs);
     Variant& operator=(Variant const& rhs);
@@ -62,6 +68,12 @@ public:
     // move
     Variant(Variant&& rhs) noexcept;
     Variant& operator=(Variant&& rhs) noexcept;
+
+    ///
+    /// Get integer
+    /// \throw `VariantEmpty`, `VariantBadType`
+    ///
+    int integer() const;
 
     ///
     /// Get stored type
