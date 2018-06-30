@@ -76,6 +76,12 @@ public:
     int integer() const;
 
     ///
+    /// Get integer or `x` if the object is empty
+    /// \throw `VariantBadType`
+    ///
+    int integerOr(int x) const;
+
+    ///
     /// Get stored type
     ///
     TypeId type() const noexcept;
