@@ -72,11 +72,10 @@ public:
               typename =
                   typename std::enable_if<
                       !std::is_same<Pimpl, U>::value, void>::type>
-    explicit Pimpl(U&& u) noexcept(std::is_nothrow_constructible<T, U>::value);
+    explicit Pimpl(U&& u);
 
     template <typename T1, typename T2, typename ...Args>
-    Pimpl(T1&& a1, T2&& a2, Args&&... args) noexcept(
-            std::is_nothrow_constructible<T, T1, T2, Args...>::value);
+    Pimpl(T1&& a1, T2&& a2, Args&&... args);
 
     //
     // Dereferencing

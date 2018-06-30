@@ -14,7 +14,7 @@ Pimpl<T>::Pimpl(Pimpl const& rhs) : m(new T(*rhs.m)) {}
 
 
 template <typename T>
-Pimpl<T>::Pimpl(Pimpl&& rhs) = default;
+Pimpl<T>::Pimpl(Pimpl&& rhs) noexcept = default;
 
 
 template <typename T>
@@ -26,7 +26,7 @@ Pimpl<T>& Pimpl<T>::operator=(Pimpl const& rhs) {
 
 
 template <typename T>
-Pimpl<T>& Pimpl<T>::operator=(Pimpl<T>&& rhs) = default;
+Pimpl<T>& Pimpl<T>::operator=(Pimpl<T>&& rhs) noexcept = default;
 
 
 template <typename T>
@@ -45,16 +45,16 @@ Pimpl<T>::Pimpl(U1&& u1, U2&& u2, Args&&... args)
 
 
 template <typename T>
-T* Pimpl<T>::operator->() { return m.get(); }
+T* Pimpl<T>::operator->() noexcept { return m.get(); }
 
 
 template <typename T>
-T const* Pimpl<T>::operator->() const { return m.get(); }
+T const* Pimpl<T>::operator->() const noexcept { return m.get(); }
 
 
 template <typename T>
-T& Pimpl<T>::operator*() { return *m; }
+T& Pimpl<T>::operator*() noexcept { return *m; }
 
 
 template <typename T>
-T const& Pimpl<T>::operator*() const { return *m; }
+T const& Pimpl<T>::operator*() const noexcept { return *m; }

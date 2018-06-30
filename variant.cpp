@@ -1,14 +1,19 @@
 #include "variant.hpp"
 
+// local
+#include <meta.hpp>
+#include <pimpl_impl.hpp>
+
 // std
 #include <variant>
 
-// local
-#include <pimpl.hpp>
-
 
 using Val = std::variant<
-    std::monostate, int, std::string, Variant::Vec, Variant::Map>;
+    std::monostate,
+    int,
+    std::string,
+    Variant::Vec,
+    Variant::Map>;
 
 
 struct Variant::Impl {
@@ -17,6 +22,9 @@ struct Variant::Impl {
 
 
 Variant::Variant() = default;
+
+
+Variant::~Variant() = default;
 
 
 Variant::Variant(int x)
@@ -33,6 +41,82 @@ Variant::Variant(std::string&& x)
     : impl(std::move(x))
 {}
 
+
+Variant::Variant(Vec const& x)
+    : impl(x)
+{}
+
+
+Variant::Variant(Vec&& x)
+    : impl(std::move(x))
+{}
+
+
+Variant::Variant(Map const& x)
+    : impl(x)
+{}
+
+
+Variant::Variant(Map&& x)
+    : impl(std::move(x))
+{}
+
+
 template <typename T, typename>
-Variant::Variant(T&& x) {
+Variant::Variant(T&& x) : Variant(T::toVariant(std::forward<T>(x))) {
+    static_assert(rp::callable(T::toVariant, x), "`T` should provide");
 }
+
+
+Variant::Variant(Variant const&) = default;
+
+
+Variant& Variant::operator=(Variant const&) = default;
+
+
+Variant::Variant(Variant&&) noexcept = default;
+
+
+Variant& Variant::operator=(Variant&&) noexcept = default;
+
+
+struct Variant::Vec::Impl {};
+
+
+Variant::Vec::Vec() = default;
+
+
+Variant::Vec::~Vec() = default;
+
+
+Variant::Vec::Vec(Vec const&) = default;
+
+
+Variant::Vec& Variant::Vec::operator=(Vec const&) = default;
+
+
+Variant::Vec::Vec(Vec&&) noexcept = default;
+
+
+Variant::Vec& Variant::Vec::operator=(Vec&&) noexcept = default;
+
+
+struct Variant::Map::Impl {};
+
+
+Variant::Map::Map() = default;
+
+
+Variant::Map::~Map() = default;
+
+
+Variant::Map::Map(Map const&) = default;
+
+
+Variant::Map& Variant::Map::operator=(Map const&) = default;
+
+
+Variant::Map::Map(Map&&) noexcept = default;
+
+
+Variant::Map& Variant::Map::operator=(Map&&) noexcept = default;
