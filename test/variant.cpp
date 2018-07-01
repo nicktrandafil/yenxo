@@ -14,6 +14,14 @@ TEST_CASE("Check to and from integral types", "[integral]") {
         REQUIRE_THROWS_AS(Variant("").integer(), VariantBadType);
         REQUIRE(Variant().integerOr(1) == 1);
     }
+
+    SECTION("string") {
+        std::string const expected = "ab";
+        auto const x = Variant(expected);
+        REQUIRE(expected == x.str());
+        REQUIRE_THROWS_AS(Variant().str(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant(5).str(), VariantBadType);
+    }
 }
 
 

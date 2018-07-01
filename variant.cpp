@@ -94,6 +94,20 @@ int Variant::integerOr(int x) const {
 }
 
 
+std::string const& Variant::str() const {
+    return std::visit(
+        rp::Overload{
+            [](std::string const& x) -> std::string const& { return x; },
+            [](std::monostate) [[noreturn]] -> std::string const& {
+                throw VariantEmpty();
+            },
+            [](auto&&) [[noreturn]] -> std::string const& {
+                throw VariantBadType();
+            }},
+        impl->m);
+}
+
+
 struct Variant::Vec::Impl {};
 
 

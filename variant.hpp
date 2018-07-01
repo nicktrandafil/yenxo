@@ -82,6 +82,12 @@ public:
     int integerOr(int x) const;
 
     ///
+    /// Get string
+    /// \throw `VariantEmpty`, `VariantBadType`
+    ///
+    std::string const& str() const;
+
+    ///
     /// Get stored type
     ///
     TypeId type() const noexcept;
