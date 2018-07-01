@@ -108,6 +108,17 @@ std::string const& Variant::str() const {
 }
 
 
+std::string Variant::strOr(std::string const& x) const {
+    return std::visit(
+        rp::Overload{
+            [](std::string const& x) { return x; },
+            [&](std::monostate) { return x; },
+            [](auto&&) [[noreturn]] -> std::string { throw VariantBadType(); }
+        },
+        impl->m);
+}
+
+
 struct Variant::Vec::Impl {};
 
 

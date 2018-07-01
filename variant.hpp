@@ -88,6 +88,12 @@ public:
     std::string const& str() const;
 
     ///
+    /// Get string or `x` if the object is empty
+    /// \throw `VariantBadType`
+    ///
+    std::string strOr(std::string const& x) const;
+
+    ///
     /// Get stored type
     ///
     TypeId type() const noexcept;

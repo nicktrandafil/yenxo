@@ -21,6 +21,7 @@ TEST_CASE("Check to and from integral types", "[integral]") {
         REQUIRE(expected == x.str());
         REQUIRE_THROWS_AS(Variant().str(), VariantEmpty);
         REQUIRE_THROWS_AS(Variant(5).str(), VariantBadType);
+        REQUIRE(Variant().strOr("abc") == "abc");
     }
 }
 
