@@ -13,16 +13,12 @@ struct Foo {
 };
 
 
-int x = 5;
-
-
 } // namespace
 
 
 static_assert(rp::callable(foo1), "");
-static_assert(rp::callable(foo2, 5), "");
-static_assert(rp::callable(foo2, x), "");
-static_assert(!rp::callable(foo2, 5, 6), "");
+static_assert(rp::callable(foo2, rp::Type<int>()), "");
+static_assert(!rp::callable(foo2, rp::Type<int>(), rp::Type<int>()), "");
 static_assert(rp::callable(Foo()), "");
 static_assert(rp::callable(Foo()), "");
 

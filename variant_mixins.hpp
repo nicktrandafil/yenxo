@@ -1,17 +1,16 @@
+#pragma once
+
+
+// local
+#include <meta.hpp>
+#include <variant.hpp>
 #include <when.hpp>
 
 // boost
-#include <meta.hpp>
 #include <boost/hana.hpp>
 
 // std
-#include <iostream>
 #include <type_traits>
-#include <string>
-#include <variant.hpp>
-
-
-namespace hana = boost::hana;
 
 
 namespace detail {
@@ -127,8 +126,8 @@ struct Var {
     static Variant toVariant(Derived const& x) {
         Variant::Map ret;
 
-        hana::for_each(x, hana::fuse([&](auto name, auto value) {
-            ret[hana::to<char const*>(name)] = detail::toVariant(value);
+        boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
+            ret[boost::hana::to<char const*>(name)] = detail::toVariant(value);
         }));
 
         return Variant(ret);
@@ -138,11 +137,11 @@ struct Var {
         Derived ret;
         auto const& map = x.map();
 
-        hana::for_each(hana::accessors<Derived>(),
-                       hana::fuse([&](auto name, auto value) {
+        boost::hana::for_each(boost::hana::accessors<Derived>(),
+                       boost::hana::fuse([&](auto name, auto value) {
             auto& tmp = value(ret);
             return detail::fromVariant(
-                        tmp, map.at(hana::to<char const*>(name)));
+                        tmp, map.at(boost::hana::to<char const*>(name)));
         }));
 
         return ret;
@@ -150,25 +149,21 @@ struct Var {
 };
 
 
+///
+/// Adds member `void update(Variant)`
+///
+template <typename Derived>
+struct UpdateFromVar {
+    void update(Variant const& x) {
+        Derived& self = static_cast<Derived&>(*this);
+        auto const& map = x.map();
+        for (auto& v: map) {
+            detail::fromVariant(
+                        boost::hana::find(self, v.first),
+                        v.second);
+        }
+    }
+};
+
+
 } // namespace
-
-
-struct X {
-    static Variant toVariant(X const& x) { return {}; }
-    static X fromVariant(Variant const& x) { return {}; }
-};
-
-
-struct Person :
-        mixin::Var<Person> {
-    BOOST_HANA_DEFINE_STRUCT(
-            Person,
-            (std::string, name),
-            (int, age)
-    );
-};
-
-
-int main() {
-    Person::toVariant(Person());
-}

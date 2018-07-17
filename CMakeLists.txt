@@ -14,6 +14,8 @@ add_library(
 
     variant.cpp
     variant.hpp
+
+    variant_mixins.hpp
 )
 
 set_target_properties(${PROJECT_NAME}_core PROPERTIES CXX_STANDARD 17)
@@ -48,6 +50,8 @@ add_executable(
     test/variant.cpp
 
     test/main.cpp
+
+    test/variant_mixins.cpp
 )
 
 set_target_properties(test_${PROJECT_NAME}_core PROPERTIES CXX_STANDARD 17)
@@ -60,3 +64,11 @@ target_link_libraries(
 add_test(
     check_to_and_from_integral test_${PROJECT_NAME}_core
     "Check to and from integral types")
+
+add_test(
+    variant_mixin_helpers test_${PROJECT_NAME}_core
+    "[variant_mixin_helpers]")
+
+add_test(
+    variant_mixins test_${PROJECT_NAME}_core
+    "[variant_mixins]")

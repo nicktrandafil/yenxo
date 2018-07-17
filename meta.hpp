@@ -21,6 +21,10 @@ template <typename ...Args>
 struct Valid : std::true_type {};
 
 
+template <typename ...Args>
+constexpr bool valid(Args&&...) { return true; }
+
+
 template <typename F, typename AS, typename = void>
 struct Callable : Callable<F, AS, When<true>> {};
 
@@ -33,7 +37,8 @@ template <typename F, typename ...Args>
 struct Callable<
         F,
         S<Args...>,
-        When<Valid<decltype(std::declval<F>()(std::declval<Args>()...))>::value>>
+        When<Valid<decltype(
+            std::declval<F>()(std::declval<Args>()...))>::value>>
     : std::true_type
 {};
 
@@ -41,8 +46,12 @@ struct Callable<
 } // namespace detail
 
 
+template <typename T>
+struct Type {};
+
+
 template <typename F, typename ...Args>
-constexpr bool callable(F&&, Args&&...) noexcept {
+constexpr bool callable(F&&, Type<Args>&&...) noexcept {
     return detail::Callable<F, detail::S<Args...>>::value;
 }
 

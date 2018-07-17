@@ -81,6 +81,7 @@ public:
     /// \throw `VariantEmpty`, `VariantBadType`
     ///
     int integer() const;
+    explicit operator int() const { return integer(); }
 
     ///
     /// Get integer or `x` if the object is empty
@@ -93,6 +94,7 @@ public:
     /// \throw `VariantEmpty`, `VariantBadType`
     ///
     std::string const& str() const;
+    explicit operator std::string const&() const { return str(); }
 
     ///
     /// Get string or `x` if the object is empty
@@ -105,6 +107,7 @@ public:
     /// \throw `VariantEmpty`, `VariantBadType`
     ///
     Vec const& vec() const;
+    explicit operator Vec const&() const { return vec(); }
 
     ///
     /// Get Vec or `x` if the object is empty
@@ -117,6 +120,7 @@ public:
     /// \throw `VariantEmpty`, `VariantBadType`
     ///
     Map const& map() const;
+    explicit operator Map const&() const { return map(); }
 
     ///
     /// Get Map or `x` if the object is empty
