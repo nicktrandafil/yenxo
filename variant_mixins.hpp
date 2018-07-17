@@ -157,10 +157,19 @@ struct UpdateFromVar {
     void update(Variant const& x) {
         Derived& self = static_cast<Derived&>(*this);
         auto const& map = x.map();
-        for (auto& v: map) {
-            detail::fromVariant(
-                        boost::hana::find(self, v.first),
-                        v.second);
+        for (auto const& v: map) {
+            bool found{false};
+            boost::hana::for_each(boost::hana::accessors<Derived>(),
+                                  boost::hana::fuse([&](auto name, auto value) {
+                if (boost::hana::to<char const*>(name) != v.first) { return; }
+                auto& tmp = value(self);
+                detail::fromVariant(tmp, v.second);
+                found = true;
+            }));
+
+            if (!found) {
+                throw std::logic_error(v.first + " no such member");
+            }
         }
     }
 };

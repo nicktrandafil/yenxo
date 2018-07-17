@@ -89,7 +89,7 @@ TEST_CASE("Check mixins", "[variant_mixins]") {
         std::string("Hack")
     };
 
-    Person const person{
+    Person person{
         "Alecu",
         25,
         hobby
@@ -100,6 +100,22 @@ TEST_CASE("Check mixins", "[variant_mixins]") {
     }
 
     SECTION("Check toVariant") {
-        REQUIRE(Person::toVariant(person) != Variant(person_var));
+        REQUIRE(Person::toVariant(person) == Variant(person_var));
+    }
+
+    SECTION("Check update") {
+        Variant::Map const person_var{
+            {"age", Variant(26)}
+        };
+
+        person.update(Variant(person_var));
+
+        Person const person_updated{
+            "Alecu",
+            26,
+            hobby
+        };
+
+        REQUIRE(hana::equal(person_updated, person));
     }
 }
