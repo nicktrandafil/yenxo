@@ -43,6 +43,14 @@ TEST_CASE("Check to and from types", "[to_from]") {
         REQUIRE(Variant().mapOr(Variant::Map{std::pair("1", Variant(1))}) ==
                 Variant::Map{std::pair("1", Variant(1))});
     }
+
+    SECTION("Variant::type") {
+        REQUIRE(Variant::TypeId::Int == Variant(5).type());
+        REQUIRE(Variant::TypeId::Map == Variant(Variant::Map()).type());
+        REQUIRE(Variant::TypeId::No == Variant().type());
+        REQUIRE(Variant::TypeId::Str == Variant("").type());
+        REQUIRE(Variant::TypeId::Vec == Variant(Variant::Vec()).type());
+    }
 }
 
 
