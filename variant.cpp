@@ -164,15 +164,3 @@ bool Variant::operator==(Variant const& rhs) const noexcept {
 bool Variant::operator!=(Variant const& rhs) const noexcept {
     return impl->m != rhs.impl->m;
 }
-
-
-Variant::TypeId Variant::type() const noexcept {
-    return std::visit(rp::Overload{
-                          [](std::monostate) noexcept { return TypeId::No; },
-                          [](int) noexcept { return TypeId::Int; },
-                          [](std::string const&) noexcept { return TypeId::Str; },
-                          [](Vec const&) noexcept { return TypeId::Vec; },
-                          [](Map const&) noexcept { return TypeId::Map; }
-                      },
-                      impl->m);
-}

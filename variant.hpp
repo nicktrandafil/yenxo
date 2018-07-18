@@ -44,15 +44,6 @@ public:
     using Map = std::unordered_map<std::string, Variant>;
     using Vec = std::vector<Variant>;
 
-    // Stored type id type
-    enum class TypeId {
-        No,
-        Int,
-        Str,
-        Vec,
-        Map
-    };
-
     Variant();
     ~Variant();
 
@@ -123,11 +114,6 @@ public:
     /// \throw `VariantBadType`
     ///
     Map mapOr(Map const& x) const;
-
-    ///
-    /// Get stored type
-    ///
-    TypeId type() const noexcept;
 
     /// \defgroup Variant equality comparation
     /// \{
