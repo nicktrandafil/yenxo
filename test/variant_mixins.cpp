@@ -140,9 +140,14 @@ TEST_CASE("Check Var and UpdateFromVar", "[variant_mixins]") {
 struct PersonD : mixin::VarDef<PersonD> {
     PersonD() {}
 
+    PersonD(std::string const& name, int age, Hobby const& hobby)
+        : name(name), age(age), hobby(hobby)
+    {}
+
     PersonD(std::string const& name, Hobby const& hobby)
         : name(name), hobby(hobby)
     {}
+
 
     constexpr static auto defaultMemVals() {
         using namespace hana::literals;
@@ -185,6 +190,7 @@ TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
 
     Variant::Map person_var{
         {"name", Variant("Alecu")},
+        {"age", Variant(16)},
         {"hobby", Variant(hobby_var)}
     };
 
@@ -195,22 +201,30 @@ TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
 
     PersonD person{
         "Alecu",
+        16,
         hobby
     };
 
     SECTION("Check toVariant with uninitialized age") {
+        person_var.erase("age");
+        person.age.reset();
         REQUIRE(PersonD::toVariant(person) == Variant(person_var));
     }
 
     SECTION("Check toVariant with initialized age") {
-        person.age = 18;
-        person_var["age"] = Variant(18);
         REQUIRE(PersonD::toVariant(person) == Variant(person_var));
     }
 
-    SECTION("Check fromVariant with no name") {
+    SECTION("Check fromVariant with no name (default value is provided)") {
         person_var.erase("name");
         auto const actual = PersonD::fromVariant(Variant(person_var));
-        REQUIRE(hana::equal(actual, PersonD{"Efendi", hobby}));
+        INFO(actual);
+        REQUIRE(hana::equal(actual, PersonD{"Efendi", 16, hobby}));
+    }
+
+    SECTION("Check fromVariant with no age (no default value, but type is optional)") {
+        person_var.erase("age");
+        auto const actual = PersonD::fromVariant(Variant(person_var));
+        REQUIRE(hana::equal(actual, PersonD{"Alecu", hobby}));
     }
 }

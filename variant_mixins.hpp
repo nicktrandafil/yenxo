@@ -96,8 +96,8 @@ struct FromVariant<T,
 /// Convinient shortcut function
 ///
 template <typename T>
-constexpr T fromVariant(Variant const& v) {
-    return FromVariant<T>()(v);
+constexpr auto fromVariant(Variant const& v) {
+    return FromVariant<std::decay_t<std::remove_reference_t<T>>>()(v);
 }
 
 
@@ -250,7 +250,7 @@ struct VarDef {
 
             } else {
                 if constexpr (detail::isOptional(rp::type_c<decltype(tmp)>)) {
-                    detail::fromVariant(*tmp, it->second);
+                    tmp = detail::fromVariant<decltype(*tmp)>(it->second);
                 } else {
                     detail::fromVariant(tmp, it->second);
                 }
