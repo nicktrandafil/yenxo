@@ -110,14 +110,6 @@ constexpr void fromVariant(T& x, Variant const& v) {
 }
 
 
-template <typename T>
-struct Type2 {};
-
-
-template <typename T>
-constexpr Type2<T> type_c{};
-
-
 ///
 /// Is `T` the `std::optional` type
 ///
@@ -130,11 +122,9 @@ struct IsOptional<std::optional<T>> : std::true_type {};
 
 
 template <typename T>
-constexpr auto isOptional(T const&) { return IsOptional<T>::value; }
-
-
-template <typename T>
-constexpr auto isOptional2(Type2<T>) { return IsOptional<T>::value; }
+constexpr auto isOptional(rp::Type<T>) {
+    return IsOptional<std::remove_reference_t< std::decay_t<T>>>::value;
+}
 
 
 template <typename T, typename = void>
@@ -216,7 +206,7 @@ struct VarDef {
         Variant::Map ret;
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
-            if constexpr (detail::isOptional(value)) {
+            if constexpr (detail::isOptional(rp::type_c<decltype(value)>)) {
                 if (value.has_value()) {
                     ret[boost::hana::to<char const*>(name)] =
                             detail::toVariant(*value);
@@ -244,7 +234,7 @@ struct VarDef {
             if (map.end() == it) {
                 if constexpr (detail::hasDefaultValue<Derived>(name)) {
                     tmp = Derived::defaultMemVals()[name];
-                } else if constexpr (!detail::isOptional2(detail::type_c<std::remove_reference_t<decltype(tmp)>>)) {
+                } else if constexpr (!detail::isOptional(rp::type_c<decltype(tmp)>)) {
                     throw std::logic_error(
                                 boost::hana::to<char const*>(name) +
                                 " not found in map, and default"
@@ -252,7 +242,7 @@ struct VarDef {
                 }
 
             } else {
-                if constexpr (detail::IsOptional<std::remove_reference_t<decltype(tmp)>>::value) {
+                if constexpr (detail::isOptional(rp::type_c<decltype(tmp)>)) {
                     detail::fromVariant(*tmp, it->second);
                 } else {
                     detail::fromVariant(tmp, it->second);
