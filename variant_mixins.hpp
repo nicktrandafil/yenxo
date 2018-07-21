@@ -110,6 +110,60 @@ constexpr void fromVariant(T& x, Variant const& v) {
 }
 
 
+template <typename T>
+struct Type2 {};
+
+
+template <typename T>
+constexpr Type2<T> type_c{};
+
+
+///
+/// Is `T` the `std::optional` type
+///
+template <typename T>
+struct IsOptional : std::false_type {};
+
+
+template <typename T>
+struct IsOptional<std::optional<T>> : std::true_type {};
+
+
+template <typename T>
+constexpr auto isOptional(T const&) { return IsOptional<T>::value; }
+
+
+template <typename T>
+constexpr auto isOptional2(Type2<T>) { return IsOptional<T>::value; }
+
+
+template <typename T, typename = void>
+struct HasDefaultMemVals : HasDefaultMemVals<T, When<true>> {};
+
+
+template <typename T, bool any>
+struct HasDefaultMemVals<T, When<any>> : std::false_type {};
+
+
+template <typename T>
+struct HasDefaultMemVals<T,
+        When<rp::callable(T::defaultMemVals)>>
+            : std::true_type
+{};
+
+
+///
+/// Has field `name` in class `C` a default value
+///
+template <typename T, typename S>
+constexpr auto hasDefaultValue(S name) {
+    static_assert(
+                HasDefaultMemVals<T>::value,
+                "The T must have `T::DefaultMemVals` static member");
+    return boost::hana::find(T::defaultMemVals(), name) != boost::hana::nothing;
+}
+
+
 } // namespace detail
 
 
@@ -117,9 +171,10 @@ namespace mixin {
 
 
 ///
-/// Adds members
-/// `static Variant toVariant(Derived)`
-/// `static Derived fromVariant(Variant)`
+/// Adds conversion support to and from `Variant`
+/// Specifically, adds members:
+///     `static Variant toVariant(Derived)`
+///     `static Derived fromVariant(Variant)`
 ///
 template <typename Derived>
 struct Var {
@@ -140,8 +195,69 @@ struct Var {
         boost::hana::for_each(boost::hana::accessors<Derived>(),
                        boost::hana::fuse([&](auto name, auto value) {
             auto& tmp = value(ret);
-            return detail::fromVariant(
+            detail::fromVariant(
                         tmp, map.at(boost::hana::to<char const*>(name)));
+        }));
+
+        return ret;
+    }
+};
+
+
+///
+/// Adds conversion support to and from `Variant`, defaulting missings fields
+/// Specifically adds members:
+///     `static Variant toVariant(Derived)`
+/// 	`static Derived fromVariant(Variant)`
+///
+template <typename Derived>
+struct VarDef {
+    static Variant toVariant(Derived const& x) {
+        Variant::Map ret;
+
+        boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
+            if constexpr (detail::isOptional(value)) {
+                if (value.has_value()) {
+                    ret[boost::hana::to<char const*>(name)] =
+                            detail::toVariant(*value);
+                }
+            } else {
+                ret[boost::hana::to<char const*>(name)] =
+                        detail::toVariant(value);
+            }
+        }));
+
+        return Variant(ret);
+    }
+
+    static Derived fromVariant(Variant const& x) {
+        using namespace std::literals;
+
+        Derived ret;
+        auto const& map = x.map();
+
+        boost::hana::for_each(boost::hana::accessors<Derived>(),
+                       boost::hana::fuse([&](auto name, auto value) {
+            auto& tmp = value(ret);
+            auto const it = map.find(boost::hana::to<char const*>(name));
+
+            if (map.end() == it) {
+                if constexpr (detail::hasDefaultValue<Derived>(name)) {
+                    tmp = Derived::defaultMemVals()[name];
+                } else if constexpr (!detail::isOptional2(detail::type_c<std::remove_reference_t<decltype(tmp)>>)) {
+                    throw std::logic_error(
+                                boost::hana::to<char const*>(name) +
+                                " not found in map, and default"
+                                " value is not provided"s);
+                }
+
+            } else {
+                if constexpr (detail::IsOptional<std::remove_reference_t<decltype(tmp)>>::value) {
+                    detail::fromVariant(*tmp, it->second);
+                } else {
+                    detail::fromVariant(tmp, it->second);
+                }
+            }
         }));
 
         return ret;

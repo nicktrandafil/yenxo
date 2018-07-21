@@ -1,3 +1,5 @@
+#define BOOST_HANA_CONFIG_ENABLE_STRING_UDL
+
 // tested
 #include <variant_mixins.hpp>
 
@@ -30,6 +32,14 @@ struct Hobby
             (std::string, description)
     );
 };
+
+
+std::ostream& operator<<(std::ostream& os, Hobby const& hobby) {
+    os << "Hobby:\n"
+       << "  id: " << hobby.id << '\n'
+       << "  description: " << hobby.description << '\n';
+    return os;
+}
 
 
 struct Person
@@ -117,5 +127,83 @@ TEST_CASE("Check mixins", "[variant_mixins]") {
         };
 
         REQUIRE(hana::equal(person_updated, person));
+    }
+}
+
+struct PersonD : mixin::VarDef<PersonD> {
+    PersonD() {}
+
+    PersonD(std::string const& name, Hobby const& hobby)
+        : name(name), hobby(hobby)
+    {}
+
+    constexpr static auto defaultMemVals() {
+        using namespace hana::literals;
+
+        return hana::make_map(
+            hana::make_pair("name"_s, "Efendi")
+        );
+    }
+
+    BOOST_HANA_DEFINE_STRUCT(
+            PersonD,
+            (std::string, name),
+            (std::optional<int>, age),
+            (Hobby, hobby)
+    );
+};
+
+
+std::ostream& operator<<(std::ostream& os, PersonD const& person) {
+    os << "Person:\n"
+       << "  name: " << person.name << '\n';
+
+    if (person.age) {
+        os << "  age: " << *person.age << '\n';
+    } else {
+        os << "  age: " << "none\n";
+    }
+
+    os << person.hobby;
+
+    return os;
+}
+
+
+TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
+    Variant::Map const hobby_var{
+        {"id", Variant(1)},
+        {"description", Variant("Hack")}
+    };
+
+    Variant::Map person_var{
+        {"name", Variant("Alecu")},
+        {"hobby", Variant(hobby_var)}
+    };
+
+    Hobby const hobby{
+        1,
+        std::string("Hack")
+    };
+
+    PersonD person{
+        "Alecu",
+        hobby
+    };
+
+    SECTION("Check toVariant with uninitialized age") {
+        REQUIRE(PersonD::toVariant(person) == Variant(person_var));
+    }
+
+    SECTION("Check toVariant with initialized age") {
+        person.age = 18;
+        person_var["age"] = Variant(18);
+        REQUIRE(PersonD::toVariant(person) == Variant(person_var));
+    }
+
+    SECTION("Check fromVariant with no name") {
+        person_var.erase("name");
+        auto const actual = PersonD::fromVariant(Variant(person_var));
+        REQUIRE(hana::equal(actual, PersonD{"Efendi", hobby}));
     }
 }

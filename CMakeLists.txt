@@ -66,9 +66,13 @@ add_test(
     "Check to and from integral types")
 
 add_test(
-    variant_mixin_helpers test_${PROJECT_NAME}_core
+    mixins_var_update_from_var test_${PROJECT_NAME}_core
     "[variant_mixin_helpers]")
 
 add_test(
     variant_mixins test_${PROJECT_NAME}_core
-    "[variant_mixins]")
+    "[Check mixins]")
+
+add_test(
+    mixins_var_def test_${PROJECT_NAME}_core
+    "Check mixin::VarDef")
