@@ -62,8 +62,8 @@ target_link_libraries(
     ${PROJECT_NAME}_core)
 
 add_test(
-    check_to_and_from_integral test_${PROJECT_NAME}_core
-    "Check to and from integral types")
+    check_to_and_from test_${PROJECT_NAME}_core
+    "Check to and from types")
 
 add_test(
     mixins_var_update_from_var test_${PROJECT_NAME}_core
@@ -71,7 +71,7 @@ add_test(
 
 add_test(
     variant_mixins test_${PROJECT_NAME}_core
-    "[Check mixins]")
+    "Check Var and UpdateFromVar")
 
 add_test(
     mixins_var_def test_${PROJECT_NAME}_core

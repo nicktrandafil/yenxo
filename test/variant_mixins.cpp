@@ -82,13 +82,13 @@ TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
 }
 
 
-TEST_CASE("Check mixins", "[variant_mixins]") {
+TEST_CASE("Check Var and UpdateFromVar", "[variant_mixins]") {
     Variant::Map const hobby_var{
         {"id", Variant(1)},
         {"description", Variant("Hack")}
     };
 
-    Variant::Map const person_var{
+    Variant::Map person_var{
         {"name", Variant("Alecu")},
         {"age", Variant(25)},
         {"hobby", Variant(hobby_var)}
@@ -127,6 +127,13 @@ TEST_CASE("Check mixins", "[variant_mixins]") {
         };
 
         REQUIRE(hana::equal(person_updated, person));
+    }
+
+    SECTION("Check no field") {
+        person_var.erase("name");
+        REQUIRE_THROWS_AS(
+                    Person::fromVariant(Variant(person_var)),
+                    std::logic_error);
     }
 }
 
