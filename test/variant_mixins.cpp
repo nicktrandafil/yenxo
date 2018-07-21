@@ -227,4 +227,9 @@ TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
         auto const actual = PersonD::fromVariant(Variant(person_var));
         REQUIRE(hana::equal(actual, PersonD{"Alecu", hobby}));
     }
+
+    SECTION("Check fromVariant with no hobby (no default value)") {
+        person_var.erase("hobby");
+        REQUIRE_THROWS_AS(PersonD::fromVariant(Variant(person_var)), std::logic_error);
+    }
 }
