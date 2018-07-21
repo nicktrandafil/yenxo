@@ -179,14 +179,21 @@ struct Var {
     }
 
     static Derived fromVariant(Variant const& x) {
+        using namespace std::literals;
         Derived ret;
         auto const& map = x.map();
 
         boost::hana::for_each(boost::hana::accessors<Derived>(),
                        boost::hana::fuse([&](auto name, auto value) {
             auto& tmp = value(ret);
-            detail::fromVariant(
-                        tmp, map.at(boost::hana::to<char const*>(name)));
+            auto const it = map.find(boost::hana::to<char const*>(name));
+            if (map.end() == it) {
+                throw std::logic_error(
+                            boost::hana::to<char const*>(name) +
+                            " not found in map"s);
+            } else {
+                detail::fromVariant(tmp, it->second);
+            }
         }));
 
         return ret;
