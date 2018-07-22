@@ -70,4 +70,8 @@ template <typename ...Args>
 Overload(Args...) -> Overload<Args...>;
 
 
+template <typename T>
+struct DependentFalse : std::false_type {};
+
+
 } // namespace rp

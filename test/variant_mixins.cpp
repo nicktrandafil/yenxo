@@ -1,5 +1,3 @@
-#define BOOST_HANA_CONFIG_ENABLE_STRING_UDL
-
 // tested
 #include <variant_mixins.hpp>
 
@@ -62,13 +60,13 @@ struct Person
 
 
 TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
-    auto const x = detail::toVariant(5);
+    auto const x = mixin::detail::toVariant(5);
     REQUIRE(x == Variant(5));
-    REQUIRE(5 == detail::fromVariant<int>(Variant(5)));
+    REQUIRE(5 == mixin::detail::fromVariant<int>(Variant(5)));
 
-    auto const x1 = detail::toVariant("Hello");
+    auto const x1 = mixin::detail::toVariant("Hello");
     REQUIRE(x1 == Variant("Hello"));
-    REQUIRE("Hello" == detail::fromVariant<std::string>(Variant("Hello")));
+    REQUIRE("Hello" == mixin::detail::fromVariant<std::string>(Variant("Hello")));
 
     struct X {
         static Variant toVariant(X const& x) { return Variant(x.m); }
@@ -76,9 +74,9 @@ TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
         int m{5};
     };
 
-    auto const x2 = detail::toVariant(X());
+    auto const x2 = mixin::detail::toVariant(X());
     REQUIRE(x2 == Variant(5));
-    REQUIRE(6 == detail::fromVariant<X>(Variant(6)).m);
+    REQUIRE(6 == mixin::detail::fromVariant<X>(Variant(6)).m);
 }
 
 
@@ -147,7 +145,6 @@ struct PersonD : mixin::VarDef<PersonD> {
     PersonD(std::string const& name, Hobby const& hobby)
         : name(name), hobby(hobby)
     {}
-
 
     constexpr static auto defaultMemVals() {
         using namespace hana::literals;
@@ -232,4 +229,61 @@ TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
         person_var.erase("hobby");
         REQUIRE_THROWS_AS(PersonD::fromVariant(Variant(person_var)), std::logic_error);
     }
+}
+
+
+struct PersonC : mixin::VarDefExplicit<PersonC> {
+    PersonC() {}
+
+    PersonC(std::string const& name, int age, Hobby const& hobby)
+        : name(name), age(age), hobby(hobby)
+    {}
+
+    PersonC(std::string const& name, Hobby const& hobby)
+        : name(name), hobby(hobby)
+    {}
+
+    constexpr static auto defaultMemVals() {
+        using namespace hana::literals;
+        return hana::make_map(
+            hana::make_pair("name"_s, "Efendi"),
+            hana::make_pair("age"_s, 1),
+            hana::make_pair("hobby"_s, mixin::NoDefault())
+        );
+    }
+
+    BOOST_HANA_DEFINE_STRUCT(
+            PersonC,
+            (std::string, name),
+            (std::optional<int>, age),
+            (Hobby, hobby)
+    );
+};
+
+
+
+TEST_CASE("Check mixin::VarDefExplicit", "[variant_mixins]") {
+    Variant::Map const hobby_var{
+        {"id", Variant(1)},
+        {"description", Variant("Hack")}
+    };
+
+    Variant::Map person_var{
+        {"name", Variant("Alecu")},
+        {"age", Variant(16)},
+        {"hobby", Variant(hobby_var)}
+    };
+
+    Hobby const hobby{
+        1,
+        std::string("Hack")
+    };
+
+    PersonC person{
+        "Alecu",
+        16,
+        hobby
+    };
+
+    PersonC::fromVariant(Variant(hobby_var));
 }
