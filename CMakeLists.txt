@@ -58,7 +58,7 @@ set_target_properties(test_${PROJECT_NAME}_core PROPERTIES CXX_STANDARD 17)
 target_link_libraries(
     test_${PROJECT_NAME}_core
     PRIVATE
-    Catch2::Catch
+    Catch2::Catch2
     ${PROJECT_NAME}_core)
 
 add_test(

@@ -5,7 +5,7 @@
 #include <variant.hpp>
 
 // 3rd
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 // boost
 #include <boost/hana.hpp>
