@@ -65,7 +65,7 @@ struct ToVariant<T, When<rp::detail::Valid<
 /// Convinient shortcut function
 ///
 template <typename T>
-constexpr Variant toVariant(T&& t) {
+Variant toVariant(T&& t) {
     return ToVariant<std::decay_t<T>>()(std::forward<T>(t));
 }
 
@@ -122,23 +122,6 @@ constexpr void fromVariant(T& x, Variant const& v) {
 
 
 ///
-/// Is `T` the `std::optional` type
-///
-template <typename T>
-struct IsOptional : std::false_type {};
-
-
-template <typename T>
-struct IsOptional<std::optional<T>> : std::true_type {};
-
-
-template <typename T>
-constexpr auto isOptional(rp::Type<T>) {
-    return IsOptional<std::remove_reference_t< std::decay_t<T>>>::value;
-}
-
-
-///
 /// Does a type has a static member `default_mem_vals`
 ///
 constexpr auto const hasDefaultMemVals = boost::hana::is_valid(
@@ -175,9 +158,6 @@ constexpr bool hasDefaultValue(S name) {
     static_assert(
                 hasDefaultMemVals(boost::hana::type_c<T>),
                 "The T must have `default_mem_vals` static member");
-
-    using Found = decltype(
-        name ^boost::hana::in^ boost::hana::keys(T::default_mem_vals));
 
     if constexpr(present<T>(name)) {
         return !noDefault<T>(name);
@@ -247,7 +227,7 @@ struct VarDef {
         Variant::Map ret;
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
-            if constexpr (detail::isOptional(rp::type_c<decltype(value)>)) {
+            if constexpr (rp::isOptional(rp::type_c<decltype(value)>)) {
                 if (value.has_value()) {
                     ret[boost::hana::to<char const*>(name)] =
                             detail::toVariant(*value);
@@ -275,7 +255,7 @@ struct VarDef {
             if (map.end() == it) {
                 if constexpr (detail::hasDefaultValue<Derived>(name)) {
                     tmp = Derived::default_mem_vals[name];
-                } else if constexpr (!detail::isOptional(rp::type_c<decltype(tmp)>)) {
+                } else if constexpr (!rp::isOptional(rp::type_c<decltype(tmp)>)) {
                     throw std::logic_error(
                                 boost::hana::to<char const*>(name) +
                                 " not found in map, and default"
@@ -283,7 +263,7 @@ struct VarDef {
                 }
 
             } else {
-                if constexpr (detail::isOptional(rp::type_c<decltype(tmp)>)) {
+                if constexpr (rp::isOptional(rp::type_c<decltype(tmp)>)) {
                     tmp = detail::fromVariant<decltype(*tmp)>(it->second);
                 } else {
                     detail::fromVariant(tmp, it->second);

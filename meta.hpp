@@ -5,6 +5,7 @@
 #include <when.hpp>
 
 // std
+#include <optional>
 #include <type_traits>
 #include <utility>
 
@@ -72,6 +73,23 @@ Overload(Args...) -> Overload<Args...>;
 
 template <typename T>
 struct DependentFalse : std::false_type {};
+
+
+///
+/// Is `T` the `std::optional` type
+///
+template <typename T>
+struct IsOptional : std::false_type {};
+
+
+template <typename T>
+struct IsOptional<std::optional<T>> : std::true_type {};
+
+
+template <typename T>
+constexpr auto isOptional(rp::Type<T>) {
+    return IsOptional<std::decay_t<T>>::value;
+}
 
 
 } // namespace rp

@@ -18,6 +18,9 @@ using namespace hana::literals;
 using namespace std::literals;
 
 
+namespace {
+
+
 struct Hobby
         : mixin::Var<Hobby>
         , mixin::UpdateFromVar<Hobby> {
@@ -34,14 +37,6 @@ struct Hobby
             (std::string, description)
     );
 };
-
-
-std::ostream& operator<<(std::ostream& os, Hobby const& hobby) {
-    os << "Hobby:\n"
-       << "  id: " << hobby.id << '\n'
-       << "  description: " << hobby.description << '\n';
-    return os;
-}
 
 
 struct Person
@@ -61,6 +56,9 @@ struct Person
             (Hobby, hobby)
     );
 };
+
+
+} // namespace
 
 
 TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
@@ -140,6 +138,9 @@ TEST_CASE("Check Var and UpdateFromVar", "[variant_mixins]") {
 }
 
 
+namespace {
+
+
 auto makePersonDDefaults() {
     return hana::make_map(
         hana::make_pair("name"_s, "Efendi"s)
@@ -172,20 +173,7 @@ struct PersonD : mixin::VarDef<PersonD> {
 decltype(makePersonDDefaults()) PersonD::default_mem_vals = makePersonDDefaults();
 
 
-std::ostream& operator<<(std::ostream& os, PersonD const& person) {
-    os << "Person:\n"
-       << "  name: " << person.name << '\n';
-
-    if (person.age) {
-        os << "  age: " << *person.age << '\n';
-    } else {
-        os << "  age: " << "none\n";
-    }
-
-    os << person.hobby;
-
-    return os;
-}
+} // namespace
 
 
 TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
@@ -224,7 +212,6 @@ TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
     SECTION("Check fromVariant with no name (default value is provided)") {
         person_var.erase("name");
         auto const actual = PersonD::fromVariant(Variant(person_var));
-        INFO(actual);
         REQUIRE(hana::equal(actual, PersonD{"Efendi", 16, hobby}));
     }
 
@@ -239,6 +226,9 @@ TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
         REQUIRE_THROWS_AS(PersonD::fromVariant(Variant(person_var)), std::logic_error);
     }
 }
+
+
+namespace {
 
 
 auto makePersonCDefaults() {
@@ -257,10 +247,6 @@ struct PersonC : mixin::VarDefExplicit<PersonC> {
         : name(name), age(age), hobby(hobby)
     {}
 
-    PersonC(std::string const& name, Hobby const& hobby)
-        : name(name), hobby(hobby)
-    {}
-
     static decltype(makePersonCDefaults()) default_mem_vals;
 
     BOOST_HANA_DEFINE_STRUCT(
@@ -273,6 +259,9 @@ struct PersonC : mixin::VarDefExplicit<PersonC> {
 
 
 decltype(makePersonCDefaults()) PersonC::default_mem_vals = makePersonCDefaults();
+
+
+} // namespace
 
 
 TEST_CASE("Check mixin::VarDefExplicit", "[variant_mixins]") {

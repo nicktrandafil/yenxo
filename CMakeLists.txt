@@ -16,6 +16,9 @@ add_library(
     variant.hpp
 
     variant_mixins.hpp
+    ostream_mixins.hpp
+
+    type_name.hpp
 )
 
 set_target_properties(${PROJECT_NAME}_core PROPERTIES CXX_STANDARD 17)
@@ -52,6 +55,8 @@ add_executable(
     test/main.cpp
 
     test/variant_mixins.cpp
+    test/ostream_mixins.cpp
+    test/type_name.cpp
 )
 
 set_target_properties(test_${PROJECT_NAME}_core PROPERTIES CXX_STANDARD 17)
@@ -80,3 +85,11 @@ add_test(
 add_test(
     mixins_var_def_explicit test_${PROJECT_NAME}_core
     "Check mixin::VarDefExplicit")
+
+add_test(
+    mixins_ostream test_${PROJECT_NAME}_core
+    "Check mixin::OStream")
+
+add_test(
+    type_name test_${PROJECT_NAME}_core
+    "Check typeName")
