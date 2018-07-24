@@ -138,32 +138,42 @@ constexpr auto isOptional(rp::Type<T>) {
 }
 
 
-template <typename T, typename = void>
-struct HasDefaultMemVals : HasDefaultMemVals<T, When<true>> {};
+constexpr auto const hasDefaultMemVals = boost::hana::is_valid(
+            [](auto t) -> decltype((void) decltype(t)::type::default_mem_vals) {
+});
 
 
-template <typename T, bool any>
-struct HasDefaultMemVals<T, When<any>> : std::false_type {};
+template <typename T, typename S>
+constexpr bool present(S name) {
+    using Found = decltype(
+        name ^boost::hana::in^ boost::hana::keys(T::default_mem_vals));
+    return boost::hana::value<Found>();
+}
 
 
-template <typename T>
-struct HasDefaultMemVals<T,
-        When<rp::callable(T::defaultMemVals)>>
-            : std::true_type
-{};
+template <typename T, typename S>
+constexpr bool noDefault(S name) {
+    return std::is_same_v<std::decay_t<decltype(T::default_mem_vals[name])>, NoDefault>;
+}
 
 
 ///
 /// Has field `name` in class `C` a default value
 ///
 template <typename T, typename S>
-constexpr auto hasDefaultValue(S name) {
+constexpr bool hasDefaultValue(S name) {
     static_assert(
-                HasDefaultMemVals<T>::value,
-                "The T must have `T::defaultMemVals` static member");
-    constexpr auto found = boost::hana::find(T::defaultMemVals(), name);
-    return  found != boost::hana::nothing &&
-            found != boost::hana::just(NoDefault());
+                hasDefaultMemVals(boost::hana::type_c<T>),
+                "The T must have `default_mem_vals` static member");
+
+    using Found = decltype(
+        name ^boost::hana::in^ boost::hana::keys(T::default_mem_vals));
+
+    if constexpr(present<T>(name)) {
+        return !noDefault<T>(name);
+    } else {
+        return false;
+    }
 }
 
 
@@ -250,7 +260,7 @@ struct VarDef {
 
             if (map.end() == it) {
                 if constexpr (detail::hasDefaultValue<Derived>(name)) {
-                    tmp = Derived::defaultMemVals()[name];
+                    tmp = Derived::default_mem_vals[name];
                 } else if constexpr (!detail::isOptional(rp::type_c<decltype(tmp)>)) {
                     throw std::logic_error(
                                 boost::hana::to<char const*>(name) +
@@ -288,37 +298,41 @@ struct VarDefExplicit : private VarDef<T> {
         using namespace boost::hana::literals;
 
         static_assert(
-                detail::HasDefaultMemVals<T>::value,
-                "The T must have `T::defaultMemVals` static member");
+                detail::hasDefaultMemVals(boost::hana::type_c<T>),
+                "The T must have `defail_mem_vals` static member");
 
         boost::hana::for_each(
                     boost::hana::accessors<T>(),
                     boost::hana::fuse([](auto name, auto value) {
-                        auto found = boost::hana::find(T::defaultMemVals(), name);
-                        if constexpr (found == boost::hana::nothing) {
+                        if constexpr (!detail::present<T>(name)) {
                             BOOST_HANA_CONSTEXPR_ASSERT_MSG(
                                         rp::DependentFalse<T>::value,
                                         name +
-                                        " not present in defaultMemVals"_s);
-                        } else if constexpr (!std::is_same_v<std::decay_t<decltype(*found)>, NoDefault>) {
+                                        " not present in default_mem_vals"_s);
+                        } else if constexpr (!detail::noDefault<T>(name)) {
                             constexpr auto c =
                                     std::is_convertible_v<
-                                        decltype(*found),
-                                        decltype(value(std::declval<T>()))>;
+                                        std::decay_t<decltype(T::default_mem_vals[name])>,
+                                        std::decay_t<decltype(value(std::declval<T>()))>>;
 
                             BOOST_HANA_CONSTEXPR_ASSERT_MSG(
                                         c,
-                                        "The provided default type in defaultMemVals"_s +
+                                        "The provided default type in default_mem_vals"_s +
                                         " for "_s +
                                         name +
                                         " does not match with the actual type"_s);
                         }
                     }));
 
-        static_assert(
-                    boost::hana::size(T::defaultMemVals()) ==
-                    boost::hana::size(boost::hana::accessors<T>()),
-                    "There are unkonwn fields in defaultMemVals");
+        constexpr decltype(boost::hana::keys(T::default_mem_vals)) keys;
+        boost::hana::for_each(
+                    keys,
+                    [](auto key) {
+                        constexpr decltype(boost::hana::keys(T())) keys;
+                        BOOST_HANA_CONSTANT_ASSERT_MSG(
+                                    key ^boost::hana::in^ keys,
+                                    "There are unknown fields in default_mem_vals");
+                    });
 
         return true;
     }

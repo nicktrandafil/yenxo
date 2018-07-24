@@ -15,6 +15,7 @@ namespace hana = boost::hana;
 
 
 using namespace hana::literals;
+using namespace std::literals;
 
 
 struct Hobby
@@ -138,6 +139,14 @@ TEST_CASE("Check Var and UpdateFromVar", "[variant_mixins]") {
     }
 }
 
+
+auto makePersonDDefaults() {
+    return hana::make_map(
+        hana::make_pair("name"_s, "Efendi"s)
+    );
+}
+
+
 struct PersonD : mixin::VarDef<PersonD> {
     PersonD() {}
 
@@ -149,11 +158,7 @@ struct PersonD : mixin::VarDef<PersonD> {
         : name(name), hobby(hobby)
     {}
 
-    constexpr static auto defaultMemVals() {
-        return hana::make_map(
-            hana::make_pair("name"_s, "Efendi")
-        );
-    }
+    static decltype(makePersonDDefaults()) default_mem_vals;
 
     BOOST_HANA_DEFINE_STRUCT(
             PersonD,
@@ -162,6 +167,9 @@ struct PersonD : mixin::VarDef<PersonD> {
             (Hobby, hobby)
     );
 };
+
+
+decltype(makePersonDDefaults()) PersonD::default_mem_vals = makePersonDDefaults();
 
 
 std::ostream& operator<<(std::ostream& os, PersonD const& person) {
@@ -233,6 +241,15 @@ TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
 }
 
 
+auto makePersonCDefaults() {
+    return hana::make_map(
+        hana::make_pair("name"_s, "Efendi"),
+        hana::make_pair("age"_s, 18),
+        hana::make_pair("hobby"_s, mixin::NoDefault())
+    );
+}
+
+
 struct PersonC : mixin::VarDefExplicit<PersonC> {
     PersonC() {}
 
@@ -244,22 +261,18 @@ struct PersonC : mixin::VarDefExplicit<PersonC> {
         : name(name), hobby(hobby)
     {}
 
-    constexpr static auto defaultMemVals() {
-        return hana::make_map(
-            hana::make_pair("name"_s, "Efendi"),
-            hana::make_pair("age"_s, 1),
-            hana::make_pair("hobby"_s, mixin::NoDefault())
-        );
-    }
+    static decltype(makePersonCDefaults()) default_mem_vals;
 
     BOOST_HANA_DEFINE_STRUCT(
             PersonC,
-            (std::string, name),
+            (std::optional<std::string>, name),
             (std::optional<int>, age),
             (Hobby, hobby)
     );
 };
 
+
+decltype(makePersonCDefaults()) PersonC::default_mem_vals = makePersonCDefaults();
 
 
 TEST_CASE("Check mixin::VarDefExplicit", "[variant_mixins]") {
@@ -269,8 +282,6 @@ TEST_CASE("Check mixin::VarDefExplicit", "[variant_mixins]") {
     };
 
     Variant::Map person_var{
-        {"name", Variant("Alecu")},
-        {"age", Variant(16)},
         {"hobby", Variant(hobby_var)}
     };
 
@@ -280,10 +291,10 @@ TEST_CASE("Check mixin::VarDefExplicit", "[variant_mixins]") {
     };
 
     PersonC person{
-        "Alecu",
-        16,
+        "Efendi",
+        18,
         hobby
     };
 
-    PersonC::fromVariant(Variant(hobby_var));
+    REQUIRE(hana::equal(PersonC::fromVariant(Variant(person_var)), person));
 }

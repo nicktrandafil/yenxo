@@ -76,3 +76,7 @@ add_test(
 add_test(
     mixins_var_def test_${PROJECT_NAME}_core
     "Check mixin::VarDef")
+
+add_test(
+    mixins_var_def_explicit test_${PROJECT_NAME}_core
+    "Check mixin::VarDefExplicit")
