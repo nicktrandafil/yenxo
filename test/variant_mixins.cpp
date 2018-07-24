@@ -14,6 +14,9 @@
 namespace hana = boost::hana;
 
 
+using namespace hana::literals;
+
+
 struct Hobby
         : mixin::Var<Hobby>
         , mixin::UpdateFromVar<Hobby> {
@@ -147,8 +150,6 @@ struct PersonD : mixin::VarDef<PersonD> {
     {}
 
     constexpr static auto defaultMemVals() {
-        using namespace hana::literals;
-
         return hana::make_map(
             hana::make_pair("name"_s, "Efendi")
         );
@@ -244,7 +245,6 @@ struct PersonC : mixin::VarDefExplicit<PersonC> {
     {}
 
     constexpr static auto defaultMemVals() {
-        using namespace hana::literals;
         return hana::make_map(
             hana::make_pair("name"_s, "Efendi"),
             hana::make_pair("age"_s, 1),
