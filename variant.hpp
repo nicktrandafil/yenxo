@@ -22,7 +22,7 @@ public:
 ///
 /// Empty Variant error
 ///
-class VariantEmpty : public VariantErr {
+class VariantEmpty final : public VariantErr {
 public:
     explicit VariantEmpty() : VariantErr("Attempt to get empty `Variant`") {}
 };
@@ -31,7 +31,7 @@ public:
 ///
 /// Bad type error
 ///
-class VariantBadType : public VariantErr {
+class VariantBadType final : public VariantErr {
 public:
     explicit VariantBadType() : VariantErr("Attempt to get wrong type") {}
 };

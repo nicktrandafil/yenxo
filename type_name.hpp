@@ -5,8 +5,11 @@
 #include <string_view>
 
 
+///
+/// Get unqualified type name
+///
 template <class T>
-constexpr std::string_view typeName() {
+constexpr std::string_view unqualifiedTypeName() {
     using namespace std;
 
 #ifdef __clang__

@@ -16,9 +16,18 @@
 #include <type_traits>
 
 
+///
+/// \file variant_mixins.hpp
+/// Some add-ons for enabling to and from Variant conversion
+///
+
+
 namespace mixin {
 
 
+///
+/// Specify stub for default value (means no default value specified)
+///
 struct NoDefault {
     BOOST_HANA_DEFINE_STRUCT(NoDefault);
 };
@@ -151,7 +160,7 @@ constexpr bool noDefault(S name) {
 
 
 ///
-/// Has the field `name` in class `C` a default value
+/// Does the field `name` has a default value in the class `C`
 ///
 template <typename T, typename S>
 constexpr bool hasDefaultValue(S name) {
@@ -221,6 +230,10 @@ struct Var {
 ///     `static Variant toVariant(Derived)`
 /// 	`static Derived fromVariant(Variant)`
 ///
+/// Requires a static member `default_mem_vals` of hana map to be presented in
+/// `Derived`, where the kays are member names and the values are convertible
+/// to the corresponding members.
+///
 template <typename Derived>
 struct VarDef {
     static Variant toVariant(Derived const& x) {
@@ -255,7 +268,8 @@ struct VarDef {
             if (map.end() == it) {
                 if constexpr (detail::hasDefaultValue<Derived>(name)) {
                     tmp = Derived::default_mem_vals[name];
-                } else if constexpr (!rp::isOptional(rp::type_c<decltype(tmp)>)) {
+                } else if constexpr (
+                            !rp::isOptional(rp::type_c<decltype(tmp)>)) {
                     throw std::logic_error(
                                 boost::hana::to<char const*>(name) +
                                 " not found in map, and default"
@@ -276,38 +290,53 @@ struct VarDef {
 };
 
 
-template <typename T>
-struct VarDefExplicit : private VarDef<T> {
-    static T fromVariant(Variant const& x) {
+///
+/// Adds conversion support to and from `Variant`, defaulting missings fields
+/// Specifically adds members:
+///     `static Variant toVariant(Derived)`
+/// 	`static Derived fromVariant(Variant)`
+///
+/// Requires a static member `default_mem_vals` of hana map to be presented in
+/// `Derived`, where the kays are member names and the values are convertible
+/// to the corresponding members.
+///
+/// Ensures:
+/// 	- default value presented for every member (use `NoDefault` as stub);
+/// 	- types of default values are convertible to the correspondig members;
+/// 	- there are no unknown fields in the dict
+///
+template <typename Derived>
+struct VarDefExplicit : private VarDef<Derived> {
+    static Derived fromVariant(Variant const& x) {
         static_assert(check());
-        return VarDef<T>::fromVariant(x);
+        return VarDef<Derived>::fromVariant(x);
     }
 
-    static Variant toVariant(T const& x) {
+    static Variant toVariant(Derived const& x) {
         static_assert(check());
-        return VarDef<T>::toVariant(x);
+        return VarDef<Derived>::toVariant(x);
     }
 
     static constexpr bool check() {
         using namespace boost::hana::literals;
 
         static_assert(
-                detail::hasDefaultMemVals(boost::hana::type_c<T>),
+                detail::hasDefaultMemVals(boost::hana::type_c<Derived>),
                 "The T must have `defail_mem_vals` static member");
 
         boost::hana::for_each(
-            boost::hana::accessors<T>(),
+            boost::hana::accessors<Derived>(),
             boost::hana::fuse([](auto name, auto value) {
-                if constexpr (!detail::present<T>(name)) {
+                if constexpr (!detail::present<Derived>(name)) {
                     BOOST_HANA_CONSTEXPR_ASSERT_MSG(
-                        rp::DependentFalse<T>::value,
+                        rp::DependentFalse<Derived>::value,
                         name +
                         " not present in default_mem_vals"_s);
-                } else if constexpr (!detail::noDefault<T>(name)) {
+                } else if constexpr (!detail::noDefault<Derived>(name)) {
                     constexpr auto c =
                         std::is_convertible_v<
-                            std::decay_t<decltype(T::default_mem_vals[name])>,
-                            std::decay_t<decltype(value(std::declval<T>()))>>;
+                            std::decay_t<decltype(Derived::default_mem_vals[name])>,
+                            std::decay_t<decltype(value(std::declval<Derived>()))>>;
                     BOOST_HANA_CONSTEXPR_ASSERT_MSG(
                                 c,
                                 "The provided default type in"_s +
@@ -316,11 +345,11 @@ struct VarDefExplicit : private VarDef<T> {
                 }
             }));
 
-        constexpr decltype(boost::hana::keys(T::default_mem_vals)) keys;
+        constexpr decltype(boost::hana::keys(Derived::default_mem_vals)) keys;
         boost::hana::for_each(
             keys,
             [](auto key) {
-                constexpr decltype(boost::hana::keys(T())) keys;
+                constexpr decltype(boost::hana::keys(Derived())) keys;
                 BOOST_HANA_CONSTANT_ASSERT_MSG(
                     key ^boost::hana::in^ keys,
                     "There are unknown fields in default_mem_vals");
@@ -333,6 +362,7 @@ struct VarDefExplicit : private VarDef<T> {
 
 ///
 /// Adds member `void update(Variant)`
+/// Updates the specified fields
 ///
 template <typename Derived>
 struct UpdateFromVar {

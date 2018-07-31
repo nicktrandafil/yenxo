@@ -7,7 +7,7 @@
 
 
 ///
-/// \brief Generic 'Pimpl' idiom implementation
+/// Generic 'Pimpl' idiom implementation
 ///
 /// Throwing member functions do throw if and only if `T` or allocation throws
 ///

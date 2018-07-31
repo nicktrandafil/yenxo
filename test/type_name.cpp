@@ -15,7 +15,7 @@ struct Dum { struct Zum {}; };
 
 
 TEST_CASE("Check typeName", "[utilities]") {
-    REQUIRE(typeName<Def>() == "Def");
-    REQUIRE(typeName<a::Xyz>() == "Xyz");
-    REQUIRE(typeName<Dum::Zum>() == "Zum");
+    REQUIRE(unqualifiedTypeName<Def>() == "Def");
+    REQUIRE(unqualifiedTypeName<a::Xyz>() == "Xyz");
+    REQUIRE(unqualifiedTypeName<Dum::Zum>() == "Zum");
 }
