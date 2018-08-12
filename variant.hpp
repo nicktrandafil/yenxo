@@ -115,7 +115,7 @@ public:
     ///
     Map mapOr(Map const& x) const;
 
-    /// \defgroup Variant equality comparation
+    /// \defgroup Variant equality comparison
     /// \{
     bool operator==(Variant const& rhs) const noexcept;
     bool operator!=(Variant const& rhs) const noexcept;

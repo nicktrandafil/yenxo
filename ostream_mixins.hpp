@@ -16,6 +16,9 @@
 namespace mixin {
 
 
+///
+/// Enables `ostreams` for `Derived`
+///
 template <typename Derived>
 struct OStream {
     friend std::ostream& operator<<(std::ostream& os, Derived const& x) {

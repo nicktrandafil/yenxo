@@ -17,6 +17,7 @@ add_library(
 
     variant_mixins.hpp
     ostream_mixins.hpp
+    comparison_mixins.hpp
 
     type_name.hpp
 )
@@ -56,6 +57,8 @@ add_executable(
 
     test/variant_mixins.cpp
     test/ostream_mixins.cpp
+    test/comparison_mixins.cpp
+
     test/type_name.cpp
 )
 
@@ -89,6 +92,10 @@ add_test(
 add_test(
     mixins_ostream test_${PROJECT_NAME}_core
     "Check mixin::OStream")
+
+add_test(
+    mixins_equality_comparison test_${PROJECT_NAME}_core
+    "Check mixin::EqualityComparison")
 
 add_test(
     type_name test_${PROJECT_NAME}_core
