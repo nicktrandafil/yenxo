@@ -221,6 +221,9 @@ struct Var {
 
         return ret;
     }
+
+protected:
+    ~Var() = default;
 };
 
 
@@ -287,6 +290,9 @@ struct VarDef {
 
         return ret;
     }
+
+protected:
+    ~VarDef() = default;
 };
 
 
@@ -357,6 +363,9 @@ struct VarDefExplicit : private VarDef<Derived> {
 
         return true;
     }
+
+protected:
+    ~VarDefExplicit() = default;
 };
 
 
@@ -384,6 +393,9 @@ struct UpdateFromVar {
             }
         }
     }
+
+protected:
+    ~UpdateFromVar() = default;
 };
 
 
