@@ -31,11 +31,8 @@ struct Hobby
         : id(id), description(description)
     {}
 
-    BOOST_HANA_DEFINE_STRUCT(
-            Hobby,
-            (int, id),
-            (std::string, description)
-    );
+    int id;
+    std::string description;
 };
 
 
@@ -49,16 +46,17 @@ struct Person
         : name(name), age(age), hobby(hobby)
     {}
 
-    BOOST_HANA_DEFINE_STRUCT(
-            Person,
-            (std::string, name),
-            (int, age),
-            (Hobby, hobby)
-    );
+    std::string name;
+    int age;
+    Hobby hobby;
 };
 
 
 } // namespace
+
+
+BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
+BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
 
 
 TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
@@ -161,12 +159,9 @@ struct PersonD : mixin::VarDef<PersonD> {
 
     static decltype(makePersonDDefaults()) default_mem_vals;
 
-    BOOST_HANA_DEFINE_STRUCT(
-            PersonD,
-            (std::string, name),
-            (std::optional<int>, age),
-            (Hobby, hobby)
-    );
+    std::string name;
+    std::optional<int> age;
+    Hobby hobby;
 };
 
 
@@ -174,6 +169,9 @@ decltype(makePersonDDefaults()) PersonD::default_mem_vals = makePersonDDefaults(
 
 
 } // namespace
+
+
+BOOST_HANA_ADAPT_STRUCT(PersonD, name, age, hobby);
 
 
 TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
@@ -249,12 +247,9 @@ struct PersonC : mixin::VarDefExplicit<PersonC> {
 
     static decltype(makePersonCDefaults()) default_mem_vals;
 
-    BOOST_HANA_DEFINE_STRUCT(
-            PersonC,
-            (std::optional<std::string>, name),
-            (std::optional<int>, age),
-            (Hobby, hobby)
-    );
+    std::optional<std::string> name;
+    std::optional<int> age;
+    Hobby hobby;
 };
 
 
@@ -262,6 +257,9 @@ decltype(makePersonCDefaults()) PersonC::default_mem_vals = makePersonCDefaults(
 
 
 } // namespace
+
+
+BOOST_HANA_ADAPT_STRUCT(PersonC, name, age, hobby);
 
 
 TEST_CASE("Check mixin::VarDefExplicit", "[variant_mixins]") {

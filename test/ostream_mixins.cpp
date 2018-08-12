@@ -14,11 +14,8 @@ struct Hobby
         : id(id), description(description)
     {}
 
-    BOOST_HANA_DEFINE_STRUCT(
-            Hobby,
-            (int, id),
-            (std::string, description)
-    );
+    int id;
+    std::string description;
 };
 
 
@@ -29,16 +26,17 @@ struct Person
         : name(name), age(age), hobby(hobby)
     {}
 
-    BOOST_HANA_DEFINE_STRUCT(
-            Person,
-            (std::string, name),
-            (std::optional<int>, age),
-            (Hobby, hobby)
-    );
+    std::string name;
+    std::optional<int> age;
+    Hobby hobby;
 };
 
 
 } // namespace
+
+
+BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
+BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
 
 
 TEST_CASE("Check mixin::OStream", "[ostream_mixins]") {
