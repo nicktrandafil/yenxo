@@ -27,6 +27,8 @@
 #include <variant_mixins.hpp>
 
 // local
+#include <ostream_mixins.hpp>
+#include <comparison_mixins.hpp>
 #include <variant.hpp>
 
 // 3rd
@@ -48,7 +50,9 @@ namespace {
 
 struct Hobby
         : mixin::Var<Hobby>
-        , mixin::UpdateFromVar<Hobby> {
+        , mixin::UpdateFromVar<Hobby>
+        , mixin::OStream<Hobby>
+        , mixin::EqualityComparison<Hobby> {
 
     Hobby() : id(0) {}
 
@@ -63,7 +67,9 @@ struct Hobby
 
 struct Person
         : mixin::Var<Person>
-        , mixin::UpdateFromVar<Person> {
+        , mixin::UpdateFromVar<Person>
+        , mixin::OStream<Person>
+        , mixin::EqualityComparison<Person> {
 
     Person() : age(0) {}
 
@@ -91,7 +97,8 @@ TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
 
     auto const x1 = mixin::detail::toVariant("Hello");
     REQUIRE(x1 == Variant("Hello"));
-    REQUIRE("Hello" == mixin::detail::fromVariant<std::string>(Variant("Hello")));
+    REQUIRE("Hello" ==
+            mixin::detail::fromVariant<std::string>(Variant("Hello")));
 
     struct X {
         static Variant toVariant(X const& x) { return Variant(x.m); }
@@ -105,7 +112,7 @@ TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
 }
 
 
-TEST_CASE("Check Var and UpdateFromVar", "[variant_mixins]") {
+TEST_CASE("Check mixin::Var and mixin::UpdateFromVar", "[variant_mixins]") {
     Variant::Map const hobby_var{
         {"id", Variant(1)},
         {"description", Variant("Hack")}
@@ -129,7 +136,7 @@ TEST_CASE("Check Var and UpdateFromVar", "[variant_mixins]") {
     };
 
     SECTION("Check fromVariant") {
-        REQUIRE(hana::equal(person, Person::fromVariant(Variant(person_var))));
+        REQUIRE(person == Person::fromVariant(Variant(person_var)));
     }
 
     SECTION("Check toVariant") {
@@ -149,7 +156,7 @@ TEST_CASE("Check Var and UpdateFromVar", "[variant_mixins]") {
             hobby
         };
 
-        REQUIRE(hana::equal(person_updated, person));
+        REQUIRE(person_updated == person);
     }
 
     SECTION("Check no field") {
@@ -171,7 +178,10 @@ auto makePersonDDefaults() {
 }
 
 
-struct PersonD : mixin::VarDef<PersonD> {
+struct PersonD
+        : mixin::VarDef<PersonD>
+        , mixin::OStream<PersonD>
+        , mixin::EqualityComparison<PersonD> {
     PersonD() {}
 
     PersonD(std::string const& name, int age, Hobby const& hobby)
@@ -235,13 +245,13 @@ TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
     SECTION("Check fromVariant with no name (default value is provided)") {
         person_var.erase("name");
         auto const actual = PersonD::fromVariant(Variant(person_var));
-        REQUIRE(hana::equal(actual, PersonD{"Efendi", 16, hobby}));
+        REQUIRE(actual == PersonD{"Efendi", 16, hobby});
     }
 
     SECTION("Check fromVariant with no age (no default value, but type is optional)") {
         person_var.erase("age");
         auto const actual = PersonD::fromVariant(Variant(person_var));
-        REQUIRE(hana::equal(actual, PersonD{"Alecu", hobby}));
+        REQUIRE(actual == PersonD{"Alecu", hobby});
     }
 
     SECTION("Check fromVariant with no hobby (no default value)") {
@@ -263,7 +273,10 @@ auto makePersonCDefaults() {
 }
 
 
-struct PersonC : mixin::VarDefExplicit<PersonC> {
+struct PersonC
+        : mixin::VarDefExplicit<PersonC>
+        , mixin::OStream<PersonC>
+        , mixin::EqualityComparison<PersonC> {
     PersonC() {}
 
     PersonC(std::string const& name, int age, Hobby const& hobby)
@@ -308,5 +321,5 @@ TEST_CASE("Check mixin::VarDefExplicit", "[variant_mixins]") {
         hobby
     };
 
-    REQUIRE(hana::equal(PersonC::fromVariant(Variant(person_var)), person));
+    REQUIRE(PersonC::fromVariant(Variant(person_var)) == person);
 }

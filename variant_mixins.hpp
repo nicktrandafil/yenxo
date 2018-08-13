@@ -74,7 +74,7 @@ struct ToVariant : ToVariant<T, When<true>> {};
 template <typename T, bool condition>
 struct ToVariant<T, When<condition>> {
     static_assert(
-            rp::callable(T::toVariant, rp::Type<T>()),
+            rp::callable(T::toVariant, rp::type_c<T>),
             "The type T must have T::toVariant(T) static member function");
 
     static_assert(
@@ -117,7 +117,7 @@ struct FromVariant : FromVariant<T, When<true>> {};
 template <typename T, bool condition>
 struct FromVariant<T, When<condition>> {
     static_assert(
-            rp::callable(T::fromVariant, rp::Type<Variant>()),
+            rp::callable(T::fromVariant, rp::type_c<Variant>),
             "The type T must have static member function fromVariant(Variant)");
     static_assert(
             std::is_same_v<decltype(T::fromVariant(Variant())), T>,

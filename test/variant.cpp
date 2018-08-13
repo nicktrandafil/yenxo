@@ -30,7 +30,7 @@
 #include <catch2/catch.hpp>
 
 
-TEST_CASE("Check to and from types", "[to_from]") {
+TEST_CASE("Check Variant", "[Variant]") {
     SECTION("integer") {
         int const expected{5};
         auto const x = Variant(expected);

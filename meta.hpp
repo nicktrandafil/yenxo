@@ -56,7 +56,7 @@ constexpr Type<T> type_c{};
 
 
 template <typename F, typename ...Args>
-constexpr bool callable(F&&, Type<Args>&&...) noexcept {
+constexpr bool callable(F&&, Type<Args> const&...) noexcept {
     return detail::Callable<F, detail::S<Args...>>::value;
 }
 

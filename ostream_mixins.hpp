@@ -34,8 +34,8 @@
 #include <boost/hana.hpp>
 
 // std
-#include <ostream>
 #include <iomanip>
+#include <ostream>
 
 
 namespace mixin {

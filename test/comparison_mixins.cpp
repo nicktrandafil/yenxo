@@ -25,6 +25,8 @@
 
 // tested
 #include <comparison_mixins.hpp>
+
+// local
 #include <ostream_mixins.hpp>
 
 // 3rd

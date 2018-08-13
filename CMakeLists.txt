@@ -70,8 +70,8 @@ target_link_libraries(
     ${PROJECT_NAME}_core)
 
 add_test(
-    check_to_and_from test_${PROJECT_NAME}_core
-    "Check to and from types")
+    check_variant test_${PROJECT_NAME}_core
+    "Check Variant")
 
 add_test(
     mixins_var_update_from_var test_${PROJECT_NAME}_core
@@ -79,7 +79,7 @@ add_test(
 
 add_test(
     variant_mixins test_${PROJECT_NAME}_core
-    "Check Var and UpdateFromVar")
+    "Check mixin::Var and mixin::UpdateFromVar")
 
 add_test(
     mixins_var_def test_${PROJECT_NAME}_core
