@@ -25,6 +25,13 @@
 
 #include <meta.hpp>
 
+#if __GNUG__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wundefined-internal"
+#pragma GCC diagnostic ignored "-Wunneeded-member-function"
+
 
 namespace {
 
@@ -41,11 +48,14 @@ struct Foo {
 } // namespace
 
 
+#pragma GCC diagnostic pop
+#else
+#error The compiler not supported
+#endif
+
+
 static_assert(rp::callable(foo1), "");
 static_assert(rp::callable(foo2, rp::type_c<int>), "");
 static_assert(!rp::callable(foo2, rp::type_c<int>, rp::Type<int>()), "");
 static_assert(rp::callable(Foo()), "");
 static_assert(rp::callable(Foo()), "");
-
-
-

@@ -3,33 +3,74 @@ cmake_minimum_required(VERSION 2.8)
 project(rproject)
 
 #
-# Targets
+# Common
+#
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(GENERIC_CXX_COMPILE_OPTIONS
+        $<$<CONFIG:Debug>:-O0>
+        $<$<NOT:$<CONFIG:Debug>>:-O2 -DNDEBUG>
+        -Wall
+    )
+else()
+    message(FATAL_ERROR "${CMAKE_CXX_COMPILER_ID} is not supported")
+endif()
+
+#
+# Core
 #
 
 add_library(
     ${PROJECT_NAME}_core
 
-    meta.hpp
+    include/rproject/meta.hpp
 
-    pimpl.hpp
-    pimpl_impl.hpp
+    include/rproject/pimpl.hpp
+    include/rproject/pimpl_impl.hpp
 
-    variant.cpp
-    variant.hpp
+    src/variant.cpp
+    include/rproject/variant.hpp
 
-    variant_mixins.hpp
-    ostream_mixins.hpp
-    comparison_mixins.hpp
+    include/rproject/variant_mixins.hpp
+    include/rproject/ostream_mixins.hpp
+    include/rproject/comparison_mixins.hpp
 
-    type_name.hpp
+    include/rproject/type_name.hpp
 )
 
 set_target_properties(${PROJECT_NAME}_core PROPERTIES CXX_STANDARD 17)
-target_include_directories(${PROJECT_NAME}_core PUBLIC ${PROJECT_SOURCE_DIR})
+
+target_include_directories(
+    ${PROJECT_NAME}_core
+
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/rproject>
+
+    INTERFACE
+    $<INSTALL_INTERFACE:include>
+)
+
+target_compile_options(
+    ${PROJECT_NAME}_core
+
+    PRIVATE
+    ${GENERIC_CXX_COMPILE_OPTIONS}
+)
+
+#
+# App
+#
 
 add_executable(
     ${PROJECT_NAME} 
-    main.cpp
+    src/main.cpp
+)
+
+target_compile_options(
+    ${PROJECT_NAME}
+
+    PRIVATE
+    ${GENERIC_CXX_COMPILE_OPTIONS}
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -65,11 +106,25 @@ add_executable(
 )
 
 set_target_properties(test_${PROJECT_NAME}_core PROPERTIES CXX_STANDARD 17)
+
 target_link_libraries(
     test_${PROJECT_NAME}_core
     PRIVATE
+
     Catch2::Catch2
-    ${PROJECT_NAME}_core)
+    ${PROJECT_NAME}_core
+)
+
+target_compile_options(
+    test_${PROJECT_NAME}_core
+
+    PRIVATE
+    ${GENERIC_CXX_COMPILE_OPTIONS}
+)
+
+#
+# Test cases
+#
 
 add_test(
     check_variant test_${PROJECT_NAME}_core
