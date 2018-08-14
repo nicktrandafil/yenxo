@@ -9,6 +9,8 @@ project(rproject)
 add_library(
     ${PROJECT_NAME}_core
 
+    meta.hpp
+
     pimpl.hpp
     pimpl_impl.hpp
 
