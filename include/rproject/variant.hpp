@@ -113,7 +113,7 @@ public:
 
     ///
     /// Get short int
-    /// \throw `VariantEmpty`, `VariantBadType`
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
     ///
     short int shortInt() const;
     explicit operator short int() const { return shortInt(); }
@@ -126,7 +126,7 @@ public:
 
     ///
     /// Get unsigned short int
-    /// \throw `VariantEmpty`, `VariantBadType`
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
     ///
     unsigned short int ushortInt() const;
     explicit operator unsigned short int() const { return ushortInt(); }
@@ -139,7 +139,7 @@ public:
 
     ///
     /// Get int
-    /// \throw `VariantEmpty`, `VariantBadType`
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
     ///
     int integer() const;
     explicit operator int() const { return integer(); }
@@ -152,7 +152,7 @@ public:
 
     ///
     /// Get unsigned int
-    /// \throw `VariantEmpty`, `VariantBadType`
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
     ///
     unsigned int uint() const;
     explicit operator unsigned int() const { return uint(); }
@@ -165,7 +165,7 @@ public:
 
     ///
     /// Get int
-    /// \throw `VariantEmpty`, `VariantBadType`
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
     ///
     double floating() const;
     explicit operator double() const { return floating(); }
