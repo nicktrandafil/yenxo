@@ -131,7 +131,7 @@ struct IntegralCheckedCast<T, U, When<same_sign_v<U, T> &&
 template <typename T, typename U>
 struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
                                       std::is_unsigned_v<U> &&
-                                      (sizeof(T) >= sizeof(U))>> {
+                                      (sizeof(T) > sizeof(U))>> {
     T operator()(U x) const noexcept { return x; }
 };
 
@@ -163,7 +163,7 @@ struct IntegralCheckedCast<T, U, When<std::is_unsigned_v<T> &&
 template <typename T, typename U>
 struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
                                       std::is_unsigned_v<U> &&
-                                      (sizeof(T) < sizeof(U))>> {
+                                      (sizeof(T) <= sizeof(U))>> {
     T operator()(U x) const {
 
 #if __GNUG__

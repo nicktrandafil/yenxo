@@ -155,7 +155,7 @@ public:
     /// \throw `VariantEmpty`, `VariantBadType`
     ///
     unsigned int uint() const;
-    explicit operator unsigned int() const { return integer(); }
+    explicit operator unsigned int() const { return uint(); }
 
     ///
     /// Get unsigned int or `x` if the object is empty

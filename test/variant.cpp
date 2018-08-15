@@ -26,8 +26,20 @@
 // tested
 #include <variant.hpp>
 
+// local
+#include <type_name.hpp>
+
 // 3rd
 #include <catch2/catch.hpp>
+
+// boost
+#include <boost/hana.hpp>
+
+// std
+#include <limits.h>
+
+
+namespace hana = boost::hana;
 
 
 TEST_CASE("Check Variant", "[Variant]") {
@@ -38,29 +50,6 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE_THROWS_AS(Variant().ushortInt(), VariantEmpty);
         REQUIRE_THROWS_AS(Variant("").ushortInt(), VariantBadType);
         REQUIRE(Variant().ushortIntOr(1) == 1);
-
-        SECTION("shrot when actual is int") {
-            int const expected{4};
-            REQUIRE(expected == Variant(expected).shortInt());
-        }
-
-        SECTION("short when actual is int (last short") {
-            int const expected{32767};
-            REQUIRE(expected == Variant(expected).shortInt());
-        }
-
-        SECTION("short when actual is int (first not short)") {
-            int const expected{32768};
-            REQUIRE_THROWS_AS(Variant(expected).shortInt(), VariantIntegralOverflow);
-            REQUIRE_THROWS_WITH(
-                        Variant(expected).shortInt(),
-                        "The type 'short int' can not hold the value '32768'");
-        }
-
-        SECTION("short when actual is unsigned int") {
-            unsigned int const expected{5};
-            REQUIRE(expected == Variant(expected).shortInt());
-        }
     }
 
     SECTION("short int") {
@@ -127,6 +116,74 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(Variant().mapOr(Variant::Map{std::pair("1", Variant(1))}) ==
                 Variant::Map{std::pair("1", Variant(1))});
     }
+
+    SECTION("allow representable integral type conversions") {
+        auto const types = hana::make_tuple(
+            hana::type_c<short int>,
+            hana::type_c<unsigned short int>,
+            hana::type_c<int>,
+            hana::type_c<unsigned int>);
+
+        hana::for_each(
+            types,
+            [&](auto x) {
+                hana::for_each(
+                    types,
+                    [&x](auto y) {
+                        using X = typename decltype(x)::type;
+                        using Y = typename decltype(y)::type;
+                        using YLimiets = std::numeric_limits<Y>;
+
+                        auto const y_min = YLimiets::min();
+
+                        // no fails
+
+                        // min bound
+                        X const y_min_in_x = static_cast<X>(y_min);
+                        if (std::to_string(y_min) == std::to_string(y_min_in_x)) {
+                            REQUIRE(static_cast<Y>(Variant(y_min_in_x)) == y_min);
+                        }
+
+                        auto const y_max = YLimiets::max();
+
+                        // max bound
+                        X const y_max_in_x = static_cast<X>(y_max);
+                        if (std::to_string(y_max) == std::to_string(y_max_in_x)) {
+                            REQUIRE(static_cast<Y>(Variant(y_max_in_x)) == y_max);
+                        }
+
+                        // fails
+
+                        // min - 1 out of range
+                        X const y_min_in_x_1 = static_cast<X>(static_cast<double>(y_min) - 1);
+                        if (std::to_string(static_cast<double>(y_min) - 1) ==
+                                std::to_string(static_cast<double>(y_min_in_x_1))) {
+                            REQUIRE_THROWS_AS(
+                                static_cast<Y>(Variant(y_min_in_x_1)),
+                                VariantIntegralOverflow);
+                            REQUIRE_THROWS_WITH(
+                                static_cast<Y>(Variant(y_min_in_x_1)),
+                                "The type '" +
+                                        std::string(unqualifiedTypeName<Y>()) +
+                                        "' can not hold the value '" +
+                                        std::to_string(y_min_in_x_1) + "'");
+                        }
+
+                        // max + 1 out of range
+                        X const y_max_in_x_1 = static_cast<X>(static_cast<double>(y_max) + 1);
+                        if (std::to_string(static_cast<double>(y_max) + 1) ==
+                                std::to_string(static_cast<double>(y_max_in_x_1))) {
+                            REQUIRE_THROWS_AS(
+                                static_cast<Y>(Variant(y_max_in_x_1)),
+                                VariantIntegralOverflow);
+                            REQUIRE_THROWS_WITH(
+                                static_cast<Y>(Variant(y_max_in_x_1)),
+                                "The type '" +
+                                        std::string(unqualifiedTypeName<Y>()) +
+                                        "' can not hold the value '" +
+                                        std::to_string(y_max_in_x_1) + "'");
+                        }
+                    });
+            });
+    }
 }
-
-
