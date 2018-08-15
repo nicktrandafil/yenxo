@@ -79,14 +79,10 @@ Variant::Variant(Map&& x) : impl(std::move(x)) {}
 
 
 Variant::Variant(Variant const&) = default;
-
-
 Variant& Variant::operator=(Variant const&) = default;
 
 
 Variant::Variant(Variant&&) noexcept = default;
-
-
 Variant& Variant::operator=(Variant&&) noexcept = default;
 
 
@@ -136,31 +132,6 @@ struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
 };
 
 template <typename T, typename U>
-struct IntegralCheckedCast<T, U, When<std::is_unsigned_v<T> &&
-                                      std::is_signed_v<U>>> {
-    T operator()(U x) const {
-
-#if __GNUG__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare" // safe comparation
-
-        if (x < 0 || x > std::numeric_limits<T>::max()) {
-
-#pragma GCC diagnostic pop
-#else
-#error The compiler not supported
-#endif
-
-            throw VariantIntegralOverflow(
-                        std::string(unqualifiedTypeName<T>()),
-                        std::to_string(x));
-        }
-
-        return x;
-    }
-};
-
-template <typename T, typename U>
 struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
                                       std::is_unsigned_v<U> &&
                                       (sizeof(T) <= sizeof(U))>> {
@@ -185,6 +156,32 @@ struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
         return x;
     }
 };
+
+template <typename T, typename U>
+struct IntegralCheckedCast<T, U, When<std::is_unsigned_v<T> &&
+                                      std::is_signed_v<U>>> {
+    T operator()(U x) const {
+
+#if __GNUG__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare" // safe comparation
+
+        if (x < 0 || x > std::numeric_limits<T>::max()) {
+
+#pragma GCC diagnostic pop
+#else
+#error The compiler not supported
+#endif
+
+            throw VariantIntegralOverflow(
+                        std::string(unqualifiedTypeName<T>()),
+                        std::to_string(x));
+        }
+
+        return x;
+    }
+};
+
 
 template <typename T, typename U, bool condition>
 struct IntegralCheckedCast<T, U, When<condition>> {
@@ -235,7 +232,7 @@ struct GetHelper<T, When<std::is_integral_v<T>>> {
         return integralCheckedCast<T, decltype(x)>(x);
     }
 
-    T operator()(double x)     const { throw VariantBadType(); }
+    T operator()(double)       const { throw VariantBadType(); }
     T operator()(std::string)  const { throw VariantBadType(); }
     T operator()(Variant::Vec) const { throw VariantBadType(); }
     T operator()(Variant::Map) const { throw VariantBadType(); }
