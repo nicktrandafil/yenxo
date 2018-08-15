@@ -73,10 +73,14 @@ public:
     ~Variant();
 
     explicit Variant(int);
+    explicit Variant(unsigned int);
+
     explicit Variant(std::string const&);
     explicit Variant(std::string&&);
+
     explicit Variant(Vec const&);
     explicit Variant(Vec&&);
+
     explicit Variant(Map const&);
     explicit Variant(Map&&);
 
@@ -89,14 +93,26 @@ public:
     Variant& operator=(Variant&& rhs) noexcept;
 
     ///
-    /// Get integer
+    /// Get int
     /// \throw `VariantEmpty`, `VariantBadType`
     ///
     int integer() const;
     explicit operator int() const { return integer(); }
 
     ///
-    /// Get integer or `x` if the object is empty
+    /// Get unsigned int
+    /// \throw `VariantEmpty`, `VariantBadType`
+    ///
+    unsigned int uint() const;
+    explicit operator unsigned int() const { return integer(); }
+
+    ///
+    /// Get unsigned int or `x` if the object is empty
+    ///
+    unsigned int uintOr(unsigned int x) const;
+
+    ///
+    /// Get int or `x` if the object is empty
     /// \throw `VariantBadType`
     ///
     int integerOr(int x) const;

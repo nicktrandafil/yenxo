@@ -38,6 +38,7 @@
 using Val = std::variant<
     std::monostate,
     int,
+    unsigned int,
     std::string,
     Variant::Vec,
     Variant::Map>;
@@ -54,39 +55,20 @@ Variant::Variant() = default;
 Variant::~Variant() = default;
 
 
-Variant::Variant(int x)
-    : impl(x)
-{}
+Variant::Variant(int x) : impl(x) {}
+Variant::Variant(unsigned int x) : impl(x) {}
 
 
-Variant::Variant(std::string const& x)
-    : impl(x)
-{}
+Variant::Variant(std::string const& x) : impl(x) {}
+Variant::Variant(std::string&& x) : impl(std::move(x)) {}
 
 
-Variant::Variant(std::string&& x)
-    : impl(std::move(x))
-{}
+Variant::Variant(Vec const& x) : impl(x) {}
+Variant::Variant(Vec&& x) : impl(std::move(x)) {}
 
 
-Variant::Variant(Vec const& x)
-    : impl(x)
-{}
-
-
-Variant::Variant(Vec&& x)
-    : impl(std::move(x))
-{}
-
-
-Variant::Variant(Map const& x)
-    : impl(x)
-{}
-
-
-Variant::Variant(Map&& x)
-    : impl(std::move(x))
-{}
+Variant::Variant(Map const& x) : impl(x) {}
+Variant::Variant(Map&& x) : impl(std::move(x)) {}
 
 
 Variant::Variant(Variant const&) = default;
@@ -148,6 +130,16 @@ int Variant::integer() const {
 
 int Variant::integerOr(int x) const {
     return std::visit(GetOrHelper<int>{x}, impl->m);
+}
+
+
+unsigned int Variant::uint() const {
+    return std::visit(GetHelper<unsigned int>(), impl->m);
+}
+
+
+unsigned int Variant::uintOr(unsigned int x) const {
+    return std::visit(GetOrHelper<unsigned int>{x}, impl->m);
 }
 
 

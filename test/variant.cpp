@@ -40,6 +40,15 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(Variant().integerOr(1) == 1);
     }
 
+    SECTION("uint") {
+        unsigned int const expected{5};
+        auto const x = Variant(expected);
+        REQUIRE(expected == x.uint());
+        REQUIRE_THROWS_AS(Variant().uint(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").uint(), VariantBadType);
+        REQUIRE(Variant().uintOr(1) == 1);
+    }
+
     SECTION("string") {
         std::string const expected = "ab";
         auto const x = Variant(expected);
