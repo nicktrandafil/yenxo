@@ -37,6 +37,7 @@
 
 using Val = std::variant<
     std::monostate,
+    short int,
     int,
     unsigned int,
     std::string,
@@ -55,6 +56,7 @@ Variant::Variant() = default;
 Variant::~Variant() = default;
 
 
+Variant::Variant(short int x) : impl(x) {}
 Variant::Variant(int x) : impl(x) {}
 Variant::Variant(unsigned int x) : impl(x) {}
 
@@ -121,6 +123,16 @@ struct GetOrHelper {
 
 
 } // namespace
+
+
+short int Variant::shortInt() const {
+    return std::visit(GetHelper<short int>(), impl->m);
+}
+
+
+short int Variant::shortIntOr(short int x) const {
+    return std::visit(GetOrHelper<short int>{x}, impl->m);
+}
 
 
 int Variant::integer() const {

@@ -72,6 +72,7 @@ public:
     Variant();
     ~Variant();
 
+    explicit Variant(short int);
     explicit Variant(int);
     explicit Variant(unsigned int);
 
@@ -93,11 +94,30 @@ public:
     Variant& operator=(Variant&& rhs) noexcept;
 
     ///
+    /// Get short int
+    /// \throw `VariantEmpty`, `VariantBadType`
+    ///
+    short int shortInt() const;
+    explicit operator short int() const { return shortInt(); }
+
+    ///
+    /// Get short int or `x` if the object is empty
+    /// \throw `VariantBadType`
+    ///
+    short int shortIntOr(short int x) const;
+
+    ///
     /// Get int
     /// \throw `VariantEmpty`, `VariantBadType`
     ///
     int integer() const;
     explicit operator int() const { return integer(); }
+
+    ///
+    /// Get int or `x` if the object is empty
+    /// \throw `VariantBadType`
+    ///
+    int integerOr(int x) const;
 
     ///
     /// Get unsigned int
@@ -108,14 +128,9 @@ public:
 
     ///
     /// Get unsigned int or `x` if the object is empty
-    ///
-    unsigned int uintOr(unsigned int x) const;
-
-    ///
-    /// Get int or `x` if the object is empty
     /// \throw `VariantBadType`
     ///
-    int integerOr(int x) const;
+    unsigned int uintOr(unsigned int x) const;
 
     ///
     /// Get string
