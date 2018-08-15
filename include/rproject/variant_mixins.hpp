@@ -364,15 +364,13 @@ struct VarDefExplicit : private VarDef<Derived> {
                         name +
                         " not present in default_mem_vals"_s);
                 } else if constexpr (!detail::noDefault<Derived>(name)) {
-                    constexpr auto c =
-                        std::is_convertible_v<
-                            std::decay_t<decltype(Derived::default_mem_vals[name])>,
-                            std::decay_t<decltype(value(std::declval<Derived>()))>>;
                     BOOST_HANA_CONSTEXPR_ASSERT_MSG(
-                                c,
-                                "The provided default type in"_s +
-                                " default_mem_vals for "_s + name +
-                                " does not match with the actual type"_s);
+                        (std::is_convertible_v<
+                            std::decay_t<decltype(Derived::default_mem_vals[name])>,
+                            std::decay_t<decltype(value(std::declval<Derived>()))>>),
+                        "The provided default type in"_s +
+                        " default_mem_vals for "_s + name +
+                        " does not match with the actual type"_s);
                 }
             }));
 

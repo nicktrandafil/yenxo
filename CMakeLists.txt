@@ -16,6 +16,8 @@ else()
     message(FATAL_ERROR "${CMAKE_CXX_COMPILER_ID} is not supported")
 endif()
 
+set(CMAKE_BUILD_TYPE Release CACHE BOOL "Enable testing")
+
 #
 # Core
 #
