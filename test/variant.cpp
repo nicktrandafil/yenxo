@@ -32,6 +32,15 @@
 
 TEST_CASE("Check Variant", "[Variant]") {
     SECTION("short int") {
+        unsigned short int const expected{5};
+        auto const x = Variant(expected);
+        REQUIRE(expected == x.ushortInt());
+        REQUIRE_THROWS_AS(Variant().ushortInt(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").ushortInt(), VariantBadType);
+        REQUIRE(Variant().ushortIntOr(1) == 1);
+    }
+
+    SECTION("short int") {
         short int const expected{5};
         auto const x = Variant(expected);
         REQUIRE(expected == x.shortInt());

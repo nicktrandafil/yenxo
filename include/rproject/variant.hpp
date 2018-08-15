@@ -73,6 +73,7 @@ public:
     ~Variant();
 
     explicit Variant(short int);
+    explicit Variant(unsigned short int);
     explicit Variant(int);
     explicit Variant(unsigned int);
 
@@ -105,6 +106,19 @@ public:
     /// \throw `VariantBadType`
     ///
     short int shortIntOr(short int x) const;
+
+    ///
+    /// Get unsigned short int
+    /// \throw `VariantEmpty`, `VariantBadType`
+    ///
+    unsigned short int ushortInt() const;
+    explicit operator unsigned short int() const { return ushortInt(); }
+
+    ///
+    /// Get unsigned short int or `x` if the object is empty
+    /// \throw `VariantBadType`
+    ///
+    unsigned short int ushortIntOr(unsigned short int) const;
 
     ///
     /// Get int
