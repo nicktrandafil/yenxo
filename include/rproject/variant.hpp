@@ -76,6 +76,7 @@ public:
     explicit Variant(unsigned short int);
     explicit Variant(int);
     explicit Variant(unsigned int);
+    explicit Variant(double);
 
     explicit Variant(std::string const&);
     explicit Variant(std::string&&);
@@ -145,6 +146,19 @@ public:
     /// \throw `VariantBadType`
     ///
     unsigned int uintOr(unsigned int x) const;
+
+    ///
+    /// Get int
+    /// \throw `VariantEmpty`, `VariantBadType`
+    ///
+    double floating() const;
+    explicit operator double() const { return floating(); }
+
+    ///
+    /// Get int or `x` if the object is empty
+    /// \throw `VariantBadType`
+    ///
+    double floatingOr(double x) const;
 
     ///
     /// Get string

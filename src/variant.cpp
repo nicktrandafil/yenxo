@@ -41,6 +41,7 @@ using Val = std::variant<
     unsigned short int,
     int,
     unsigned int,
+    double,
     std::string,
     Variant::Vec,
     Variant::Map>;
@@ -61,6 +62,7 @@ Variant::Variant(short int x) : impl(x) {}
 Variant::Variant(unsigned short int x) : impl(x) {}
 Variant::Variant(int x) : impl(x) {}
 Variant::Variant(unsigned int x) : impl(x) {}
+Variant::Variant(double x) : impl(x) {}
 
 
 Variant::Variant(std::string const& x) : impl(x) {}
@@ -164,6 +166,16 @@ unsigned int Variant::uint() const {
 
 unsigned int Variant::uintOr(unsigned int x) const {
     return std::visit(GetOrHelper<unsigned int>{x}, impl->m);
+}
+
+
+double Variant::floating() const {
+    return std::visit(GetHelper<double>(), impl->m);
+}
+
+
+double Variant::floatingOr(double x) const {
+    return std::visit(GetOrHelper<double>{x}, impl->m);
 }
 
 

@@ -67,6 +67,15 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(Variant().uintOr(1) == 1);
     }
 
+    SECTION("floating") {
+        double const expected{5.1};
+        auto const x = Variant(expected);
+        REQUIRE(expected == x.floating());
+        REQUIRE_THROWS_AS(Variant().floating(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").floating(), VariantBadType);
+        REQUIRE(Variant().floatingOr(1.1) == 1.1);
+    }
+
     SECTION("string") {
         std::string const expected = "ab";
         auto const x = Variant(expected);
