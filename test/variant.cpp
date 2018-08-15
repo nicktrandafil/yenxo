@@ -129,7 +129,7 @@ TEST_CASE("Check Variant", "[Variant]") {
             [&](auto x) {
                 hana::for_each(
                     types,
-                    [&x](auto y) {
+                    [](auto y) {
                         using X = typename decltype(x)::type;
                         using Y = typename decltype(y)::type;
                         using YLimiets = std::numeric_limits<Y>;
