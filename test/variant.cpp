@@ -142,6 +142,7 @@ TEST_CASE("Check Variant", "[Variant]") {
                         X const y_min_in_x = static_cast<X>(y_min);
                         if (std::to_string(y_min) == std::to_string(y_min_in_x)) {
                             REQUIRE(static_cast<Y>(Variant(y_min_in_x)) == y_min);
+                            REQUIRE(Variant(y_min_in_x).asOr<Y>(1) == y_min);
                         }
 
                         auto const y_max = YLimiets::max();
@@ -150,6 +151,7 @@ TEST_CASE("Check Variant", "[Variant]") {
                         X const y_max_in_x = static_cast<X>(y_max);
                         if (std::to_string(y_max) == std::to_string(y_max_in_x)) {
                             REQUIRE(static_cast<Y>(Variant(y_max_in_x)) == y_max);
+                            REQUIRE(Variant(y_max_in_x).asOr<Y>(1) == y_max);
                         }
 
                         // fails
@@ -161,8 +163,17 @@ TEST_CASE("Check Variant", "[Variant]") {
                             REQUIRE_THROWS_AS(
                                 static_cast<Y>(Variant(y_min_in_x_1)),
                                 VariantIntegralOverflow);
+                            REQUIRE_THROWS_AS(
+                                Variant(y_min_in_x_1).asOr<Y>(1),
+                                VariantIntegralOverflow);
                             REQUIRE_THROWS_WITH(
                                 static_cast<Y>(Variant(y_min_in_x_1)),
+                                "The type '" +
+                                        std::string(unqualifiedTypeName<Y>()) +
+                                        "' can not hold the value '" +
+                                        std::to_string(y_min_in_x_1) + "'");
+                            REQUIRE_THROWS_WITH(
+                                Variant(y_min_in_x_1).asOr<Y>(1),
                                 "The type '" +
                                         std::string(unqualifiedTypeName<Y>()) +
                                         "' can not hold the value '" +
@@ -176,8 +187,17 @@ TEST_CASE("Check Variant", "[Variant]") {
                             REQUIRE_THROWS_AS(
                                 static_cast<Y>(Variant(y_max_in_x_1)),
                                 VariantIntegralOverflow);
+                            REQUIRE_THROWS_AS(
+                                Variant(y_max_in_x_1).asOr<Y>(1),
+                                VariantIntegralOverflow);
                             REQUIRE_THROWS_WITH(
                                 static_cast<Y>(Variant(y_max_in_x_1)),
+                                "The type '" +
+                                        std::string(unqualifiedTypeName<Y>()) +
+                                        "' can not hold the value '" +
+                                        std::to_string(y_max_in_x_1) + "'");
+                            REQUIRE_THROWS_WITH(
+                                Variant(y_max_in_x_1).asOr<Y>(1),
                                 "The type '" +
                                         std::string(unqualifiedTypeName<Y>()) +
                                         "' can not hold the value '" +

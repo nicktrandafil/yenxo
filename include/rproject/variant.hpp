@@ -112,6 +112,12 @@ public:
     Variant& operator=(Variant&& rhs) noexcept;
 
     ///
+    /// Get as `T` or `x` if the object is empty
+    ///
+    template <typename T>
+    T asOr(T x) const;
+
+    ///
     /// Get short int
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
     ///
@@ -225,3 +231,9 @@ private:
     struct Impl;
     Pimpl<Impl> impl;
 };
+
+
+template <> inline short int Variant::asOr<short int>(short int x) const { return shortIntOr(x); }
+template <> inline unsigned short int Variant::asOr<unsigned short int>(unsigned short int x) const { return ushortIntOr(x); }
+template <> inline int Variant::asOr<int>(int x) const { return integerOr(x); }
+template <> inline unsigned int Variant::asOr<unsigned int>(unsigned int x) const { return uintOr(x); }
