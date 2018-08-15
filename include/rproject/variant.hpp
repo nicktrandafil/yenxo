@@ -61,6 +61,22 @@ public:
     explicit VariantBadType() : VariantErr("Attempt to get wrong type") {}
 };
 
+
+///
+/// User tried to get a type which is not able to hold the actual value
+///
+class VariantIntegralOverflow final : public VariantErr {
+public:
+    explicit VariantIntegralOverflow(
+            std::string const type_name,
+            std::string const value)
+        : VariantErr("The type '" + type_name +
+                     "' can not hold the value '" +
+                     value +
+                     "'")
+    {}
+};
+
 ///
 /// Serialized object reprezentation class
 ///

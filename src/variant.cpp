@@ -28,6 +28,7 @@
 // local
 #include <meta.hpp>
 #include <pimpl_impl.hpp>
+#include <type_name.hpp>
 
 // std
 #include <unordered_map>
@@ -107,12 +108,137 @@ struct GetHelper<T, When<condition>> {
 };
 
 
+template <typename A, typename B>
+constexpr auto same_sign_v = !(std::is_signed_v<A> ^ std::is_signed_v<B>);
+
+
+///
+/// Check if a specific value of type `U` is representable in type `T`
+///
+template <typename T, typename U, typename = void>
+struct IntegralCheckedCast : IntegralCheckedCast<T, U, When<true>> {
+    static_assert(std::is_integral_v<T> && std::is_integral_v<U>);
+};
+
+// safe conversion
+template <typename T, typename U>
+struct IntegralCheckedCast<T, U, When<same_sign_v<U, T> &&
+                                      (sizeof(T) >= sizeof(U))>> {
+    T operator()(U x) const noexcept { return x; }
+};
+
+// safe conversion
+template <typename T, typename U>
+struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
+                                      std::is_unsigned_v<U> &&
+                                      (sizeof(T) >= sizeof(U))>> {
+    T operator()(U x) const noexcept { return x; }
+};
+
+template <typename T, typename U>
+struct IntegralCheckedCast<T, U, When<std::is_unsigned_v<T> &&
+                                      std::is_signed_v<U>>> {
+    T operator()(U x) const {
+
+#if __GNUG__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare" // safe comparation
+
+        if (x < 0 || x > std::numeric_limits<T>::max()) {
+
+#pragma GCC diagnostic pop
+#else
+#error The compiler not supported
+#endif
+
+            throw VariantIntegralOverflow(
+                        std::string(unqualifiedTypeName<T>()),
+                        std::to_string(x));
+        }
+
+        return x;
+    }
+};
+
+template <typename T, typename U>
+struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
+                                      std::is_unsigned_v<U> &&
+                                      (sizeof(T) < sizeof(U))>> {
+    T operator()(U x) const {
+
+#if __GNUG__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare" // safe comparation
+
+        if (x > std::numeric_limits<T>::max()) {
+
+#pragma GCC diagnostic pop
+#else
+#error The compiler not supported
+#endif
+
+            throw VariantIntegralOverflow(
+                        std::string(unqualifiedTypeName<T>()),
+                        std::to_string(x));
+        }
+
+        return x;
+    }
+};
+
+template <typename T, typename U, bool condition>
+struct IntegralCheckedCast<T, U, When<condition>> {
+    T operator()(U x) const {
+
+#if __GNUG__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare" // safe comparation
+
+       if (x < std::numeric_limits<T>::min() ||
+           x > std::numeric_limits<T>::max()) {
+
+#pragma GCC diagnostic pop
+#else
+#error The compiler not supported
+#endif
+
+            throw VariantIntegralOverflow(
+                        std::string(unqualifiedTypeName<T>()),
+                        std::to_string(x));
+        }
+        return x;
+    }
+};
+
+
+template <typename T, typename U>
+constexpr IntegralCheckedCast<T, U> integralCheckedCast;
+
+
 template <typename T>
 struct GetHelper<T, When<std::is_integral_v<T>>> {
-    T operator()(T x) const noexcept { return x; }
-    [[noreturn]]  T operator()(std::monostate) const { throw VariantEmpty(); }
-    template <typename U>
-    [[noreturn]] T operator()(U) const { throw VariantBadType(); }
+    [[noreturn]] T operator()(std::monostate) const { throw VariantEmpty(); }
+
+    T operator()(short int x)          const {
+        return integralCheckedCast<T, decltype(x)>(x);
+    }
+
+    T operator()(unsigned short int x) const {
+        return integralCheckedCast<T, decltype(x)>(x);
+    }
+
+    T operator()(int x)                const {
+        return integralCheckedCast<T, decltype(x)>(x);
+    }
+
+    T operator()(unsigned int x)       const {
+        return integralCheckedCast<T, decltype(x)>(x);
+    }
+
+    T operator()(double x)     const { throw VariantBadType(); }
+    T operator()(std::string)  const { throw VariantBadType(); }
+    T operator()(Variant::Vec) const { throw VariantBadType(); }
+    T operator()(Variant::Map) const { throw VariantBadType(); }
 };
 
 

@@ -32,16 +32,39 @@
 
 TEST_CASE("Check Variant", "[Variant]") {
     SECTION("short int") {
-        unsigned short int const expected{5};
+        unsigned short int const expected{3};
         auto const x = Variant(expected);
         REQUIRE(expected == x.ushortInt());
         REQUIRE_THROWS_AS(Variant().ushortInt(), VariantEmpty);
         REQUIRE_THROWS_AS(Variant("").ushortInt(), VariantBadType);
         REQUIRE(Variant().ushortIntOr(1) == 1);
+
+        SECTION("shrot when actual is int") {
+            int const expected{4};
+            REQUIRE(expected == Variant(expected).shortInt());
+        }
+
+        SECTION("short when actual is int (last short") {
+            int const expected{32767};
+            REQUIRE(expected == Variant(expected).shortInt());
+        }
+
+        SECTION("short when actual is int (first not short)") {
+            int const expected{32768};
+            REQUIRE_THROWS_AS(Variant(expected).shortInt(), VariantIntegralOverflow);
+            REQUIRE_THROWS_WITH(
+                        Variant(expected).shortInt(),
+                        "The type 'short int' can not hold the value '32768'");
+        }
+
+        SECTION("short when actual is unsigned int") {
+            unsigned int const expected{5};
+            REQUIRE(expected == Variant(expected).shortInt());
+        }
     }
 
     SECTION("short int") {
-        short int const expected{5};
+        short int const expected{6};
         auto const x = Variant(expected);
         REQUIRE(expected == x.shortInt());
         REQUIRE_THROWS_AS(Variant().shortInt(), VariantEmpty);
@@ -50,7 +73,7 @@ TEST_CASE("Check Variant", "[Variant]") {
     }
 
     SECTION("integer") {
-        int const expected{5};
+        int const expected{7};
         auto const x = Variant(expected);
         REQUIRE(expected == x.integer());
         REQUIRE_THROWS_AS(Variant().integer(), VariantEmpty);
@@ -59,7 +82,7 @@ TEST_CASE("Check Variant", "[Variant]") {
     }
 
     SECTION("uint") {
-        unsigned int const expected{5};
+        unsigned int const expected{8};
         auto const x = Variant(expected);
         REQUIRE(expected == x.uint());
         REQUIRE_THROWS_AS(Variant().uint(), VariantEmpty);
