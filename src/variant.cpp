@@ -240,11 +240,14 @@ struct GetHelper<T, When<std::is_integral_v<T>>> {
 
 
 template <typename T>
-struct GetOrHelper {
-    T operator()(T x) const { return x; }
-    T operator()(std::monostate) const { return t; }
-    template <typename U>
-    [[noreturn]] T operator()(U const&) const { throw VariantBadType(); }
+struct GetOrHelper : GetHelper<T> {
+    GetOrHelper(T const& t) : t(t) {}
+
+    using GetHelper<T>::operator();
+    decltype(GetHelper<T>()(std::monostate())) operator()(std::monostate) const {
+        return t;
+    }
+
     T const& t;
 };
 
