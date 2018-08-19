@@ -238,4 +238,33 @@ TEST_CASE("Check Variant", "[Variant]") {
                     });
             });
     }
+
+    SECTION("JSON") {
+        SECTION("int") {
+            auto const raw = R"(5)";
+            Variant expected(5);
+            REQUIRE(expected == Variant::from(rapidjson::Document().Parse(raw)));
+        }
+
+        SECTION("map") {
+            auto const raw = R"(
+                {
+                    "x": 6,
+                    "y": [1, 2],
+                    "z": {
+                        "a": "a",
+                        "b": "b"
+                    }
+                }
+            )";
+            Variant expected{Variant::Map{
+                std::make_pair("x", Variant(6)),
+                std::make_pair("y", Variant(Variant::Vec{Variant(1), Variant(2)})),
+                std::make_pair("z", Variant(Variant::Map{
+                    std::make_pair("a", Variant("a")),
+                    std::make_pair("b", Variant("b"))}))
+            }};
+            REQUIRE(expected == Variant::from(rapidjson::Document().Parse(raw)));
+        }
+    }
 }
