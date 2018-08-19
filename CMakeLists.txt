@@ -16,7 +16,13 @@ else()
     message(FATAL_ERROR "${CMAKE_CXX_COMPILER_ID} is not supported")
 endif()
 
-set(CMAKE_BUILD_TYPE Release CACHE BOOL "Enable testing")
+set(CMAKE_BUILD_TYPE Release CACHE BOOL "Build type")
+
+#
+# 3rd party
+#
+
+find_package(RapidJSON QUIET REQUIRED)
 
 #
 # Core
@@ -46,10 +52,16 @@ target_include_directories(
     ${PROJECT_NAME}_core
 
     PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/rproject>
+    $<BUILD_INTERFACE:
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/rproject
+        ${RAPIDJSON_INCLUDE_DIRS}
+    >
 
     INTERFACE
-    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:
+        include
+        ${RAPIDJSON_INCLUDE_DIRS}
+    >
 )
 
 target_compile_options(

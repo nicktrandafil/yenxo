@@ -29,6 +29,9 @@
 // local
 #include <pimpl.hpp>
 
+// 3rd
+#include <rapidjson/document.h>
+
 // std
 #include <string>
 #include <vector>
@@ -88,12 +91,17 @@ public:
     Variant();
     ~Variant();
 
+    explicit Variant(bool);
+
     explicit Variant(short int);
     explicit Variant(unsigned short int);
     explicit Variant(int);
     explicit Variant(unsigned int);
+    explicit Variant(signed long);
+    explicit Variant(unsigned long);
     explicit Variant(double);
 
+    explicit Variant(char const*const&);
     explicit Variant(std::string const&);
     explicit Variant(std::string&&);
 
@@ -118,6 +126,18 @@ public:
     T asOr(T x) const;
 
     ///
+    /// Get bool
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    bool boolean() const;
+    explicit operator bool() const { return boolean(); }
+
+    ///
+    /// Get bool or `x` if the object is empty
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    ///
+    bool booleanOr(bool x) const;
+
+    ///
     /// Get short int
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
     ///
@@ -126,7 +146,7 @@ public:
 
     ///
     /// Get short int or `x` if the object is empty
-    /// \throw `VariantBadType`
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
     ///
     short int shortIntOr(short int x) const;
 
@@ -139,7 +159,7 @@ public:
 
     ///
     /// Get unsigned short int or `x` if the object is empty
-    /// \throw `VariantBadType`
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
     ///
     unsigned short int ushortIntOr(unsigned short int) const;
 
@@ -152,7 +172,7 @@ public:
 
     ///
     /// Get int or `x` if the object is empty
-    /// \throw `VariantBadType`
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
     ///
     int integerOr(int x) const;
 
@@ -165,9 +185,35 @@ public:
 
     ///
     /// Get unsigned int or `x` if the object is empty
-    /// \throw `VariantBadType`
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
     ///
     unsigned int uintOr(unsigned int x) const;
+
+    ///
+    /// Get signed long or `x` if the object is empty
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    ///
+    signed long longInt() const;
+    explicit operator signed long() const { return longInt(); }
+
+    ///
+    /// Get signed long or `x` if the object is empty
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    ///
+    signed long longInteOr(signed long x) const;
+
+    ///
+    /// Get unsigned long or `x` if the object is empty
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    ///
+    unsigned long ulongInt() const;
+    explicit operator unsigned long() const { return ulongInt(); }
+
+    ///
+    /// Get unsigned long or `x` if the object is empty
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    ///
+    unsigned long ulongIntOr(unsigned long x) const;
 
     ///
     /// Get int
@@ -178,7 +224,7 @@ public:
 
     ///
     /// Get int or `x` if the object is empty
-    /// \throw `VariantBadType`
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
     ///
     double floatingOr(double x) const;
 
@@ -191,7 +237,7 @@ public:
 
     ///
     /// Get string or `x` if the object is empty
-    /// \throw `VariantBadType`
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
     ///
     std::string strOr(std::string const& x) const;
 
@@ -204,7 +250,7 @@ public:
 
     ///
     /// Get Vec or `x` if the object is empty
-    /// \throw `VariantBadType`
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
     ///
     Vec vecOr(Vec const& x) const;
 
@@ -217,7 +263,7 @@ public:
 
     ///
     /// Get Map or `x` if the object is empty
-    /// \throw `VariantBadType`
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
     ///
     Map mapOr(Map const& x) const;
 
@@ -227,13 +273,25 @@ public:
     bool operator!=(Variant const& rhs) const noexcept;
     /// \}
 
+    /// \defgroup Formats Serialized data formats
+
+    /// \defgroup Json
+    /// \ingroup Formats
+    /// \{
+    static Variant from(rapidjson::Value const& json);
+    void to(rapidjson::Value& json) const;
+    /// \}
+
 private:
     struct Impl;
     Pimpl<Impl> impl;
 };
 
 
+template <> inline bool Variant::asOr<bool>(bool x) const { return booleanOr(x); }
 template <> inline short int Variant::asOr<short int>(short int x) const { return shortIntOr(x); }
 template <> inline unsigned short int Variant::asOr<unsigned short int>(unsigned short int x) const { return ushortIntOr(x); }
 template <> inline int Variant::asOr<int>(int x) const { return integerOr(x); }
 template <> inline unsigned int Variant::asOr<unsigned int>(unsigned int x) const { return uintOr(x); }
+template <> inline signed long Variant::asOr<signed long>(signed long x) const { return longInteOr(x); }
+template <> inline unsigned long Variant::asOr<unsigned long>(unsigned long x) const { return ulongIntOr(x); }

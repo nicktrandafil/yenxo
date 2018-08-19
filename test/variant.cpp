@@ -43,6 +43,15 @@ namespace hana = boost::hana;
 
 
 TEST_CASE("Check Variant", "[Variant]") {
+    SECTION("boolean") {
+        bool const expected{true};
+        auto const x = Variant(expected);
+        REQUIRE(expected == x.boolean());
+        REQUIRE_THROWS_AS(Variant().boolean(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").boolean(), VariantBadType);
+        REQUIRE(Variant().booleanOr(true) == true);
+    }
+
     SECTION("short int") {
         unsigned short int const expected{3};
         auto const x = Variant(expected);
@@ -77,6 +86,24 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE_THROWS_AS(Variant().uint(), VariantEmpty);
         REQUIRE_THROWS_AS(Variant("").uint(), VariantBadType);
         REQUIRE(Variant().uintOr(1) == 1);
+    }
+
+    SECTION("longInt") {
+        signed long const expected{12};
+        auto const x = Variant(expected);
+        REQUIRE(expected == x.longInt());
+        REQUIRE_THROWS_AS(Variant().longInt(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").longInt(), VariantBadType);
+        REQUIRE(Variant().longInteOr(12) == 12);
+    }
+
+    SECTION("ulongInt") {
+        unsigned long const expected{13};
+        auto const x = Variant(expected);
+        REQUIRE(expected == x.ulongInt());
+        REQUIRE_THROWS_AS(Variant().ulongInt(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").ulongInt(), VariantBadType);
+        REQUIRE(Variant().ulongIntOr(expected) == expected);
     }
 
     SECTION("floating") {
@@ -119,10 +146,13 @@ TEST_CASE("Check Variant", "[Variant]") {
 
     SECTION("allow representable integral type conversions") {
         auto const types = hana::make_tuple(
+            hana::type_c<bool>,
             hana::type_c<short int>,
             hana::type_c<unsigned short int>,
             hana::type_c<int>,
-            hana::type_c<unsigned int>);
+            hana::type_c<unsigned int>,
+            hana::type_c<signed long>,
+            hana::type_c<unsigned long>);
 
         hana::for_each(
             types,
@@ -159,7 +189,8 @@ TEST_CASE("Check Variant", "[Variant]") {
                         // min - 1 out of range
                         X const y_min_in_x_1 = static_cast<X>(static_cast<double>(y_min) - 1);
                         if (std::to_string(static_cast<double>(y_min) - 1) ==
-                                std::to_string(static_cast<double>(y_min_in_x_1))) {
+                                std::to_string(static_cast<double>(y_min_in_x_1)) &&
+                                ((static_cast<double>(y_min) - 1) != static_cast<double>(y_min))) {
                             REQUIRE_THROWS_AS(
                                 static_cast<Y>(Variant(y_min_in_x_1)),
                                 VariantIntegralOverflow);
@@ -183,7 +214,8 @@ TEST_CASE("Check Variant", "[Variant]") {
                         // max + 1 out of range
                         X const y_max_in_x_1 = static_cast<X>(static_cast<double>(y_max) + 1);
                         if (std::to_string(static_cast<double>(y_max) + 1) ==
-                                std::to_string(static_cast<double>(y_max_in_x_1))) {
+                                std::to_string(static_cast<double>(y_max_in_x_1)) &&
+                                ((static_cast<double>(y_max) + 1) != static_cast<double>(y_max))) {
                             REQUIRE_THROWS_AS(
                                 static_cast<Y>(Variant(y_max_in_x_1)),
                                 VariantIntegralOverflow);

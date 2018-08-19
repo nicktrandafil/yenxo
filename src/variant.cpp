@@ -34,14 +34,18 @@
 #include <unordered_map>
 #include <vector>
 #include <variant>
+#include <deque>
 
 
 using Val = std::variant<
     std::monostate,
+    bool,
     short int,
     unsigned short int,
     int,
     unsigned int,
+    signed long,
+    unsigned long,
     double,
     std::string,
     Variant::Vec,
@@ -59,13 +63,17 @@ Variant::Variant() = default;
 Variant::~Variant() = default;
 
 
+Variant::Variant(bool x) : impl(x) {}
 Variant::Variant(short int x) : impl(x) {}
 Variant::Variant(unsigned short int x) : impl(x) {}
 Variant::Variant(int x) : impl(x) {}
 Variant::Variant(unsigned int x) : impl(x) {}
+Variant::Variant(signed long x) : impl(x) {}
+Variant::Variant(unsigned long x) : impl(x) {}
 Variant::Variant(double x) : impl(x) {}
 
 
+Variant::Variant(char const*const& x) : Variant(std::string(x)) {}
 Variant::Variant(std::string const& x) : impl(x) {}
 Variant::Variant(std::string&& x) : impl(std::move(x)) {}
 
@@ -216,6 +224,10 @@ template <typename T>
 struct GetHelper<T, When<std::is_integral_v<T>>> {
     [[noreturn]] T operator()(std::monostate) const { throw VariantEmpty(); }
 
+    T operator()(bool x)               const {
+        return integralCheckedCast<T, decltype(x)>(x);
+    }
+
     T operator()(short int x)          const {
         return integralCheckedCast<T, decltype(x)>(x);
     }
@@ -229,6 +241,14 @@ struct GetHelper<T, When<std::is_integral_v<T>>> {
     }
 
     T operator()(unsigned int x)       const {
+        return integralCheckedCast<T, decltype(x)>(x);
+    }
+
+    T operator()(signed long x)          const {
+        return integralCheckedCast<T, decltype(x)>(x);
+    }
+
+    T operator()(unsigned long x)        const {
         return integralCheckedCast<T, decltype(x)>(x);
     }
 
@@ -275,6 +295,16 @@ unsigned short int Variant::ushortIntOr(unsigned short int x) const {
 }
 
 
+bool Variant::boolean() const {
+    return std::visit(GetHelper<bool>(), impl->m);
+}
+
+
+bool Variant::booleanOr(bool x) const {
+    return std::visit(GetOrHelper<bool>{x}, impl->m);
+}
+
+
 int Variant::integer() const {
     return std::visit(GetHelper<int>(), impl->m);
 }
@@ -292,6 +322,26 @@ unsigned int Variant::uint() const {
 
 unsigned int Variant::uintOr(unsigned int x) const {
     return std::visit(GetOrHelper<unsigned int>{x}, impl->m);
+}
+
+
+signed long Variant::longInt() const {
+    return std::visit(GetHelper<signed long>(), impl->m);
+}
+
+
+signed long Variant::longInteOr(signed long x) const {
+    return std::visit(GetOrHelper<signed long>{x}, impl->m);
+}
+
+
+unsigned long Variant::ulongInt() const {
+    return std::visit(GetHelper<unsigned long>(), impl->m);
+}
+
+
+unsigned long Variant::ulongIntOr(unsigned long x) const {
+    return std::visit(GetOrHelper<unsigned long >{x}, impl->m);
 }
 
 
@@ -342,4 +392,141 @@ bool Variant::operator==(Variant const& rhs) const noexcept {
 
 bool Variant::operator!=(Variant const& rhs) const noexcept {
     return impl->m != rhs.impl->m;
+}
+
+
+namespace {
+
+
+using namespace rapidjson;
+
+
+/// RapidJSON visitor
+template <typename Ch>
+struct FromRapidJsonValue {
+    bool Null()                 { val(Variant());    return true; }
+    bool Bool(bool b)           { val(Variant(b));   return true; }
+    bool Int(int i)             { val(Variant(i));   return true; }
+    bool Uint(unsigned u)       { val(Variant(u));   return true; }
+    bool Int64(int64_t i64)     { val(Variant(i64)); return true; }
+    bool Uint64(uint64_t u64)   { val(Variant(u64)); return true; }
+    bool Double(double d)       { val(Variant(d));   return true; }
+
+    bool String(const Ch* str, SizeType length, bool) {
+        val(Variant(std::string(str, length)));
+        return true;
+    }
+
+    bool StartObject() {
+        stack.push_back(KeyCarriedMap());
+        return true;
+    }
+
+    bool Key(const Ch* str, SizeType length, bool) {
+        key(std::string(str, length));
+        return true;
+    }
+
+    bool EndObject(SizeType) {
+        std::visit([this](auto& x) {
+                       finish_v(x,
+                                std::visit(res_v, std::move(stack.back()))); },
+                   *std::prev(stack.end(), 2));
+        stack.pop_back();
+        return true;
+    }
+
+    bool StartArray() {
+        stack.push_back(Variant::Vec());
+        return true;
+    }
+
+    bool EndArray(SizeType) {
+        std::visit([this](auto& x) {
+                       finish_v(x,
+                                std::visit(res_v, std::move(stack.back()))); },
+                   *std::prev(stack.end(), 2));
+        stack.pop_back();
+        return true;
+    }
+
+    struct KeyCarriedMap {
+        std::string key;
+        Variant::Map map;
+    };
+
+    using Stack = std::variant<Variant, KeyCarriedMap, Variant::Vec>;
+
+    struct Val {
+        Variant& operator()(Variant& x)       const { return x; }
+        Variant& operator()(KeyCarriedMap& x) const { return x.map[x.key]; }
+        Variant& operator()(Variant::Vec& x)  const { x.push_back(Variant());
+                                                      return x.back(); }
+    };
+
+    struct Key {
+        [[noreturn]] std::string& operator()(Variant&) const {
+            throw std::runtime_error("JSON structure error");
+        }
+
+        [[noreturn]] std::string& operator()(Variant::Vec&) const {
+            throw std::runtime_error("JSON structure error");
+        }
+
+        std::string& operator()(KeyCarriedMap& x) const {
+            return x.key;
+        }
+    };
+
+    struct Finish {
+        void operator()(Variant& x, Variant&& y) const {
+            x = std::move(y);
+        }
+
+        void operator()(Variant::Vec& x, Variant&& y) const {
+            x.push_back(std::move(y));
+        }
+
+        void operator()(KeyCarriedMap& x, Variant&& y) const {
+            x.map[x.key] = std::move(y);
+        }
+    };
+
+    struct Res {
+        Variant operator()(Variant&& x) const {
+            return x;
+        }
+
+        Variant operator()(Variant::Vec&& x) const {
+            return Variant(std::move(x));
+        }
+
+        Variant operator()(KeyCarriedMap&& x) const {
+            return Variant(std::move(x).map);
+        }
+    };
+
+    void val(Variant&& x) {
+        std::visit(value_v, stack.back()) = std::move(x);
+    }
+
+    void key(std::string&& x) {
+        std::visit(key_v, stack.back()) = std::move(x);
+    }
+
+    std::vector<Stack> stack{Variant()};
+    Val const value_v{};
+    struct Key const key_v{};
+    Finish const finish_v{};
+    Res const res_v{};
+};
+
+
+} // namespace
+
+
+Variant Variant::from(Value const& json) {
+    FromRapidJsonValue<Value::Ch> ser;
+    json.Accept(ser);
+    return std::visit(ser.res_v, std::move(ser.stack.front()));
 }
