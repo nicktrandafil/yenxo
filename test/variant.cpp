@@ -150,9 +150,7 @@ TEST_CASE("Check Variant", "[Variant]") {
             hana::type_c<short int>,
             hana::type_c<unsigned short int>,
             hana::type_c<int>,
-            hana::type_c<unsigned int>,
-            hana::type_c<signed long>,
-            hana::type_c<unsigned long>);
+            hana::type_c<unsigned int>);
 
         hana::for_each(
             types,
@@ -189,8 +187,7 @@ TEST_CASE("Check Variant", "[Variant]") {
                         // min - 1 out of range
                         X const y_min_in_x_1 = static_cast<X>(static_cast<double>(y_min) - 1);
                         if (std::to_string(static_cast<double>(y_min) - 1) ==
-                                std::to_string(static_cast<double>(y_min_in_x_1)) &&
-                                ((static_cast<double>(y_min) - 1) != static_cast<double>(y_min))) {
+                                std::to_string(static_cast<double>(y_min_in_x_1))) {
                             REQUIRE_THROWS_AS(
                                 static_cast<Y>(Variant(y_min_in_x_1)),
                                 VariantIntegralOverflow);
@@ -214,8 +211,7 @@ TEST_CASE("Check Variant", "[Variant]") {
                         // max + 1 out of range
                         X const y_max_in_x_1 = static_cast<X>(static_cast<double>(y_max) + 1);
                         if (std::to_string(static_cast<double>(y_max) + 1) ==
-                                std::to_string(static_cast<double>(y_max_in_x_1)) &&
-                                ((static_cast<double>(y_max) + 1) != static_cast<double>(y_max))) {
+                                std::to_string(static_cast<double>(y_max_in_x_1))) {
                             REQUIRE_THROWS_AS(
                                 static_cast<Y>(Variant(y_max_in_x_1)),
                                 VariantIntegralOverflow);
