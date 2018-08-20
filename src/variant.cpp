@@ -530,3 +530,42 @@ Variant Variant::from(Value const& json) {
     json.Accept(ser);
     return std::visit(ser.res_v, std::move(ser.stack.front()));
 }
+
+
+void Variant::to(rapidjson::Document& json) const {
+    std::visit(rp::Overload{
+        [&](std::monostate) { json.SetNull(); },
+        [&](bool x) { json.SetBool(x); },
+        [&](short int x) { json.SetInt(x); },
+        [&](unsigned short int x) { json.SetUint(x); },
+        [&](int x) { json.SetInt(x); },
+        [&](unsigned int x) { json.SetUint(x); },
+        [&](signed long x) { json.SetInt64(x); },
+        [&](unsigned long x) { json.SetUint64(x); },
+        [&](double x) { json.SetDouble(x); },
+        [&](std::string const& x) {
+            json.SetString(x.c_str(), json.GetAllocator());
+        },
+        [&](Variant::Vec const& vec) {
+            json.SetArray();
+            for (auto const& x: vec) {
+                rapidjson::Document tmp;
+                x.to(tmp);
+                json.PushBack(
+                    rapidjson::Value(tmp.Move(), json.GetAllocator()),
+                    json.GetAllocator());
+            }
+        },
+        [&](Variant::Map const& map) {
+            json.SetObject();
+            for (auto const& [key, x]: map) {
+                rapidjson::Document tmp;
+                x.to(tmp);
+                json.AddMember(
+                    rapidjson::Value(key.c_str(), json.GetAllocator()),
+                    rapidjson::Value(tmp.Move(), json.GetAllocator()),
+                    json.GetAllocator());
+            }
+        }
+    }, impl->m);
+}

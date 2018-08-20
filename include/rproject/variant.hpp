@@ -279,7 +279,7 @@ public:
     /// \ingroup Formats
     /// \{
     static Variant from(rapidjson::Value const& json);
-    void to(rapidjson::Value& json) const;
+    void to(rapidjson::Document& json) const;
     /// \}
 
 private:
