@@ -37,6 +37,7 @@
 
 // std
 #include <limits.h>
+#include <sstream>
 
 
 namespace hana = boost::hana;
@@ -299,5 +300,29 @@ TEST_CASE("Check Variant", "[Variant]") {
 
             REQUIRE(expected == json);
         }
+    }
+
+    SECTION("ostream") {
+        Variant var1{Variant::Map{std::make_pair("x", Variant(6))}};
+        Variant var2{Variant::Map{std::make_pair("y", Variant(Variant::Vec{Variant(1), Variant(2)}))}};
+        Variant var3(5);
+
+        auto const expected1 = "{ x: 6; }";
+        auto const expected2 = "{ y: [ 1, 2 ]; }";
+        auto const expected3 = "5";
+
+        std::ostringstream os;
+        os << var1;
+        REQUIRE(expected1 == os.str());
+
+        os.clear();
+        os.str("");
+        os << var2;
+        REQUIRE(expected2 == os.str());
+
+        os.clear();
+        os.str("");
+        os << var3;
+        REQUIRE(expected3 == os.str());
     }
 }

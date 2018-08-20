@@ -282,6 +282,11 @@ public:
     void to(rapidjson::Document& json) const;
     /// \}
 
+    ///
+    /// Stream operator
+    ///
+    friend std::ostream& operator<<(std::ostream& os, Variant const& var);
+
 private:
     struct Impl;
     Pimpl<Impl> impl;

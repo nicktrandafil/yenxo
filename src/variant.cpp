@@ -569,3 +569,25 @@ void Variant::to(rapidjson::Document& json) const {
         }
     }, impl->m);
 }
+
+
+std::ostream& operator<<(std::ostream& os, Variant const& var) {
+    std::visit(rp::Overload{
+        [&](auto integral) { os << std::to_string(integral); },
+        [&](std::monostate) { os << "Null"; },
+        [&](std::string const& str)  { os << str; },
+        [&](Variant::Map const& map) {
+            os << "{ ";
+            for (auto const& [key, x]: map) { os << key << ": " << x << "; "; }
+            os << "}";
+        },
+        [&](Variant::Vec const& vec) {
+            auto const l = vec.size() - 1;
+            std::size_t i = 0;
+            os << "[ ";
+            for (auto const& x: vec) { os << x << ((i++ == l) ? " " : ", "); }
+            os << "]";
+        }
+    }, var.impl->m);
+    return os;
+}
