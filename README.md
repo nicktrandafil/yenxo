@@ -17,8 +17,7 @@ Typical use case of `mixins::Var`:
 #include <variant.hpp>
 #include <variant_mixins.hpp>
 
-
-struct Hobby : mixin::Var<Hobby> {
+struct Hobby : mixin::Var<Hobby> {  // enables serialization/deserialization
     Hobby() : id(0) {}
 
     Hobby(int id, std::string const& description)
@@ -28,7 +27,6 @@ struct Hobby : mixin::Var<Hobby> {
     int id;
     std::string description;
 };
-
 
 struct Person : mixin::Var<Person> {
     Person() : age(0) {}
@@ -41,7 +39,6 @@ struct Person : mixin::Var<Person> {
     int age;
     Hobby hobby;
 };
-
 
 int main() {
     auto const json = R"(
@@ -58,8 +55,79 @@ int main() {
     Person const p = Person::fromVariant(Variant::from(rapidjson::Document().Parse(json))));
 }
 
-
 // add reflection
+BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
+BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
+```
+
+Typical use case of `mixin::OStream`, `EqualityComparison`:
+
+```cpp
+// rapidjson
+#include <variant.hpp>
+#include <variant_mixins.hpp>
+#include <ostream_mixins.hpp>
+#include <comparison_mixins.hpp>
+
+// std
+#include <iostream>
+
+struct Hobby
+        : mixin::Var<Hobby>
+        , mixin::OStream<Hobby>              // enables `std::ostream`
+        , mixin::EqualityComparison<Hobby> { // enables `==` and `!=`
+    Hobby() : id(0) {}
+
+    Hobby(int id, std::string const& description)
+        : id(id), description(description)
+    {}
+
+    int id;
+    std::string description;
+};
+
+struct Person
+        : mixin::Var<Person>
+        , mixin::OStream<Person>
+        , mixin::EqualityComparison<Person> {
+    Person() : age(0) {}
+
+    Person(std::string const& name, int age, Hobby const& hobby)
+        : name(name), age(age), hobby(hobby)
+    {}
+
+    std::string name;
+    int age;
+    Hobby hobby;
+};
+
+int main() {
+    auto const json = R"(
+        {
+            "name": "Efendi",
+            "age": 20,
+            "hobby": {
+                "id": 10,
+                "description": "Barista"
+            }
+        }
+    )";
+
+    Hobby const hobby{
+        10,
+        "Barista"
+    };
+
+    Person const expected{
+        "Efendi",
+        20,
+        hobby
+    };
+
+    auto const person = Person::fromVariant(Variant::from(rapidjson::Document().Parse(json)));
+    assert(person == expected);
+}
+
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
 ```
