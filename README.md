@@ -11,7 +11,7 @@ Uses `boost::hana` in order to obtain reflection in C++.
 
 Typical use case of `mixins::Var`:
 
-```
+```cpp
 // rproject
 #include <variant.hpp>
 #include <variant_mixins.hpp>
