@@ -117,6 +117,8 @@ add_executable(
     test/comparison_mixins.cpp
 
     test/type_name.cpp
+
+    test/json_struct.cpp
 )
 
 set_target_properties(test_${PROJECT_NAME}_core PROPERTIES CXX_STANDARD 17)
@@ -171,3 +173,7 @@ add_test(
 add_test(
     type_name test_${PROJECT_NAME}_core
     "Check typeName")
+
+add_test(
+    simple_json_to_struct test_${PROJECT_NAME}_core
+    "Check simple json to struct")
