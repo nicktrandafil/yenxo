@@ -83,11 +83,27 @@ struct Person
 };
 
 
+struct PersonEx
+        : mixin::Var<PersonEx>
+        , mixin::OStream<PersonEx>
+        , mixin::EqualityComparison<PersonEx> {
+
+    PersonEx() {}
+    PersonEx(std::string const& name, std::vector<Hobby> const& hobbies)
+        : name(name), hobbies(hobbies)
+    {}
+
+    std::string name;
+    std::vector<Hobby> hobbies;
+};
+
+
 } // namespace
 
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
+BOOST_HANA_ADAPT_STRUCT(PersonEx, name, hobbies);
 
 
 TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
@@ -164,6 +180,32 @@ TEST_CASE("Check mixin::Var and mixin::UpdateFromVar", "[variant_mixins]") {
         REQUIRE_THROWS_AS(
                     Person::fromVariant(Variant(person_var)),
                     std::logic_error);
+    }
+
+    Hobby hobby2{
+        2,
+        "Barista"
+    };
+
+    Variant const hobby2_var{Variant::Map{
+        {"id", Variant(2)},
+        {"description", Variant("Barista")}
+    }};
+
+
+    PersonEx const person_ex{
+        "P",
+        std::vector<Hobby>{hobby, hobby2}
+    };
+
+    Variant person_ex_var{Variant::Map{
+        std::make_pair("name", Variant("P")),
+        std::make_pair("hobbies", Variant(Variant::Vec{Variant(hobby_var), hobby2_var}))
+    }};
+
+    SECTION("Check struct with vector") {
+        REQUIRE(person_ex == PersonEx::fromVariant(person_ex_var));
+        REQUIRE(person_ex_var == PersonEx::toVariant(person_ex));
     }
 }
 

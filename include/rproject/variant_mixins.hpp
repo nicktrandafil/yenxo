@@ -96,6 +96,21 @@ struct ToVariant<T, When<rp::detail::Valid<
 
 
 ///
+/// Specialization for `vector`
+///
+template <typename T>
+struct ToVariant<T, When<rp::isVector(rp::type_c<T>)>> {
+    Variant operator()(T const& vec) const {
+        Variant::Vec ret;
+        for (auto const& x: vec) {
+            ret.push_back(ToVariant<std::decay_t<decltype(x)>>()(x));
+        }
+        return Variant(ret);
+    }
+};
+
+
+///
 /// Convinient shortcut function
 ///
 template <typename T>
@@ -134,6 +149,21 @@ template <typename T>
 struct FromVariant<T,
         When<rp::detail::Valid<decltype(static_cast<T>(Variant()))>::value>> {
     T operator()(Variant const& x) const { return static_cast<T>(x); }
+};
+
+
+///
+/// Specialization from `vector`
+///
+template <typename T>
+struct FromVariant<T, When<rp::isVector(rp::type_c<T>)>> {
+    T operator()(Variant const& var) const {
+        T ret;
+        for (auto const& x: var.vec()) {
+            ret.push_back(FromVariant<typename T::value_type>()(x));
+        }
+        return ret;
+    }
 };
 
 

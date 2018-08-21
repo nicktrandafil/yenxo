@@ -57,6 +57,14 @@ struct OStream {
                        << *value
                        << "; ";
                 }
+            } else if constexpr (rp::isVector(rp::type_c<decltype(value)>)) {
+                auto const s = value.size();
+                std::size_t i = 0;
+                os << "[ ";
+                for (auto const& x: value) {
+                    os << x << ((i++ == s - 1) ? " " : ", ");
+                }
+                os << "]";
             } else {
                 os << boost::hana::to<char const*>(name)
                    << ": "

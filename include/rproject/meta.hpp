@@ -8,6 +8,7 @@
 #include <optional>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 
 namespace rp {
@@ -89,6 +90,23 @@ struct IsOptional<std::optional<T>> : std::true_type {};
 template <typename T>
 constexpr auto isOptional(rp::Type<T>) {
     return IsOptional<std::decay_t<T>>::value;
+}
+
+
+///
+/// Is `T` a vector type
+///
+template <typename T>
+struct IsVector : std::false_type {};
+
+
+template <typename T>
+struct IsVector<std::vector<T>> : std::true_type {};
+
+
+template <typename T>
+constexpr auto isVector(rp::Type<T>) {
+    return IsVector<std::decay_t<T>>::value;
 }
 
 
