@@ -102,6 +102,7 @@ int main() {
 
     auto const person = Person::fromVariant(Variant::from(rapidjson::Document().Parse(json)));
     assert(person == expected);
+    std::cout << person;
 }
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
