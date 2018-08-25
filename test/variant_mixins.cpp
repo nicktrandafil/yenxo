@@ -98,12 +98,28 @@ struct PersonEx
 };
 
 
+struct Dict
+        : mixin::Var<Dict>
+        , mixin::EqualityComparison<Dict>
+        , mixin::OStream<Dict> {
+    Dict() = default;
+
+    Dict(int x, std::unordered_map<std::string, int> const& map)
+        : x(x), map(map)
+    {}
+
+    int x;
+    std::unordered_map<std::string, int> map;
+};
+
+
 } // namespace
 
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
 BOOST_HANA_ADAPT_STRUCT(PersonEx, name, hobbies);
+BOOST_HANA_ADAPT_STRUCT(Dict, x, map);
 
 
 TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
@@ -206,6 +222,21 @@ TEST_CASE("Check mixin::Var and mixin::UpdateFromVar", "[variant_mixins]") {
     SECTION("Check struct with vector") {
         REQUIRE(person_ex == PersonEx::fromVariant(person_ex_var));
         REQUIRE(person_ex_var == PersonEx::toVariant(person_ex));
+    }
+
+    SECTION("Check dict") {
+        Dict const expected{
+            5,
+            {{"1", 1}, {"2", 2}}
+        };
+
+        Variant const tmp{Variant::Map{
+            {"x", Variant(5)},
+            {"map", Variant({{"1", Variant(1)}, {"2", Variant(2)}})}
+        }};
+
+        REQUIRE(expected == Dict::fromVariant(tmp));
+        REQUIRE(tmp == Dict::toVariant(expected));
     }
 }
 

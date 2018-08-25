@@ -54,8 +54,13 @@ struct Foo {
 #endif
 
 
-static_assert(rp::callable(foo1), "");
-static_assert(rp::callable(foo2, rp::type_c<int>), "");
-static_assert(!rp::callable(foo2, rp::type_c<int>, rp::Type<int>()), "");
-static_assert(rp::callable(Foo()), "");
-static_assert(rp::callable(Foo()), "");
+static_assert(rp::callable(foo1));
+static_assert(rp::callable(foo2, rp::type_c<int>));
+static_assert(!rp::callable(foo2, rp::type_c<int>, rp::Type<int>()));
+static_assert(rp::callable(Foo()));
+static_assert(rp::callable(Foo()));
+static_assert(rp::isIterable(rp::type_c<std::vector<int>>));
+static_assert(rp::isString(rp::type_c<std::string>));
+static_assert(rp::isPair(rp::type_c<std::pair<int, std::string>>));
+static_assert(!rp::isKeyValue(rp::type_c<std::pair<int, std::string>>));
+static_assert(rp::isKeyValue(rp::type_c<std::pair<std::string, std::string>>));

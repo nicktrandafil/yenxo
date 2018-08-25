@@ -96,10 +96,31 @@ struct ToVariant<T, When<rp::detail::Valid<
 
 
 ///
-/// Specialization for `vector`
+/// Specialization for `Container`
 ///
 template <typename T>
-struct ToVariant<T, When<rp::isVector(rp::type_c<T>)>> {
+struct ToVariant<T,
+        When<rp::isContainer(rp::type_c<T>) &&
+             rp::isKeyValue(rp::type_c<typename T::value_type>)>> {
+    Variant operator()(T const& map) const {
+        Variant::Map ret;
+        for (auto const& x: map) {
+            ret.emplace(
+                ToVariant<typename T::key_type>()(x.first),
+                ToVariant<typename T::mapped_type>()(x.second));
+        }
+        return Variant(ret);
+    }
+};
+
+
+///
+/// Specialization for `Dict`
+///
+template <typename T>
+struct ToVariant<T,
+        When<rp::isContainer(rp::type_c<T>) &&
+             !rp::isKeyValue(rp::type_c<typename T::value_type>)>> {
     Variant operator()(T const& vec) const {
         Variant::Vec ret;
         for (auto const& x: vec) {
@@ -153,14 +174,33 @@ struct FromVariant<T,
 
 
 ///
-/// Specialization from `vector`
+/// Specialization from `Container`
 ///
 template <typename T>
-struct FromVariant<T, When<rp::isVector(rp::type_c<T>)>> {
+struct FromVariant<T, When<rp::isContainer(rp::type_c<T>) &&
+                           !rp::isKeyValue(rp::type_c<typename T::value_type>)>> {
     T operator()(Variant const& var) const {
         T ret;
         for (auto const& x: var.vec()) {
             ret.push_back(FromVariant<typename T::value_type>()(x));
+        }
+        return ret;
+    }
+};
+
+
+///
+/// Specialization from `Dict`
+///
+template <typename T>
+struct FromVariant<T, When<rp::isContainer(rp::type_c<T>) &&
+                           rp::isKeyValue(rp::type_c<typename T::value_type>)>> {
+    T operator()(Variant const& var) const {
+        T ret;
+        for (auto const& x: var.map()) {
+            ret.emplace(
+                FromVariant<typename T::key_type>()(Variant(x.first)),
+                FromVariant<typename T::mapped_type>()(x.second));
         }
         return ret;
     }

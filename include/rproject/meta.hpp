@@ -93,20 +93,94 @@ constexpr auto isOptional(rp::Type<T>) {
 }
 
 
-///
-/// Is `T` a vector type
-///
-template <typename T>
-struct IsVector : std::false_type {};
+namespace detail {
+
+
+template <typename T, typename = void>
+struct IsIterable : IsIterable<T, When<true>> {};
+
+
+template <typename T, bool condition>
+struct IsIterable<T, When<condition>> : std::false_type {};
 
 
 template <typename T>
-struct IsVector<std::vector<T>> : std::true_type {};
+struct IsIterable<
+    T,
+    When<valid(type_c<decltype((
+                   // begin/end and operator !=
+                   begin(std::declval<T&>()) != end(std::declval<T&>()),
+
+                   // operator ++
+                   ++std::declval<decltype(begin(std::declval<T&>()))&>(),
+
+                   // operator*
+                   *begin(std::declval<T&>())))
+               >)>> : std::true_type
+
+{};
+
+
+template <typename T, typename = void>
+struct IsString : IsString<T, When<true>> {};
+
+
+template <typename T, bool condition>
+struct IsString<T, When<condition>> : std::false_type {};
 
 
 template <typename T>
-constexpr auto isVector(rp::Type<T>) {
-    return IsVector<std::decay_t<T>>::value;
+struct IsString<
+        T,
+        When<std::is_convertible_v<T,
+             std::basic_string<typename T::value_type,
+                               typename T::traits_type,
+                               typename T::allocator_type>>>> : std::true_type {};
+
+
+
+template <typename T>
+struct IsPair : std::false_type {};
+
+
+template <typename First, typename Second>
+struct IsPair<std::pair<First, Second>> : std::true_type {};
+
+
+} // namespace detail
+
+
+template <typename T>
+constexpr auto isPair(Type<T> const&) {
+    return detail::IsPair<T>::value;
+}
+
+
+template <typename T>
+constexpr auto isString(Type<T> const&) {
+    return detail::IsString<T>::value;
+}
+
+
+template <typename T>
+constexpr auto isIterable(Type<T> const&) {
+    return detail::IsIterable<T>::value;
+}
+
+
+template <typename T>
+constexpr auto isContainer(Type<T> const& x) {
+    return isIterable(x) && !isString(x);
+}
+
+
+template <typename T>
+constexpr auto isKeyValue(Type<T> const& x) {
+    if constexpr (isPair(x)) {
+        return isString(type_c<typename T::first_type>);
+    } else {
+        return false;
+    }
 }
 
 
