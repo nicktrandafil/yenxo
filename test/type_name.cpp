@@ -43,4 +43,5 @@ TEST_CASE("Check typeName", "[utilities]") {
     REQUIRE(unqualifiedTypeName<Def>() == "Def");
     REQUIRE(unqualifiedTypeName<a::Xyz>() == "Xyz");
     REQUIRE(unqualifiedTypeName<Dum::Zum>() == "Zum");
+    static_assert(unqualifiedTypeName<Def>() == "Def");
 }
