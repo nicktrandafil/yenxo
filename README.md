@@ -18,11 +18,23 @@ Typical use case of `mixins::Var`:
 #include <variant_mixins.hpp>
 
 struct Hobby : mixin::Var<Hobby> {  // enables serialization/deserialization
+    Hobby() : id(0) {}
+
+    Hobby(int id, std::string const& description)
+        : id(id), description(description)
+    {}
+
     int id;
     std::string description;
 };
 
 struct Person : mixin::Var<Person> {
+    Person() : age(0) {}
+
+    Person(std::string const& name, int age, Hobby const& hobby)
+        : name(name), age(age), hobby(hobby)
+    {}
+
     std::string name;
     int age;
     Hobby hobby;
@@ -64,6 +76,12 @@ struct Hobby
         : mixin::Var<Hobby>
         , mixin::OStream<Hobby>              // enables `std::ostream`
         , mixin::EqualityComparison<Hobby> { // enables `==` and `!=`
+    Hobby() : id(0) {}
+
+    Hobby(int id, std::string const& description)
+        : id(id), description(description)
+    {}
+
     int id;
     std::string description;
 };
@@ -72,6 +90,12 @@ struct Person
         : mixin::Var<Person>
         , mixin::OStream<Person>
         , mixin::EqualityComparison<Person> {
+    Person() : age(0) {}
+
+    Person(std::string const& name, int age, Hobby const& hobby)
+        : name(name), age(age), hobby(hobby)
+    {}
+
     std::string name;
     int age;
     Hobby hobby;
@@ -89,12 +113,12 @@ int main() {
         }
     )";
 
-    Hobby hobby{
+    Hobby const hobby{
         10,
         "Barista"
     };
 
-    Person expected{
+    Person const expected{
         "Efendi",
         20,
         hobby
