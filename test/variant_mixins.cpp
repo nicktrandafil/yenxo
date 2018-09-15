@@ -396,3 +396,31 @@ TEST_CASE("Check mixin::VarDefExplicit", "[variant_mixins]") {
 
     REQUIRE(PersonC::fromVariant(Variant(person_var)) == person);
 }
+
+
+namespace {
+
+
+struct Car : mixin::Var<Car> {
+    Car(std::string const& name, int wheels) : name(name), wheels(wheels) {}
+    Car() = default;
+
+    std::string name;
+    int wheels{0};
+};
+
+
+} // namespace
+
+
+BOOST_HANA_ADAPT_STRUCT(Car, name, wheels);
+
+
+TEST_CASE("Check mixin::Var fails", "[variant_mixins]") {
+    Variant car_var{Variant::Map{
+        {"name", Variant("saab")},
+        {"wheels", Variant("4")}
+    }};
+
+    REQUIRE_THROWS_AS(Car::fromVariant(car_var), VariantBadType);
+}

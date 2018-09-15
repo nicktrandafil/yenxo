@@ -177,3 +177,8 @@ add_test(
 add_test(
     simple_json_to_struct test_${PROJECT_NAME}_core
     "Check simple json to struct")
+
+add_test(
+    mixins_var_fails test_${PROJECT_NAME}_core
+    "Check mixin::Var fails")
+
