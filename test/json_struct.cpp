@@ -103,5 +103,7 @@ TEST_CASE("Check simple json to struct", "[json_struct]") {
         hobby
     };
 
-    REQUIRE(expected == Person::fromVariant(Variant::from(rapidjson::Document().Parse(json))));
+    REQUIRE(expected ==
+            Person::fromVariant(
+                Variant::from(rapidjson::Document().Parse(json))));
 }

@@ -40,6 +40,7 @@ add_library(
     include/rproject/variant.hpp
 
     include/rproject/variant_mixins.hpp
+    include/rproject/variant_conversion.hpp
     include/rproject/ostream_mixins.hpp
     include/rproject/comparison_mixins.hpp
 
