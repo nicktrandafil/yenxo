@@ -125,12 +125,13 @@ BOOST_HANA_ADAPT_STRUCT(Dict, x, map);
 TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
     auto const x = mixin::detail::toVariant(5);
     REQUIRE(x == Variant(5));
-    REQUIRE(5 == mixin::detail::fromVariant<int>(Variant(5)));
+    REQUIRE(5 == mixin::detail::fromVariant.operator()<int>(Variant(5)));
 
     auto const x1 = mixin::detail::toVariant("Hello");
     REQUIRE(x1 == Variant("Hello"));
     REQUIRE("Hello" ==
-            mixin::detail::fromVariant<std::string>(Variant("Hello")));
+            mixin::detail::fromVariant.operator()<std::string>(
+                Variant("Hello")));
 
     struct X {
         static Variant toVariant(X const& x) { return Variant(x.m); }
@@ -140,7 +141,7 @@ TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
 
     auto const x2 = mixin::detail::toVariant(X());
     REQUIRE(x2 == Variant(5));
-    REQUIRE(6 == mixin::detail::fromVariant<X>(Variant(6)).m);
+    REQUIRE(6 == mixin::detail::fromVariant.operator()<X>(Variant(6)).m);
 }
 
 
@@ -423,4 +424,5 @@ TEST_CASE("Check mixin::Var fails", "[variant_mixins]") {
     }};
 
     REQUIRE_THROWS_AS(Car::fromVariant(car_var), VariantBadType);
+    REQUIRE(hana::equal(int(1), int(1)));
 }

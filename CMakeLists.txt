@@ -113,6 +113,7 @@ add_executable(
     test/main.cpp
 
     test/variant_mixins.cpp
+    test/variant_mixins_non_intrusive.cpp
     test/ostream_mixins.cpp
     test/comparison_mixins.cpp
 
@@ -182,3 +183,6 @@ add_test(
     mixins_var_fails test_${PROJECT_NAME}_core
     "Check mixin::Var fails")
 
+add_test(
+    mixins_var_redefine test_${PROJECT_NAME}_core
+    "Check mixin::Var redefine")
