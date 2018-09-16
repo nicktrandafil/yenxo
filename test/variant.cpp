@@ -53,6 +53,15 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(Variant().booleanOr(true) == true);
     }
 
+    SECTION("char") {
+        char const expected{7};
+        auto const x = Variant(expected);
+        REQUIRE(expected == x.character());
+        REQUIRE_THROWS_AS(Variant().character(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").character(), VariantBadType);
+        REQUIRE(Variant().characterOr(1) == 1);
+    }
+
     SECTION("short int") {
         unsigned short int const expected{3};
         auto const x = Variant(expected);
@@ -148,6 +157,7 @@ TEST_CASE("Check Variant", "[Variant]") {
     SECTION("allow representable integral type conversions") {
         auto const types = hana::make_tuple(
             hana::type_c<bool>,
+            hana::type_c<char>,
             hana::type_c<short int>,
             hana::type_c<unsigned short int>,
             hana::type_c<int>,

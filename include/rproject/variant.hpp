@@ -93,6 +93,7 @@ public:
 
     explicit Variant(bool);
 
+    explicit Variant(char);
     explicit Variant(short int);
     explicit Variant(unsigned short int);
     explicit Variant(int);
@@ -136,6 +137,19 @@ public:
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
     ///
     bool booleanOr(bool x) const;
+
+    ///
+    /// Get char
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    ///
+    char character() const;
+    explicit operator char() const { return character(); }
+
+    ///
+    /// Get char or `x` if the object is empty
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    ///
+    char characterOr(char x) const;
 
     ///
     /// Get short int
@@ -294,6 +308,7 @@ private:
 
 
 template <> inline bool Variant::asOr<bool>(bool x) const { return booleanOr(x); }
+template <> inline char Variant::asOr<char>(char x) const { return characterOr(x); }
 template <> inline short int Variant::asOr<short int>(short int x) const { return shortIntOr(x); }
 template <> inline unsigned short int Variant::asOr<unsigned short int>(unsigned short int x) const { return ushortIntOr(x); }
 template <> inline int Variant::asOr<int>(int x) const { return integerOr(x); }

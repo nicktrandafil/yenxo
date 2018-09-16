@@ -40,6 +40,7 @@
 using Val = std::variant<
     std::monostate,
     bool,
+    char,
     short int,
     unsigned short int,
     int,
@@ -64,6 +65,7 @@ Variant::~Variant() = default;
 
 
 Variant::Variant(bool x) : impl(x) {}
+Variant::Variant(char x) : impl(x) {}
 Variant::Variant(short int x) : impl(x) {}
 Variant::Variant(unsigned short int x) : impl(x) {}
 Variant::Variant(int x) : impl(x) {}
@@ -228,6 +230,10 @@ struct GetHelper<T, When<std::is_integral_v<T>>> {
         return integralCheckedCast<T, decltype(x)>(x);
     }
 
+    T operator()(char x)               const {
+        return integralCheckedCast<T, decltype(x)>(x);
+    }
+
     T operator()(short int x)          const {
         return integralCheckedCast<T, decltype(x)>(x);
     }
@@ -273,6 +279,16 @@ struct GetOrHelper : GetHelper<T> {
 
 
 } // namespace
+
+
+char Variant::character() const {
+    return std::visit(GetHelper<char>(), impl->m);
+}
+
+
+char Variant::characterOr(char x) const {
+    return std::visit(GetOrHelper<char>{x}, impl->m);
+}
 
 
 short int Variant::shortInt() const {
@@ -536,6 +552,7 @@ void Variant::to(rapidjson::Document& json) const {
     std::visit(rp::Overload{
         [&](std::monostate) { json.SetNull(); },
         [&](bool x) { json.SetBool(x); },
+        [&](char x) { json.SetInt(x); },
         [&](short int x) { json.SetInt(x); },
         [&](unsigned short int x) { json.SetUint(x); },
         [&](int x) { json.SetInt(x); },
