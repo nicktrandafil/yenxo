@@ -4,6 +4,9 @@
 // local
 #include <when.hpp>
 
+// 3rd
+#include <type_safe/strong_typedef.hpp>
+
 // std
 #include <optional>
 #include <type_traits>
@@ -53,7 +56,7 @@ struct Type {};
 
 
 template <typename T>
-constexpr Type<T> type_c{};
+constexpr Type<T> type_c;
 
 
 template <typename F, typename ...Args>
@@ -182,6 +185,26 @@ constexpr auto isKeyValue(Type<T> const& x) {
         return false;
     }
 }
+
+
+template <typename T>
+struct StrongTypeDefImpl {
+    template <typename Tag, typename U>
+    static std::true_type test(type_safe::strong_typedef<Tag, U>&&);
+    static std::false_type test(...);
+    static constexpr auto const value = decltype(test(std::declval<T>()))();
+};
+
+
+struct StrongTypedef {
+    template <typename T>
+    constexpr bool operator()(Type<T> const&) const {
+        return StrongTypeDefImpl<T>::value;
+    }
+};
+
+
+constexpr StrongTypedef strongTypeDef;
 
 
 } // namespace rp

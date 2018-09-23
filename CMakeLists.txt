@@ -121,6 +121,8 @@ add_executable(
     test/type_name.cpp
 
     test/json_struct.cpp
+
+    test/strong_typedef.cpp
 )
 
 set_target_properties(test_${PROJECT_NAME}_core PROPERTIES CXX_STANDARD 17)
@@ -187,3 +189,7 @@ add_test(
 add_test(
     mixins_var_redefine test_${PROJECT_NAME}_core
     "Check mixin::Var redefine")
+
+add_test(
+    mixins_var_strong_typedef test_${PROJECT_NAME}_core
+    "Check mixin::Var with type_safe::strong_typedef")

@@ -31,6 +31,9 @@
 #include <variant.hpp>
 #include <when.hpp>
 
+// 3rd
+#include <type_safe/strong_typedef.hpp>
+
 // std
 #include <type_traits>
 
@@ -103,6 +106,18 @@ struct ToVariantImpl<T,
             ret.push_back(ToVariantImpl<std::decay_t<decltype(x)>>::apply(x));
         }
         return Variant(ret);
+    }
+};
+
+
+///
+/// Specialization for `type_safe::strong_typedef`s
+///
+template <typename T>
+struct ToVariantImpl<T, When<rp::strongTypeDef(rp::type_c<T>)>> {
+    static Variant apply(T const& st)   {
+        using U = type_safe::underlying_type<T>;
+        return ToVariantImpl<U>::apply(static_cast<U const&>(st));
     }
 };
 
@@ -185,6 +200,15 @@ struct FromVariantImpl<T, When<rp::isContainer(rp::type_c<T>) &&
                 FromVariantImpl<typename T::mapped_type>::apply(x.second));
         }
         return ret;
+    }
+};
+
+
+template <typename T>
+struct FromVariantImpl<T, When<rp::strongTypeDef(rp::type_c<T>)>> {
+    static T apply(Variant const& var) {
+        using U = type_safe::underlying_type<T>;
+        return static_cast<T>(FromVariantImpl<U>::apply(var));
     }
 };
 
