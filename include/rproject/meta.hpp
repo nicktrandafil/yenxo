@@ -6,6 +6,7 @@
 
 // 3rd
 #include <type_safe/strong_typedef.hpp>
+#include <type_safe/constrained_type.hpp>
 
 // std
 #include <optional>
@@ -196,7 +197,7 @@ struct StrongTypeDefImpl {
 };
 
 
-struct StrongTypedef {
+struct StrongTypedefT {
     template <typename T>
     constexpr bool operator()(Type<T> const&) const {
         return StrongTypeDefImpl<T>::value;
@@ -204,7 +205,33 @@ struct StrongTypedef {
 };
 
 
-constexpr StrongTypedef strongTypeDef;
+///
+/// Tests if type is `type_safe::strong_typedef`
+///
+constexpr StrongTypedefT strongTypeDef;
+
+
+template <typename T>
+struct ConstrainedTypeImpl {
+    template <typename U, class Constraint, class Verifier>
+    static std::true_type test(type_safe::constrained_type<U, Constraint, Verifier>&&);
+    static std::false_type test(...);
+    static constexpr auto const value = decltype(test(std::declval<T>()))();
+};
+
+
+struct ConstrainedTypeT {
+    template <typename T>
+    constexpr bool operator()(Type<T> const&) const {
+        return ConstrainedTypeImpl<T>::value;
+    }
+};
+
+
+///
+/// Tests if type is `type_safe::constrained_type`
+///
+constexpr ConstrainedTypeT constrainedType;
 
 
 } // namespace rp

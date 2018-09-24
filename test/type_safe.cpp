@@ -27,7 +27,9 @@
 #include <variant.hpp>
 #include <variant_mixins.hpp>
 #include <comparison_mixins.hpp>
+
 #include <type_safe/strong_typedef.hpp>
+#include <type_safe/constrained_type.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
@@ -82,3 +84,39 @@ TEST_CASE("Check mixin::Var with type_safe::strong_typedef",
     REQUIRE(Table::toVariant(t) == Variant(v));
 }
 
+
+namespace {
+
+
+using non_empty_string = ts::constrained_type<std::string, ts::constraints::non_empty>;
+
+
+struct Pen
+        : mixin::Var<Pen>
+        , mixin::EqualityComparison<Pen> {
+    Pen() = default;
+    explicit Pen(non_empty_string const& color) : color(color) {}
+
+    non_empty_string color{"green"};
+};
+
+
+} // namespace
+
+
+BOOST_HANA_ADAPT_STRUCT(Pen, color);
+
+
+TEST_CASE("Check mixin::Var with type_safe::constraint_type",
+          "[variant_mixins]") {
+    Variant::Map const v{
+        {"color", Variant("red")}
+    };
+
+    Pen const pen{
+        non_empty_string("red")
+    };
+
+    REQUIRE(Pen::fromVariant(Variant(v)) == pen);
+    REQUIRE(Pen::toVariant(pen) == Variant(v));
+}

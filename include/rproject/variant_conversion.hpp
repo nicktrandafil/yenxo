@@ -115,9 +115,21 @@ struct ToVariantImpl<T,
 ///
 template <typename T>
 struct ToVariantImpl<T, When<rp::strongTypeDef(rp::type_c<T>)>> {
-    static Variant apply(T const& st)   {
+    static Variant apply(T const& st) {
         using U = type_safe::underlying_type<T>;
         return ToVariantImpl<U>::apply(static_cast<U const&>(st));
+    }
+};
+
+
+///
+/// Specialization for `type_safe::constrained_type`s
+///
+template <typename T>
+struct ToVariantImpl<T, When<rp::constrainedType(rp::type_c<T>)>> {
+    static Variant apply(T const& st) {
+        return ToVariantImpl<std::decay_t<typename T::value_type>>::apply(
+                    st.get_value());
     }
 };
 
@@ -171,7 +183,7 @@ struct FromVariantImpl<T,
 
 
 ///
-/// Specialization from `Container`
+/// Specialization for `Container`
 ///
 template <typename T>
 struct FromVariantImpl<T, When<rp::isContainer(rp::type_c<T>) &&
@@ -187,7 +199,7 @@ struct FromVariantImpl<T, When<rp::isContainer(rp::type_c<T>) &&
 
 
 ///
-/// Specialization from `Dict`
+/// Specialization for `Dict`
 ///
 template <typename T>
 struct FromVariantImpl<T, When<rp::isContainer(rp::type_c<T>) &&
@@ -204,11 +216,25 @@ struct FromVariantImpl<T, When<rp::isContainer(rp::type_c<T>) &&
 };
 
 
+///
+/// Specialization for `type_safe::strong_typedef`
+///
 template <typename T>
 struct FromVariantImpl<T, When<rp::strongTypeDef(rp::type_c<T>)>> {
     static T apply(Variant const& var) {
         using U = type_safe::underlying_type<T>;
         return static_cast<T>(FromVariantImpl<U>::apply(var));
+    }
+};
+
+
+///
+/// Specialization for `type_safe::constrained_type`
+///
+template <typename T>
+struct FromVariantImpl<T, When<rp::constrainedType(rp::type_c<T>)>> {
+    static T apply(Variant const& var) {
+        return T(FromVariantImpl<std::decay_t<typename T::value_type>>::apply(var));
     }
 };
 
