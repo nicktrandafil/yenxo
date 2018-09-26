@@ -111,7 +111,7 @@ struct ToVariantImpl<T,
 
 
 ///
-/// Specialization for `type_safe::strong_typedef`s
+/// Specialization for `type_safe::strong_typedef`
 ///
 template <typename T>
 struct ToVariantImpl<T, When<rp::strongTypeDef(rp::type_c<T>)>> {
@@ -123,13 +123,49 @@ struct ToVariantImpl<T, When<rp::strongTypeDef(rp::type_c<T>)>> {
 
 
 ///
-/// Specialization for `type_safe::constrained_type`s
+/// Specialization for `type_safe::constrained_type`
 ///
 template <typename T>
 struct ToVariantImpl<T, When<rp::constrainedType(rp::type_c<T>)>> {
     static Variant apply(T const& st) {
         return ToVariantImpl<std::decay_t<typename T::value_type>>::apply(
                     st.get_value());
+    }
+};
+
+
+///
+/// Specialization for `type_safe::integer`
+///
+template <typename T>
+struct ToVariantImpl<T, When<rp::integerType(rp::type_c<T>)>> {
+    static Variant apply(T const& st) {
+        using U = typename T::integer_type;
+        return ToVariantImpl<U>::apply(static_cast<U>(st));
+    }
+};
+
+
+///
+/// Specialization for `type_safe::floating_point`
+///
+template <typename T>
+struct ToVariantImpl<T, When<rp::floatingPoint(rp::type_c<T>)>> {
+    static Variant apply(T const& st) {
+        using U = typename T::floating_point_type;
+        return ToVariantImpl<U>::apply(static_cast<U>(st));
+    }
+};
+
+
+///
+/// Specialization for `type_safe::boolean`
+///
+template <typename T>
+struct ToVariantImpl<T, When<rp::boolean(rp::type_c<T>)>> {
+    static Variant apply(T const& st) {
+        using U = bool;
+        return ToVariantImpl<U>::apply(static_cast<U>(st));
     }
 };
 
@@ -235,6 +271,39 @@ template <typename T>
 struct FromVariantImpl<T, When<rp::constrainedType(rp::type_c<T>)>> {
     static T apply(Variant const& var) {
         return T(FromVariantImpl<std::decay_t<typename T::value_type>>::apply(var));
+    }
+};
+
+
+///
+/// Specialization for `type_safe::integer`
+///
+template <typename T>
+struct FromVariantImpl<T, When<rp::integerType(rp::type_c<T>)>> {
+    static T apply(Variant const& var) {
+        return T(FromVariantImpl<typename T::integer_type>::apply(var));
+    }
+};
+
+
+///
+/// Specialization for `type_safe::floating_point`
+///
+template <typename T>
+struct FromVariantImpl<T, When<rp::floatingPoint(rp::type_c<T>)>> {
+    static T apply(Variant const& var) {
+        return T(FromVariantImpl<typename T::floating_point_type>::apply(var));
+    }
+};
+
+
+///
+/// Specialization for `type_safe::boolean`
+///
+template <typename T>
+struct FromVariantImpl<T, When<rp::boolean(rp::type_c<T>)>> {
+    static T apply(Variant const& var) {
+        return T(FromVariantImpl<bool>::apply(var));
     }
 };
 

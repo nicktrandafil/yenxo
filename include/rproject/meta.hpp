@@ -7,6 +7,7 @@
 // 3rd
 #include <type_safe/strong_typedef.hpp>
 #include <type_safe/constrained_type.hpp>
+#include <type_safe/types.hpp>
 
 // std
 #include <optional>
@@ -232,6 +233,74 @@ struct ConstrainedTypeT {
 /// Tests if type is `type_safe::constrained_type`
 ///
 constexpr ConstrainedTypeT constrainedType;
+
+
+template <typename T>
+struct IntegerTypeImpl {
+    template <typename IntegerT, class Policy /* = arithmetic_policy_default*/>
+    static std::true_type test(type_safe::integer<IntegerT, Policy>&&);
+    static std::false_type test(...);
+    static constexpr auto const value = decltype(test(std::declval<T>()))();
+};
+
+
+struct IntegerTypeT {
+    template <typename T>
+    constexpr bool operator()(Type<T> const&) const {
+        return IntegerTypeImpl<T>::value;
+    }
+};
+
+
+///
+/// Tests if type is `type_safe::integer`
+///
+constexpr IntegerTypeT integerType;
+
+
+template <typename T>
+struct FloatingPointTypeImpl {
+    template <typename FloatT>
+    static std::true_type test(type_safe::floating_point<FloatT>&&);
+    static std::false_type test(...);
+    static constexpr auto const value = decltype(test(std::declval<T>()))();
+};
+
+
+struct FloatingPointTypeT {
+    template <typename T>
+    constexpr bool operator()(Type<T> const&) const {
+        return FloatingPointTypeImpl<T>::value;
+    }
+};
+
+
+///
+/// Tests if type is `type_safe::integer`
+///
+constexpr FloatingPointTypeT floatingPoint;
+
+
+template <typename T>
+struct BooleanTypeImpl : std::false_type {};
+
+
+template <>
+struct BooleanTypeImpl<type_safe::boolean> : std::true_type {};
+
+
+struct BooleanTypeT {
+    template <typename T>
+    constexpr bool operator()(Type<T> const&) const {
+        return BooleanTypeImpl<T>::value;
+    }
+};
+
+
+///
+/// Tests if type is `type_safe::integer`
+///
+constexpr BooleanTypeT boolean;
 
 
 } // namespace rp
