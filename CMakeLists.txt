@@ -58,13 +58,20 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/include/rproject
         ${RAPIDJSON_INCLUDE_DIRS}
     >
-    ${Boost_INCLUDE_DIRS}
 
     INTERFACE
     $<INSTALL_INTERFACE:
         include
         ${RAPIDJSON_INCLUDE_DIRS}
     >
+)
+
+target_include_directories(
+    ${PROJECT_NAME}
+
+    SYSTEM
+    PUBLIC
+    ${Boost_INCLUDE_DIRS}
 )
 
 target_compile_options(
