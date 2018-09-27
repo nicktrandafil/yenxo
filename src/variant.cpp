@@ -130,7 +130,7 @@ struct IntegralCheckedCast : IntegralCheckedCast<T, U, When<true>> {
 template <typename T, typename U>
 struct IntegralCheckedCast<T, U, When<same_sign_v<U, T> &&
                                       (sizeof(T) >= sizeof(U))>> {
-    T operator()(U x) const noexcept { return x; }
+    static T apply(U x) noexcept { return x; }
 };
 
 // safe conversion
@@ -138,14 +138,14 @@ template <typename T, typename U>
 struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
                                       std::is_unsigned_v<U> &&
                                       (sizeof(T) > sizeof(U))>> {
-    T operator()(U x) const noexcept { return x; }
+    static T apply(U x) noexcept { return x; }
 };
 
 template <typename T, typename U>
 struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
                                       std::is_unsigned_v<U> &&
                                       (sizeof(T) <= sizeof(U))>> {
-    T operator()(U x) const {
+    static T apply(U x) {
 
 #if __GNUG__
 #pragma GCC diagnostic push
@@ -170,7 +170,7 @@ struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
 template <typename T, typename U>
 struct IntegralCheckedCast<T, U, When<std::is_unsigned_v<T> &&
                                       std::is_signed_v<U>>> {
-    T operator()(U x) const {
+    static T apply(U x) {
 
 #if __GNUG__
 #pragma GCC diagnostic push
@@ -195,7 +195,7 @@ struct IntegralCheckedCast<T, U, When<std::is_unsigned_v<T> &&
 
 template <typename T, typename U, bool condition>
 struct IntegralCheckedCast<T, U, When<condition>> {
-    T operator()(U x) const {
+    static T apply(U x) {
 
 #if __GNUG__
 #pragma GCC diagnostic push
@@ -218,8 +218,23 @@ struct IntegralCheckedCast<T, U, When<condition>> {
 };
 
 
-template <typename T, typename U>
-constexpr IntegralCheckedCast<T, U> integralCheckedCast;
+template <typename T>
+struct IntegralCheckedCast<T, bool> {
+    static T apply(bool x) { return x; }
+};
+
+
+template <typename Dst>
+struct IntegralCheckedCastT {
+    template <typename Src>
+    Dst operator()(Src x) const {
+        return IntegralCheckedCast<Dst, Src>::apply(x);
+    }
+};
+
+
+template <typename T>
+constexpr IntegralCheckedCastT<T> integralCheckedCast;
 
 
 template <typename T>
@@ -227,35 +242,35 @@ struct GetHelper<T, When<std::is_integral_v<T>>> {
     [[noreturn]] T operator()(std::monostate) const { throw VariantEmpty(); }
 
     T operator()(bool x)               const {
-        return integralCheckedCast<T, decltype(x)>(x);
+        return integralCheckedCast<T>(x);
     }
 
     T operator()(char x)               const {
-        return integralCheckedCast<T, decltype(x)>(x);
+        return integralCheckedCast<T>(x);
     }
 
     T operator()(short int x)          const {
-        return integralCheckedCast<T, decltype(x)>(x);
+        return integralCheckedCast<T>(x);
     }
 
     T operator()(unsigned short int x) const {
-        return integralCheckedCast<T, decltype(x)>(x);
+        return integralCheckedCast<T>(x);
     }
 
     T operator()(int x)                const {
-        return integralCheckedCast<T, decltype(x)>(x);
+        return integralCheckedCast<T>(x);
     }
 
     T operator()(unsigned int x)       const {
-        return integralCheckedCast<T, decltype(x)>(x);
+        return integralCheckedCast<T>(x);
     }
 
-    T operator()(signed long x)          const {
-        return integralCheckedCast<T, decltype(x)>(x);
+    T operator()(signed long x)        const {
+        return integralCheckedCast<T>(x);
     }
 
-    T operator()(unsigned long x)        const {
-        return integralCheckedCast<T, decltype(x)>(x);
+    T operator()(unsigned long x)      const {
+        return integralCheckedCast<T>(x);
     }
 
     T operator()(double)       const { throw VariantBadType(); }
