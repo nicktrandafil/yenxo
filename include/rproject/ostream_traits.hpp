@@ -38,7 +38,7 @@
 #include <ostream>
 
 
-namespace mixin {
+namespace trait {
 
 
 ///

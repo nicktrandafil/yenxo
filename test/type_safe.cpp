@@ -25,8 +25,8 @@
 
 // tested
 #include <variant.hpp>
-#include <variant_mixins.hpp>
-#include <comparison_mixins.hpp>
+#include <variant_traits.hpp>
+#include <comparison_traits.hpp>
 
 #include <type_safe/strong_typedef.hpp>
 #include <type_safe/constrained_type.hpp>
@@ -54,8 +54,8 @@ public:
 
 
 struct Table
-        : mixin::Var<Table>
-        , mixin::EqualityComparison<Table> {
+        : trait::Var<Table>
+        , trait::EqualityComparison<Table> {
     Table() = default;
     Table(Centimetre w, Centimetre d) : width(w), depth(d) {}
     Centimetre width;
@@ -69,8 +69,8 @@ struct Table
 BOOST_HANA_ADAPT_STRUCT(Table, width, depth);
 
 
-TEST_CASE("Check mixin::Var with type_safe::strong_typedef",
-          "[variant_mixins]") {
+TEST_CASE("Check trait::Var with type_safe::strong_typedef",
+          "[variant_traits]") {
     Table const t{
         Centimetre(100),
         Centimetre(200)
@@ -93,8 +93,8 @@ using non_empty_string = ts::constrained_type<std::string, ts::constraints::non_
 
 
 struct Pen
-        : mixin::Var<Pen>
-        , mixin::EqualityComparison<Pen> {
+        : trait::Var<Pen>
+        , trait::EqualityComparison<Pen> {
     Pen() = default;
     explicit Pen(non_empty_string const& color) : color(color) {}
 
@@ -108,8 +108,8 @@ struct Pen
 BOOST_HANA_ADAPT_STRUCT(Pen, color);
 
 
-TEST_CASE("Check mixin::Var with type_safe::constraint_type",
-          "[variant_mixins]") {
+TEST_CASE("Check trait::Var with type_safe::constraint_type",
+          "[variant_traits]") {
     Variant::Map const v{
         {"color", Variant("red")}
     };
@@ -126,7 +126,7 @@ TEST_CASE("Check mixin::Var with type_safe::constraint_type",
 namespace {
 
 
-struct RemoteControl : mixin::Var<RemoteControl> {
+struct RemoteControl : trait::Var<RemoteControl> {
     RemoteControl() = default;
     RemoteControl(
             ts::unsigned_t bc,
@@ -155,8 +155,8 @@ struct RemoteControl : mixin::Var<RemoteControl> {
 BOOST_HANA_ADAPT_STRUCT(RemoteControl, buttons_count, frequency, is_on);
 
 
-TEST_CASE("Check mixin::Var with type_safe build-in types",
-          "[variant_mixins]") {
+TEST_CASE("Check trait::Var with type_safe build-in types",
+          "[variant_traits]") {
     Variant::Map const v{
         {"buttons_count", Variant(2u)},
         {"frequency", Variant(2.2)},

@@ -25,11 +25,11 @@
 
 // tested
 #include <variant.hpp>
-#include <variant_mixins.hpp>
+#include <variant_traits.hpp>
 
 // local
-#include <ostream_mixins.hpp>
-#include <comparison_mixins.hpp>
+#include <ostream_traits.hpp>
+#include <comparison_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
@@ -39,10 +39,10 @@ namespace {
 
 
 struct Hobby
-        : mixin::Var<Hobby>
-        , mixin::UpdateFromVar<Hobby>
-        , mixin::OStream<Hobby>
-        , mixin::EqualityComparison<Hobby> {
+        : trait::Var<Hobby>
+        , trait::UpdateFromVar<Hobby>
+        , trait::OStream<Hobby>
+        , trait::EqualityComparison<Hobby> {
 
     Hobby() : id(0) {}
 
@@ -56,10 +56,10 @@ struct Hobby
 
 
 struct Person
-        : mixin::Var<Person>
-        , mixin::UpdateFromVar<Person>
-        , mixin::OStream<Person>
-        , mixin::EqualityComparison<Person> {
+        : trait::Var<Person>
+        , trait::UpdateFromVar<Person>
+        , trait::OStream<Person>
+        , trait::EqualityComparison<Person> {
 
     Person() : age(0) {}
 

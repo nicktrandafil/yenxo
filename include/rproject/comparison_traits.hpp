@@ -30,7 +30,7 @@
 #include <boost/hana.hpp>
 
 
-namespace mixin {
+namespace trait {
 
 
 ///
@@ -69,4 +69,4 @@ protected:
 };
 
 
-} // namespace mixin
+} // namespace trait

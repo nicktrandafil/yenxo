@@ -39,10 +39,10 @@ add_library(
     src/variant.cpp
     include/rproject/variant.hpp
 
-    include/rproject/variant_mixins.hpp
+    include/rproject/variant_traits.hpp
     include/rproject/variant_conversion.hpp
-    include/rproject/ostream_mixins.hpp
-    include/rproject/comparison_mixins.hpp
+    include/rproject/ostream_traits.hpp
+    include/rproject/comparison_traits.hpp
 
     include/rproject/type_name.hpp
 )
@@ -94,10 +94,10 @@ add_executable(
 
     test/main.cpp
 
-    test/variant_mixins.cpp
-    test/variant_mixins_non_intrusive.cpp
-    test/ostream_mixins.cpp
-    test/comparison_mixins.cpp
+    test/variant_traits.cpp
+    test/variant_traits_non_intrusive.cpp
+    test/ostream_traits.cpp
+    test/comparison_traits.cpp
 
     test/type_name.cpp
 
@@ -132,28 +132,28 @@ add_test(
     "Check Variant")
 
 add_test(
-    mixins_var_update_from_var test_${PROJECT_NAME}
-    "[variant_mixin_helpers]")
+    traits_var_update_from_var test_${PROJECT_NAME}
+    "[variant_trait_helpers]")
 
 add_test(
-    variant_mixins test_${PROJECT_NAME}
-    "Check mixin::Var and mixin::UpdateFromVar")
+    variant_traits test_${PROJECT_NAME}
+    "Check trait::Var and trait::UpdateFromVar")
 
 add_test(
-    mixins_var_def test_${PROJECT_NAME}
-    "Check mixin::VarDef")
+    traits_var_def test_${PROJECT_NAME}
+    "Check trait::VarDef")
 
 add_test(
-    mixins_var_def_explicit test_${PROJECT_NAME}
-    "Check mixin::VarDefExplicit")
+    traits_var_def_explicit test_${PROJECT_NAME}
+    "Check trait::VarDefExplicit")
 
 add_test(
-    mixins_ostream test_${PROJECT_NAME}
-    "Check mixin::OStream")
+    traits_ostream test_${PROJECT_NAME}
+    "Check trait::OStream")
 
 add_test(
-    mixins_equality_comparison test_${PROJECT_NAME}
-    "Check mixin::EqualityComparison")
+    traits_equality_comparison test_${PROJECT_NAME}
+    "Check trait::EqualityComparison")
 
 add_test(
     type_name test_${PROJECT_NAME}
@@ -164,17 +164,17 @@ add_test(
     "Check simple json to struct")
 
 add_test(
-    mixins_var_fails test_${PROJECT_NAME}
-    "Check mixin::Var fails")
+    traits_var_fails test_${PROJECT_NAME}
+    "Check trait::Var fails")
 
 add_test(
-    mixins_var_redefine test_${PROJECT_NAME}
-    "Check mixin::Var redefine")
+    traits_var_redefine test_${PROJECT_NAME}
+    "Check trait::Var redefine")
 
 add_test(
-    mixins_var_strong_typedef test_${PROJECT_NAME}
-    "Check mixin::Var with type_safe::strong_typedef")
+    traits_var_strong_typedef test_${PROJECT_NAME}
+    "Check trait::Var with type_safe::strong_typedef")
 
 add_test(
-    mixins_var_constraint_type test_${PROJECT_NAME}
-    "Check mixin::Var with type_safe::constraint_type")
+    traits_var_constraint_type test_${PROJECT_NAME}
+    "Check trait::Var with type_safe::constraint_type")

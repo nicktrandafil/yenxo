@@ -24,11 +24,11 @@
 
 
 // tested
-#include <variant_mixins.hpp>
+#include <variant_traits.hpp>
 
 // local
-#include <comparison_mixins.hpp>
-#include <ostream_mixins.hpp>
+#include <comparison_traits.hpp>
+#include <ostream_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
@@ -56,7 +56,7 @@ struct UserDefinedStr : private std::string {
 } // namespace
 
 
-namespace mixin::detail {
+namespace trait::detail {
 
 
 template <>
@@ -67,16 +67,16 @@ struct FromVariantImpl<UserDefinedStr> {
 };
 
 
-} // namespace mixin::detail
+} // namespace trait::detail
 
 
 namespace {
 
 
 struct Hobby
-        : mixin::Var<Hobby>
-        , mixin::EqualityComparison<Hobby>
-        , mixin::OStream<Hobby> {
+        : trait::Var<Hobby>
+        , trait::EqualityComparison<Hobby>
+        , trait::OStream<Hobby> {
     Hobby() = default;
     Hobby(int id, std::string const& description)
         : id(id), description(description)
@@ -93,7 +93,7 @@ struct Hobby
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 
 
-TEST_CASE("Check mixin::Var redefine", "[variant_mixins]") {
+TEST_CASE("Check trait::Var redefine", "[variant_traits]") {
     Variant::Map map{
         {"id", Variant(9)},
         {"description", Variant("abc")}

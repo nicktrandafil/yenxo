@@ -24,11 +24,11 @@
 
 
 // tested
-#include <variant_mixins.hpp>
+#include <variant_traits.hpp>
 
 // local
-#include <ostream_mixins.hpp>
-#include <comparison_mixins.hpp>
+#include <ostream_traits.hpp>
+#include <comparison_traits.hpp>
 #include <variant.hpp>
 
 // 3rd
@@ -49,10 +49,10 @@ namespace {
 
 
 struct Hobby
-        : mixin::Var<Hobby>
-        , mixin::UpdateFromVar<Hobby>
-        , mixin::OStream<Hobby>
-        , mixin::EqualityComparison<Hobby> {
+        : trait::Var<Hobby>
+        , trait::UpdateFromVar<Hobby>
+        , trait::OStream<Hobby>
+        , trait::EqualityComparison<Hobby> {
 
     Hobby() : id(0) {}
 
@@ -66,10 +66,10 @@ struct Hobby
 
 
 struct Person
-        : mixin::Var<Person>
-        , mixin::UpdateFromVar<Person>
-        , mixin::OStream<Person>
-        , mixin::EqualityComparison<Person> {
+        : trait::Var<Person>
+        , trait::UpdateFromVar<Person>
+        , trait::OStream<Person>
+        , trait::EqualityComparison<Person> {
 
     Person() : age(0) {}
 
@@ -84,9 +84,9 @@ struct Person
 
 
 struct PersonEx
-        : mixin::Var<PersonEx>
-        , mixin::OStream<PersonEx>
-        , mixin::EqualityComparison<PersonEx> {
+        : trait::Var<PersonEx>
+        , trait::OStream<PersonEx>
+        , trait::EqualityComparison<PersonEx> {
 
     PersonEx() {}
     PersonEx(std::string const& name, std::vector<Hobby> const& hobbies)
@@ -99,9 +99,9 @@ struct PersonEx
 
 
 struct Dict
-        : mixin::Var<Dict>
-        , mixin::EqualityComparison<Dict>
-        , mixin::OStream<Dict> {
+        : trait::Var<Dict>
+        , trait::EqualityComparison<Dict>
+        , trait::OStream<Dict> {
     Dict() = default;
 
     Dict(int x, std::unordered_map<std::string, int> const& map)
@@ -122,15 +122,15 @@ BOOST_HANA_ADAPT_STRUCT(PersonEx, name, hobbies);
 BOOST_HANA_ADAPT_STRUCT(Dict, x, map);
 
 
-TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
-    auto const x = mixin::detail::toVariant(5);
+TEST_CASE("detail::toVariant", "[variant_trait_helpers]") {
+    auto const x = trait::detail::toVariant(5);
     REQUIRE(x == Variant(5));
-    REQUIRE(5 == mixin::detail::fromVariant.operator()<int>(Variant(5)));
+    REQUIRE(5 == trait::detail::fromVariant.operator()<int>(Variant(5)));
 
-    auto const x1 = mixin::detail::toVariant("Hello");
+    auto const x1 = trait::detail::toVariant("Hello");
     REQUIRE(x1 == Variant("Hello"));
     REQUIRE("Hello" ==
-            mixin::detail::fromVariant.operator()<std::string>(
+            trait::detail::fromVariant.operator()<std::string>(
                 Variant("Hello")));
 
     struct X {
@@ -139,13 +139,13 @@ TEST_CASE("detail::toVariant", "[variant_mixin_helpers]") {
         int m{5};
     };
 
-    auto const x2 = mixin::detail::toVariant(X());
+    auto const x2 = trait::detail::toVariant(X());
     REQUIRE(x2 == Variant(5));
-    REQUIRE(6 == mixin::detail::fromVariant.operator()<X>(Variant(6)).m);
+    REQUIRE(6 == trait::detail::fromVariant.operator()<X>(Variant(6)).m);
 }
 
 
-TEST_CASE("Check mixin::Var and mixin::UpdateFromVar", "[variant_mixins]") {
+TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
     Variant::Map const hobby_var{
         {"id", Variant(1)},
         {"description", Variant("Hack")}
@@ -253,9 +253,9 @@ auto makePersonDDefaults() {
 
 
 struct PersonD
-        : mixin::VarDef<PersonD>
-        , mixin::OStream<PersonD>
-        , mixin::EqualityComparison<PersonD> {
+        : trait::VarDef<PersonD>
+        , trait::OStream<PersonD>
+        , trait::EqualityComparison<PersonD> {
     PersonD() {}
 
     PersonD(std::string const& name, int age, Hobby const& hobby)
@@ -283,7 +283,7 @@ decltype(makePersonDDefaults()) PersonD::default_mem_vals = makePersonDDefaults(
 BOOST_HANA_ADAPT_STRUCT(PersonD, name, age, hobby);
 
 
-TEST_CASE("Check mixin::VarDef", "[variant_mixins]") {
+TEST_CASE("Check trait::VarDef", "[variant_traits]") {
     Variant::Map const hobby_var{
         {"id", Variant(1)},
         {"description", Variant("Hack")}
@@ -342,15 +342,15 @@ auto makePersonCDefaults() {
     return hana::make_map(
         hana::make_pair("name"_s, "Efendi"),
         hana::make_pair("age"_s, 18),
-        hana::make_pair("hobby"_s, mixin::NoDefault())
+        hana::make_pair("hobby"_s, trait::NoDefault())
     );
 }
 
 
 struct PersonC
-        : mixin::VarDefExplicit<PersonC>
-        , mixin::OStream<PersonC>
-        , mixin::EqualityComparison<PersonC> {
+        : trait::VarDefExplicit<PersonC>
+        , trait::OStream<PersonC>
+        , trait::EqualityComparison<PersonC> {
     PersonC() {}
 
     PersonC(std::string const& name, int age, Hobby const& hobby)
@@ -374,7 +374,7 @@ decltype(makePersonCDefaults()) PersonC::default_mem_vals = makePersonCDefaults(
 BOOST_HANA_ADAPT_STRUCT(PersonC, name, age, hobby);
 
 
-TEST_CASE("Check mixin::VarDefExplicit", "[variant_mixins]") {
+TEST_CASE("Check trait::VarDefExplicit", "[variant_traits]") {
     Variant::Map const hobby_var{
         {"id", Variant(1)},
         {"description", Variant("Hack")}
@@ -402,7 +402,7 @@ TEST_CASE("Check mixin::VarDefExplicit", "[variant_mixins]") {
 namespace {
 
 
-struct Car : mixin::Var<Car> {
+struct Car : trait::Var<Car> {
     Car(std::string const& name, int wheels) : name(name), wheels(wheels) {}
     Car() = default;
 
@@ -417,7 +417,7 @@ struct Car : mixin::Var<Car> {
 BOOST_HANA_ADAPT_STRUCT(Car, name, wheels);
 
 
-TEST_CASE("Check mixin::Var fails", "[variant_mixins]") {
+TEST_CASE("Check trait::Var fails", "[variant_traits]") {
     Variant car_var{Variant::Map{
         {"name", Variant("saab")},
         {"wheels", Variant("4")}

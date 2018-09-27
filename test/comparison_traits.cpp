@@ -24,7 +24,10 @@
 
 
 // tested
-#include <ostream_mixins.hpp>
+#include <comparison_traits.hpp>
+
+// local
+#include <ostream_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
@@ -34,7 +37,8 @@ namespace {
 
 
 struct Hobby
-        : mixin::OStream<Hobby> {
+        : trait::EqualityComparison<Hobby>
+        , trait::OStream<Hobby> {
     Hobby(int id, std::string const& description)
         : id(id), description(description)
     {}
@@ -45,8 +49,8 @@ struct Hobby
 
 
 struct Person
-        : mixin::OStream<Person> {
-
+        : trait::EqualityComparison<Person>
+        , trait::OStream<Person> {
     Person(std::string const& name, int age, Hobby const& hobby)
         : name(name), age(age), hobby(hobby)
     {}
@@ -57,27 +61,14 @@ struct Person
 };
 
 
-struct Dict
-        : mixin::OStream<Dict> {
-    Dict(int x, std::unordered_map<std::string, int> const& map)
-        : x(x), map(map)
-    {}
-
-    int x;
-    std::unordered_map<std::string, int> map;
-};
-
-
-
 } // namespace
 
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
-BOOST_HANA_ADAPT_STRUCT(Dict, x, map);
 
 
-TEST_CASE("Check mixin::OStream", "[ostream_mixins]") {
+TEST_CASE("Check trait::EqualityComparison", "[comparison_traits]") {
     Hobby const hobby{
         1,
         std::string("Hack")
@@ -89,21 +80,9 @@ TEST_CASE("Check mixin::OStream", "[ostream_mixins]") {
         hobby
     };
 
-    std::ostringstream os;
+    Person person2(person);
+    REQUIRE(person == person2);
 
-
-    SECTION("simple") {
-        os << person;
-        REQUIRE(os.str() == "Person { name: Efendi; age: 18; hobby: Hobby { id: 1; description: Hack; }; }");
-    }
-
-    Dict const expected{
-        1,
-        {{"1", 1}, {"2", 2}}
-    };
-
-    SECTION("dict") {
-        os << expected;
-        REQUIRE(os.str() == "Dict { x: 1; map: { 2: 2; 1: 1; }; }");
-    }
+    (*person2.age)++;
+    REQUIRE(person != person2);
 }

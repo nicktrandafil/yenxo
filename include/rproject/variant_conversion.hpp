@@ -38,7 +38,7 @@
 #include <type_traits>
 
 
-namespace mixin::detail {
+namespace trait::detail {
 
 
 ///
@@ -327,4 +327,4 @@ struct FromVariantT {
 constexpr FromVariantT fromVariant;
 
 
-} // namespace mixin::detail
+} // namespace trait::detail

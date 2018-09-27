@@ -42,12 +42,12 @@
 
 
 ///
-/// \file variant_mixins.hpp
+/// \file variant_traits.hpp
 /// Some add-ons for enabling to and from Variant conversion
 ///
 
 
-namespace mixin {
+namespace trait {
 
 
 ///
