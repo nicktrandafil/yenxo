@@ -44,11 +44,13 @@ struct Protagonist1 {};
 
 struct Protagonist2 {
     static bool fromVariant(int const& x);
+    static bool toVariant(int const& x);
 };
 
 
 struct Protagonist3 {
     static bool fromVariant(Variant const&);
+    static bool toVariant(Protagonist3);
 };
 
 
@@ -79,4 +81,8 @@ TEST_CASE("Check error diagnostic, [diagnostic]") {
 //    Film1::fromVariant(Variant());
 //    Film2::fromVariant(Variant());
 //    Film3::fromVariant(Variant());
+
+//    Film1::toVariant(Film1());
+//    Film2::toVariant(Film2());
+//    Film3::toVariant(Film3());
 }

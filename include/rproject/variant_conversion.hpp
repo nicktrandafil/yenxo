@@ -51,18 +51,63 @@ template <typename T, typename = void>
 struct ToVariantImpl : ToVariantImpl<T, When<true>> {};
 
 
+namespace concept {
+
+
+template <typename T>
+struct ToVariant {
+    static constexpr auto has_toVariant = boost::hana::is_valid([](auto t)
+        -> decltype((void)decltype(t)::type::toVariant) {
+    });
+
+    template <typename U,
+              bool = std::is_same_v<decltype(U::toVariant(std::declval<U&&>())), Variant>>
+    struct Ret : std::false_type {
+        static_assert(
+                rp::DependentFalse<U>::value,
+                "Return type should be Variant");
+    };
+
+    template <typename U>
+    struct Ret<U, true> : std::true_type {};
+
+    template <typename U,
+              bool = rp::callable(U::toVariant, rp::type_c<U>)>
+    struct Sig : std::false_type {
+        static_assert(
+                rp::DependentFalse<U>::value,
+                "Signature should be toVariant(T)");
+    };
+
+    template <typename U>
+    struct Sig<U, true> : Ret<U> {};
+
+    template <typename U, bool v = has_toVariant(boost::hana::type_c<U>)>
+    struct HasToVariant : std::false_type {
+        static_assert(
+                rp::DependentFalse<U>::value ,
+                "Missing toVariant static member function");
+    };
+
+    template <typename U>
+    struct HasToVariant<U, true> : Sig<U> {};
+
+    static constexpr auto check() {
+        return HasToVariant<T>::value;
+    }
+};
+
+
+} // namespace
+
+
+
 ///
 /// Specialization to types with `static Variant T::toVariant(T)`
 ///
 template <typename T, bool condition>
 struct ToVariantImpl<T, When<condition>> {
-    static_assert(
-            rp::callable(T::toVariant, rp::type_c<T>),
-            "The type T must have T::toVariant(T) static member function");
-    static_assert(
-            std::is_same_v<decltype(T::toVariant(std::declval<T>())), Variant>,
-            "The return type of T::toVariant must be Variant");
-
+    static_assert(concept::ToVariant<T>::check());
     static Variant apply(T const& x) { return T::toVariant(x); }
 };
 
