@@ -34,6 +34,9 @@
 // 3rd
 #include <type_safe/strong_typedef.hpp>
 
+// boost
+#include <boost/hana.hpp>
+
 // std
 #include <type_traits>
 
@@ -192,18 +195,62 @@ template <typename T, typename = void>
 struct FromVariantImpl : FromVariantImpl<T, When<true>> {};
 
 
+namespace concept {
+
+
+template <typename T>
+struct FromVariant {
+    static constexpr auto has_fromVariant = boost::hana::is_valid([](auto t)
+        -> decltype((void)decltype(t)::type::fromVariant) {
+    });
+
+    template <typename U,
+              bool = std::is_same_v<decltype(U::fromVariant(Variant())), U>>
+    struct Ret : std::false_type {
+        static_assert(
+                rp::DependentFalse<U>::value,
+                "Return type should be T");
+    };
+
+    template <typename U>
+    struct Ret<U, true> : std::true_type {};
+
+    template <typename U,
+              bool = rp::callable(U::fromVariant, rp::type_c<Variant>)>
+    struct Sig : std::false_type {
+        static_assert(
+                rp::DependentFalse<U>::value,
+                "Signature should be fromVariant(Variant)");
+    };
+
+    template <typename U>
+    struct Sig<U, true> : Ret<U> {};
+
+    template <typename U, bool v = has_fromVariant(boost::hana::type_c<U>)>
+    struct HasFromVariant : std::false_type {
+        static_assert(
+                rp::DependentFalse<U>::value ,
+                "Missing fromVariant static member function");
+    };
+
+    template <typename U>
+    struct HasFromVariant<U, true> : Sig<U> {};
+
+    static constexpr auto check() {
+        return HasFromVariant<T>::value;
+    }
+};
+
+
+} // namespace
+
+
 ///
 /// Specialization to types with `static T T::fromVariant(Variant)`
 ///
 template <typename T, bool condition>
 struct FromVariantImpl<T, When<condition>> {
-    static_assert(
-            rp::callable(T::fromVariant, rp::type_c<Variant>),
-            "The type T must have static member function fromVariant(Variant)");
-    static_assert(
-            std::is_same_v<decltype(T::fromVariant(Variant())), T>,
-            "The return type of T::fromVariant must be T");
-
+    static_assert(concept::FromVariant<T>::check());
     static T apply(Variant const& x) { return T::fromVariant(x); }
 };
 

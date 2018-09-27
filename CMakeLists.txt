@@ -104,6 +104,8 @@ add_executable(
     test/json_struct.cpp
 
     test/type_safe.cpp
+
+    test/error_diagnostic.cpp
 )
 
 set_target_properties(test_${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
