@@ -1,0 +1,79 @@
+language: cpp
+sudo: enabled
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-7', "cmake"]
+      env: TOOLSET=g++-7 TOOLSET_C=gcc-7 BUILD_TYPE='Debug'
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-7', "cmake"]
+      env: TOOLSET=g++-7 TOOLSET_C=gcc-7 BUILD_TYPE='Release'
+
+install:
+  - cd ../
+  - export CXX=$TOOLSET
+  - export CC=$TOOLSET_C
+  - $CXX --version
+  - $CC --version
+  - cmake --version
+  - cd rproject
+
+  # Install Boost headers
+  - BOOST_VERSION=1.65.1
+  - BOOST_DIR=${TRAVIS_BUILD_DIR}/boost-${BOOST_VERSION}
+  - |
+    BOOST_URL="https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION//\./_}.tar.gz"
+    mkdir -p ${BOOST_DIR}
+    { travis_retry wget -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ${BOOST_DIR}; } || exit 1
+    export BOOST_ROOT=$BOOST_DIR
+
+  # RapidJSON
+  - git clone --recurse-submodules https://github.com/Tencent/rapidjson.git
+  - cd rapidjson
+  - mkdir build/ && cd build/
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DRAPIDJSON_BUILD_TESTS=OFF ..
+  - cmake --build .
+  - sudo cmake --build . --target install
+  - cd ../../
+
+  # Catch2
+  - git clone --recurse-submodules https://github.com/catchorg/Catch2.git
+  - cd Catch2
+  - mkdir build/ && cd build/
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCATCH_BUILD_TESTING=OFF -DCATCH_INSTALL_DOCS=OFF ..
+  - cmake --build .
+  - sudo cmake --build . --target install
+  - cd ../../
+
+  # debug_assert
+  - git clone --recurse-submodules https://github.com/foonathan/debug_assert.git
+  - cd debug_assert
+  - mkdir build/ && cd build/
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+  - cmake --build .
+  - sudo cmake --build . --target install
+  - cd ../../
+
+  # type_safe
+  - git clone --recurse-submodules https://github.com/foonathan/type_safe.git
+  - cd type_safe
+  - mkdir build/ && cd build/
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTYPE_SAFE_BUILD_TEST_EXAMPLE=OFF ..
+  - cmake --build .
+  - sudo cmake --build . --target install
+  - cd ../../
+
+script:
+  - mkdir build/ && cd build/
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+  - cmake --build .
+  - ./test_rproject

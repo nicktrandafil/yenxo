@@ -23,6 +23,7 @@ set(CMAKE_BUILD_TYPE Release CACHE BOOL "Build type")
 #
 
 find_package(RapidJSON QUIET REQUIRED)
+find_package(Boost QUIET REQUIRED)
 
 #
 # Target
@@ -57,6 +58,7 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/include/rproject
         ${RAPIDJSON_INCLUDE_DIRS}
     >
+    ${Boost_INCLUDE_DIRS}
 
     INTERFACE
     $<INSTALL_INTERFACE:
