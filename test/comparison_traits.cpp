@@ -24,10 +24,10 @@
 
 
 // tested
-#include <comparison_traits.hpp>
+#include <rproject/comparison_traits.hpp>
 
 // local
-#include <ostream_traits.hpp>
+#include <rproject/ostream_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>

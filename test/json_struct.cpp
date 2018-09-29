@@ -24,12 +24,12 @@
 
 
 // tested
-#include <variant.hpp>
-#include <variant_traits.hpp>
+#include <rproject/variant.hpp>
+#include <rproject/variant_traits.hpp>
 
 // local
-#include <ostream_traits.hpp>
-#include <comparison_traits.hpp>
+#include <rproject/ostream_traits.hpp>
+#include <rproject/comparison_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>

@@ -24,10 +24,10 @@
 
 
 // tested
-#include <variant.hpp>
+#include <rproject/variant.hpp>
 
 // local
-#include <type_name.hpp>
+#include <rproject/type_name.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>

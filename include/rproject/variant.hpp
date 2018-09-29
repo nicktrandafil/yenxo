@@ -27,7 +27,7 @@
 
 
 // local
-#include <pimpl.hpp>
+#include <rproject/pimpl.hpp>
 
 // 3rd
 #include <rapidjson/document.h>

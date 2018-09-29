@@ -23,7 +23,7 @@
 */
 
 
-#include <meta.hpp>
+#include <rproject/meta.hpp>
 
 #if __GNUG__
 #pragma GCC diagnostic push

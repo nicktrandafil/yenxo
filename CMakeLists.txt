@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0048 NEW)
 
-project(rproject)
+project(rproject VERSION 0.1)
 
 #
 # Common
@@ -24,6 +25,8 @@ set(CMAKE_BUILD_TYPE Release CACHE BOOL "Build type")
 
 find_package(RapidJSON QUIET REQUIRED)
 find_package(Boost QUIET REQUIRED)
+find_package(type_safe QUIET REQUIRED)
+find_package(debug_assert QUIET REQUIRED)
 
 #
 # Target
@@ -53,35 +56,55 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_include_directories(
     ${PROJECT_NAME}
 
-    PUBLIC
-    $<BUILD_INTERFACE:
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/rproject
-        ${RAPIDJSON_INCLUDE_DIRS}
-    >
-
     INTERFACE
-    $<INSTALL_INTERFACE:
-        include
-        ${RAPIDJSON_INCLUDE_DIRS}
-    >
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-target_include_directories(
-    ${PROJECT_NAME}
-
+target_include_directories(${PROJECT_NAME}
     SYSTEM
-    PUBLIC
+    INTERFACE
+    $<INSTALL_INTERFACE:include>
+    ${RAPIDJSON_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
 )
 
-target_compile_options(
-    ${PROJECT_NAME}
-
+target_compile_options(${PROJECT_NAME}
     PRIVATE
     ${GENERIC_CXX_COMPILE_OPTIONS}
 )
 
+target_link_libraries(${PROJECT_NAME} INTERFACE type_safe debug_assert)
+
 set(TESTING ON CACHE BOOL "Enable testing")
+
+#
+# Setup package config
+#
+
+include(CMakePackageConfigHelpers)
+set(CONFIG_PACKAGE_INSTALL_DIR lib/cmake/rproject)
+
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
+  COMPATIBILITY SameMajorVersion
+)
+
+install(DIRECTORY include/rproject DESTINATION include)
+
+install(TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}-targets
+    DESTINATION lib
+)
+
+install(EXPORT ${PROJECT_NAME}-targets
+    DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
+)
+
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
+    DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
+)
 
 #
 # Testing
