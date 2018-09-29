@@ -12,7 +12,7 @@ Uses `rapidjson` in order to parse and serialize JSON.
 
 ## Examples
 
-Typical use case of `traits::Var`:
+Typical use case of `trait::Var`:
 
 ```cpp
 // rproject
