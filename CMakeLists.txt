@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0048 NEW)
+cmake_policy(SET CMP0022 NEW)
 
 project(rproject VERSION 0.1)
 
@@ -26,7 +27,6 @@ set(CMAKE_BUILD_TYPE Release CACHE BOOL "Build type")
 find_package(RapidJSON QUIET REQUIRED)
 find_package(Boost QUIET REQUIRED)
 find_package(type_safe QUIET REQUIRED)
-find_package(debug_assert QUIET REQUIRED)
 
 #
 # Target
@@ -56,14 +56,17 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_include_directories(
     ${PROJECT_NAME}
 
-    INTERFACE
+    PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
 target_include_directories(${PROJECT_NAME}
     SYSTEM
-    INTERFACE
+
+    PUBLIC
     $<INSTALL_INTERFACE:include>
+
+    INTERFACE
     ${RAPIDJSON_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
 )
@@ -73,7 +76,8 @@ target_compile_options(${PROJECT_NAME}
     ${GENERIC_CXX_COMPILE_OPTIONS}
 )
 
-target_link_libraries(${PROJECT_NAME} INTERFACE type_safe debug_assert)
+target_link_libraries(${PROJECT_NAME} PUBLIC type_safe)
+set_target_properties(${PROJECT_NAME} PROPERTIES INTERFACE_LINK_LIBRARIES "")
 
 set(TESTING ON CACHE BOOL "Enable testing")
 
