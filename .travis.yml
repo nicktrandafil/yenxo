@@ -25,11 +25,10 @@ install:
   - $CXX --version
   - $CC --version
   - cmake --version
-  - cd rproject
 
   # Install Boost headers
   - BOOST_VERSION=1.65.1
-  - BOOST_DIR=${TRAVIS_BUILD_DIR}/boost-${BOOST_VERSION}
+  - BOOST_DIR=`pwd`/boost-${BOOST_VERSION}
   - |
     BOOST_URL="https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION//\./_}.tar.gz"
     mkdir -p ${BOOST_DIR}
@@ -71,6 +70,8 @@ install:
   - cmake --build .
   - sudo cmake --build . --target install
   - cd ../../
+
+  - cd rproject
 
 script:
   - mkdir build/ && cd build/
