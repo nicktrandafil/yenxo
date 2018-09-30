@@ -51,7 +51,7 @@ template <typename T, typename = void>
 struct ToVariantImpl : ToVariantImpl<T, When<true>> {};
 
 
-namespace concept {
+namespace concept_ {
 
 
 template <typename T>
@@ -107,7 +107,7 @@ struct ToVariant {
 ///
 template <typename T, bool condition>
 struct ToVariantImpl<T, When<condition>> {
-    static_assert(concept::ToVariant<T>::check());
+    static_assert(concept_::ToVariant<T>::check());
     static Variant apply(T const& x) { return T::toVariant(x); }
 };
 
@@ -240,7 +240,7 @@ template <typename T, typename = void>
 struct FromVariantImpl : FromVariantImpl<T, When<true>> {};
 
 
-namespace concept {
+namespace concept_ {
 
 
 template <typename T>
@@ -295,7 +295,7 @@ struct FromVariant {
 ///
 template <typename T, bool condition>
 struct FromVariantImpl<T, When<condition>> {
-    static_assert(concept::FromVariant<T>::check());
+    static_assert(concept_::FromVariant<T>::check());
     static T apply(Variant const& x) { return T::fromVariant(x); }
 };
 
