@@ -18,7 +18,7 @@ else()
     message(FATAL_ERROR "${CMAKE_CXX_COMPILER_ID} is not supported")
 endif()
 
-set(CMAKE_BUILD_TYPE Release CACHE BOOL "Build type")
+option(CMAKE_BUILD_TYPE "Build type" Release)
 
 #
 # 3rd party
@@ -77,9 +77,8 @@ target_compile_options(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC type_safe)
-set_target_properties(${PROJECT_NAME} PROPERTIES INTERFACE_LINK_LIBRARIES "")
 
-set(TESTING ON CACHE BOOL "Enable testing")
+option(TESTING "Enable testing" ON)
 
 #
 # Setup package config
