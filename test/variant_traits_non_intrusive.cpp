@@ -40,6 +40,7 @@ namespace {
 struct UserDefinedStr : private std::string {
     UserDefinedStr() = default;
     UserDefinedStr(std::string const& x) : std::string(x) {}
+    std::string str() const { return static_cast<std::string>(*this); }
 
     bool operator==(UserDefinedStr const& rhs) const {
         return static_cast<std::string const&>(*this) ==
@@ -56,18 +57,26 @@ struct UserDefinedStr : private std::string {
 } // namespace
 
 
-namespace trait::detail {
+namespace trait {
 
 
 template <>
 struct FromVariantImpl<UserDefinedStr> {
     static UserDefinedStr apply(Variant const& x) {
-        return "User defined " + x.str();
+        return x.str();
     }
 };
 
 
-} // namespace trait::detail
+template <>
+struct ToVariantImpl<UserDefinedStr> {
+    static Variant apply(UserDefinedStr const& x) {
+        return Variant(x.str());
+    }
+};
+
+
+} // namespace trait
 
 
 namespace {
@@ -93,11 +102,14 @@ struct Hobby
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 
 
-TEST_CASE("Check trait::Var redefine", "[variant_traits]") {
+TEST_CASE("Check trait::Var nonintrusive", "[variant_traits]") {
     Variant::Map map{
         {"id", Variant(9)},
         {"description", Variant("abc")}
     };
 
-    REQUIRE(Hobby::fromVariant(Variant(map)) == Hobby(9, "User defined abc"));
+    Hobby const h(9, "abc");
+
+    REQUIRE(Hobby::fromVariant(Variant(map)) == h);
+    REQUIRE(Hobby::toVariant(h) == Variant(map));
 }

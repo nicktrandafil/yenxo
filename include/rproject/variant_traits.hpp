@@ -117,6 +117,18 @@ constexpr void checkOrphanKeys(rp::Type<T> const&) {
 }
 
 
+template <typename T>
+auto toVariantWrap(T&& x) {
+    return toVariant(std::forward<T>(x));
+}
+
+
+template <typename T>
+auto fromVariantWrap(Variant const& x) {
+    return fromVariant<T>(x);
+}
+
+
 } // namespace detail
 
 
@@ -136,7 +148,8 @@ struct Var {
         Variant::Map ret;
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
-            ret[boost::hana::to<char const*>(name)] = detail::toVariant(value);
+            ret[boost::hana::to<char const*>(name)] =
+                    detail::toVariantWrap(value);
         }));
 
         return Variant(ret);
@@ -156,7 +169,8 @@ struct Var {
                             boost::hana::to<char const*>(name) +
                             " not found in map"s);
             } else {
-                detail::fromVariant(tmp, it->second);
+                tmp = detail::fromVariantWrap<
+                        std::decay_t<decltype(tmp)>>(it->second);
             }
         }));
 
@@ -187,11 +201,11 @@ struct VarDef {
             if constexpr (rp::isOptional(rp::type_c<decltype(value)>)) {
                 if (value.has_value()) {
                     ret[boost::hana::to<char const*>(name)] =
-                            detail::toVariant(*value);
+                            detail::toVariantWrap(*value);
                 }
             } else {
                 ret[boost::hana::to<char const*>(name)] =
-                        detail::toVariant(value);
+                        detail::toVariantWrap(value);
             }
         }));
 
@@ -236,10 +250,11 @@ struct VarDef {
 
             } else {
                 if constexpr (rp::isOptional(rp::type_c<decltype(tmp)>)) {
-                    tmp = detail::fromVariant.operator()<decltype(*tmp)>(
-                                it->second);
+                    tmp = detail::fromVariantWrap<
+                            std::decay_t<decltype(*tmp)>>(it->second);
                 } else {
-                    detail::fromVariant(tmp, it->second);
+                    tmp = detail::fromVariantWrap<
+                            std::decay_t<decltype(tmp)>>(it->second);
                 }
             }
         }));
@@ -320,7 +335,8 @@ struct UpdateFromVar {
                                   boost::hana::fuse([&](auto name, auto value) {
                 if (boost::hana::to<char const*>(name) != v.first) { return; }
                 auto& tmp = value(self);
-                detail::fromVariant(tmp, v.second);
+                tmp = detail::fromVariantWrap<
+                        std::decay_t<decltype(tmp)>>(v.second);
                 found = true;
             }));
 

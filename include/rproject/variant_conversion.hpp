@@ -41,16 +41,7 @@
 #include <type_traits>
 
 
-namespace trait::detail {
-
-
-///
-/// Unified converstion of T to Variant
-///
-template <typename T, typename = void>
-struct ToVariantImpl : ToVariantImpl<T, When<true>> {};
-
-
+namespace trait {
 namespace concept_ {
 
 
@@ -98,8 +89,14 @@ struct ToVariant {
 };
 
 
-} // namespace
+} // namespace concept_
 
+
+///
+/// Unified converstion of T to Variant
+///
+template <typename T, typename = void>
+struct ToVariantImpl : ToVariantImpl<T, When<true>> {};
 
 
 ///
@@ -230,7 +227,13 @@ struct ToVariantT {
 ///
 /// Convinient shortcut function
 ///
-constexpr ToVariantT toVariant;
+//constexpr ToVariantT toVariant;
+
+
+template <typename T>
+constexpr auto toVariant(T&& x) {
+    return ToVariantImpl<std::decay_t<T>>::apply(std::forward<T>(x));
+}
 
 
 ///
@@ -400,15 +403,10 @@ struct FromVariantImpl<T, When<rp::boolean(rp::type_c<T>)>> {
 };
 
 
+template <typename T>
 struct FromVariantT {
-    template <typename T>
     auto operator()(Variant const& x) const {
         return FromVariantImpl<std::decay_t<T>>::apply(x);
-    }
-
-    template <typename T>
-    void operator()(T& x, Variant const& y) const {
-        x = FromVariantImpl<std::decay_t<T>>::apply(y);
     }
 };
 
@@ -416,7 +414,8 @@ struct FromVariantT {
 ///
 /// Convinient shortcut function
 ///
-constexpr FromVariantT fromVariant;
+template <typename T>
+constexpr FromVariantT<T> fromVariant;
 
 
-} // namespace trait::detail
+} // namespace trait

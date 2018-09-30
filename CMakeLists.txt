@@ -205,8 +205,8 @@ add_test(
     "Check trait::Var fails")
 
 add_test(
-    traits_var_redefine test_${PROJECT_NAME}
-    "Check trait::Var redefine")
+    traits_var_nonintrusive test_${PROJECT_NAME}
+    "Check trait::Var nonintrusive")
 
 add_test(
     traits_var_strong_typedef test_${PROJECT_NAME}
