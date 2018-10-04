@@ -43,6 +43,9 @@
 namespace hana = boost::hana;
 
 
+using namespace rp;
+
+
 TEST_CASE("Check Variant", "[Variant]") {
     SECTION("boolean") {
         bool const expected{true};

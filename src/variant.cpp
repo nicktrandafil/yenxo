@@ -159,7 +159,7 @@ struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
 #endif
 
             throw VariantIntegralOverflow(
-                        std::string(unqualifiedTypeName<T>()),
+                        std::string(rp::unqualifiedTypeName<T>()),
                         std::to_string(x));
         }
 
@@ -184,7 +184,7 @@ struct IntegralCheckedCast<T, U, When<std::is_unsigned_v<T> &&
 #endif
 
             throw VariantIntegralOverflow(
-                        std::string(unqualifiedTypeName<T>()),
+                        std::string(rp::unqualifiedTypeName<T>()),
                         std::to_string(x));
         }
 
@@ -210,7 +210,7 @@ struct IntegralCheckedCast<T, U, When<condition>> {
 #endif
 
             throw VariantIntegralOverflow(
-                        std::string(unqualifiedTypeName<T>()),
+                        std::string(rp::unqualifiedTypeName<T>()),
                         std::to_string(x));
         }
         return x;

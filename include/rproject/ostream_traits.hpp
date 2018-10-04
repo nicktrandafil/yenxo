@@ -47,7 +47,7 @@ namespace trait {
 template <typename Derived>
 struct OStream {
     friend std::ostream& operator<<(std::ostream& os, Derived const& x) {
-        os << unqualifiedTypeName<Derived>() << " { ";
+        os << rp::unqualifiedTypeName<Derived>() << " { ";
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
             if constexpr (rp::isOptional(rp::type_c<decltype(value)>)) {

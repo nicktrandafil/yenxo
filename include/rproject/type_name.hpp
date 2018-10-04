@@ -30,6 +30,9 @@
 #include <string_view>
 
 
+namespace rp {
+
+
 ///
 /// Get unqualified type name
 ///
@@ -73,4 +76,7 @@ constexpr std::string_view qualifiedTypeName() {
 #elif defined(_MSC_VER)
 #error "Not supported"
 #endif
+}
+
+
 }
