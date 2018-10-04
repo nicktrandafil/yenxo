@@ -243,13 +243,6 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
 namespace {
 
 
-auto makePersonDDefaults() {
-    return hana::make_map(
-        hana::make_pair("name"_s, "Efendi"s)
-    );
-}
-
-
 struct PersonD
         : trait::VarDef<PersonD>
         , trait::OStream<PersonD>
@@ -264,15 +257,16 @@ struct PersonD
         : name(name), hobby(hobby)
     {}
 
-    static decltype(makePersonDDefaults()) default_mem_vals;
+    static auto defaults() {
+        return hana::make_map(
+                    hana::make_pair("name"_s, "Efendi"s)
+        );
+    }
 
     std::string name;
     std::optional<int> age;
     Hobby hobby;
 };
-
-
-decltype(makePersonDDefaults()) PersonD::default_mem_vals = makePersonDDefaults();
 
 
 } // namespace
@@ -336,15 +330,6 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
 namespace {
 
 
-auto makePersonCDefaults() {
-    return hana::make_map(
-        hana::make_pair("name"_s, "Efendi"),
-        hana::make_pair("age"_s, 18),
-        hana::make_pair("hobby"_s, trait::NoDefault())
-    );
-}
-
-
 struct PersonC
         : trait::VarDefExplicit<PersonC>
         , trait::OStream<PersonC>
@@ -355,15 +340,18 @@ struct PersonC
         : name(name), age(age), hobby(hobby)
     {}
 
-    static decltype(makePersonCDefaults()) default_mem_vals;
+    static auto defaults() {
+        return hana::make_map(
+                    hana::make_pair("name"_s, "Efendi"),
+                    hana::make_pair("age"_s, 18),
+                    hana::make_pair("hobby"_s, trait::NoDefault())
+        );
+    }
 
     std::optional<std::string> name;
     std::optional<int> age;
     Hobby hobby;
 };
-
-
-decltype(makePersonCDefaults()) PersonC::default_mem_vals = makePersonCDefaults();
 
 
 } // namespace

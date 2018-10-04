@@ -62,30 +62,30 @@ namespace detail {
 
 
 ///
-/// Does a type has a static member `default_mem_vals`
+/// Does a type has a static member function `defaults()`
 ///
-constexpr auto const hasDefaultMemVals = boost::hana::is_valid(
-            [](auto t) -> decltype((void) decltype(t)::type::default_mem_vals) {
+constexpr auto const hasDefaults = boost::hana::is_valid(
+            [](auto t) -> decltype((void) decltype(t)::type::defaults()) {
 });
 
 
 ///
-/// Is `name` is present in `default_mem_vals` of `T`
+/// Is `name` is present in `defaults()` of `T`
 ///
 template <typename T, typename S>
 constexpr bool present(S name) {
     using Found = decltype(
-        name ^boost::hana::in^ boost::hana::keys(T::default_mem_vals));
+        name ^boost::hana::in^ boost::hana::keys(T::defaults()));
     return boost::hana::value<Found>();
 }
 
 
 ///
-/// Does type of provided entry in `default_mem_vals` for `name` is `NoDefault`
+/// Does type of provided entry in `defaults()` for `name` is `NoDefault`
 ///
 template <typename T, typename S>
 constexpr bool noDefault(S name) {
-    return std::is_same_v<std::decay_t<decltype(T::default_mem_vals[name])>,
+    return std::is_same_v<std::decay_t<decltype(T::defaults()[name])>,
                           NoDefault>;
 }
 
@@ -105,14 +105,14 @@ constexpr bool hasDefaultValue(S name) {
 
 template <typename T>
 constexpr void checkOrphanKeys(rp::Type<T> const&) {
-    constexpr decltype(boost::hana::keys(T::default_mem_vals)) keys;
+    constexpr decltype(boost::hana::keys(T::defaults())) keys;
     boost::hana::for_each(
         keys,
         [](auto key) {
             constexpr decltype(boost::hana::keys(T())) keys;
             BOOST_HANA_CONSTANT_ASSERT_MSG(
                 key ^boost::hana::in^ keys,
-                "There are unknown fields in default_mem_vals");
+                "There are unknown fields in defaults()");
         });
 }
 
@@ -188,7 +188,7 @@ protected:
 ///     `static Variant toVariant(Derived)`
 /// 	`static Derived fromVariant(Variant)`
 ///
-/// Requires a static member `default_mem_vals` of hana map to be presented in
+/// Requires a static member function `defaults` of hana map to be presented in
 /// `Derived`, where the kays are member names and the values are convertible
 /// to the corresponding members.
 ///
@@ -217,8 +217,8 @@ struct VarDef {
         using namespace boost::hana::literals;
 
         static_assert(
-            detail::hasDefaultMemVals(boost::hana::type_c<Derived>),
-            "The T must have `defail_mem_vals` static member");
+            detail::hasDefaults(boost::hana::type_c<Derived>),
+            "The T must have `defaults` static member function");
         detail::checkOrphanKeys(rp::type_c<Derived>);
 
         Derived ret;
@@ -233,13 +233,13 @@ struct VarDef {
                 if constexpr (detail::hasDefaultValue<Derived>(name)) {
                     BOOST_HANA_CONSTEXPR_ASSERT_MSG(
                         (std::is_convertible_v<
-                            std::decay_t<decltype(Derived::default_mem_vals[name])>,
+                            std::decay_t<decltype(Derived::defaults()[name])>,
                             std::decay_t<decltype(value(std::declval<Derived>()))>>),
                         "The provided default type in"_s +
-                        " default_mem_vals for "_s + name +
+                        " defaults() for "_s + name +
                         " does not match with the actual type"_s);
 
-                    tmp = Derived::default_mem_vals[name];
+                    tmp = Derived::defaults()[name];
                 } else if constexpr (
                             !rp::isOptional(rp::type_c<decltype(tmp)>)) {
                     throw std::logic_error(
@@ -273,8 +273,8 @@ protected:
 ///     `static Variant toVariant(Derived)`
 /// 	`static Derived fromVariant(Variant)`
 ///
-/// Requires a static member `default_mem_vals` of hana map to be presented in
-/// `Derived`, where the kays are member names and the values are convertible
+/// Requires a static member function `defaults()` of hana map to be presented
+/// in `Derived`, where the kays are member names and the values are convertible
 /// to the corresponding members.
 ///
 /// Ensures:
@@ -298,8 +298,8 @@ struct VarDefExplicit : private VarDef<Derived> {
         using namespace boost::hana::literals;
 
         static_assert(
-                detail::hasDefaultMemVals(boost::hana::type_c<Derived>),
-                "The T must have `defail_mem_vals` static member");
+                detail::hasDefaults(boost::hana::type_c<Derived>),
+                "The T must have `defaults` static member function");
 
         detail::checkOrphanKeys(rp::type_c<Derived>);
 
@@ -310,7 +310,7 @@ struct VarDefExplicit : private VarDef<Derived> {
                     BOOST_HANA_CONSTEXPR_ASSERT_MSG(
                         rp::DependentFalse<Derived>::value,
                         name +
-                        " not present in default_mem_vals"_s);
+                        " not present in defaults()"_s);
                 }
             }));
     }
