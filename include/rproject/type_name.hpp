@@ -52,3 +52,25 @@ constexpr std::string_view unqualifiedTypeName() {
 #error "Not supported"
 #endif
 }
+
+
+///
+/// Get unqualified type name
+///
+template <class T>
+constexpr std::string_view qualifiedTypeName() {
+    using namespace std;
+
+#ifdef __clang__
+#error "Not supported"
+
+#elif defined(__GNUC__)
+    string_view p = __PRETTY_FUNCTION__;
+    auto const start = p.find("T = ") + 4;
+    auto const end = p.find(';', start);
+    return string_view(p.data() + start, end - start);
+
+#elif defined(_MSC_VER)
+#error "Not supported"
+#endif
+}

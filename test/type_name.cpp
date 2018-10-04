@@ -39,9 +39,33 @@ namespace a { struct Xyz {}; }
 struct Dum { struct Zum {}; };
 
 
+template <typename T>
+struct X {};
+
+
+template <bool b>
+struct Y {};
+
+
+enum class E { e1 };
+
+
+template <E e>
+struct Z {};
+
+
 TEST_CASE("Check typeName", "[utilities]") {
     REQUIRE(unqualifiedTypeName<Def>() == "Def");
     REQUIRE(unqualifiedTypeName<a::Xyz>() == "Xyz");
     REQUIRE(unqualifiedTypeName<Dum::Zum>() == "Zum");
     static_assert(unqualifiedTypeName<Def>() == "Def");
+
+    REQUIRE(qualifiedTypeName<Def>() == "Def");
+    REQUIRE(qualifiedTypeName<a::Xyz>() == "a::Xyz");
+    REQUIRE(qualifiedTypeName<Dum::Zum>() == "Dum::Zum");
+    static_assert(qualifiedTypeName<Def>() == "Def");
+
+    REQUIRE(qualifiedTypeName<X<Dum>>() == "X<Dum>");
+    REQUIRE(qualifiedTypeName<Y<true>>() == "Y<true>");
+    REQUIRE(qualifiedTypeName<Z<E::e1>>() == "Z<(E)0>");
 }
