@@ -9,6 +9,11 @@
 #include <type_safe/constrained_type.hpp>
 #include <type_safe/types.hpp>
 
+// hana
+#include <boost/hana/tuple.hpp>
+#include <boost/hana/type.hpp>
+#include <boost/hana/any_of.hpp>
+
 // std
 #include <optional>
 #include <type_traits>
@@ -17,11 +22,28 @@
 
 
 namespace rp {
+
+
+template <typename... Args>
+struct S {
+    template <typename T>
+    using push_front = S<T, Args...>;
+
+    template <template <class...> class T>
+    using rebind = T<Args...>;
+
+    template <typename Key>
+    constexpr static bool convertible() {
+        return boost::hana::any_of(
+                    boost::hana::tuple<boost::hana::type<Args>...>{},
+                    [](auto x) {
+            return std::is_convertible_v<Key, typename decltype(x)::type>;
+        });
+    }
+};
+
+
 namespace detail {
-
-
-template <typename ...Args>
-struct S;
 
 
 template <typename ...Args>
@@ -63,7 +85,7 @@ constexpr Type<T> type_c;
 
 template <typename F, typename ...Args>
 constexpr bool callable(F&&, Type<Args> const&...) noexcept {
-    return detail::Callable<F, detail::S<Args...>>::value;
+    return detail::Callable<F, S<Args...>>::value;
 }
 
 

@@ -28,7 +28,7 @@
 
 // local
 #include <rproject/meta.hpp>
-#include <rproject/variant_fwd.hpp>
+#include <rproject/variant.hpp>
 #include <rproject/when.hpp>
 
 // 3rd
@@ -42,54 +42,56 @@
 
 
 namespace trait {
-namespace concept_ {
 
 
 template <typename T>
-struct ToVariant {
-    static constexpr auto has_toVariant = boost::hana::is_valid([](auto t)
-        -> decltype((void)decltype(t)::type::toVariant) {
-    });
+struct HasToVariantImpl {
+    static void var(Variant const&);
+    template <typename U, typename = decltype(
+              var(U::toVariant(std::declval<U>())))>
+    static std::true_type test(rp::Type<U> const&);
+    static std::false_type test(...);
+    static constexpr auto const value = decltype(test(rp::type_c<T>))();
+};
 
-    template <typename U,
-              bool = std::is_same_v<decltype(U::toVariant(std::declval<U&&>())), Variant>>
-    struct Ret : std::false_type {
-        static_assert(
-                rp::DependentFalse<U>::value,
-                "Return type should be Variant");
-    };
 
-    template <typename U>
-    struct Ret<U, true> : std::true_type {};
-
-    template <typename U,
-              bool = rp::callable(U::toVariant, rp::type_c<U>)>
-    struct Sig : std::false_type {
-        static_assert(
-                rp::DependentFalse<U>::value,
-                "Signature should be toVariant(T)");
-    };
-
-    template <typename U>
-    struct Sig<U, true> : Ret<U> {};
-
-    template <typename U, bool v = has_toVariant(boost::hana::type_c<U>)>
-    struct HasToVariant : std::false_type {
-        static_assert(
-                rp::DependentFalse<U>::value ,
-                "Missing toVariant static member function");
-    };
-
-    template <typename U>
-    struct HasToVariant<U, true> : Sig<U> {};
-
-    static constexpr auto check() {
-        return HasToVariant<T>::value;
+struct HasToVariantT {
+    template <typename T>
+    constexpr auto operator()(rp::Type<T> const&) const {
+        return HasToVariantImpl<std::decay_t<T>>::value;
     }
 };
 
 
-} // namespace concept_
+///
+/// Tests if type has Variant T::toVariant(T)
+///
+constexpr HasToVariantT hasToVariant;
+
+
+template <typename T>
+struct HasFromVariantImpl {
+    static void var(T const&);
+    template <typename U, typename = decltype(
+              var(U::fromVariant(std::declval<Variant>())))>
+    static std::true_type test(rp::Type<U> const&);
+    static std::false_type test(...);
+    static constexpr auto const value = decltype(test(rp::type_c<T>))();
+};
+
+
+struct HasFromVariantT {
+    template <typename T>
+    constexpr auto operator()(rp::Type<T> const&) const {
+        return HasFromVariantImpl<std::decay_t<T>>::value;
+    }
+};
+
+
+///
+/// Tests if type has T T::fromVariant(Variant)
+///
+constexpr HasFromVariantT hasFromVariant;
 
 
 ///
@@ -100,21 +102,32 @@ struct ToVariantImpl : ToVariantImpl<T, When<true>> {};
 
 
 ///
-/// Specialization to types with `static Variant T::toVariant(T)`
+/// Fallback
 ///
 template <typename T, bool condition>
 struct ToVariantImpl<T, When<condition>> {
-    static_assert(concept_::ToVariant<T>::check());
+    static Variant apply(T const&) {
+        static_assert(rp::DependentFalse<T>::value,
+                      "No conversion to Variant is provided");
+        return {};
+    }
+};
+
+
+///
+/// Specialization to types with `static Variant T::toVariant(T)`
+///
+template <typename T>
+struct ToVariantImpl<T, When<hasToVariant(rp::type_c<T>)>> {
     static Variant apply(T const& x) { return T::toVariant(x); }
 };
 
 
 ///
-/// Specialization for types for which Variant have constructor
+/// Specialization Variant build-in supported types
 ///
 template <typename T>
-struct ToVariantImpl<T, When<rp::detail::Valid<
-        decltype(Variant(std::declval<T>()))>::value>> {
+struct ToVariantImpl<T, When<Variant::Types::convertible<T>()>> {
     static Variant apply(T x) { return Variant(x); }
 };
 
@@ -159,7 +172,9 @@ struct ToVariantImpl<T,
 /// Specialization for `type_safe::strong_typedef`
 ///
 template <typename T>
-struct ToVariantImpl<T, When<rp::strongTypeDef(rp::type_c<T>)>> {
+struct ToVariantImpl<T, When<
+        !hasToVariant(rp::type_c<T>) &&
+        rp::strongTypeDef(rp::type_c<T>)>> {
     static Variant apply(T const& st) {
         using U = type_safe::underlying_type<T>;
         return ToVariantImpl<U>::apply(static_cast<U const&>(st));
@@ -243,62 +258,24 @@ template <typename T, typename = void>
 struct FromVariantImpl : FromVariantImpl<T, When<true>> {};
 
 
-namespace concept_ {
-
-
-template <typename T>
-struct FromVariant {
-    static constexpr auto has_fromVariant = boost::hana::is_valid([](auto t)
-        -> decltype((void)decltype(t)::type::fromVariant) {
-    });
-
-    template <typename U,
-              bool = std::is_same_v<decltype(U::fromVariant(Variant())), U>>
-    struct Ret : std::false_type {
-        static_assert(
-                rp::DependentFalse<U>::value,
-                "Return type should be T");
-    };
-
-    template <typename U>
-    struct Ret<U, true> : std::true_type {};
-
-    template <typename U,
-              bool = rp::callable(U::fromVariant, rp::type_c<Variant>)>
-    struct Sig : std::false_type {
-        static_assert(
-                rp::DependentFalse<U>::value,
-                "Signature should be fromVariant(Variant)");
-    };
-
-    template <typename U>
-    struct Sig<U, true> : Ret<U> {};
-
-    template <typename U, bool v = has_fromVariant(boost::hana::type_c<U>)>
-    struct HasFromVariant : std::false_type {
-        static_assert(
-                rp::DependentFalse<U>::value ,
-                "Missing fromVariant static member function");
-    };
-
-    template <typename U>
-    struct HasFromVariant<U, true> : Sig<U> {};
-
-    static constexpr auto check() {
-        return HasFromVariant<T>::value;
+///
+/// Fallback
+///
+template <typename T, bool condition>
+struct FromVariantImpl<T, When<condition>> {
+    static T apply(Variant const&) {
+        static_assert(rp::DependentFalse<T>::value,
+                      "No conversion from Variant is provided");
+        return {};
     }
 };
-
-
-} // namespace
 
 
 ///
 /// Specialization to types with `static T T::fromVariant(Variant)`
 ///
-template <typename T, bool condition>
-struct FromVariantImpl<T, When<condition>> {
-    static_assert(concept_::FromVariant<T>::check());
+template <typename T>
+struct FromVariantImpl<T, When<hasFromVariant(rp::type_c<T>)>> {
     static T apply(Variant const& x) { return T::fromVariant(x); }
 };
 
@@ -307,8 +284,7 @@ struct FromVariantImpl<T, When<condition>> {
 /// Specialization for types for which Variant have conversion
 ///
 template <typename T>
-struct FromVariantImpl<T,
-        When<rp::detail::Valid<decltype(static_cast<T>(Variant()))>::value>> {
+struct FromVariantImpl<T, When<Variant::Types::convertible<T>()>> {
     static T apply(Variant const& x) { return static_cast<T>(x); }
 };
 
@@ -351,7 +327,9 @@ struct FromVariantImpl<T, When<rp::isContainer(rp::type_c<T>) &&
 /// Specialization for `type_safe::strong_typedef`
 ///
 template <typename T>
-struct FromVariantImpl<T, When<rp::strongTypeDef(rp::type_c<T>)>> {
+struct FromVariantImpl<T, When<
+        !hasFromVariant(rp::type_c<T>) &&
+        rp::strongTypeDef(rp::type_c<T>)>> {
     static T apply(Variant const& var) {
         using U = type_safe::underlying_type<T>;
         return static_cast<T>(FromVariantImpl<U>::apply(var));

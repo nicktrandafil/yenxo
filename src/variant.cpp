@@ -37,20 +37,7 @@
 #include <deque>
 
 
-using Val = std::variant<
-    std::monostate,
-    bool,
-    char,
-    short int,
-    unsigned short int,
-    int,
-    unsigned int,
-    signed long,
-    unsigned long,
-    double,
-    std::string,
-    Variant::Vec,
-    Variant::Map>;
+using Val = Variant::Types::push_front<std::monostate>::rebind<std::variant>;
 
 
 struct Variant::Impl {

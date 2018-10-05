@@ -28,6 +28,7 @@
 
 // local
 #include <rproject/pimpl.hpp>
+#include <rproject/meta.hpp>
 
 // 3rd
 #include <rapidjson/document.h>
@@ -313,6 +314,21 @@ public:
     /// Stream operator
     ///
     friend std::ostream& operator<<(std::ostream& os, Variant const& var);
+
+    /// List of supported types
+    using Types = rp::S<
+        bool,
+        char,
+        short int,
+        unsigned short int,
+        int,
+        unsigned int,
+        signed long,
+        unsigned long,
+        double,
+        std::string,
+        Variant::Vec,
+        Variant::Map>;
 
 private:
     struct Impl;

@@ -48,6 +48,16 @@ using namespace std::literals;
 namespace {
 
 
+struct X {
+    static Variant toVariant(X const&);
+    static X fromVariant(Variant const&);
+};
+
+
+static_assert(trait::hasFromVariant(rp::type_c<X>));
+static_assert(trait::hasToVariant(rp::type_c<X>));
+
+
 struct Hobby
         : trait::Var<Hobby>
         , trait::UpdateFromVar<Hobby>

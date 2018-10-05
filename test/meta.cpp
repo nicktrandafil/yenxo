@@ -25,6 +25,10 @@
 
 #include <rproject/meta.hpp>
 
+
+namespace hana = boost::hana;
+
+
 #if __GNUG__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
@@ -64,3 +68,4 @@ static_assert(rp::isString(rp::type_c<std::string>));
 static_assert(rp::isPair(rp::type_c<std::pair<int, std::string>>));
 static_assert(!rp::isKeyValue(rp::type_c<std::pair<int, std::string>>));
 static_assert(rp::isKeyValue(rp::type_c<std::pair<std::string, std::string>>));
+static_assert(rp::S<int, char, bool>::convertible<int>());
