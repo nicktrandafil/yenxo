@@ -42,6 +42,7 @@ add_library(
 
     src/variant.cpp
     include/rproject/variant.hpp
+    include/rproject/variant_fwd.hpp
 
     include/rproject/variant_traits.hpp
     include/rproject/variant_conversion.hpp

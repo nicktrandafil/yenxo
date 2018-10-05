@@ -28,7 +28,7 @@
 
 // local
 #include <rproject/meta.hpp>
-#include <rproject/variant.hpp>
+#include <rproject/variant_fwd.hpp>
 #include <rproject/when.hpp>
 
 // 3rd
@@ -127,7 +127,7 @@ struct ToVariantImpl<T,
         When<rp::isContainer(rp::type_c<T>) &&
              rp::isKeyValue(rp::type_c<typename T::value_type>)>> {
     static Variant apply(T const& map) {
-        Variant::Map ret;
+        VariantMap ret;
         for (auto const& x: map) {
             ret.emplace(
                 ToVariantImpl<typename T::key_type>::apply(x.first),
@@ -146,7 +146,7 @@ struct ToVariantImpl<T,
         When<rp::isContainer(rp::type_c<T>) &&
              !rp::isKeyValue(rp::type_c<typename T::value_type>)>> {
     static Variant apply(T const& vec) {
-        Variant::Vec ret;
+        VariantVec ret;
         for (auto const& x: vec) {
             ret.push_back(ToVariantImpl<std::decay_t<decltype(x)>>::apply(x));
         }

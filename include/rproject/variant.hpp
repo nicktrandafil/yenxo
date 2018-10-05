@@ -34,6 +34,7 @@
 
 // std
 #include <string>
+#include <type_traits>
 #include <vector>
 #include <unordered_map>
 
@@ -111,6 +112,18 @@ public:
 
     explicit Variant(Map const&);
     explicit Variant(Map&&);
+
+    template <typename T,
+              typename = decltype(T::toVariant(std::declval<T>()))>
+    explicit Variant(T const& x)
+        : Variant(T::toVariant(x))
+    {}
+
+    template <typename T,
+              typename = decltype(T::fromVariant(std::declval<Variant>()))>
+    explicit operator T() const {
+        return T::fromVariant(*this);
+    }
 
     // copy
     Variant(Variant const& rhs);
@@ -305,6 +318,10 @@ private:
     struct Impl;
     Pimpl<Impl> impl;
 };
+
+
+using VariantMap = std::unordered_map<std::string, Variant>;
+using VariantVec = std::vector<Variant>;
 
 
 template <> inline bool Variant::asOr<bool>(bool x) const { return booleanOr(x); }

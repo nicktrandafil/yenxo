@@ -338,4 +338,17 @@ TEST_CASE("Check Variant", "[Variant]") {
         os << var3;
         REQUIRE(expected3 == os.str());
     }
+
+    SECTION("Conversion for user defined types") {
+        struct X {
+            static Variant toVariant(X const& x) { return Variant(x.x); }
+            static X fromVariant(Variant const& x) { return X{x.integer()}; }
+            bool operator==(X const& rhs) const { return x == rhs.x; }
+            int x;
+        };
+
+        REQUIRE(Variant(1) == Variant(X{1}));
+        REQUIRE(X{1} == static_cast<X>(Variant(1)));
+        REQUIRE(X{1} == X(Variant(1)));
+    }
 }
