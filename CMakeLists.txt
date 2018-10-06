@@ -66,10 +66,10 @@ target_include_directories(${PROJECT_NAME}
 
     PUBLIC
     $<INSTALL_INTERFACE:include>
+    ${Boost_INCLUDE_DIRS}
 
     INTERFACE
     ${RAPIDJSON_INCLUDE_DIRS}
-    ${Boost_INCLUDE_DIRS}
 )
 
 target_compile_options(${PROJECT_NAME}
