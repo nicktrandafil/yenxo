@@ -150,7 +150,7 @@ struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
                         std::to_string(x));
         }
 
-        return x;
+        return T(x);
     }
 };
 
@@ -200,7 +200,7 @@ struct IntegralCheckedCast<T, U, When<condition>> {
                         std::string(rp::unqualifiedTypeName<T>()),
                         std::to_string(x));
         }
-        return x;
+        return T(x);
     }
 };
 
