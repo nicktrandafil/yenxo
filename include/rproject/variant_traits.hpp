@@ -26,9 +26,6 @@
 #pragma once
 
 
-#define BOOST_HANA_CONFIG_ENABLE_STRING_UDL
-
-
 // local
 #include <rproject/meta.hpp>
 #include <rproject/variant.hpp>

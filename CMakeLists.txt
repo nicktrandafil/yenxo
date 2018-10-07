@@ -79,6 +79,9 @@ target_compile_options(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} PUBLIC type_safe)
 
+target_compile_definitions(${PROJECT_NAME}
+    PUBLIC "BOOST_HANA_CONFIG_ENABLE_STRING_UDL")
+
 option(TESTING "Enable testing" ON)
 
 #
