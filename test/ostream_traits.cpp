@@ -30,6 +30,9 @@
 #include <catch2/catch.hpp>
 
 
+using namespace rp;
+
+
 namespace {
 
 

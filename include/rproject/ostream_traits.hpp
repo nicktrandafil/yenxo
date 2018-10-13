@@ -38,7 +38,7 @@
 #include <ostream>
 
 
-namespace trait {
+namespace rp::trait {
 
 
 ///
@@ -91,4 +91,4 @@ struct OStream {
 };
 
 
-} // namespace
+}

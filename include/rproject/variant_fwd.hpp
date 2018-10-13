@@ -31,6 +31,12 @@
 #include <unordered_map>
 
 
+namespace rp {
+
+
 class Variant;
 using VariantMap = std::unordered_map<std::string, Variant>;
 using VariantVec = std::vector<Variant>;
+
+
+}

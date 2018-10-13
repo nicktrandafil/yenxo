@@ -34,6 +34,9 @@
 #include <catch2/catch.hpp>
 
 
+using namespace rp;
+
+
 namespace {
 
 
@@ -57,7 +60,7 @@ struct UserDefinedStr : private std::string {
 } // namespace
 
 
-namespace trait {
+namespace rp {
 
 
 template <>
@@ -76,7 +79,7 @@ struct ToVariantImpl<UserDefinedStr> {
 };
 
 
-} // namespace trait
+}
 
 
 namespace {

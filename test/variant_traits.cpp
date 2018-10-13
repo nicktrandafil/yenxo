@@ -41,6 +41,9 @@
 namespace hana = boost::hana;
 
 
+using namespace rp;
+
+
 using namespace hana::literals;
 using namespace std::literals;
 
@@ -54,8 +57,8 @@ struct X {
 };
 
 
-static_assert(trait::hasFromVariant(rp::type_c<X>));
-static_assert(trait::hasToVariant(rp::type_c<X>));
+static_assert(hasFromVariant(rp::type_c<X>));
+static_assert(hasToVariant(rp::type_c<X>));
 
 
 struct Hobby
@@ -133,13 +136,13 @@ BOOST_HANA_ADAPT_STRUCT(Dict, x, map);
 
 
 TEST_CASE("detail::toVariant", "[variant_trait_helpers]") {
-    auto const x = trait::toVariant(5);
+    auto const x = toVariant(5);
     REQUIRE(x == Variant(5));
-    REQUIRE(5 == trait::fromVariant<int>(Variant(5)));
+    REQUIRE(5 == fromVariant<int>(Variant(5)));
 
-    auto const x1 = trait::toVariant("Hello");
+    auto const x1 = toVariant("Hello");
     REQUIRE(x1 == Variant("Hello"));
-    REQUIRE("Hello" ==trait::fromVariant<std::string>(Variant("Hello")));
+    REQUIRE("Hello" == fromVariant<std::string>(Variant("Hello")));
 
     struct X {
         static Variant toVariant(X const& x) { return Variant(x.m); }
@@ -147,9 +150,9 @@ TEST_CASE("detail::toVariant", "[variant_trait_helpers]") {
         int m{5};
     };
 
-    auto const x2 = trait::toVariant(X());
+    auto const x2 = toVariant(X());
     REQUIRE(x2 == Variant(5));
-    REQUIRE(6 == trait::fromVariant<X>(Variant(6)).m);
+    REQUIRE(6 == fromVariant<X>(Variant(6)).m);
 }
 
 

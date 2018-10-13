@@ -31,6 +31,9 @@
 #include <type_traits>
 
 
+namespace rp {
+
+
 ///
 /// Generic 'Pimpl' idiom implementation
 ///
@@ -115,3 +118,6 @@ public:
 private:
     std::unique_ptr<T> m;
 };
+
+
+}

@@ -37,6 +37,9 @@
 #include <deque>
 
 
+namespace rp {
+
+
 using Val = Variant::Types::push_front<std::monostate>::rebind<std::variant>;
 
 
@@ -609,4 +612,7 @@ std::ostream& operator<<(std::ostream& os, Variant const& var) {
         }
     }, var.impl->m);
     return os;
+}
+
+
 }

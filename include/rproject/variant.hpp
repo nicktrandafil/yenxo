@@ -40,6 +40,9 @@
 #include <unordered_map>
 
 
+namespace rp {
+
+
 ///
 /// An error identifying `Variant` error
 ///
@@ -348,3 +351,6 @@ template <> inline int Variant::asOr<int>(int x) const { return integerOr(x); }
 template <> inline unsigned int Variant::asOr<unsigned int>(unsigned int x) const { return uintOr(x); }
 template <> inline signed long Variant::asOr<signed long>(signed long x) const { return longInteOr(x); }
 template <> inline unsigned long Variant::asOr<unsigned long>(unsigned long x) const { return ulongIntOr(x); }
+
+
+}

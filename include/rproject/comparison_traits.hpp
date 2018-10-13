@@ -30,7 +30,7 @@
 #include <boost/hana.hpp>
 
 
-namespace trait {
+namespace rp::trait {
 
 
 ///
@@ -69,4 +69,4 @@ protected:
 };
 
 
-} // namespace trait
+} // namespace rp::trait

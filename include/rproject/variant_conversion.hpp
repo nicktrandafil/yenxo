@@ -41,7 +41,7 @@
 #include <type_traits>
 
 
-namespace trait {
+namespace rp {
 
 
 template <typename T>
@@ -396,4 +396,4 @@ template <typename T>
 constexpr FromVariantT<T> fromVariant;
 
 
-} // namespace trait
+}

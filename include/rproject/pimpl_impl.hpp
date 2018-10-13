@@ -26,6 +26,9 @@
 #pragma once
 
 
+namespace rp {
+
+
 template <typename T>
 Pimpl<T>::Pimpl() : m(new T) {}
 
@@ -83,3 +86,6 @@ T& Pimpl<T>::operator*() noexcept { return *m; }
 
 template <typename T>
 T const& Pimpl<T>::operator*() const noexcept { return *m; }
+
+
+}

@@ -44,7 +44,7 @@
 ///
 
 
-namespace trait {
+namespace rp::trait {
 
 
 ///
