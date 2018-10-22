@@ -47,8 +47,6 @@ struct EqualityComparison {
                     boost::hana::fuse([](auto const& lhs, auto const& rhs) {
             return lhs == rhs;
         }));
-
-        return true;
     }
 
     friend bool operator!=(Derived const& lhs, Derived const& rhs) {
@@ -60,8 +58,6 @@ struct EqualityComparison {
                     boost::hana::fuse([](auto const& lhs, auto const& rhs) {
             return lhs != rhs;
         }));
-
-        return true;
     }
 
 protected:

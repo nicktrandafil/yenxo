@@ -153,6 +153,25 @@ TEST_CASE("detail::toVariant", "[variant_trait_helpers]") {
     auto const x2 = toVariant(X());
     REQUIRE(x2 == Variant(5));
     REQUIRE(6 == fromVariant<X>(Variant(6)).m);
+
+    SECTION("quick struct") {
+        Variant::Map const m{std::make_pair("a", Variant(1))};
+        auto hm = hana::make_map(hana::make_pair("a"_s, 1));
+        auto const hm_v = toVariant(hm);
+        REQUIRE(hm_v == Variant(m));
+        REQUIRE(boost::hana::equal(fromVariant<decltype(hm)>(Variant(m)), hm));
+        auto hm2 = hana::make_map(hana::make_pair("b"_s, 2));
+        REQUIRE_THROWS_WITH(fromVariant<decltype(hm2)>(Variant(m)),
+                            "b not found in map");
+    }
+
+    SECTION("integral constant") {
+        Variant ok(2);
+        Variant not_ok(3);
+        std::integral_constant<int, 2> c;
+        REQUIRE(fromVariant<decltype(c)>(ok) == c);
+        REQUIRE_THROWS_AS(fromVariant<decltype(c)>(not_ok), VariantBadType);
+    }
 }
 
 

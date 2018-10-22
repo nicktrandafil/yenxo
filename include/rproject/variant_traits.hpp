@@ -166,8 +166,7 @@ struct Var {
                             boost::hana::to<char const*>(name) +
                             " not found in map"s);
             } else {
-                tmp = detail::fromVariantWrap<
-                        std::decay_t<decltype(tmp)>>(it->second);
+                tmp = detail::fromVariantWrap<decltype(tmp)>(it->second);
             }
         }));
 
@@ -247,11 +246,9 @@ struct VarDef {
 
             } else {
                 if constexpr (rp::isOptional(rp::type_c<decltype(tmp)>)) {
-                    tmp = detail::fromVariantWrap<
-                            std::decay_t<decltype(*tmp)>>(it->second);
+                    tmp = detail::fromVariantWrap<decltype(*tmp)>(it->second);
                 } else {
-                    tmp = detail::fromVariantWrap<
-                            std::decay_t<decltype(tmp)>>(it->second);
+                    tmp = detail::fromVariantWrap<decltype(tmp)>(it->second);
                 }
             }
         }));
@@ -332,8 +329,7 @@ struct UpdateFromVar {
                                   boost::hana::fuse([&](auto name, auto value) {
                 if (boost::hana::to<char const*>(name) != v.first) { return; }
                 auto& tmp = value(self);
-                tmp = detail::fromVariantWrap<
-                        std::decay_t<decltype(tmp)>>(v.second);
+                tmp = detail::fromVariantWrap<decltype(tmp)>(v.second);
                 found = true;
             }));
 

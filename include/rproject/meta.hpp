@@ -11,6 +11,7 @@
 
 // hana
 #include <boost/hana/tuple.hpp>
+#include <boost/hana/contains.hpp>
 #include <boost/hana/type.hpp>
 #include <boost/hana/any_of.hpp>
 
@@ -39,6 +40,12 @@ struct S {
                     [](auto x) {
             return std::is_convertible_v<Key, typename decltype(x)::type>;
         });
+    }
+
+    template <typename Key>
+    constexpr static bool anyOf() {
+        return boost::hana::type_c<Key> ^boost::hana::in^
+                boost::hana::tuple<boost::hana::type<Args>...>{};
     }
 };
 

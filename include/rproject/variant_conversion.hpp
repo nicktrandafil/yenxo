@@ -49,15 +49,15 @@ struct HasToVariantImpl {
     static void var(Variant const&);
     template <typename U, typename = decltype(
               var(U::toVariant(std::declval<U>())))>
-    static std::true_type test(rp::Type<U> const&);
+    static std::true_type test(Type<U> const&);
     static std::false_type test(...);
-    static constexpr auto const value = decltype(test(rp::type_c<T>))();
+    static constexpr auto const value = decltype(test(type_c<T>))();
 };
 
 
 struct HasToVariantT {
     template <typename T>
-    constexpr auto operator()(rp::Type<T> const&) const {
+    constexpr auto operator()(Type<T> const&) const {
         return HasToVariantImpl<std::decay_t<T>>::value;
     }
 };
@@ -69,20 +69,32 @@ struct HasToVariantT {
 constexpr HasToVariantT hasToVariant;
 
 
+struct ToVariantT {
+    template <typename ...Args>
+    auto operator()(Args&&... args) const;
+};
+
+
+///
+/// Convinient shortcut function
+///
+constexpr ToVariantT toVariant;
+
+
 template <typename T>
 struct HasFromVariantImpl {
     static void var(T const&);
     template <typename U, typename = decltype(
               var(U::fromVariant(std::declval<Variant>())))>
-    static std::true_type test(rp::Type<U> const&);
+    static std::true_type test(Type<U> const&);
     static std::false_type test(...);
-    static constexpr auto const value = decltype(test(rp::type_c<T>))();
+    static constexpr auto const value = decltype(test(type_c<T>))();
 };
 
 
 struct HasFromVariantT {
     template <typename T>
-    constexpr auto operator()(rp::Type<T> const&) const {
+    constexpr auto operator()(Type<T> const&) const {
         return HasFromVariantImpl<std::decay_t<T>>::value;
     }
 };
@@ -107,7 +119,7 @@ struct ToVariantImpl : ToVariantImpl<T, When<true>> {};
 template <typename T, bool condition>
 struct ToVariantImpl<T, When<condition>> {
     static Variant apply(T const&) {
-        static_assert(rp::DependentFalse<T>::value,
+        static_assert(DependentFalse<T>::value,
                       "No conversion to Variant is provided");
         return {};
     }
@@ -118,7 +130,7 @@ struct ToVariantImpl<T, When<condition>> {
 /// Specialization to types with `static Variant T::toVariant(T)`
 ///
 template <typename T>
-struct ToVariantImpl<T, When<hasToVariant(rp::type_c<T>)>> {
+struct ToVariantImpl<T, When<hasToVariant(type_c<T>)>> {
     static Variant apply(T const& x) { return T::toVariant(x); }
 };
 
@@ -137,8 +149,8 @@ struct ToVariantImpl<T, When<Variant::Types::convertible<T>()>> {
 ///
 template <typename T>
 struct ToVariantImpl<T,
-        When<rp::isContainer(rp::type_c<T>) &&
-             rp::isKeyValue(rp::type_c<typename T::value_type>)>> {
+        When<isContainer(type_c<T>) &&
+             isKeyValue(type_c<typename T::value_type>)>> {
     static Variant apply(T const& map) {
         VariantMap ret;
         for (auto const& x: map) {
@@ -156,8 +168,8 @@ struct ToVariantImpl<T,
 ///
 template <typename T>
 struct ToVariantImpl<T,
-        When<rp::isContainer(rp::type_c<T>) &&
-             !rp::isKeyValue(rp::type_c<typename T::value_type>)>> {
+        When<isContainer(type_c<T>) &&
+             !isKeyValue(type_c<typename T::value_type>)>> {
     static Variant apply(T const& vec) {
         VariantVec ret;
         for (auto const& x: vec) {
@@ -173,8 +185,7 @@ struct ToVariantImpl<T,
 ///
 template <typename T>
 struct ToVariantImpl<T, When<
-        !hasToVariant(rp::type_c<T>) &&
-        rp::strongTypeDef(rp::type_c<T>)>> {
+        !hasToVariant(type_c<T>) && strongTypeDef(type_c<T>)>> {
     static Variant apply(T const& st) {
         using U = type_safe::underlying_type<T>;
         return ToVariantImpl<U>::apply(static_cast<U const&>(st));
@@ -186,7 +197,7 @@ struct ToVariantImpl<T, When<
 /// Specialization for `type_safe::constrained_type`
 ///
 template <typename T>
-struct ToVariantImpl<T, When<rp::constrainedType(rp::type_c<T>)>> {
+struct ToVariantImpl<T, When<constrainedType(type_c<T>)>> {
     static Variant apply(T const& st) {
         return ToVariantImpl<std::decay_t<typename T::value_type>>::apply(
                     st.get_value());
@@ -198,7 +209,7 @@ struct ToVariantImpl<T, When<rp::constrainedType(rp::type_c<T>)>> {
 /// Specialization for `type_safe::integer`
 ///
 template <typename T>
-struct ToVariantImpl<T, When<rp::integerType(rp::type_c<T>)>> {
+struct ToVariantImpl<T, When<integerType(type_c<T>)>> {
     static Variant apply(T const& st) {
         using U = typename T::integer_type;
         return ToVariantImpl<U>::apply(static_cast<U>(st));
@@ -210,7 +221,7 @@ struct ToVariantImpl<T, When<rp::integerType(rp::type_c<T>)>> {
 /// Specialization for `type_safe::floating_point`
 ///
 template <typename T>
-struct ToVariantImpl<T, When<rp::floatingPoint(rp::type_c<T>)>> {
+struct ToVariantImpl<T, When<floatingPoint(type_c<T>)>> {
     static Variant apply(T const& st) {
         using U = typename T::floating_point_type;
         return ToVariantImpl<U>::apply(static_cast<U>(st));
@@ -222,7 +233,7 @@ struct ToVariantImpl<T, When<rp::floatingPoint(rp::type_c<T>)>> {
 /// Specialization for `type_safe::boolean`
 ///
 template <typename T>
-struct ToVariantImpl<T, When<rp::boolean(rp::type_c<T>)>> {
+struct ToVariantImpl<T, When<boolean(type_c<T>)>> {
     static Variant apply(T const& st) {
         using U = bool;
         return ToVariantImpl<U>::apply(static_cast<U>(st));
@@ -230,25 +241,70 @@ struct ToVariantImpl<T, When<rp::boolean(rp::type_c<T>)>> {
 };
 
 
-struct ToVariantT {
-    template <typename ...Args>
-    auto operator()(Args&&... args) const {
-        return ToVariantImpl<std::decay_t<Args>...>::apply(
-                    std::forward<Args>(args)...);
+template <typename T>
+struct HanaMapImpl {
+    template <typename U,
+              typename = std::enable_if_t<
+                  boost::hana::is_a<boost::hana::map_tag, U>>>
+    constexpr static bool isMap() {
+        constexpr auto is_str = [](auto x) {
+            return boost::hana::is_a<boost::hana::string_tag>(x);
+        };
+
+        using All = decltype(boost::hana::all_of(
+            boost::hana::keys(std::declval<U>()), is_str));
+
+        return boost::hana::value<All>();
     }
+
+    template <typename U, typename = std::enable_if_t<isMap<U>()>>
+    static std::true_type test(U&&);
+    static std::false_type test(...);
+    static constexpr auto value = decltype(test(std::declval<T>()))();
+};
+
+
+struct HanaMapT {
+    template <typename T>
+    constexpr bool operator()(Type<T> const&) const {
+        return HanaMapImpl<std::decay_t<T>>::value;
+    }
+};
+
+
+constexpr HanaMapT hanaMap;
+
+
+template <typename T>
+struct ToVariantImpl<T, When<hanaMap(type_c<T>)>> {
+    static Variant apply(T const& map) {
+        Variant::Map ret;
+        boost::hana::for_each(map, boost::hana::fuse([&ret](auto key, auto value) {
+            ret[boost::hana::to<char const*>(key)] = toVariant(value);
+        }));
+        return Variant(ret);
+    }
+};
+
+
+template <typename ...Args>
+auto ToVariantT::operator()(Args&&... args) const {
+    return ToVariantImpl<std::decay_t<Args>...>::apply(
+                std::forward<Args>(args)...);
+}
+
+
+template <typename T>
+struct FromVariantT {
+    auto operator()(Variant const& x) const;
 };
 
 
 ///
 /// Convinient shortcut function
 ///
-//constexpr ToVariantT toVariant;
-
-
 template <typename T>
-constexpr auto toVariant(T&& x) {
-    return ToVariantImpl<std::decay_t<T>>::apply(std::forward<T>(x));
-}
+constexpr FromVariantT<T> fromVariant;
 
 
 ///
@@ -264,7 +320,7 @@ struct FromVariantImpl : FromVariantImpl<T, When<true>> {};
 template <typename T, bool condition>
 struct FromVariantImpl<T, When<condition>> {
     static T apply(Variant const&) {
-        static_assert(rp::DependentFalse<T>::value,
+        static_assert(DependentFalse<T>::value,
                       "No conversion from Variant is provided");
         return {};
     }
@@ -275,7 +331,7 @@ struct FromVariantImpl<T, When<condition>> {
 /// Specialization to types with `static T T::fromVariant(Variant)`
 ///
 template <typename T>
-struct FromVariantImpl<T, When<hasFromVariant(rp::type_c<T>)>> {
+struct FromVariantImpl<T, When<hasFromVariant(type_c<T>)>> {
     static T apply(Variant const& x) { return T::fromVariant(x); }
 };
 
@@ -284,7 +340,7 @@ struct FromVariantImpl<T, When<hasFromVariant(rp::type_c<T>)>> {
 /// Specialization for types for which Variant have conversion
 ///
 template <typename T>
-struct FromVariantImpl<T, When<Variant::Types::convertible<T>()>> {
+struct FromVariantImpl<T, When<Variant::Types::anyOf<T>()>> {
     static T apply(Variant const& x) { return static_cast<T>(x); }
 };
 
@@ -293,8 +349,8 @@ struct FromVariantImpl<T, When<Variant::Types::convertible<T>()>> {
 /// Specialization for `Container`
 ///
 template <typename T>
-struct FromVariantImpl<T, When<rp::isContainer(rp::type_c<T>) &&
-        !rp::isKeyValue(rp::type_c<typename T::value_type>)>> {
+struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
+        !isKeyValue(type_c<typename T::value_type>)>> {
     static T apply(Variant const& var) {
         T ret;
         for (auto const& x: var.vec()) {
@@ -309,8 +365,8 @@ struct FromVariantImpl<T, When<rp::isContainer(rp::type_c<T>) &&
 /// Specialization for `Dict`
 ///
 template <typename T>
-struct FromVariantImpl<T, When<rp::isContainer(rp::type_c<T>) &&
-        rp::isKeyValue(rp::type_c<typename T::value_type>)>> {
+struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
+        isKeyValue(type_c<typename T::value_type>)>> {
     static T apply(Variant const& var) {
         T ret;
         for (auto const& x: var.map()) {
@@ -328,8 +384,7 @@ struct FromVariantImpl<T, When<rp::isContainer(rp::type_c<T>) &&
 ///
 template <typename T>
 struct FromVariantImpl<T, When<
-        !hasFromVariant(rp::type_c<T>) &&
-        rp::strongTypeDef(rp::type_c<T>)>> {
+        !hasFromVariant(type_c<T>) && strongTypeDef(type_c<T>)>> {
     static T apply(Variant const& var) {
         using U = type_safe::underlying_type<T>;
         return static_cast<T>(FromVariantImpl<U>::apply(var));
@@ -341,7 +396,7 @@ struct FromVariantImpl<T, When<
 /// Specialization for `type_safe::constrained_type`
 ///
 template <typename T>
-struct FromVariantImpl<T, When<rp::constrainedType(rp::type_c<T>)>> {
+struct FromVariantImpl<T, When<constrainedType(type_c<T>)>> {
     static T apply(Variant const& var) {
         return T(FromVariantImpl<std::decay_t<typename T::value_type>>::apply(var));
     }
@@ -352,7 +407,7 @@ struct FromVariantImpl<T, When<rp::constrainedType(rp::type_c<T>)>> {
 /// Specialization for `type_safe::integer`
 ///
 template <typename T>
-struct FromVariantImpl<T, When<rp::integerType(rp::type_c<T>)>> {
+struct FromVariantImpl<T, When<integerType(type_c<T>)>> {
     static T apply(Variant const& var) {
         return T(FromVariantImpl<typename T::integer_type>::apply(var));
     }
@@ -363,7 +418,7 @@ struct FromVariantImpl<T, When<rp::integerType(rp::type_c<T>)>> {
 /// Specialization for `type_safe::floating_point`
 ///
 template <typename T>
-struct FromVariantImpl<T, When<rp::floatingPoint(rp::type_c<T>)>> {
+struct FromVariantImpl<T, When<floatingPoint(type_c<T>)>> {
     static T apply(Variant const& var) {
         return T(FromVariantImpl<typename T::floating_point_type>::apply(var));
     }
@@ -374,7 +429,7 @@ struct FromVariantImpl<T, When<rp::floatingPoint(rp::type_c<T>)>> {
 /// Specialization for `type_safe::boolean`
 ///
 template <typename T>
-struct FromVariantImpl<T, When<rp::boolean(rp::type_c<T>)>> {
+struct FromVariantImpl<T, When<boolean(type_c<T>)>> {
     static T apply(Variant const& var) {
         return T(FromVariantImpl<bool>::apply(var));
     }
@@ -382,18 +437,39 @@ struct FromVariantImpl<T, When<rp::boolean(rp::type_c<T>)>> {
 
 
 template <typename T>
-struct FromVariantT {
-    auto operator()(Variant const& x) const {
-        return FromVariantImpl<std::decay_t<T>>::apply(x);
+struct FromVariantImpl<T, When<hanaMap(type_c<T>)>> {
+    static T apply(Variant const& var) {
+        auto const map = var.map();
+        T ret;
+        boost::hana::for_each(ret,
+                              boost::hana::fuse([&](auto key, auto& value) {
+            using namespace std::string_literals;
+            auto const it = map.find(boost::hana::to<char const*>(key));
+            if (map.end() == it) {
+                throw std::logic_error(boost::hana::to<char const*>(key) +
+                                       " not found in map"s);
+            }
+            value = fromVariant<decltype(value)>(it->second);
+        }));
+        return ret;
     }
 };
 
 
-///
-/// Convinient shortcut function
-///
 template <typename T>
-constexpr FromVariantT<T> fromVariant;
+struct FromVariantImpl<T, When<boost::hana::Constant<T>().value>> {
+    static T apply(Variant const& var) {
+        auto const tmp = fromVariant<typename T::value_type>(var);
+        if (tmp != T::value) { throw VariantBadType(); }
+        return T();
+    }
+};
+
+
+template <typename T>
+auto FromVariantT<T>::operator()(Variant const& x) const {
+    return FromVariantImpl<std::decay_t<T>>::apply(x);
+}
 
 
 }
