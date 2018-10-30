@@ -181,7 +181,7 @@ TEST_CASE("Check Variant", "[Variant]") {
                         // no fails
 
                         // min bound
-                        X const y_min_in_x = static_cast<X>(y_min);
+                        auto const y_min_in_x = static_cast<X>(y_min);
                         if (std::to_string(y_min) == std::to_string(y_min_in_x)) {
                             REQUIRE(static_cast<Y>(Variant(y_min_in_x)) == y_min);
                             REQUIRE(Variant(y_min_in_x).asOr<Y>(1) == y_min);
@@ -190,16 +190,18 @@ TEST_CASE("Check Variant", "[Variant]") {
                         auto const y_max = YLimiets::max();
 
                         // max bound
-                        X const y_max_in_x = static_cast<X>(y_max);
+                        auto const y_max_in_x = static_cast<X>(y_max);
                         if (std::to_string(y_max) == std::to_string(y_max_in_x)) {
                             REQUIRE(static_cast<Y>(Variant(y_max_in_x)) == y_max);
                             REQUIRE(Variant(y_max_in_x).asOr<Y>(1) == y_max);
                         }
 
+                        REQUIRE(static_cast<Y>(Variant(X(1))) == Y(1));
+
                         // fails
 
                         // min - 1 out of range
-                        X const y_min_in_x_1 = static_cast<X>(static_cast<double>(y_min) - 1);
+                        auto const y_min_in_x_1 = static_cast<X>(static_cast<double>(y_min) - 1);
                         if (std::to_string(static_cast<double>(y_min) - 1) ==
                                 std::to_string(static_cast<double>(y_min_in_x_1))) {
                             REQUIRE_THROWS_AS(
@@ -223,7 +225,7 @@ TEST_CASE("Check Variant", "[Variant]") {
                         }
 
                         // max + 1 out of range
-                        X const y_max_in_x_1 = static_cast<X>(static_cast<double>(y_max) + 1);
+                        auto const y_max_in_x_1 = static_cast<X>(static_cast<double>(y_max) + 1);
                         if (std::to_string(static_cast<double>(y_max) + 1) ==
                                 std::to_string(static_cast<double>(y_max_in_x_1))) {
                             REQUIRE_THROWS_AS(
