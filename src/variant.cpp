@@ -487,11 +487,11 @@ struct FromRapidJsonValue {
 
     struct Key {
         [[noreturn]] std::string& operator()(Variant&) const {
-            assert(false);
+            throw std::runtime_error("JSON structure error");
         }
 
         [[noreturn]] std::string& operator()(Variant::Vec&) const {
-            assert(false);
+            throw std::runtime_error("JSON structure error");
         }
 
         std::string& operator()(KeyCarriedMap& x) const {
