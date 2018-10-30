@@ -208,3 +208,14 @@ add_test(
 add_test(
     traits_var_constraint_type test_${PROJECT_NAME}
     "Check trait::Var with type_safe::constraint_type")
+
+#
+# Coverage
+#
+
+if(TESTING AND coverage AND CMAKE_BUILD_TYPE STREQUAL Debug)
+    add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/cov.sh
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/scripts/cov.sh ${CMAKE_BINARY_DIR}
+        DEPENDS scripts/cov.sh)
+    add_custom_target(${PROJECT_NAME}_cov ALL DEPENDS ${CMAKE_BINARY_DIR}/cov.sh)
+endif()
