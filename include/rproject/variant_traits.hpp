@@ -334,7 +334,7 @@ struct UpdateFromVar {
             }));
 
             if (!found) {
-                throw std::logic_error(v.first + " no such member");
+                throw std::logic_error("'" + v.first + "'" + " no such member");
             }
         }
     }

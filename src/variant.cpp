@@ -487,11 +487,11 @@ struct FromRapidJsonValue {
 
     struct Key {
         [[noreturn]] std::string& operator()(Variant&) const {
-            throw std::runtime_error("JSON structure error");
+            assert(false);
         }
 
         [[noreturn]] std::string& operator()(Variant::Vec&) const {
-            throw std::runtime_error("JSON structure error");
+            assert(false);
         }
 
         std::string& operator()(KeyCarriedMap& x) const {
@@ -553,7 +553,7 @@ Variant Variant::from(Value const& json) {
 }
 
 
-void Variant::to(rapidjson::Document& json) const {
+rapidjson::Document& Variant::to(rapidjson::Document& json) const {
     std::visit(rp::Overload{
         [&](std::monostate) { json.SetNull(); },
         [&](bool x) { json.SetBool(x); },
@@ -590,6 +590,8 @@ void Variant::to(rapidjson::Document& json) const {
             }
         }
     }, impl->m);
+
+    return json;
 }
 
 

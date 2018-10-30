@@ -58,9 +58,9 @@ struct OStream {
                        << "; ";
                 }
             } else if constexpr (rp::isContainer(rp::type_c<decltype(value)>)) {
-                (void) name;
+                os << boost::hana::to<char const*>(name);
                 if constexpr (rp::isKeyValue(rp::type_c<typename decltype(value)::value_type>)) {
-                    os << boost::hana::to<char const*>(name) << ": { ";
+                    os << ": { ";
                     for (auto const& x: value) {
                         os << x.first
                            << ": "
@@ -71,11 +71,11 @@ struct OStream {
                 } else {
                     auto const s = value.size();
                     std::size_t i = 0;
-                    os << "[ ";
+                    os << ": [";
                     for (auto const& x: value) {
-                        os << x << ((i++ == s - 1) ? " " : ", ");
+                        os << x << ((i++ == s - 1) ? "" : ", ");
                     }
-                    os << "]";
+                    os << "]; ";
                 }
             } else {
                 os << boost::hana::to<char const*>(name)

@@ -66,13 +66,31 @@ struct Person
 
     Person() : age(0) {}
 
-    Person(std::string const& name, int age, Hobby const& hobby)
-        : name(name), age(age), hobby(hobby)
+    Person(std::string const& name,
+           int age,
+           Hobby const& hobby,
+           bool b,
+           unsigned u,
+           long l,
+           unsigned long ul,
+           double f,
+           std::vector<int>&& v
+           )
+        : name(name), age(age), hobby(hobby), b(b), u(u), l(l), ul(ul), f(f),
+          v(std::move(v))
     {}
 
     std::string name;
     int age;
     Hobby hobby;
+
+    bool b;
+    unsigned u;
+    long l;
+    unsigned long ul;
+    double f;
+
+    std::vector<int> v;
 };
 
 
@@ -80,7 +98,7 @@ struct Person
 
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
-BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
+BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby, b, u, l, ul, f, v);
 
 
 TEST_CASE("Check simple json to struct", "[json_struct]") {
@@ -91,7 +109,14 @@ TEST_CASE("Check simple json to struct", "[json_struct]") {
             "hobby": {
                 "id": 10,
                 "description": "Barista"
-            }
+            },
+
+            "b": true,
+            "u": 4294967295,
+            "l": 9223372036854775807,
+            "ul": 18446744073709551615,
+            "f": 1.1,
+            "v": [1, 2]
         }
     )";
 
@@ -103,10 +128,20 @@ TEST_CASE("Check simple json to struct", "[json_struct]") {
     Person const expected{
         "Efendi",
         20,
-        hobby
+        hobby,
+        true,
+        4294967295u,
+        9223372036854775807,
+        18446744073709551615U,
+        1.1,
+        {1, 2}
     };
 
-    REQUIRE(expected ==
-            Person::fromVariant(
-                Variant::from(rapidjson::Document().Parse(json))));
+    rapidjson::Document d;
+    d.Parse(json);
+
+    REQUIRE(expected == Person::fromVariant(Variant::from(d)));
+
+    rapidjson::Document d2;
+    REQUIRE(d == Person::toVariant(expected).to(d2));
 }

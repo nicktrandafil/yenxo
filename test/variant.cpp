@@ -31,6 +31,7 @@
 
 // 3rd
 #include <catch2/catch.hpp>
+#include <rapidjson/document.h>
 
 // boost
 #include <boost/hana.hpp>
@@ -249,6 +250,10 @@ TEST_CASE("Check Variant", "[Variant]") {
                         }
                     });
             });
+
+        REQUIRE_THROWS_AS(Variant(1.1).integer(), VariantBadType);
+        REQUIRE_THROWS_AS(Variant(Variant::Vec()).integer(), VariantBadType);
+        REQUIRE_THROWS_AS(Variant(Variant::Map()).integer(), VariantBadType);
     }
 
     SECTION("from JSON") {
@@ -352,5 +357,27 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(Variant(1) == Variant(X{1}));
         REQUIRE(X{1} == static_cast<X>(Variant(1)));
         REQUIRE(X{1} == X(Variant(1)));
+    }
+
+    SECTION("Assign") {
+        Variant v1(1);
+        Variant v2("abc");
+        v2 = v1;
+        REQUIRE(v2 == Variant(1));
+    }
+
+    SECTION("Comparison") {
+        REQUIRE(Variant(1) == Variant(1));
+        REQUIRE(Variant(2) != Variant(1));
+    }
+
+    SECTION("From JSON") {
+        auto const json = R"(
+            [{"abc": 1}]
+        )";
+
+        REQUIRE(Variant::from(rapidjson::Document().Parse(json)) ==
+                Variant(Variant::Vec{
+                            Variant(Variant::Map{{"abc", Variant(1)}})}));
     }
 }

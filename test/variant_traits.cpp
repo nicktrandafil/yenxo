@@ -207,7 +207,7 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
     }
 
     SECTION("Check update") {
-        Variant::Map const person_var{
+        Variant::Map person_var{
             {"age", Variant(26)}
         };
 
@@ -220,6 +220,9 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
         };
 
         REQUIRE(person_updated == person);
+
+        person_var["no"] = Variant(1);
+        REQUIRE_THROWS_WITH(person.update(Variant(person_var)), "'no' no such member");
     }
 
     SECTION("Check no field") {

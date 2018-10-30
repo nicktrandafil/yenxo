@@ -115,4 +115,8 @@ TEST_CASE("Check trait::Var nonintrusive", "[variant_traits]") {
 
     REQUIRE(Hobby::fromVariant(Variant(map)) == h);
     REQUIRE(Hobby::toVariant(h) == Variant(map));
+
+    std::ostringstream out;
+    out << h;
+    REQUIRE(out.str() == "Hobby { id: 9; description: abc; }");
 }

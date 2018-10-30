@@ -310,7 +310,7 @@ public:
     /// \ingroup Formats
     /// \{
     static Variant from(rapidjson::Value const& json);
-    void to(rapidjson::Document& json) const;
+    rapidjson::Document& to(rapidjson::Document& json) const;
     /// \}
 
     ///

@@ -71,6 +71,16 @@ struct Dict
 };
 
 
+struct Vec
+        : trait::OStream<Vec> {
+    Vec(int x, std::vector<int> const& vec)
+        : x(x), vec(vec)
+    {}
+
+    int x;
+    std::vector<int> vec;
+};
+
 
 } // namespace
 
@@ -78,6 +88,7 @@ struct Dict
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
 BOOST_HANA_ADAPT_STRUCT(Dict, x, map);
+BOOST_HANA_ADAPT_STRUCT(Vec, x, vec);
 
 
 TEST_CASE("Check trait::OStream", "[ostream_traits]") {
@@ -108,5 +119,11 @@ TEST_CASE("Check trait::OStream", "[ostream_traits]") {
     SECTION("dict") {
         os << expected;
         REQUIRE(os.str() == "Dict { x: 1; map: { 2: 2; 1: 1; }; }");
+    }
+
+    SECTION("vec") {
+        Vec const expected{1, {1, 2}};
+        os << expected;
+        REQUIRE(os.str() == "Vec { x: 1; vec: [1, 2]; }");
     }
 }
