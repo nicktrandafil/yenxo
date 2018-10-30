@@ -1,6 +1,7 @@
 # rproject
 
 [![Build Status](https://travis-ci.com/nicktrandafil/rproject.svg?branch=master)](https://travis-ci.com/nicktrandafil/rproject)
+[![codecov](https://codecov.io/gh/nicktrandafil/rproject/branch/master/graph/badge.svg)](https://codecov.io/gh/nicktrandafil/rproject)
 
 Some *add-in*'s which enables the traits listed below for user defined types:
 * serialization/deserialization in application boundaries;
