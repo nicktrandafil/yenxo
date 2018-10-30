@@ -22,7 +22,7 @@ struct Person : trait::Var<Person> {
     float height;
 };
 
-BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
+BOOST_HANA_ADAPT_STRUCT(Person, name, age, height);
 
 auto const json = R"(
     {
