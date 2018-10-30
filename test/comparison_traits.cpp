@@ -85,6 +85,7 @@ TEST_CASE("Check trait::EqualityComparison", "[comparison_traits]") {
 
     Person person2(person);
     REQUIRE(person == person2);
+    REQUIRE_FALSE(person != person2);
 
     (*person2.age)++;
     REQUIRE(person != person2);
