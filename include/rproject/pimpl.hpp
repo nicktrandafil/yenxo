@@ -83,7 +83,7 @@ public:
 
     // copy
 
-    Pimpl(Pimpl const& rhs);
+    Pimpl(Pimpl const&);
     // \post Strong exception guarantee
     Pimpl& operator=(Pimpl const& rhs);
 

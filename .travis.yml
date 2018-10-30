@@ -10,6 +10,7 @@ matrix:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-7', "cmake"]
       env: TOOLSET=g++-7 TOOLSET_C=gcc-7 BUILD_TYPE='Debug'
+
     - os: linux
       compiler: gcc
       addons:
@@ -17,6 +18,17 @@ matrix:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-7', "cmake"]
       env: TOOLSET=g++-7 TOOLSET_C=gcc-7 BUILD_TYPE='Release'
+
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-7', 'cmake', 'lcov']
+      env: TOOLSET=g++-7 TOOLSET_C=gcc-7 BUILD_TYPE='Debug' coverage=TRUE options='-Dcoverage=ON'
+      after_success:
+        - cd build
+        - bash <(curl -s https://codecov.io/bash) -X fix
 
 install:
   - cd ../
@@ -75,6 +87,6 @@ install:
 
 script:
   - mkdir build/ && cd build/
-  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE $options ..
   - cmake --build .
   - ./test_rproject

@@ -58,6 +58,7 @@ struct OStream {
                        << "; ";
                 }
             } else if constexpr (rp::isContainer(rp::type_c<decltype(value)>)) {
+                (void) name;
                 if constexpr (rp::isKeyValue(rp::type_c<typename decltype(value)::value_type>)) {
                     os << boost::hana::to<char const*>(name) << ": { ";
                     for (auto const& x: value) {

@@ -3,22 +3,23 @@ cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0022 NEW)
 
 project(rproject VERSION 0.1)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+
+include(rproject)
+
 
 #
-# Common
+# Options
 #
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-    set(GENERIC_CXX_COMPILE_OPTIONS
-        $<$<CONFIG:Debug>:-O0>
-        $<$<NOT:$<CONFIG:Debug>>:-O2 -DNDEBUG>
-        -Wall
-    )
-else()
-    message(FATAL_ERROR "${CMAKE_CXX_COMPILER_ID} is not supported")
-endif()
+include(CMakeDependentOption)
 
 option(CMAKE_BUILD_TYPE "Build type" Release)
+
+cmake_dependent_option(coverage
+  "Enable binary instrumentation to collect test coverage information in the DEBUG configuration"
+  OFF "NOT subproject" OFF
+)
 
 #
 # 3rd party
@@ -72,12 +73,8 @@ target_include_directories(${PROJECT_NAME}
     ${RAPIDJSON_INCLUDE_DIRS}
 )
 
-target_compile_options(${PROJECT_NAME}
-    PRIVATE
-    ${GENERIC_CXX_COMPILE_OPTIONS}
-)
-
 target_link_libraries(${PROJECT_NAME} PUBLIC type_safe)
+target_link_libraries(${PROJECT_NAME} PRIVATE development)
 
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC "BOOST_HANA_CONFIG_ENABLE_STRING_UDL")
@@ -98,7 +95,7 @@ write_basic_package_version_file(
 
 install(DIRECTORY include/rproject DESTINATION include)
 
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME} development
     EXPORT ${PROJECT_NAME}-targets
     DESTINATION lib
 )
@@ -153,13 +150,7 @@ target_link_libraries(
 
     Catch2::Catch2
     ${PROJECT_NAME}
-)
-
-target_compile_options(
-    test_${PROJECT_NAME}
-
-    PRIVATE
-    ${GENERIC_CXX_COMPILE_OPTIONS}
+    development
 )
 
 #

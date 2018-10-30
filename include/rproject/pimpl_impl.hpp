@@ -42,7 +42,7 @@ Pimpl<T>::Pimpl(Pimpl const& rhs) : m(new T(*rhs.m)) {}
 
 
 template <typename T>
-Pimpl<T>::Pimpl(Pimpl&& rhs) noexcept = default;
+Pimpl<T>::Pimpl(Pimpl&&) noexcept = default;
 
 
 template <typename T>
@@ -54,7 +54,7 @@ Pimpl<T>& Pimpl<T>::operator=(Pimpl const& rhs) {
 
 
 template <typename T>
-Pimpl<T>& Pimpl<T>::operator=(Pimpl<T>&& rhs) noexcept = default;
+Pimpl<T>& Pimpl<T>::operator=(Pimpl<T>&&) noexcept = default;
 
 
 template <typename T>
