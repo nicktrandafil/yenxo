@@ -57,10 +57,28 @@ template <E e>
 struct Z {};
 
 
+namespace tz {
+
+
+template <E e>
+struct Z {};
+
+
+}
+
+
+template <class T>
+struct A {};
+
+
 TEST_CASE("Check typeName", "[utilities]") {
     REQUIRE(unqualifiedTypeName<Def>() == "Def");
     REQUIRE(unqualifiedTypeName<a::Xyz>() == "Xyz");
     REQUIRE(unqualifiedTypeName<Dum::Zum>() == "Zum");
+    REQUIRE(unqualifiedTypeName<tz::Z<E::e1>>() == "Z<(E)0>");
+    REQUIRE(unqualifiedTypeName<A<Z<E::e1>>>() == "A<Z<(E)0> >");
+    // FIXME
+    //REQUIRE(unqualifiedTypeName<A<tz::Z<E::e1>>>() == "A<Z<(E)0> >"); 
     static_assert(unqualifiedTypeName<Def>() == "Def");
 
     REQUIRE(qualifiedTypeName<Def>() == "Def");
@@ -71,4 +89,7 @@ TEST_CASE("Check typeName", "[utilities]") {
     REQUIRE(qualifiedTypeName<X<Dum>>() == "X<Dum>");
     REQUIRE(qualifiedTypeName<Y<true>>() == "Y<true>");
     REQUIRE(qualifiedTypeName<Z<E::e1>>() == "Z<(E)0>");
+    REQUIRE(qualifiedTypeName<tz::Z<E::e1>>() == "tz::Z<(E)0>");
+    REQUIRE(qualifiedTypeName<A<Z<E::e1>>>() == "A<Z<(E)0> >");
+    REQUIRE(qualifiedTypeName<A<tz::Z<E::e1>>>() == "A<tz::Z<(E)0> >");
 }
