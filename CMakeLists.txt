@@ -3,14 +3,20 @@ cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0022 NEW)
 
 project(rproject VERSION 0.1)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 include(rproject)
 
 
-#
+# if inside subdirectory
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+  set(${PROJECT_NAME}_sub OFF)
+else()
+  set(${PROJECT_NAME}_sub ON)
+endif()
+
+
 # Options
-#
 
 include(CMakeDependentOption)
 
@@ -18,20 +24,25 @@ option(CMAKE_BUILD_TYPE "Build type" Release)
 
 cmake_dependent_option(coverage
   "Enable binary instrumentation to collect test coverage information in the DEBUG configuration"
-  OFF "NOT subproject" OFF
+  ON "NOT ${PROJECT_NAME}_sub" OFF
 )
 
-#
+cmake_dependent_option(TESTING
+  "Enable testing"
+  ON "NOT ${PROJECT_NAME}_sub" OFF
+)
+
+
 # 3rd party
-#
 
-find_package(RapidJSON QUIET REQUIRED)
-find_package(Boost 1.65 QUIET REQUIRED)
-find_package(type_safe QUIET REQUIRED)
+if(NOT ${PROJECT_NAME}_sub)
+  find_package(RapidJSON QUIET REQUIRED)
+  find_package(Boost 1.65 QUIET REQUIRED)
+  find_package(type_safe QUIET REQUIRED)
+endif()
 
-#
+
 # Target
-#
 
 add_library(
     ${PROJECT_NAME}
@@ -74,16 +85,18 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC type_safe)
-target_link_libraries(${PROJECT_NAME} PRIVATE development)
+
+
+# compile options/definitions
+if(NOT ${PROJECT_NAME}_sub)
+  target_link_libraries(${PROJECT_NAME} PRIVATE development)
+endif()
 
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC "BOOST_HANA_CONFIG_ENABLE_STRING_UDL")
 
-option(TESTING "Enable testing" ON)
 
-#
 # Setup package config
-#
 
 include(CMakePackageConfigHelpers)
 set(CONFIG_PACKAGE_INSTALL_DIR lib/cmake/rproject)
@@ -95,10 +108,17 @@ write_basic_package_version_file(
 
 install(DIRECTORY include/rproject DESTINATION include)
 
-install(TARGETS ${PROJECT_NAME} development
+if(NOT ${PROJECT_NAME}_sub)
+  install(TARGETS ${PROJECT_NAME} development
     EXPORT ${PROJECT_NAME}-targets
     DESTINATION lib
-)
+  )
+else()
+  install(TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}-targets
+    DESTINATION lib
+  )
+endif()
 
 install(EXPORT ${PROJECT_NAME}-targets
     DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
@@ -110,9 +130,8 @@ install(FILES
     DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
 )
 
-#
+
 # Testing
-#
 
 if(NOT TESTING)
     return()
@@ -153,9 +172,8 @@ target_link_libraries(
     development
 )
 
-#
+
 # Test cases
-#
 
 add_test(
     check_variant test_${PROJECT_NAME}
@@ -209,9 +227,8 @@ add_test(
     traits_var_constraint_type test_${PROJECT_NAME}
     "Check trait::Var with type_safe::constraint_type")
 
-#
+
 # Coverage
-#
 
 if(TESTING AND coverage AND CMAKE_BUILD_TYPE STREQUAL Debug)
     add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/cov.sh
