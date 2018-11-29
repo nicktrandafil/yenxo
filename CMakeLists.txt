@@ -26,7 +26,7 @@ cmake_dependent_option(coverage
 #
 
 find_package(RapidJSON QUIET REQUIRED)
-find_package(Boost QUIET REQUIRED)
+find_package(Boost 1.65 QUIET REQUIRED)
 find_package(type_safe QUIET REQUIRED)
 
 #
