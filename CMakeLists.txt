@@ -86,7 +86,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC type_safe)
 
 # compile options/definitions
 if(NOT ${PROJECT_NAME}_sub)
-  target_link_libraries(${PROJECT_NAME} PRIVATE development)
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_development)
 endif()
 
 target_compile_definitions(${PROJECT_NAME}
@@ -106,7 +106,7 @@ write_basic_package_version_file(
 install(DIRECTORY include/rproject DESTINATION include)
 
 if(NOT ${PROJECT_NAME}_sub)
-  install(TARGETS ${PROJECT_NAME} development
+  install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_development
     EXPORT ${PROJECT_NAME}-targets
     DESTINATION lib
   )
@@ -163,7 +163,7 @@ target_link_libraries(
 
     Catch2::Catch2
     ${PROJECT_NAME}
-    development
+    ${PROJECT_NAME}_development
 )
 
 

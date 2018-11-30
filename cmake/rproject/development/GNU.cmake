@@ -13,8 +13,8 @@ string(CONCAT generator
   "$<$<AND:$<CONFIG:DEBUG>,"
           "$<BOOL:${coverage}>>:${rproject_GNU_coverage_flags};>")
 
-target_compile_options(development INTERFACE
+target_compile_options(${PROJECT_NAME}_development INTERFACE
   $<$<CXX_COMPILER_ID:GNU>:${generator}>)
 
-target_link_libraries(development INTERFACE
+target_link_libraries(${PROJECT_NAME}_development INTERFACE
 $<$<CXX_COMPILER_ID:GNU>:${generator}>)
