@@ -10,9 +10,9 @@ include(rproject)
 
 # if inside subdirectory
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-  set(${PROJECT_NAME}_sub OFF)
+    set(${PROJECT_NAME}_sub OFF)
 else()
-  set(${PROJECT_NAME}_sub ON)
+    set(${PROJECT_NAME}_sub ON)
 endif()
 
 
@@ -20,7 +20,9 @@ endif()
 
 include(CMakeDependentOption)
 
-option(CMAKE_BUILD_TYPE "Build type" Release)
+if(NOT ${PROJECT_NAME}_sub)
+    option(CMAKE_BUILD_TYPE "Build type" Release)
+endif()
 
 cmake_dependent_option(coverage
   "Enable binary instrumentation to collect test coverage information in the DEBUG configuration"
