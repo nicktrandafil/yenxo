@@ -15,6 +15,13 @@ else()
   set(${PROJECT_NAME}_sub ON)
 endif()
 
+# all deps are imported
+if(${PROJECT_NAME}_sub)
+  set(${PROJECT_NAME}_has_imported_targets OFF)
+else()
+  set(${PROJECT_NAME}_has_imported_targets ON)
+endif()
+
 
 # Options
 
@@ -103,27 +110,24 @@ write_basic_package_version_file(
 
 install(DIRECTORY include/rproject DESTINATION include)
 
-if(NOT ${PROJECT_NAME}_sub)
+if(${PROJECT_NAME}_has_imported_targets)
   install(TARGETS ${PROJECT_NAME} development
     EXPORT ${PROJECT_NAME}-targets
     DESTINATION lib
   )
-else()
-  install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}-targets
-    DESTINATION lib
-  )
-endif()
 
-install(EXPORT ${PROJECT_NAME}-targets
+  install(EXPORT ${PROJECT_NAME}-targets
     DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
-)
+  )
 
-install(FILES
+  install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
     DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
-)
+  )
+else()
+  install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+endif()
 
 
 # Testing
