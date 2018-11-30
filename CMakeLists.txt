@@ -66,16 +66,13 @@ add_library(
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 
-target_include_directories(
-    ${PROJECT_NAME}
-
+target_include_directories(${PROJECT_NAME}
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
 target_include_directories(${PROJECT_NAME}
     SYSTEM
-
     PUBLIC
     $<INSTALL_INTERFACE:include>
     ${Boost_INCLUDE_DIRS}
