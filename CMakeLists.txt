@@ -15,13 +15,6 @@ else()
   set(${PROJECT_NAME}_sub ON)
 endif()
 
-# all deps are imported
-if(${PROJECT_NAME}_sub)
-  set(${PROJECT_NAME}_has_imported_targets OFF)
-else()
-  set(${PROJECT_NAME}_has_imported_targets ON)
-endif()
-
 
 # Options
 
@@ -110,7 +103,7 @@ write_basic_package_version_file(
 
 install(DIRECTORY include/rproject DESTINATION include)
 
-if(${PROJECT_NAME}_has_imported_targets)
+if(NOT ${PROJECT_NAME}_sub)
   install(TARGETS ${PROJECT_NAME} development
     EXPORT ${PROJECT_NAME}-targets
     DESTINATION lib
