@@ -32,7 +32,6 @@
 // 3rd
 #include <rproject/type_name.hpp>
 #include <rproject/meta.hpp>
-#include <fmt/format.h>
 
 // std
 #include <string>
