@@ -64,6 +64,9 @@ add_library(
     include/rproject/comparison_traits.hpp
 
     include/rproject/type_name.hpp
+
+    include/rproject/string_conversion.hpp
+    include/rproject/algorithm/string.hpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -149,10 +152,10 @@ add_executable(
     test/comparison_traits.cpp
 
     test/type_name.cpp
-
     test/json_struct.cpp
-
     test/type_safe.cpp
+    test/string_conversion.cpp
+    test/string.cpp
 )
 
 set_target_properties(test_${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -220,6 +223,14 @@ add_test(
 add_test(
     traits_var_constraint_type test_${PROJECT_NAME}
     "Check trait::Var with type_safe::constraint_type")
+
+add_test(
+    string_conversion test_${PROJECT_NAME}
+    "Check toString/fromString")
+
+add_test(
+  algorithm_string test_${PROJECT_NAME}
+  "Check Check sp::iendsWith")
 
 
 # Coverage
