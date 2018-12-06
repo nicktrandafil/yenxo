@@ -110,6 +110,10 @@ template <typename T>
 struct DependentFalse : std::false_type {};
 
 
+template <auto...>
+struct DependentFalseV : std::false_type {};
+
+
 ///
 /// Is `T` the `std::optional` type
 ///
