@@ -130,7 +130,7 @@ struct ToVariantImpl<T, When<condition>> {
 
 
 ///
-/// Specialization to types with `static Variant T::toVariant(T)`
+/// Specialization for types with `static Variant T::toVariant(T)`
 ///
 template <typename T>
 struct ToVariantImpl<T, When<hasToVariant(type_c<T>)>> {
@@ -139,7 +139,7 @@ struct ToVariantImpl<T, When<hasToVariant(type_c<T>)>> {
 
 
 ///
-/// Specialization Variant build-in supported types
+/// Specialization for Variant build-in supported types
 ///
 template <typename T>
 struct ToVariantImpl<T, When<Variant::Types::convertible<T>()>> {
@@ -148,7 +148,7 @@ struct ToVariantImpl<T, When<Variant::Types::convertible<T>()>> {
 
 
 ///
-/// Specialization for `Container`
+/// Specialization for map types
 ///
 template <typename T>
 struct ToVariantImpl<T,
@@ -167,7 +167,7 @@ struct ToVariantImpl<T,
 
 
 ///
-/// Specialization for `Dict`
+/// Specialization for collection types
 ///
 template <typename T>
 struct ToVariantImpl<T,
@@ -333,7 +333,7 @@ struct FromVariantImpl<T, When<condition>> {
 
 
 ///
-/// Specialization to types with `static T T::fromVariant(Variant)`
+/// Specialization for types with `static T T::fromVariant(Variant)`
 ///
 template <typename T>
 struct FromVariantImpl<T, When<hasFromVariant(type_c<T>)>> {
@@ -351,7 +351,7 @@ struct FromVariantImpl<T, When<Variant::Types::anyOf<T>()>> {
 
 
 ///
-/// Specialization for `Container`
+/// Specialization for collection types
 ///
 template <typename T>
 struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
@@ -367,7 +367,7 @@ struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
 
 
 ///
-/// Specialization for `Dict`
+/// Specialization for map types
 ///
 template <typename T>
 struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
