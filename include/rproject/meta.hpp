@@ -2,12 +2,15 @@
 
 
 // local
+#include <rproject/config.hpp>
 #include <rproject/when.hpp>
 
 // 3rd
+#if RPROJECT_ENABLE_TYPE_SAFE
 #include <type_safe/strong_typedef.hpp>
 #include <type_safe/constrained_type.hpp>
 #include <type_safe/types.hpp>
+#endif
 
 // hana
 #include <boost/hana/tuple.hpp>
@@ -222,6 +225,7 @@ constexpr auto isKeyValue(Type<T> const& x) {
 }
 
 
+#if RPROJECT_ENABLE_TYPE_SAFE
 template <typename T>
 struct StrongTypeDefImpl {
     template <typename Tag, typename U>
@@ -334,6 +338,7 @@ struct BooleanTypeT {
 /// Tests if type is `type_safe::integer`
 ///
 constexpr BooleanTypeT boolean;
+#endif
 
 
 } // namespace rp

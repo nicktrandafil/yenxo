@@ -23,6 +23,10 @@
 */
 
 
+#include <rproject/config.hpp>
+#if RPROJECT_ENABLE_TYPE_SAFE
+
+
 // tested
 #include <rproject/variant.hpp>
 #include <rproject/variant_traits.hpp>
@@ -175,3 +179,6 @@ TEST_CASE("Check trait::Var with type_safe build-in types",
     REQUIRE(RemoteControl::fromVariant(Variant(v)) == rc);
     REQUIRE(RemoteControl::toVariant(rc) == Variant(v));
 }
+
+
+#endif

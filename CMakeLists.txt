@@ -20,6 +20,13 @@ endif()
 
 include(CMakeDependentOption)
 
+option(${PROJECT_NAME}_enable_type_safe "Enable type_safe support" ON)
+if(${PROJECT_NAME}_enable_type_safe)
+    set(_${PROJECT_NAME}_enable_type_safe 1)
+else()
+    set(_${PROJECT_NAME}_enable_type_safe 0)
+endif()
+
 if(NOT ${PROJECT_NAME}_sub)
     option(CMAKE_BUILD_TYPE "Build type" Release)
 endif()
@@ -40,8 +47,9 @@ cmake_dependent_option(TESTING
 if(NOT ${PROJECT_NAME}_sub)
   find_package(RapidJSON QUIET REQUIRED)
   find_package(Boost 1.65 QUIET REQUIRED)
-  find_package(type_safe QUIET REQUIRED)
 endif()
+
+include(external/external.cmake)
 
 
 # Target
@@ -67,6 +75,8 @@ add_library(
 
     include/rproject/string_conversion.hpp
     include/rproject/algorithm/string.hpp
+
+    include/rproject/config.hpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -84,7 +94,15 @@ target_include_directories(${PROJECT_NAME}
     ${RAPIDJSON_INCLUDE_DIRS}
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC type_safe)
+target_compile_definitions(${PROJECT_NAME}
+    PUBLIC
+    BOOST_HANA_CONFIG_ENABLE_STRING_UDL
+    RPROJECT_ENABLE_TYPE_SAFE=${_${PROJECT_NAME}_enable_type_safe}
+)
+
+if(${PROJECT_NAME}_enable_type_safe)
+    target_link_libraries(${PROJECT_NAME} PUBLIC type_safe)
+endif()
 
 
 # compile options/definitions
@@ -92,39 +110,47 @@ if(NOT ${PROJECT_NAME}_sub)
   target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_development)
 endif()
 
-target_compile_definitions(${PROJECT_NAME}
-    PUBLIC "BOOST_HANA_CONFIG_ENABLE_STRING_UDL")
-
 
 # Setup package config
 
-include(CMakePackageConfigHelpers)
-set(CONFIG_PACKAGE_INSTALL_DIR lib/cmake/rproject)
-
-write_basic_package_version_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
-  COMPATIBILITY SameMajorVersion
-)
-
 install(DIRECTORY include/rproject DESTINATION include)
 
-if(NOT ${PROJECT_NAME}_sub)
-  install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_development
-    EXPORT ${PROJECT_NAME}-targets
-    DESTINATION lib
-  )
+if(NOT ${PROJECT_NAME}_sub AND ${PROJECT_NAME}_all_imported_deps)
+    include(CMakePackageConfigHelpers)
+    set(CONFIG_PACKAGE_INSTALL_DIR lib/cmake/rproject)
 
-  install(EXPORT ${PROJECT_NAME}-targets
-    DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
-  )
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
+        COMPATIBILITY SameMajorVersion
+    )
 
-  install(FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
-    DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
-  )
+    install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_development
+        EXPORT ${PROJECT_NAME}-targets
+        DESTINATION lib
+    )
+
+    install(EXPORT ${PROJECT_NAME}-targets
+        DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
+    )
+
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+        @ONLY
+    )
+
+    # because of nested @vars@
+    configure_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+        @ONLY
+    )
+
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
+        DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
+    )
 else()
-  install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+    install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 endif()
 
 
@@ -229,9 +255,12 @@ add_test(
     "Check toString/fromString")
 
 add_test(
-  algorithm_string test_${PROJECT_NAME}
-  "Check Check sp::iendsWith")
+    algorithm_string test_${PROJECT_NAME}
+    "Check Check sp::iendsWith")
 
+add_test(
+    traits_var_type_safe test_${PROJECT_NAME}
+    "Check trait::Var with type_safe build-in types")
 
 # Coverage
 

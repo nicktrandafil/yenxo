@@ -34,6 +34,7 @@
 #include <rproject/meta.hpp>
 
 // std
+#include <algorithm>
 #include <string>
 #include <stdexcept>
 #include <type_traits>

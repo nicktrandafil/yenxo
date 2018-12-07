@@ -1,0 +1,13 @@
+include(CMakeFindDependencyMacro)
+
+if(@@PROJECT_NAME@_enable_type_safe@)
+    find_dependency(type_safe)
+endif()
+
+find_dependency(Boost)
+find_dependency(RapidJSON)
+
+include(${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@-targets.cmake)
+
+set(@PROJECT_NAME@_LIBRARY @PROJECT_NAME@)
+set(@PROJECT_NAME@_LIBRARIES @PROJECT_NAME@)

@@ -27,12 +27,15 @@
 
 
 // local
+#include <rproject/config.hpp>
 #include <rproject/meta.hpp>
 #include <rproject/variant.hpp>
 #include <rproject/when.hpp>
 
 // 3rd
+#if RPROJECT_ENABLE_TYPE_SAFE
 #include <type_safe/strong_typedef.hpp>
+#endif
 
 // boost
 #include <boost/hana.hpp>
@@ -180,6 +183,7 @@ struct ToVariantImpl<T,
 };
 
 
+#if RPROJECT_ENABLE_TYPE_SAFE
 ///
 /// Specialization for `type_safe::strong_typedef`
 ///
@@ -239,6 +243,7 @@ struct ToVariantImpl<T, When<boolean(type_c<T>)>> {
         return ToVariantImpl<U>::apply(static_cast<U>(st));
     }
 };
+#endif
 
 
 template <typename T>
@@ -379,6 +384,7 @@ struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
 };
 
 
+#if RPROJECT_ENABLE_TYPE_SAFE
 ///
 /// Specialization for `type_safe::strong_typedef`
 ///
@@ -434,6 +440,7 @@ struct FromVariantImpl<T, When<boolean(type_c<T>)>> {
         return T(FromVariantImpl<bool>::apply(var));
     }
 };
+#endif
 
 
 template <typename T>
