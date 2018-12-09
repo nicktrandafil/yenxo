@@ -1,7 +1,7 @@
-# rproject
+# serialize
 
-[![Build Status](https://travis-ci.com/nicktrandafil/rproject.svg?branch=master)](https://travis-ci.com/nicktrandafil/rproject)
-[![codecov](https://codecov.io/gh/nicktrandafil/rproject/branch/master/graph/badge.svg)](https://codecov.io/gh/nicktrandafil/rproject)
+[![Build Status](https://travis-ci.com/nicktrandafil/serialize.svg?branch=master)](https://travis-ci.com/nicktrandafil/serialize)
+[![codecov](https://codecov.io/gh/nicktrandafil/serialize/branch/master/graph/badge.svg)](https://codecov.io/gh/nicktrandafil/serialie)
 
 Some *add-in*'s which enables the traits listed below for user defined types:
 * serialization/deserialization;

@@ -27,9 +27,9 @@
 
 
 // local
-#include <rproject/meta.hpp>
-#include <rproject/variant.hpp>
-#include <rproject/variant_conversion.hpp>
+#include <serialize/meta.hpp>
+#include <serialize/variant.hpp>
+#include <serialize/variant_conversion.hpp>
 
 // boost
 #include <boost/hana.hpp>
@@ -44,7 +44,7 @@
 ///
 
 
-namespace rp::trait {
+namespace serialize::trait {
 
 
 ///
@@ -101,7 +101,7 @@ constexpr bool hasDefaultValue(S name) {
 
 
 template <typename T>
-constexpr void checkOrphanKeys(rp::Type<T> const&) {
+constexpr void checkOrphanKeys(Type<T> const&) {
     constexpr decltype(boost::hana::keys(T::defaults())) keys;
     boost::hana::for_each(
         keys,
@@ -194,7 +194,7 @@ struct VarDef {
         Variant::Map ret;
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
-            if constexpr (rp::isOptional(rp::type_c<decltype(value)>)) {
+            if constexpr (isOptional(type_c<decltype(value)>)) {
                 if (value.has_value()) {
                     ret[boost::hana::to<char const*>(name)] =
                             detail::toVariantWrap(*value);
@@ -215,7 +215,7 @@ struct VarDef {
         static_assert(
             detail::hasDefaults(boost::hana::type_c<Derived>),
             "The T must have `defaults` static member function");
-        detail::checkOrphanKeys(rp::type_c<Derived>);
+        detail::checkOrphanKeys(type_c<Derived>);
 
         Derived ret;
         auto const& map = x.map();
@@ -237,7 +237,7 @@ struct VarDef {
 
                     tmp = Derived::defaults()[name];
                 } else if constexpr (
-                            !rp::isOptional(rp::type_c<decltype(tmp)>)) {
+                            !isOptional(type_c<decltype(tmp)>)) {
                     throw std::logic_error(
                                 boost::hana::to<char const*>(name) +
                                 " not found in map, and default"
@@ -245,7 +245,7 @@ struct VarDef {
                 }
 
             } else {
-                if constexpr (rp::isOptional(rp::type_c<decltype(tmp)>)) {
+                if constexpr (isOptional(type_c<decltype(tmp)>)) {
                     tmp = detail::fromVariantWrap<decltype(*tmp)>(it->second);
                 } else {
                     tmp = detail::fromVariantWrap<decltype(tmp)>(it->second);
@@ -295,14 +295,14 @@ struct VarDefExplicit : private VarDef<Derived> {
                 detail::hasDefaults(boost::hana::type_c<Derived>),
                 "The T must have `defaults` static member function");
 
-        detail::checkOrphanKeys(rp::type_c<Derived>);
+        detail::checkOrphanKeys(type_c<Derived>);
 
         boost::hana::for_each(
             boost::hana::accessors<Derived>(),
             boost::hana::fuse([](auto name, auto) {
                 if constexpr (!detail::present<Derived>(name)) {
                     BOOST_HANA_CONSTEXPR_ASSERT_MSG(
-                        rp::DependentFalse<Derived>::value,
+                        DependentFalse<Derived>::value,
                         name +
                         " not present in defaults()"_s);
                 }

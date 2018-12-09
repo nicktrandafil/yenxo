@@ -24,17 +24,17 @@
 
 
 // tested
-#include <rproject/variant_traits.hpp>
+#include <serialize/variant_traits.hpp>
 
 // local
-#include <rproject/comparison_traits.hpp>
-#include <rproject/ostream_traits.hpp>
+#include <serialize/comparison_traits.hpp>
+#include <serialize/ostream_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
 
 
-using namespace rp;
+using namespace serialize;
 
 
 namespace {
@@ -60,7 +60,7 @@ struct UserDefinedStr : private std::string {
 } // namespace
 
 
-namespace rp {
+namespace serialize {
 
 
 template <>

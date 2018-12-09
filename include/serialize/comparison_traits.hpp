@@ -30,7 +30,7 @@
 #include <boost/hana.hpp>
 
 
-namespace rp::trait {
+namespace serialize::trait {
 
 
 ///
@@ -65,4 +65,4 @@ protected:
 };
 
 
-} // namespace rp::trait
+}

@@ -83,10 +83,10 @@ install:
   - sudo cmake --build . --target install
   - cd ../../
 
-  - cd rproject
+  - cd serialize
 
 script:
   - mkdir build/ && cd build/
   - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE $options ..
   - cmake --build .
-  - ./test_rproject
+  - ./test_serialize

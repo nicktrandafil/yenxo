@@ -24,13 +24,13 @@
 
 
 // tested
-#include <rproject/type_name.hpp>
+#include <serialize/type_name.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
 
 
-using namespace rp;
+using namespace serialize;
 
 
 struct Def {};

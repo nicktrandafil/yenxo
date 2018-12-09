@@ -1,6 +1,8 @@
-// rproject
+// serialize
 #include <variant.hpp>
 #include <variant_traits.hpp>
+
+using namespace serialize;
 
 struct Hobby : trait::Var<Hobby> {  // enables serialization/deserialization
     Hobby() : id(0) {}

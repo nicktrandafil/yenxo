@@ -2,11 +2,11 @@
 
 
 // local
-#include <rproject/config.hpp>
-#include <rproject/when.hpp>
+#include <serialize/config.hpp>
+#include <serialize/when.hpp>
 
 // 3rd
-#if RPROJECT_ENABLE_TYPE_SAFE
+#if SERIALIZE_ENABLE_TYPE_SAFE
 #include <type_safe/strong_typedef.hpp>
 #include <type_safe/constrained_type.hpp>
 #include <type_safe/types.hpp>
@@ -25,7 +25,7 @@
 #include <vector>
 
 
-namespace rp {
+namespace serialize {
 
 
 template <typename... Args>
@@ -129,7 +129,7 @@ struct IsOptional<std::optional<T>> : std::true_type {};
 
 
 template <typename T>
-constexpr auto isOptional(rp::Type<T>) {
+constexpr auto isOptional(serialize::Type<T>) {
     return IsOptional<std::decay_t<T>>::value;
 }
 
@@ -225,7 +225,7 @@ constexpr auto isKeyValue(Type<T> const& x) {
 }
 
 
-#if RPROJECT_ENABLE_TYPE_SAFE
+#if SERIALIZE_ENABLE_TYPE_SAFE
 template <typename T>
 struct StrongTypeDefImpl {
     template <typename Tag, typename U>
@@ -341,4 +341,4 @@ constexpr BooleanTypeT boolean;
 #endif
 
 
-} // namespace rp
+}

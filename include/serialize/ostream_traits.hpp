@@ -27,8 +27,8 @@
 
 
 // local
-#include <rproject/meta.hpp>
-#include <rproject/type_name.hpp>
+#include <serialize/meta.hpp>
+#include <serialize/type_name.hpp>
 
 // boost
 #include <boost/hana.hpp>
@@ -38,7 +38,7 @@
 #include <ostream>
 
 
-namespace rp::trait {
+namespace serialize::trait {
 
 
 ///
@@ -47,19 +47,19 @@ namespace rp::trait {
 template <typename Derived>
 struct OStream {
     friend std::ostream& operator<<(std::ostream& os, Derived const& x) {
-        os << rp::unqualifiedTypeName<Derived>() << " { ";
+        os << unqualifiedTypeName<Derived>() << " { ";
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
-            if constexpr (rp::isOptional(rp::type_c<decltype(value)>)) {
+            if constexpr (isOptional(type_c<decltype(value)>)) {
                 if (value.has_value()) {
                     os << boost::hana::to<char const*>(name)
                        << ": "
                        << *value
                        << "; ";
                 }
-            } else if constexpr (rp::isContainer(rp::type_c<decltype(value)>)) {
+            } else if constexpr (isContainer(type_c<decltype(value)>)) {
                 os << boost::hana::to<char const*>(name);
-                if constexpr (rp::isKeyValue(rp::type_c<typename decltype(value)::value_type>)) {
+                if constexpr (isKeyValue(type_c<typename decltype(value)::value_type>)) {
                     os << ": { ";
                     for (auto const& x: value) {
                         os << x.first

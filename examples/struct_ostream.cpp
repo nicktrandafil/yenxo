@@ -7,6 +7,8 @@
 // std
 #include <iostream>
 
+using namespace serialize;
+
 struct Hobby
         : trait::Var<Hobby>
         , trait::OStream<Hobby>              // enables `std::ostream`

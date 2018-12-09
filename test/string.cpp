@@ -24,13 +24,13 @@
 
 
 // tested
-#include <rproject/algorithm/string.hpp>
+#include <serialize/algorithm/string.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
 
 
-using namespace rp;
+using namespace serialize;
 
 
 TEST_CASE("Check sp::iendsWith", "[algorithms]") {

@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0022 NEW)
 
-project(rproject VERSION 0.1)
+project(serialize VERSION 0.1)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-include(rproject)
+include(serialize)
 
 
 # if inside subdirectory
@@ -57,26 +57,27 @@ include(external/external.cmake)
 add_library(
     ${PROJECT_NAME}
 
-    include/rproject/meta.hpp
+    include/${PROJECT_NAME}/meta.hpp
 
-    include/rproject/pimpl.hpp
-    include/rproject/pimpl_impl.hpp
+    include/${PROJECT_NAME}/pimpl.hpp
+    include/${PROJECT_NAME}/pimpl_impl.hpp
+
+    include/${PROJECT_NAME}/variant.hpp
+    include/${PROJECT_NAME}/variant_fwd.hpp
+
+    include/${PROJECT_NAME}/variant_traits.hpp
+    include/${PROJECT_NAME}/variant_conversion.hpp
+    include/${PROJECT_NAME}/ostream_traits.hpp
+    include/${PROJECT_NAME}/comparison_traits.hpp
+
+    include/${PROJECT_NAME}/type_name.hpp
+
+    include/${PROJECT_NAME}/string_conversion.hpp
+    include/${PROJECT_NAME}/algorithm/string.hpp
+
+    include/${PROJECT_NAME}/config.hpp
 
     src/variant.cpp
-    include/rproject/variant.hpp
-    include/rproject/variant_fwd.hpp
-
-    include/rproject/variant_traits.hpp
-    include/rproject/variant_conversion.hpp
-    include/rproject/ostream_traits.hpp
-    include/rproject/comparison_traits.hpp
-
-    include/rproject/type_name.hpp
-
-    include/rproject/string_conversion.hpp
-    include/rproject/algorithm/string.hpp
-
-    include/rproject/config.hpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -97,7 +98,7 @@ target_include_directories(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC
     BOOST_HANA_CONFIG_ENABLE_STRING_UDL
-    RPROJECT_ENABLE_TYPE_SAFE=${_${PROJECT_NAME}_enable_type_safe}
+    SERIALIZE_ENABLE_TYPE_SAFE=${_${PROJECT_NAME}_enable_type_safe}
 )
 
 if(${PROJECT_NAME}_enable_type_safe)
@@ -113,11 +114,11 @@ endif()
 
 # Setup package config
 
-install(DIRECTORY include/rproject DESTINATION include)
+install(DIRECTORY include/${PROJECT_NAME} DESTINATION include)
 
 if(NOT ${PROJECT_NAME}_sub AND ${PROJECT_NAME}_all_imported_deps)
     include(CMakePackageConfigHelpers)
-    set(CONFIG_PACKAGE_INSTALL_DIR lib/cmake/rproject)
+    set(CONFIG_PACKAGE_INSTALL_DIR lib/cmake/${PROJECT_NAME})
 
     write_basic_package_version_file(
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake

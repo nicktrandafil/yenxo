@@ -24,10 +24,10 @@
 
 
 // tested
-#include <rproject/variant.hpp>
+#include <serialize/variant.hpp>
 
 // local
-#include <rproject/type_name.hpp>
+#include <serialize/type_name.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
@@ -44,7 +44,7 @@
 namespace hana = boost::hana;
 
 
-using namespace rp;
+using namespace serialize;
 
 
 TEST_CASE("Check Variant", "[Variant]") {

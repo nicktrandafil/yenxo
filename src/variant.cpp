@@ -23,12 +23,12 @@
 */
 
 
-#include <rproject/variant.hpp>
+#include <serialize/variant.hpp>
 
 // local
-#include <rproject/meta.hpp>
-#include <rproject/pimpl_impl.hpp>
-#include <rproject/type_name.hpp>
+#include <serialize/meta.hpp>
+#include <serialize/pimpl_impl.hpp>
+#include <serialize/type_name.hpp>
 
 // std
 #include <unordered_map>
@@ -37,7 +37,7 @@
 #include <deque>
 
 
-namespace rp {
+namespace serialize {
 
 
 using Val = Variant::Types::push_front<std::monostate>::rebind<std::variant>;
@@ -149,7 +149,7 @@ struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
 #endif
 
             throw VariantIntegralOverflow(
-                        std::string(rp::unqualifiedTypeName<T>()),
+                        std::string(unqualifiedTypeName<T>()),
                         std::to_string(x));
         }
 
@@ -174,7 +174,7 @@ struct IntegralCheckedCast<T, U, When<std::is_unsigned_v<T> &&
 #endif
 
             throw VariantIntegralOverflow(
-                        std::string(rp::unqualifiedTypeName<T>()),
+                        std::string(unqualifiedTypeName<T>()),
                         std::to_string(x));
         }
 
@@ -200,7 +200,7 @@ struct IntegralCheckedCast<T, U, When<condition>> {
 #endif
 
             throw VariantIntegralOverflow(
-                        std::string(rp::unqualifiedTypeName<T>()),
+                        std::string(unqualifiedTypeName<T>()),
                         std::to_string(x));
         }
         return T(x);
@@ -554,7 +554,7 @@ Variant Variant::from(Value const& json) {
 
 
 rapidjson::Document& Variant::to(rapidjson::Document& json) const {
-    std::visit(rp::Overload{
+    std::visit(Overload{
         [&](std::monostate) { json.SetNull(); },
         [&](bool x) { json.SetBool(x); },
         [&](char x) { json.SetInt(x); },
@@ -596,7 +596,7 @@ rapidjson::Document& Variant::to(rapidjson::Document& json) const {
 
 
 std::ostream& operator<<(std::ostream& os, Variant const& var) {
-    std::visit(rp::Overload{
+    std::visit(Overload{
         [&](auto integral) { os << std::to_string(integral); },
         [&](std::monostate) { os << "Null"; },
         [&](std::string const& str)  { os << str; },

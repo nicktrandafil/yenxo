@@ -24,12 +24,12 @@
 
 
 // tested
-#include <rproject/variant_traits.hpp>
+#include <serialize/variant_traits.hpp>
 
 // local
-#include <rproject/ostream_traits.hpp>
-#include <rproject/comparison_traits.hpp>
-#include <rproject/variant.hpp>
+#include <serialize/ostream_traits.hpp>
+#include <serialize/comparison_traits.hpp>
+#include <serialize/variant.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
@@ -41,7 +41,7 @@
 namespace hana = boost::hana;
 
 
-using namespace rp;
+using namespace serialize;
 
 
 using namespace hana::literals;
@@ -57,8 +57,8 @@ struct X {
 };
 
 
-static_assert(hasFromVariant(rp::type_c<X>));
-static_assert(hasToVariant(rp::type_c<X>));
+static_assert(hasFromVariant(serialize::type_c<X>));
+static_assert(hasToVariant(serialize::type_c<X>));
 
 
 struct Hobby

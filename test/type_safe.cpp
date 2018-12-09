@@ -23,14 +23,14 @@
 */
 
 
-#include <rproject/config.hpp>
-#if RPROJECT_ENABLE_TYPE_SAFE
+#include <serialize/config.hpp>
+#if SERIALIZE_ENABLE_TYPE_SAFE
 
 
 // tested
-#include <rproject/variant.hpp>
-#include <rproject/variant_traits.hpp>
-#include <rproject/comparison_traits.hpp>
+#include <serialize/variant.hpp>
+#include <serialize/variant_traits.hpp>
+#include <serialize/comparison_traits.hpp>
 
 #include <type_safe/strong_typedef.hpp>
 #include <type_safe/constrained_type.hpp>
@@ -43,7 +43,7 @@
 namespace ts = type_safe;
 
 
-using namespace rp;
+using namespace serialize;
 
 
 namespace {

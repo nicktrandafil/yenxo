@@ -27,8 +27,8 @@
 
 
 // local
-#include <rproject/pimpl.hpp>
-#include <rproject/meta.hpp>
+#include <serialize/pimpl.hpp>
+#include <serialize/meta.hpp>
 
 // 3rd
 #include <rapidjson/document.h>
@@ -40,7 +40,7 @@
 #include <unordered_map>
 
 
-namespace rp {
+namespace serialize {
 
 
 ///
@@ -319,7 +319,7 @@ public:
     friend std::ostream& operator<<(std::ostream& os, Variant const& var);
 
     /// List of supported types
-    using Types = rp::S<
+    using Types = S<
         bool,
         char,
         short int,

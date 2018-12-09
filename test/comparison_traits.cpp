@@ -24,16 +24,16 @@
 
 
 // tested
-#include <rproject/comparison_traits.hpp>
+#include <serialize/comparison_traits.hpp>
 
 // local
-#include <rproject/ostream_traits.hpp>
+#include <serialize/ostream_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
 
 
-using namespace rp;
+using namespace serialize;
 
 
 namespace {

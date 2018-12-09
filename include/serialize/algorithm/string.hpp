@@ -30,7 +30,7 @@
 #include <string>
 
 
-namespace rp {
+namespace serialize {
 
 
 /// Test case insensitively if string ends with `end`

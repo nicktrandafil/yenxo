@@ -31,7 +31,7 @@
 #include <unordered_map>
 
 
-namespace rp {
+namespace serialize {
 
 
 class Variant;

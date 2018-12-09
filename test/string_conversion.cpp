@@ -24,13 +24,13 @@
 
 
 // tested
-#include <rproject/string_conversion.hpp>
+#include <serialize/string_conversion.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
 
 
-using namespace rp;
+using namespace serialize;
 
 
 namespace {

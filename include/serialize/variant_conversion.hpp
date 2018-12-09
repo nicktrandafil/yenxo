@@ -27,13 +27,13 @@
 
 
 // local
-#include <rproject/config.hpp>
-#include <rproject/meta.hpp>
-#include <rproject/variant.hpp>
-#include <rproject/when.hpp>
+#include <serialize/config.hpp>
+#include <serialize/meta.hpp>
+#include <serialize/variant.hpp>
+#include <serialize/when.hpp>
 
 // 3rd
-#if RPROJECT_ENABLE_TYPE_SAFE
+#if SERIALIZE_ENABLE_TYPE_SAFE
 #include <type_safe/strong_typedef.hpp>
 #endif
 
@@ -44,7 +44,7 @@
 #include <type_traits>
 
 
-namespace rp {
+namespace serialize {
 
 
 template <typename T>
@@ -183,7 +183,7 @@ struct ToVariantImpl<T,
 };
 
 
-#if RPROJECT_ENABLE_TYPE_SAFE
+#if SERIALIZE_ENABLE_TYPE_SAFE
 ///
 /// Specialization for `type_safe::strong_typedef`
 ///
@@ -384,7 +384,7 @@ struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
 };
 
 
-#if RPROJECT_ENABLE_TYPE_SAFE
+#if SERIALIZE_ENABLE_TYPE_SAFE
 ///
 /// Specialization for `type_safe::strong_typedef`
 ///

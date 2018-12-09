@@ -23,10 +23,13 @@
 */
 
 
-#include <rproject/meta.hpp>
+#include <serialize/meta.hpp>
 
 
 namespace hana = boost::hana;
+
+
+using namespace serialize;
 
 
 #if __GNUG__
@@ -58,14 +61,14 @@ struct Foo {
 #endif
 
 
-static_assert(rp::callable(foo1));
-static_assert(rp::callable(foo2, rp::type_c<int>));
-static_assert(!rp::callable(foo2, rp::type_c<int>, rp::Type<int>()));
-static_assert(rp::callable(Foo()));
-static_assert(rp::callable(Foo()));
-static_assert(rp::isIterable(rp::type_c<std::vector<int>>));
-static_assert(rp::isString(rp::type_c<std::string>));
-static_assert(rp::isPair(rp::type_c<std::pair<int, std::string>>));
-static_assert(!rp::isKeyValue(rp::type_c<std::pair<int, std::string>>));
-static_assert(rp::isKeyValue(rp::type_c<std::pair<std::string, std::string>>));
-static_assert(rp::S<int, char, bool>::convertible<int>());
+static_assert(callable(foo1));
+static_assert(callable(foo2, type_c<int>));
+static_assert(!callable(foo2, type_c<int>, Type<int>()));
+static_assert(callable(Foo()));
+static_assert(callable(Foo()));
+static_assert(isIterable(type_c<std::vector<int>>));
+static_assert(isString(type_c<std::string>));
+static_assert(isPair(type_c<std::pair<int, std::string>>));
+static_assert(!isKeyValue(type_c<std::pair<int, std::string>>));
+static_assert(isKeyValue(type_c<std::pair<std::string, std::string>>));
+static_assert(S<int, char, bool>::convertible<int>());
