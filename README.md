@@ -1,7 +1,7 @@
 # serialize
 
 [![Build Status](https://travis-ci.com/nicktrandafil/serialize.svg?branch=master)](https://travis-ci.com/nicktrandafil/serialize)
-[![codecov](https://codecov.io/gh/nicktrandafil/serialize/branch/master/graph/badge.svg)](https://codecov.io/gh/nicktrandafil/serialie)
+[![codecov](https://codecov.io/gh/nicktrandafil/serialize/branch/master/graph/badge.svg)](https://codecov.io/gh/nicktrandafil/serialize)
 
 Some *add-in*'s which enables the traits listed below for user defined types:
 * serialization/deserialization;
