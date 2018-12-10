@@ -3,7 +3,7 @@ set(${PROJECT_NAME}_all_imported_deps ON)
 
 if(${PROJECT_NAME}_enable_type_safe)
     if(NOT type_safe_FOUND)
-        find_package(type_safe)
+        find_package(type_safe QUIET)
     endif()
 
     if(NOT type_safe_FOUND)
