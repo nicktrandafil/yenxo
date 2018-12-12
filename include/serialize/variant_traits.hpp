@@ -320,7 +320,7 @@ protected:
 ///
 template <typename Derived>
 struct UpdateFromVar {
-    void update(Variant const& x) {
+    void updateVar(Variant const& x) {
         Derived& self = static_cast<Derived&>(*this);
         auto const& map = x.map();
         for (auto const& v: map) {
@@ -341,6 +341,28 @@ struct UpdateFromVar {
 
 protected:
     ~UpdateFromVar() = default;
+};
+
+
+/// Adds member `void update(Opt const&)`
+/// Updates the specified fields
+template <typename Derived, typename Opt>
+struct UpdateFromOpt {
+    void updateOpt(Opt const& x) {
+        Derived& self = static_cast<Derived&>(*this);
+        boost::hana::for_each(x,
+                              boost::hana::fuse([&](auto rkey, auto rvalue) {
+            auto found = boost::hana::to_map(boost::hana::accessors<Derived>())[rkey];
+            if constexpr (isOptional(type_c<decltype(rvalue)>)) {
+                if (rvalue) { found(self) = *rvalue; }
+            } else {
+                found(self) = rvalue;
+            }
+        }));
+    }
+
+protected:
+    ~UpdateFromOpt() = default;
 };
 
 

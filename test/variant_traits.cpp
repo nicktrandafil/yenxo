@@ -78,9 +78,26 @@ struct Hobby
 };
 
 
+struct OptPerson
+        : trait::OStream<OptPerson>
+        , trait::EqualityComparison<OptPerson> {
+
+    OptPerson() = default;
+
+    OptPerson(std::string const& name, int age, Hobby const& hobby)
+        : name(name), age(age), hobby(hobby)
+    {}
+
+    std::optional<std::string> name;
+    std::optional<int> age;
+    std::optional<Hobby> hobby;
+};
+
+
 struct Person
         : trait::Var<Person>
         , trait::UpdateFromVar<Person>
+        , trait::UpdateFromOpt<Person, OptPerson>
         , trait::OStream<Person>
         , trait::EqualityComparison<Person> {
 
@@ -130,6 +147,7 @@ struct Dict
 
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
+BOOST_HANA_ADAPT_STRUCT(OptPerson, name, age, hobby);
 BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
 BOOST_HANA_ADAPT_STRUCT(PersonEx, name, hobbies);
 BOOST_HANA_ADAPT_STRUCT(Dict, x, map);
@@ -206,12 +224,12 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
         REQUIRE(Person::toVariant(person) == Variant(person_var));
     }
 
-    SECTION("Check update") {
+    SECTION("Check updateVar") {
         Variant::Map person_var{
             {"age", Variant(26)}
         };
 
-        person.update(Variant(person_var));
+        person.updateVar(Variant(person_var));
 
         Person const person_updated{
             "Alecu",
@@ -222,7 +240,22 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
         REQUIRE(person_updated == person);
 
         person_var["no"] = Variant(1);
-        REQUIRE_THROWS_WITH(person.update(Variant(person_var)), "'no' no such member");
+        REQUIRE_THROWS_WITH(person.updateVar(Variant(person_var)), "'no' no such member");
+    }
+
+    SECTION("Check updateOpt") {
+        OptPerson opt;
+        opt.age = 27;
+
+        person.updateOpt(opt);
+
+        Person const person_updated{
+            "Alecu",
+            27,
+            hobby
+        };
+
+        REQUIRE(person_updated == person);
     }
 
     SECTION("Check no field") {
