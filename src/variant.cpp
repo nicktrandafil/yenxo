@@ -35,6 +35,7 @@
 #include <vector>
 #include <variant>
 #include <deque>
+#include <typeinfo>
 
 
 namespace serialize {
@@ -614,6 +615,13 @@ std::ostream& operator<<(std::ostream& os, Variant const& var) {
         }
     }, var.impl->m);
     return os;
+}
+
+
+std::type_info const& Variant::typeInfo() const {
+    return std::visit(Overload{
+        [&](auto val) -> std::type_info const& { return typeid(val); }
+    }, impl->m);
 }
 
 

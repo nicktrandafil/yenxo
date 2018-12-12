@@ -318,6 +318,12 @@ public:
     ///
     friend std::ostream& operator<<(std::ostream& os, Variant const& var);
 
+    /// \defgroup type_info
+    /// \ingroup type_info
+    /// \{
+    std::type_info const& typeInfo() const;
+    /// \}
+
     /// List of supported types
     using Types = S<
         bool,

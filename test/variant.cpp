@@ -380,4 +380,8 @@ TEST_CASE("Check Variant", "[Variant]") {
                 Variant(Variant::Vec{
                             Variant(Variant::Map{{"abc", Variant(1)}})}));
     }
+
+    SECTION("typeInfo") {
+        REQUIRE(Variant(int(1)).typeInfo() == typeid(int(1)));
+    }
 }
