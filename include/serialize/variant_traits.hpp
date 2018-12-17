@@ -92,8 +92,12 @@ constexpr bool noDefault(S name) {
 ///
 template <typename T, typename S>
 constexpr bool hasDefaultValue(S name) {
-    if constexpr(present<T>(name)) {
-        return !noDefault<T>(name);
+    if constexpr (hasDefaults(boost::hana::type_c<T>)) {
+        if constexpr(present<T>(name)) {
+            return !noDefault<T>(name);
+        } else {
+            return false;
+        }
     } else {
         return false;
     }
@@ -211,11 +215,6 @@ struct VarDef {
     static Derived fromVariant(Variant const& x) {
         using namespace std::literals;
         using namespace boost::hana::literals;
-
-        static_assert(
-            detail::hasDefaults(boost::hana::type_c<Derived>),
-            "The T must have `defaults` static member function");
-        detail::checkOrphanKeys(type_c<Derived>);
 
         Derived ret;
         auto const& map = x.map();
