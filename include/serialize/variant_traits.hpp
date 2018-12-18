@@ -149,8 +149,17 @@ struct Var {
         Variant::Map ret;
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
-            ret[boost::hana::to<char const*>(name)] =
-                    detail::toVariantWrap(value);
+            if constexpr (isOptional(type_c<decltype(value)>)) {
+                if (value.has_value()) {
+                    ret[boost::hana::to<char const*>(name)] =
+                            detail::toVariantWrap(*value);
+                } else {
+                    ret[boost::hana::to<char const*>(name)] = Variant();
+                }
+            } else {
+                ret[boost::hana::to<char const*>(name)] =
+                        detail::toVariantWrap(value);
+            }
         }));
 
         return Variant(ret);
@@ -170,7 +179,15 @@ struct Var {
                             boost::hana::to<char const*>(name) +
                             " not found in map"s);
             } else {
-                tmp = detail::fromVariantWrap<decltype(tmp)>(it->second);
+                if constexpr (isOptional(type_c<decltype(tmp)>)) {
+                    if (it->second.empty()) {
+                        return;
+                    } else {
+                        tmp = detail::fromVariantWrap<decltype(*tmp)>(it->second);
+                    }
+                } else {
+                    tmp = detail::fromVariantWrap<decltype(tmp)>(it->second);
+                }
             }
         }));
 
