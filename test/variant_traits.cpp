@@ -337,10 +337,30 @@ struct PersonD
 };
 
 
+struct Pol {
+    static constexpr auto serialize_empty_container = false;
+    static constexpr auto serialize_default_value   = false;
+};
+
+
+struct PersonE
+        : trait::VarDef<PersonE, Pol> {
+
+    static constexpr auto defaults() {
+        return hana::make_map(hana::make_pair("i"_s, 2));
+    }
+
+    PersonE() = default;
+    std::vector<int> cont;
+    int i{0};
+};
+
+
 } // namespace
 
 
 BOOST_HANA_ADAPT_STRUCT(PersonD, name, age, hobby);
+BOOST_HANA_ADAPT_STRUCT(PersonE, cont, i);
 
 
 TEST_CASE("Check trait::VarDef", "[variant_traits]") {
@@ -391,6 +411,21 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
     SECTION("Check fromVariant with no hobby (no default value)") {
         person_var.erase("hobby");
         REQUIRE_THROWS_AS(PersonD::fromVariant(Variant(person_var)), std::logic_error);
+    }
+
+    SECTION("Check toVariant policy redefinition") {
+        PersonE p1;
+        p1.i = 2;
+        REQUIRE(Variant(p1) == Variant(VariantMap{}));
+
+        PersonE p2;
+        p2.i = 0;
+        p2.cont.push_back(1);
+        VariantMap exp{
+            {"i", Variant(0)},
+            {"cont", Variant(VariantVec{Variant(1)})}
+        };
+        REQUIRE(Variant(p2) == Variant(exp));
     }
 }
 

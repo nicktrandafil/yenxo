@@ -38,18 +38,14 @@
 #include <type_traits>
 
 
-///
 /// \file variant_traits.hpp
 /// Some add-ons for enabling to and from Variant conversion
-///
 
 
 namespace serialize::trait {
 
 
-///
 /// Specify stub for default value (means no default value specified)
-///
 struct NoDefault {
     BOOST_HANA_DEFINE_STRUCT(NoDefault);
 };
@@ -58,17 +54,19 @@ struct NoDefault {
 namespace detail {
 
 
-///
 /// Does a type has a static member function `defaults()`
-///
 constexpr auto const hasDefaults = boost::hana::is_valid(
             [](auto t) -> decltype((void) decltype(t)::type::defaults()) {
 });
 
 
-///
+/// Is the type a container
+constexpr auto const isContainer = boost::hana::is_valid(
+  [](auto t) -> decltype((void) begin(std::declval<typename decltype(t)::type>())) {
+});
+
+
 /// Is `name` is present in `defaults()` of `T`
-///
 template <typename T, typename S>
 constexpr bool present(S name) {
     using Found = decltype(
@@ -77,9 +75,7 @@ constexpr bool present(S name) {
 }
 
 
-///
 /// Does type of provided entry in `defaults()` for `name` is `NoDefault`
-///
 template <typename T, typename S>
 constexpr bool noDefault(S name) {
     return std::is_same_v<std::decay_t<decltype(T::defaults()[name])>,
@@ -87,9 +83,7 @@ constexpr bool noDefault(S name) {
 }
 
 
-///
 /// Does the field `name` has a default value in the class `C`
-///
 template <typename T, typename S>
 constexpr bool hasDefaultValue(S name) {
     if constexpr (hasDefaults(boost::hana::type_c<T>)) {
@@ -99,6 +93,7 @@ constexpr bool hasDefaultValue(S name) {
             return false;
         }
     } else {
+        (void) name;
         return false;
     }
 }
@@ -133,7 +128,6 @@ auto fromVariantWrap(Variant const& x) {
 } // namespace detail
 
 
-///
 /// Adds conversion support to and from `Variant`
 /// Specifically, adds methods:
 ///     `static Variant toVariant(Derived)`
@@ -142,7 +136,6 @@ auto fromVariantWrap(Variant const& x) {
 /// The methods does not deal with optional types and default values. Therefore,
 /// for the method `fromVariant` all members must be presented in a variant,
 /// and, for the method `toVariant` all fields will be serialized into a variant
-///
 template <typename Derived>
 struct Var {
     static Variant toVariant(Derived const& x) {
@@ -199,7 +192,13 @@ protected:
 };
 
 
-///
+/// Configuaratoin for `VarDef`
+struct VarDefPolicy {
+    static auto constexpr serialize_empty_container = true;
+    static auto constexpr serialize_default_value = true;
+};
+
+
 /// Adds conversion support to and from `Variant`, defaulting missings fields
 /// Specifically adds members:
 ///     `static Variant toVariant(Derived)`
@@ -208,8 +207,7 @@ protected:
 /// Requires a static member function `defaults` of hana map to be presented in
 /// `Derived`, where the kays are member names and the values are convertible
 /// to the corresponding members.
-///
-template <typename Derived>
+template <typename Derived, class Policy = VarDefPolicy>
 struct VarDef {
     static Variant toVariant(Derived const& x) {
         Variant::Map ret;
@@ -221,8 +219,23 @@ struct VarDef {
                             detail::toVariantWrap(*value);
                 }
             } else {
-                ret[boost::hana::to<char const*>(name)] =
-                        detail::toVariantWrap(value);
+                if constexpr (detail::hasDefaultValue<Derived>(name)) {
+                    if (Derived::defaults()[name] == value) { return; }
+                }
+
+                if constexpr(detail::isContainer(
+                                 boost::hana::type_c<decltype(value)>)) {
+                    if constexpr (Policy::serialize_empty_container) {
+                        ret[boost::hana::to<char const*>(name)] =
+                                detail::toVariantWrap(value);
+                    } else if (begin(value) != end(value)) {
+                        ret[boost::hana::to<char const*>(name)] =
+                                detail::toVariantWrap(value);
+                    }
+                } else {
+                    ret[boost::hana::to<char const*>(name)] =
+                            detail::toVariantWrap(value);
+                }
             }
         }));
 
@@ -277,7 +290,6 @@ protected:
 };
 
 
-///
 /// Adds conversion support to and from `Variant`, defaulting missings fields
 /// Specifically adds members:
 ///     `static Variant toVariant(Derived)`
@@ -291,7 +303,6 @@ protected:
 /// 	- default value presented for every member (use `NoDefault` as stub);
 /// 	- types of default values are convertible to the correspondig members;
 /// 	- there are no unknown fields in the dict
-///
 template <typename Derived>
 struct VarDefExplicit : private VarDef<Derived> {
     static Derived fromVariant(Variant const& x) {
@@ -330,10 +341,8 @@ protected:
 };
 
 
-///
 /// Adds member `void update(Variant)`
 /// Updates the specified fields
-///
 template <typename Derived>
 struct UpdateFromVar {
     void updateVar(Variant const& x) {
