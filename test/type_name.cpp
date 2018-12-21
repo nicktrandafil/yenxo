@@ -76,10 +76,10 @@ TEST_CASE("Check typeName", "[utilities]") {
     REQUIRE(unqualifiedTypeName<a::Xyz>() == "Xyz");
     REQUIRE(unqualifiedTypeName<Dum::Zum>() == "Zum");
     REQUIRE(unqualifiedTypeName<tz::Z<E::e1>>() == "Z<(E)0>");
-    REQUIRE(unqualifiedTypeName<A<Z<E::e1>>>() == "A<Z<(E)0> >");
-    // FIXME
-    //REQUIRE(unqualifiedTypeName<A<tz::Z<E::e1>>>() == "A<Z<(E)0> >"); 
+    REQUIRE(unqualifiedTypeName<A<Z<E::e1>>>() == "A<Z<(E)0>>");
+    REQUIRE(unqualifiedTypeName<A<tz::Z<E::e1>>>() == "A<Z<(E)0>>");
     static_assert(unqualifiedTypeName<Def>() == "Def");
+    REQUIRE(unqualifiedTypeName<std::string>() == "string");
 
     REQUIRE(qualifiedTypeName<Def>() == "Def");
     REQUIRE(qualifiedTypeName<a::Xyz>() == "a::Xyz");

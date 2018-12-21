@@ -26,40 +26,87 @@
 #pragma once
 
 
+// local
+#include <serialize/when.hpp>
+
 // std
+#include <string>
 #include <string_view>
 
 
 namespace serialize {
+namespace detail {
 
 
-///
-/// Get unqualified type name
-///
-template <class T>
-constexpr std::string_view unqualifiedTypeName() {
+constexpr std::string_view getT(std::string_view p) {
     using namespace std;
-
 #ifdef __clang__
 #error "Not supported"
-
 #elif defined(__GNUC__)
-    string_view p = __PRETTY_FUNCTION__;
     auto start = p.find("T = ") + 4;
     auto const end = p.find(';', start);
     auto const tmp = p.rfind("::", end);
     if (tmp > start) { start = tmp + 2; }
     return string_view(p.data() + start, end - start);
-
 #elif defined(_MSC_VER)
 #error "Not supported"
 #endif
 }
 
 
-///
+}
+
+
+template <class T, class = void>
+struct UnqualifiedTypeNameImpl : UnqualifiedTypeNameImpl<T, When<true>> {};
+
+
+template <class T>
+struct UnqualifiedTypeNameT {
+    constexpr auto operator()() const;
+};
+
+
 /// Get unqualified type name
-///
+template <class T>
+constexpr UnqualifiedTypeNameT<T> unqualifiedTypeName;
+
+
+template <class T, bool condition>
+struct UnqualifiedTypeNameImpl<T, When<condition>> {
+    static constexpr std::string_view apply() {
+        return detail::getT(__PRETTY_FUNCTION__);
+    }
+};
+
+
+template <>
+struct UnqualifiedTypeNameImpl<std::string> {
+    static constexpr std::string_view apply() {
+        return "string";
+    }
+};
+
+
+template <template <class...> class T, class... Args>
+struct UnqualifiedTypeNameImpl<T<Args...>> {
+    static std::string apply() {
+        using namespace std;
+        std::string const name{detail::getT(__PRETTY_FUNCTION__)};
+        string tmp = ((string(unqualifiedTypeName<Args>()) + ", ") + ...);
+        if (!tmp.empty()) { tmp.erase(tmp.end() - 2, tmp.end()); }
+        return name + "<" + tmp + ">";
+    }
+};
+
+
+template <class T>
+constexpr auto UnqualifiedTypeNameT<T>::operator()() const {
+    return UnqualifiedTypeNameImpl<T>::apply();
+}
+
+
+/// Get unqualified type name
 template <class T>
 constexpr std::string_view qualifiedTypeName() {
     using namespace std;
