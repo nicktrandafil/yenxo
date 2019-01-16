@@ -66,9 +66,7 @@ struct HasToVariantT {
 };
 
 
-///
 /// Tests if type has Variant T::toVariant(T)
-///
 constexpr HasToVariantT hasToVariant;
 
 
@@ -78,9 +76,7 @@ struct ToVariantT {
 };
 
 
-///
 /// Convinient shortcut function
-///
 constexpr ToVariantT toVariant;
 
 
@@ -103,22 +99,16 @@ struct HasFromVariantT {
 };
 
 
-///
 /// Tests if type has T T::fromVariant(Variant)
-///
 constexpr HasFromVariantT hasFromVariant;
 
 
-///
 /// Unified converstion of T to Variant
-///
 template <typename T, typename = void>
 struct ToVariantImpl : ToVariantImpl<T, When<true>> {};
 
 
-///
 /// Fallback
-///
 template <typename T, bool condition>
 struct ToVariantImpl<T, When<condition>> {
     static Variant apply(T const&) {
@@ -129,27 +119,21 @@ struct ToVariantImpl<T, When<condition>> {
 };
 
 
-///
 /// Specialization for types with `static Variant T::toVariant(T)`
-///
 template <typename T>
 struct ToVariantImpl<T, When<hasToVariant(type_c<T>)>> {
     static Variant apply(T const& x) { return T::toVariant(x); }
 };
 
 
-///
 /// Specialization for Variant build-in supported types
-///
 template <typename T>
 struct ToVariantImpl<T, When<Variant::Types::convertible<T>()>> {
     static Variant apply(T x) { return Variant(x); }
 };
 
 
-///
 /// Specialization for map types
-///
 template <typename T>
 struct ToVariantImpl<T,
         When<isContainer(type_c<T>) &&
@@ -166,9 +150,7 @@ struct ToVariantImpl<T,
 };
 
 
-///
 /// Specialization for collection types
-///
 template <typename T>
 struct ToVariantImpl<T,
         When<isContainer(type_c<T>) &&
@@ -176,7 +158,7 @@ struct ToVariantImpl<T,
     static Variant apply(T const& vec) {
         VariantVec ret;
         for (auto const& x: vec) {
-            ret.push_back(ToVariantImpl<std::decay_t<decltype(x)>>::apply(x));
+            ret.push_back(toVariant(x));
         }
         return Variant(ret);
     }
@@ -184,9 +166,7 @@ struct ToVariantImpl<T,
 
 
 #if SERIALIZE_ENABLE_TYPE_SAFE
-///
 /// Specialization for `type_safe::strong_typedef`
-///
 template <typename T>
 struct ToVariantImpl<T, When<
         !hasToVariant(type_c<T>) && strongTypeDef(type_c<T>)>> {
@@ -197,9 +177,7 @@ struct ToVariantImpl<T, When<
 };
 
 
-///
 /// Specialization for `type_safe::constrained_type`
-///
 template <typename T>
 struct ToVariantImpl<T, When<constrainedType(type_c<T>)>> {
     static Variant apply(T const& st) {
@@ -209,9 +187,7 @@ struct ToVariantImpl<T, When<constrainedType(type_c<T>)>> {
 };
 
 
-///
 /// Specialization for `type_safe::integer`
-///
 template <typename T>
 struct ToVariantImpl<T, When<integerType(type_c<T>)>> {
     static Variant apply(T const& st) {
@@ -221,9 +197,7 @@ struct ToVariantImpl<T, When<integerType(type_c<T>)>> {
 };
 
 
-///
 /// Specialization for `type_safe::floating_point`
-///
 template <typename T>
 struct ToVariantImpl<T, When<floatingPoint(type_c<T>)>> {
     static Variant apply(T const& st) {
@@ -233,9 +207,7 @@ struct ToVariantImpl<T, When<floatingPoint(type_c<T>)>> {
 };
 
 
-///
 /// Specialization for `type_safe::boolean`
-///
 template <typename T>
 struct ToVariantImpl<T, When<boolean(type_c<T>)>> {
     static Variant apply(T const& st) {
@@ -305,23 +277,17 @@ struct FromVariantT {
 };
 
 
-///
 /// Convinient shortcut function
-///
 template <typename T>
 constexpr FromVariantT<T> fromVariant;
 
 
-///
 /// Unified converstion of Variant to T
-///
 template <typename T, typename = void>
 struct FromVariantImpl : FromVariantImpl<T, When<true>> {};
 
 
-///
 /// Fallback
-///
 template <typename T, bool condition>
 struct FromVariantImpl<T, When<condition>> {
     static T apply(Variant const&) {
@@ -332,43 +298,54 @@ struct FromVariantImpl<T, When<condition>> {
 };
 
 
-///
 /// Specialization for types with `static T T::fromVariant(Variant)`
-///
 template <typename T>
 struct FromVariantImpl<T, When<hasFromVariant(type_c<T>)>> {
     static T apply(Variant const& x) { return T::fromVariant(x); }
 };
 
 
-///
 /// Specialization for types for which Variant have conversion
-///
 template <typename T>
 struct FromVariantImpl<T, When<Variant::Types::anyOf<T>()>> {
     static T apply(Variant const& x) { return static_cast<T>(x); }
 };
 
 
-///
-/// Specialization for collection types
-///
+/// Specialization for collection types (with push_back)
 template <typename T>
-struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
-        !isKeyValue(type_c<typename T::value_type>)>> {
+struct FromVariantImpl<T, When<
+        isContainer(type_c<T>) &&
+        !isKeyValue(type_c<typename T::value_type>) &&
+        hasPushBack(boost::hana::type_c<T>)>> {
     static T apply(Variant const& var) {
         T ret;
         for (auto const& x: var.vec()) {
-            ret.push_back(FromVariantImpl<typename T::value_type>::apply(x));
+            ret.push_back(fromVariant<typename T::value_type>(x));
         }
         return ret;
     }
 };
 
 
-///
+/// Specialization for collection types (with emplace)
+template <typename T>
+struct FromVariantImpl<T, When<
+        isContainer(type_c<T>) &&
+        !isKeyValue(type_c<typename T::value_type>) &&
+        !hasPushBack(boost::hana::type_c<T>) &&
+        hasEmplace(boost::hana::type_c<T>)>> {
+    static T apply(Variant const& var) {
+        T ret;
+        for (auto const& x: var.vec()) {
+            ret.emplace(fromVariant<typename T::value_type>(x));
+        }
+        return ret;
+    }
+};
+
+
 /// Specialization for map types
-///
 template <typename T>
 struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
         isKeyValue(type_c<typename T::value_type>)>> {
@@ -385,9 +362,7 @@ struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
 
 
 #if SERIALIZE_ENABLE_TYPE_SAFE
-///
 /// Specialization for `type_safe::strong_typedef`
-///
 template <typename T>
 struct FromVariantImpl<T, When<
         !hasFromVariant(type_c<T>) && strongTypeDef(type_c<T>)>> {
@@ -398,9 +373,7 @@ struct FromVariantImpl<T, When<
 };
 
 
-///
 /// Specialization for `type_safe::constrained_type`
-///
 template <typename T>
 struct FromVariantImpl<T, When<constrainedType(type_c<T>)>> {
     static T apply(Variant const& var) {
@@ -409,9 +382,7 @@ struct FromVariantImpl<T, When<constrainedType(type_c<T>)>> {
 };
 
 
-///
 /// Specialization for `type_safe::integer`
-///
 template <typename T>
 struct FromVariantImpl<T, When<integerType(type_c<T>)>> {
     static T apply(Variant const& var) {
@@ -420,9 +391,7 @@ struct FromVariantImpl<T, When<integerType(type_c<T>)>> {
 };
 
 
-///
 /// Specialization for `type_safe::floating_point`
-///
 template <typename T>
 struct FromVariantImpl<T, When<floatingPoint(type_c<T>)>> {
     static T apply(Variant const& var) {
@@ -431,9 +400,7 @@ struct FromVariantImpl<T, When<floatingPoint(type_c<T>)>> {
 };
 
 
-///
 /// Specialization for `type_safe::boolean`
-///
 template <typename T>
 struct FromVariantImpl<T, When<boolean(type_c<T>)>> {
     static T apply(Variant const& var) {

@@ -41,9 +41,7 @@
 namespace serialize::trait {
 
 
-///
 /// Enables `ostreams` for `Derived`
-///
 template <typename Derived>
 struct OStream {
     friend std::ostream& operator<<(std::ostream& os, Derived const& x) {
@@ -77,6 +75,8 @@ struct OStream {
                     }
                     os << "]; ";
                 }
+            } else if constexpr (strongTypeDef(type_c<Derived>)) {
+                os << static_cast<type_safe::underlying_type<Derived>>(x);
             } else {
                 os << boost::hana::to<char const*>(name)
                    << ": "

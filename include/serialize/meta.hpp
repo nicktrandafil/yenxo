@@ -17,6 +17,7 @@
 #include <boost/hana/contains.hpp>
 #include <boost/hana/type.hpp>
 #include <boost/hana/any_of.hpp>
+#include <boost/hana/traits.hpp>
 
 // std
 #include <optional>
@@ -223,6 +224,16 @@ constexpr auto isKeyValue(Type<T> const& x) {
         return false;
     }
 }
+
+
+constexpr auto hasPushBack = boost::hana::is_valid([](auto x) ->
+    decltype((void) boost::hana::traits::declval(x).push_back(std::declval<typename decltype(x)::type::value_type>()))
+{});
+
+
+constexpr auto hasEmplace = boost::hana::is_valid([](auto x) ->
+    decltype((void) boost::hana::traits::declval(x).emplace(std::declval<typename decltype(x)::type::value_type>()))
+{});
 
 
 #if SERIALIZE_ENABLE_TYPE_SAFE
