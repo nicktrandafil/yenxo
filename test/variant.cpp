@@ -320,6 +320,11 @@ TEST_CASE("Check Variant", "[Variant]") {
 
             REQUIRE(expected == json);
         }
+
+        SECTION("string") {
+            auto const json = Variant(VariantMap({std::make_pair("a", Variant("b"))})).toJson();
+            REQUIRE(json == R"({"a":"b"})");
+        }
     }
 
     SECTION("ostream") {

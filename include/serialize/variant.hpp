@@ -311,6 +311,7 @@ public:
     /// \{
     static Variant from(rapidjson::Value const& json);
     rapidjson::Document& to(rapidjson::Document& json) const;
+    std::string toJson() const;
     /// \}
 
     ///

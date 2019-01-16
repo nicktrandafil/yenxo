@@ -23,12 +23,17 @@
 */
 
 
+// ifce
 #include <serialize/variant.hpp>
 
 // local
 #include <serialize/meta.hpp>
 #include <serialize/pimpl_impl.hpp>
 #include <serialize/type_name.hpp>
+
+// 3rd
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 // std
 #include <unordered_map>
@@ -593,6 +598,18 @@ rapidjson::Document& Variant::to(rapidjson::Document& json) const {
     }, impl->m);
 
     return json;
+}
+
+
+std::string Variant::toJson() const {
+    rapidjson::Document doc;
+    to(doc);
+
+    rapidjson::StringBuffer sb;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+    doc.Accept(writer);
+
+    return sb.GetString();
 }
 
 
