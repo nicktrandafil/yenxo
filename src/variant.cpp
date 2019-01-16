@@ -34,6 +34,7 @@
 // 3rd
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/error/en.h>
 
 // std
 #include <unordered_map>
@@ -556,6 +557,15 @@ Variant Variant::from(Value const& json) {
     FromRapidJsonValue<Value::Ch> ser;
     json.Accept(ser);
     return std::visit(ser.res_v, std::move(ser.stack.front()));
+}
+
+
+Variant Variant::fromJson(std::string const& json) {
+    rapidjson::Document d;
+    if (d.Parse(json.c_str()).HasParseError()) {
+        throw std::runtime_error(rapidjson::GetParseError_En(d.GetParseError()));
+    }
+    return Variant::from(d);
 }
 
 

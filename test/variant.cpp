@@ -322,8 +322,11 @@ TEST_CASE("Check Variant", "[Variant]") {
         }
 
         SECTION("string") {
-            auto const json = Variant(VariantMap({std::make_pair("a", Variant("b"))})).toJson();
-            REQUIRE(json == R"({"a":"b"})");
+            Variant var(VariantMap({std::make_pair("a", Variant("b"))}));
+            auto const json_str = var.toJson();
+            REQUIRE(json_str == R"({"a":"b"})");
+            REQUIRE(var == Variant::fromJson(json_str));
+            REQUIRE_THROWS_AS(Variant::fromJson("{abc"), std::runtime_error);
         }
     }
 

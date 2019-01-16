@@ -310,7 +310,12 @@ public:
     /// \ingroup Formats
     /// \{
     static Variant from(rapidjson::Value const& json);
+
+    /// \throw `std::runtime_error` on `json` parse
+    static Variant fromJson(std::string const& json);
+
     rapidjson::Document& to(rapidjson::Document& json) const;
+
     std::string toJson() const;
     /// \}
 
