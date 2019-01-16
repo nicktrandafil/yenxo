@@ -219,7 +219,8 @@ struct VarDef {
                             detail::toVariantWrap(*value);
                 }
             } else {
-                if constexpr (detail::hasDefaultValue<Derived>(name)) {
+                if constexpr (!Policy::serialize_default_value &&
+                              detail::hasDefaultValue<Derived>(name)) {
                     if (Derived::defaults()[name] == value) { return; }
                 }
 

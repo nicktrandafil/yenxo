@@ -386,6 +386,12 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
         hobby
     };
 
+    SECTION("Check toVariant with default value (should serialize)") {
+        person.name = "Efendi";
+        person_var["name"] = Variant("Efendi");
+        REQUIRE(Variant(person) == Variant(person_var));
+    }
+
     SECTION("Check toVariant with uninitialized age") {
         person_var.erase("age");
         person.age.reset();
