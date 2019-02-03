@@ -257,7 +257,7 @@ add_test(
 
 add_test(
     algorithm_string test_${PROJECT_NAME}
-    "Check Check sp::iendsWith")
+    "Check Check iendsWith")
 
 add_test(
     traits_var_type_safe test_${PROJECT_NAME}

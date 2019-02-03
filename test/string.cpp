@@ -33,7 +33,7 @@
 using namespace serialize;
 
 
-TEST_CASE("Check sp::iendsWith", "[algorithms]") {
+TEST_CASE("Check iendsWith", "[algorithms]") {
     REQUIRE(iendsWith("", ""));
     REQUIRE(iendsWith("a", ""));
     REQUIRE(iendsWith("heLlO", "Llo"));
