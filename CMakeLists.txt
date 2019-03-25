@@ -55,7 +55,7 @@ include(external/external.cmake)
 # Target
 
 add_library(
-    ${PROJECT_NAME}
+    ${PROJECT_NAME} STATIC
 
     include/${PROJECT_NAME}/meta.hpp
 
