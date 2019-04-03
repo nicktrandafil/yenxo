@@ -46,9 +46,22 @@ namespace serialize {
 ///
 /// An error identifying `Variant` error
 ///
-class VariantErr : public std::runtime_error {
+class VariantErr : public std::exception {
 public:
-    explicit VariantErr(std::string const& x) : runtime_error(x) {}
+    explicit VariantErr(std::string const& msg)
+        : what_(msg)
+    {}
+
+    char const* what() const noexcept override {
+        return what_.c_str();
+    }
+
+    void prependPath(std::string const& val) {
+        what_ = "." + val + what_;
+    }
+
+private:
+    std::string what_;
 };
 
 
@@ -57,7 +70,8 @@ public:
 ///
 class VariantEmpty final : public VariantErr {
 public:
-    explicit VariantEmpty() : VariantErr("Attempt to get empty `Variant`") {}
+    VariantEmpty() : VariantErr("Attempt to get empty `Variant`")
+    {}
 };
 
 
@@ -66,7 +80,8 @@ public:
 ///
 class VariantBadType final : public VariantErr {
 public:
-    explicit VariantBadType() : VariantErr("Attempt to get wrong type") {}
+    VariantBadType() : VariantErr("Attempt to get wrong type")
+    {}
 };
 
 
@@ -75,13 +90,11 @@ public:
 ///
 class VariantIntegralOverflow final : public VariantErr {
 public:
-    explicit VariantIntegralOverflow(
-            std::string const type_name,
-            std::string const value)
-        : VariantErr("The type '" + type_name +
-                     "' can not hold the value '" +
-                     value +
-                     "'")
+    VariantIntegralOverflow(
+            std::string const& type_name,
+            std::string const& value)
+        : VariantErr("The type '" +
+                     type_name + "' can not hold the value '" + value + "'")
     {}
 };
 
@@ -297,6 +310,11 @@ public:
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
     ///
     Map mapOr(Map const& x) const;
+
+    ///
+    /// Check if Variant contains data
+    ///
+    bool empty() const noexcept;
 
     /// \defgroup Variant equality comparison
     /// \{

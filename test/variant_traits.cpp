@@ -338,8 +338,9 @@ struct PersonD
 
 
 struct Pol {
-    static constexpr auto serialize_empty_container = false;
-    static constexpr auto serialize_default_value   = false;
+    static constexpr auto allow_null = true;
+    static auto constexpr serialize_default_value = false;
+    static auto constexpr empty_container_not_required = true;
 };
 
 

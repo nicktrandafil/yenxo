@@ -120,8 +120,13 @@ auto toVariantWrap(T&& x) {
 
 
 template <typename T>
-auto fromVariantWrap(Variant const& x) {
-    return fromVariant<T>(x);
+auto fromVariantWrap(char const* name, Variant const& x) {
+    try {
+        return fromVariant<T>(x);
+    } catch (serialize::VariantErr& e) {
+        e.prependPath(name);
+        throw;
+    }
 }
 
 
@@ -173,13 +178,11 @@ struct Var {
                             " not found in map"s);
             } else {
                 if constexpr (isOptional(type_c<decltype(tmp)>)) {
-                    if (it->second.empty()) {
-                        return;
-                    } else {
-                        tmp = detail::fromVariantWrap<decltype(*tmp)>(it->second);
+                    if (!it->second.empty()) {
+                        tmp = detail::fromVariantWrap<decltype(*tmp)>(boost::hana::to<char const*>(name), it->second);
                     }
                 } else {
-                    tmp = detail::fromVariantWrap<decltype(tmp)>(it->second);
+                    tmp = detail::fromVariantWrap<decltype(tmp)>(boost::hana::to<char const*>(name), it->second);
                 }
             }
         }));
@@ -194,8 +197,9 @@ protected:
 
 /// Configuaratoin for `VarDef`
 struct VarDefPolicy {
-    static auto constexpr serialize_empty_container = true;
+    static auto constexpr empty_container_not_required = false;
     static auto constexpr serialize_default_value = true;
+    static auto constexpr allow_null = false;
 };
 
 
@@ -217,6 +221,8 @@ struct VarDef {
                 if (value.has_value()) {
                     ret[boost::hana::to<char const*>(name)] =
                             detail::toVariantWrap(*value);
+                } else if (Policy::allow_null) {
+                    ret[boost::hana::to<char const*>(name)] = {};
                 }
             } else {
                 if constexpr (!Policy::serialize_default_value &&
@@ -226,7 +232,7 @@ struct VarDef {
 
                 if constexpr(detail::isContainer(
                                  boost::hana::type_c<decltype(value)>)) {
-                    if constexpr (Policy::serialize_empty_container) {
+                    if constexpr (!Policy::empty_container_not_required) {
                         ret[boost::hana::to<char const*>(name)] =
                                 detail::toVariantWrap(value);
                     } else if (begin(value) != end(value)) {
@@ -267,7 +273,9 @@ struct VarDef {
 
                     tmp = Derived::defaults()[name];
                 } else if constexpr (
-                            !isOptional(type_c<decltype(tmp)>)) {
+                            !isOptional(type_c<decltype(tmp)>) &&
+                            ((isContainer(type_c<decltype(tmp)>) && !Policy::empty_container_not_required) ||
+                                !isContainer(type_c<decltype(tmp)>))) {
                     throw std::logic_error(
                                 boost::hana::to<char const*>(name) +
                                 " not found in map, and default"
@@ -276,9 +284,13 @@ struct VarDef {
 
             } else {
                 if constexpr (isOptional(type_c<decltype(tmp)>)) {
-                    tmp = detail::fromVariantWrap<decltype(*tmp)>(it->second);
+                    if (!it->second.empty()) {
+                        tmp = detail::fromVariantWrap<decltype(*tmp)>(boost::hana::to<char const*>(name), it->second);
+                    } else if (!Policy::allow_null) {
+                        tmp = detail::fromVariantWrap<decltype(*tmp)>(boost::hana::to<char const*>(name), it->second);
+                    }
                 } else {
-                    tmp = detail::fromVariantWrap<decltype(tmp)>(it->second);
+                    tmp = detail::fromVariantWrap<decltype(tmp)>(boost::hana::to<char const*>(name), it->second);
                 }
             }
         }));
@@ -355,7 +367,7 @@ struct UpdateFromVar {
                                   boost::hana::fuse([&](auto name, auto value) {
                 if (boost::hana::to<char const*>(name) != v.first) { return; }
                 auto& tmp = value(self);
-                tmp = detail::fromVariantWrap<decltype(tmp)>(v.second);
+                tmp = detail::fromVariantWrap<decltype(tmp)>(boost::hana::to<char const*>(name), v.second);
                 found = true;
             }));
 

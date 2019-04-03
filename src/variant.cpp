@@ -652,4 +652,12 @@ std::type_info const& Variant::typeInfo() const {
 }
 
 
+bool Variant::empty() const noexcept {
+    return std::visit(Overload{
+        [](std::monostate) { return true; },
+        [](auto) { return false; }
+    }, impl->m);
+}
+
+
 }
