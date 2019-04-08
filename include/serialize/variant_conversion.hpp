@@ -137,7 +137,8 @@ struct ToVariantImpl<T, When<Variant::Types::convertible<T>()>> {
 template <typename T>
 struct ToVariantImpl<T,
         When<isContainer(type_c<T>) &&
-             isKeyValue(type_c<typename T::value_type>)>> {
+             isKeyValue(type_c<typename T::value_type>) &&
+             !std::is_same_v<T, serialize::VariantMap>>> {
     static Variant apply(T const& map) {
         VariantMap ret;
         for (auto const& x: map) {
@@ -154,7 +155,8 @@ struct ToVariantImpl<T,
 template <typename T>
 struct ToVariantImpl<T,
         When<isContainer(type_c<T>) &&
-             !isKeyValue(type_c<typename T::value_type>)>> {
+             !isKeyValue(type_c<typename T::value_type>) &&
+             !std::is_same_v<T, serialize::VariantVec>>> {
     static Variant apply(T const& vec) {
         VariantVec ret;
         for (auto const& x: vec) {
@@ -317,7 +319,8 @@ template <typename T>
 struct FromVariantImpl<T, When<
         isContainer(type_c<T>) &&
         !isKeyValue(type_c<typename T::value_type>) &&
-        hasPushBack(boost::hana::type_c<T>)>> {
+        hasPushBack(boost::hana::type_c<T>) &&
+        !std::is_same_v<T, serialize::VariantVec>>> {
     static T apply(Variant const& var) {
         T ret;
         for (auto const& x: var.vec()) {
@@ -334,7 +337,8 @@ struct FromVariantImpl<T, When<
         isContainer(type_c<T>) &&
         !isKeyValue(type_c<typename T::value_type>) &&
         !hasPushBack(boost::hana::type_c<T>) &&
-        hasEmplace(boost::hana::type_c<T>)>> {
+        hasEmplace(boost::hana::type_c<T>) &&
+        !std::is_same_v<T, serialize::VariantVec>>> {
     static T apply(Variant const& var) {
         T ret;
         for (auto const& x: var.vec()) {
@@ -348,7 +352,8 @@ struct FromVariantImpl<T, When<
 /// Specialization for map types
 template <typename T>
 struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
-        isKeyValue(type_c<typename T::value_type>)>> {
+        isKeyValue(type_c<typename T::value_type>) &&
+        !std::is_same_v<T, serialize::VariantMap>>> {
     static T apply(Variant const& var) {
         T ret;
         for (auto const& x: var.map()) {
