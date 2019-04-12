@@ -57,11 +57,16 @@ public:
     }
 
     void prependPath(std::string const& val) {
+        if (path_.empty()) { what_ = ": " + what_; }
         what_ = "." + val + what_;
+        path_ += "." + val + path_;
     }
+
+    std::string const& path() const noexcept { return path_; }
 
 private:
     std::string what_;
+    std::string path_;
 };
 
 

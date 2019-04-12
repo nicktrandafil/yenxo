@@ -520,5 +520,6 @@ TEST_CASE("Check trait::Var fails", "[variant_traits]") {
     }};
 
     REQUIRE_THROWS_AS(Car::fromVariant(car_var), VariantBadType);
+    REQUIRE_THROWS_WITH(Car::fromVariant(car_var), ".wheels: Attempt to get wrong type");
     REQUIRE(hana::equal(int(1), int(1)));
 }
