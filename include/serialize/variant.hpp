@@ -27,8 +27,9 @@
 
 
 // local
-#include <serialize/pimpl.hpp>
 #include <serialize/meta.hpp>
+#include <serialize/pimpl.hpp>
+#include <serialize/type_name.hpp>
 
 // 3rd
 #include <rapidjson/document.h>
@@ -85,7 +86,15 @@ public:
 ///
 class VariantBadType final : public VariantErr {
 public:
-    VariantBadType() : VariantErr("Attempt to get wrong type")
+    VariantBadType() : VariantErr("Attempt to get wrong type") {}
+    VariantBadType(std::string const& msg) : VariantErr(msg) {}
+    template <class T>
+    VariantBadType(std::string const &value, Type<T>)
+        : VariantErr(
+              "'" + value + "'" +
+              " is not a " +
+              "'" + std::string(qualifiedTypeName<std::decay_t<T>>()) + "'" +
+              " value")
     {}
 };
 

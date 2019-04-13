@@ -197,8 +197,13 @@ protected:
 
 /// Configuaratoin for `VarDef`
 struct VarDefPolicy {
+    /// treat missing keys as empty containers
     static auto constexpr empty_container_not_required = false;
+
+    /// serialize a value even if it has it's default value
     static auto constexpr serialize_default_value = true;
+
+    /// serialize empty optional as null, else drop the key
     static auto constexpr allow_null = false;
 };
 
@@ -285,8 +290,6 @@ struct VarDef {
             } else {
                 if constexpr (isOptional(type_c<decltype(tmp)>)) {
                     if (!it->second.empty()) {
-                        tmp = detail::fromVariantWrap<decltype(*tmp)>(boost::hana::to<char const*>(name), it->second);
-                    } else if (!Policy::allow_null) {
                         tmp = detail::fromVariantWrap<decltype(*tmp)>(boost::hana::to<char const*>(name), it->second);
                     }
                 } else {

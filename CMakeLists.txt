@@ -77,6 +77,9 @@ add_library(
 
     include/${PROJECT_NAME}/config.hpp
 
+    include/${PROJECT_NAME}/enum_traits.hpp
+    include/${PROJECT_NAME}/define_enum.hpp
+
     src/variant.cpp
 )
 
@@ -183,6 +186,10 @@ add_executable(
     test/type_safe.cpp
     test/string_conversion.cpp
     test/string.cpp
+
+    test/variant_conversion.cpp
+
+    test/define_enum.cpp
 )
 
 set_target_properties(test_${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -262,6 +269,15 @@ add_test(
 add_test(
     traits_var_type_safe test_${PROJECT_NAME}
     "Check trait::Var with type_safe build-in types")
+
+add_test(
+    variant_conversion test_${PROJECT_NAME}
+    "Check toVariant/fromVariant")
+
+add_test(
+    define_enum test_${PROJECT_NAME}
+    "Check DEFINE_ENUM")
+
 
 # Coverage
 

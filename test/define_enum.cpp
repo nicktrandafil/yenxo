@@ -24,6 +24,7 @@
 
 
 // tested
+#include <serialize/define_enum.hpp>
 #include <serialize/string_conversion.hpp>
 
 // 3rd
@@ -36,47 +37,23 @@ using namespace serialize;
 namespace {
 
 
-struct Hobby {
-    explicit Hobby(std::string const& str) : str(str) {}
-    [[maybe_unused]] explicit operator std::string() const { return str; }
-    bool operator==(Hobby const& rhs) const { return str == rhs.str; }
-    std::string str;
-};
-
-
-enum class E {
+DEFINE_ENUM(E,
     e1,
-    e2
-};
-
-
-struct ETraits {
-    using Enum [[maybe_unused]] = E;
-    [[maybe_unused]] static constexpr size_t count = 2;
-    [[maybe_unused]] static constexpr std::array<Enum, count> values{Enum::e1, Enum::e2};
-    [[maybe_unused]] static char const* toString(Enum x) {
-        switch (x) {
-        case Enum::e1: return "e1";
-        case Enum::e2: return "e2";
-        }
-        throw 1;
-    }
-};
-
-
-[[maybe_unused]] ETraits traits(E) { return {}; }
+    (e2),
+    (e3,)
+);
 
 
 }
 
 
-TEST_CASE("Check toString/fromString", "[string_conversion]") {
-    Hobby const hobby("abc");
-    std::string const str("abc");
-
-    REQUIRE(str == toString(hobby));
-    REQUIRE(hobby == fromString<Hobby>(str));
-
+TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
     REQUIRE(toString(E::e1) == "e1");
+    REQUIRE(fromString<E>("e1") == E::e1);
+
+    REQUIRE(toString(E::e2) == "e2");
     REQUIRE(fromString<E>("e2") == E::e2);
+
+    REQUIRE(toString(E::e3) == "e3");
+    REQUIRE(fromString<E>("e3") == E::e3);
 }
