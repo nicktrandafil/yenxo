@@ -440,3 +440,173 @@ ISEMPTY_( \
         } \
         friend Type##Traits traits(Type) { return {}; } \
     }
+
+#define DEFINE_ENUM_IMPL_12(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12) DEFINE_ENUM_IMPL_12_(Type, RESOLVE_VALUE(e1), RESOLVE_VALUE(e2), RESOLVE_VALUE(e3), RESOLVE_VALUE(e4), RESOLVE_VALUE(e5), RESOLVE_VALUE(e6), RESOLVE_VALUE(e7), RESOLVE_VALUE(e8), RESOLVE_VALUE(e9), RESOLVE_VALUE(e10), RESOLVE_VALUE(e11), RESOLVE_VALUE(e12))
+#define DEFINE_ENUM_IMPL_12_(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12) \
+    enum class [[maybe_unused]] Type { SECOND3 e1, SECOND3 e2, SECOND3 e3, SECOND3 e4, SECOND3 e5, SECOND3 e6, SECOND3 e7, SECOND3 e8, SECOND3 e9, SECOND3 e10, SECOND3 e11, SECOND3 e12 }; \
+    struct Type##Traits; \
+    [[maybe_unused]] Type##Traits traits(Type); \
+    struct [[maybe_unused]] Type##Traits { \
+        using Enum [[maybe_unused]] = Type; \
+        [[maybe_unused]] static constexpr size_t count = 12; \
+        [[maybe_unused]] static constexpr std::array<Enum, count> values{ \
+            Enum::FIRST3 e1, Enum::FIRST3 e2, Enum::FIRST3 e3, Enum::FIRST3 e4, Enum::FIRST3 e5, Enum::FIRST3 e6, Enum::FIRST3 e7, Enum::FIRST3 e8, Enum::FIRST3 e9, Enum::FIRST3 e10, Enum::FIRST3 e11, Enum::FIRST3 e12 \
+        }; \
+        [[maybe_unused]] static char const* toString(Enum x) { \
+            switch (x) { \
+            case Enum::FIRST3 e1: return THIRD3 e1; \
+            case Enum::FIRST3 e2: return THIRD3 e2; \
+            case Enum::FIRST3 e3: return THIRD3 e3; \
+            case Enum::FIRST3 e4: return THIRD3 e4; \
+            case Enum::FIRST3 e5: return THIRD3 e5; \
+            case Enum::FIRST3 e6: return THIRD3 e6; \
+            case Enum::FIRST3 e7: return THIRD3 e7; \
+            case Enum::FIRST3 e8: return THIRD3 e8; \
+            case Enum::FIRST3 e9: return THIRD3 e9; \
+            case Enum::FIRST3 e10: return THIRD3 e10; \
+            case Enum::FIRST3 e11: return THIRD3 e11; \
+            case Enum::FIRST3 e12: return THIRD3 e12; \
+            } \
+            assert(false); \
+            throw serialize::BadEnumValue(x); \
+        } \
+        friend Type##Traits traits(Type) { return {}; } \
+    }
+
+#define DEFINE_ENUM_IMPL_13(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13) DEFINE_ENUM_IMPL_13_(Type, RESOLVE_VALUE(e1), RESOLVE_VALUE(e2), RESOLVE_VALUE(e3), RESOLVE_VALUE(e4), RESOLVE_VALUE(e5), RESOLVE_VALUE(e6), RESOLVE_VALUE(e7), RESOLVE_VALUE(e8), RESOLVE_VALUE(e9), RESOLVE_VALUE(e10), RESOLVE_VALUE(e11), RESOLVE_VALUE(e12), RESOLVE_VALUE(e13))
+#define DEFINE_ENUM_IMPL_13_(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13) \
+    enum class [[maybe_unused]] Type { SECOND3 e1, SECOND3 e2, SECOND3 e3, SECOND3 e4, SECOND3 e5, SECOND3 e6, SECOND3 e7, SECOND3 e8, SECOND3 e9, SECOND3 e10, SECOND3 e11, SECOND3 e12, SECOND3 e13 }; \
+    struct Type##Traits; \
+    [[maybe_unused]] Type##Traits traits(Type); \
+    struct [[maybe_unused]] Type##Traits { \
+        using Enum [[maybe_unused]] = Type; \
+        [[maybe_unused]] static constexpr size_t count = 13; \
+        [[maybe_unused]] static constexpr std::array<Enum, count> values{ \
+            Enum::FIRST3 e1, Enum::FIRST3 e2, Enum::FIRST3 e3, Enum::FIRST3 e4, Enum::FIRST3 e5, Enum::FIRST3 e6, Enum::FIRST3 e7, Enum::FIRST3 e8, Enum::FIRST3 e9, Enum::FIRST3 e10, Enum::FIRST3 e11, Enum::FIRST3 e12, Enum::FIRST3 e13 \
+        }; \
+        [[maybe_unused]] static char const* toString(Enum x) { \
+            switch (x) { \
+            case Enum::FIRST3 e1: return THIRD3 e1; \
+            case Enum::FIRST3 e2: return THIRD3 e2; \
+            case Enum::FIRST3 e3: return THIRD3 e3; \
+            case Enum::FIRST3 e4: return THIRD3 e4; \
+            case Enum::FIRST3 e5: return THIRD3 e5; \
+            case Enum::FIRST3 e6: return THIRD3 e6; \
+            case Enum::FIRST3 e7: return THIRD3 e7; \
+            case Enum::FIRST3 e8: return THIRD3 e8; \
+            case Enum::FIRST3 e9: return THIRD3 e9; \
+            case Enum::FIRST3 e10: return THIRD3 e10; \
+            case Enum::FIRST3 e11: return THIRD3 e11; \
+            case Enum::FIRST3 e12: return THIRD3 e12; \
+            case Enum::FIRST3 e13: return THIRD3 e13; \
+            } \
+            assert(false); \
+            throw serialize::BadEnumValue(x); \
+        } \
+        friend Type##Traits traits(Type) { return {}; } \
+    }
+
+#define DEFINE_ENUM_IMPL_14(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14) DEFINE_ENUM_IMPL_14_(Type, RESOLVE_VALUE(e1), RESOLVE_VALUE(e2), RESOLVE_VALUE(e3), RESOLVE_VALUE(e4), RESOLVE_VALUE(e5), RESOLVE_VALUE(e6), RESOLVE_VALUE(e7), RESOLVE_VALUE(e8), RESOLVE_VALUE(e9), RESOLVE_VALUE(e10), RESOLVE_VALUE(e11), RESOLVE_VALUE(e12), RESOLVE_VALUE(e13), RESOLVE_VALUE(e14))
+#define DEFINE_ENUM_IMPL_14_(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14) \
+    enum class [[maybe_unused]] Type { SECOND3 e1, SECOND3 e2, SECOND3 e3, SECOND3 e4, SECOND3 e5, SECOND3 e6, SECOND3 e7, SECOND3 e8, SECOND3 e9, SECOND3 e10, SECOND3 e11, SECOND3 e12, SECOND3 e13, SECOND3 e14 }; \
+    struct Type##Traits; \
+    [[maybe_unused]] Type##Traits traits(Type); \
+    struct [[maybe_unused]] Type##Traits { \
+        using Enum [[maybe_unused]] = Type; \
+        [[maybe_unused]] static constexpr size_t count = 14; \
+        [[maybe_unused]] static constexpr std::array<Enum, count> values{ \
+            Enum::FIRST3 e1, Enum::FIRST3 e2, Enum::FIRST3 e3, Enum::FIRST3 e4, Enum::FIRST3 e5, Enum::FIRST3 e6, Enum::FIRST3 e7, Enum::FIRST3 e8, Enum::FIRST3 e9, Enum::FIRST3 e10, Enum::FIRST3 e11, Enum::FIRST3 e12, Enum::FIRST3 e13, Enum::FIRST3 e14 \
+        }; \
+        [[maybe_unused]] static char const* toString(Enum x) { \
+            switch (x) { \
+            case Enum::FIRST3 e1: return THIRD3 e1; \
+            case Enum::FIRST3 e2: return THIRD3 e2; \
+            case Enum::FIRST3 e3: return THIRD3 e3; \
+            case Enum::FIRST3 e4: return THIRD3 e4; \
+            case Enum::FIRST3 e5: return THIRD3 e5; \
+            case Enum::FIRST3 e6: return THIRD3 e6; \
+            case Enum::FIRST3 e7: return THIRD3 e7; \
+            case Enum::FIRST3 e8: return THIRD3 e8; \
+            case Enum::FIRST3 e9: return THIRD3 e9; \
+            case Enum::FIRST3 e10: return THIRD3 e10; \
+            case Enum::FIRST3 e11: return THIRD3 e11; \
+            case Enum::FIRST3 e12: return THIRD3 e12; \
+            case Enum::FIRST3 e13: return THIRD3 e13; \
+            case Enum::FIRST3 e14: return THIRD3 e14; \
+            } \
+            assert(false); \
+            throw serialize::BadEnumValue(x); \
+        } \
+        friend Type##Traits traits(Type) { return {}; } \
+    }
+
+#define DEFINE_ENUM_IMPL_15(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15) DEFINE_ENUM_IMPL_15_(Type, RESOLVE_VALUE(e1), RESOLVE_VALUE(e2), RESOLVE_VALUE(e3), RESOLVE_VALUE(e4), RESOLVE_VALUE(e5), RESOLVE_VALUE(e6), RESOLVE_VALUE(e7), RESOLVE_VALUE(e8), RESOLVE_VALUE(e9), RESOLVE_VALUE(e10), RESOLVE_VALUE(e11), RESOLVE_VALUE(e12), RESOLVE_VALUE(e13), RESOLVE_VALUE(e14), RESOLVE_VALUE(e15))
+#define DEFINE_ENUM_IMPL_15_(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15) \
+    enum class [[maybe_unused]] Type { SECOND3 e1, SECOND3 e2, SECOND3 e3, SECOND3 e4, SECOND3 e5, SECOND3 e6, SECOND3 e7, SECOND3 e8, SECOND3 e9, SECOND3 e10, SECOND3 e11, SECOND3 e12, SECOND3 e13, SECOND3 e14, SECOND3 e15 }; \
+    struct Type##Traits; \
+    [[maybe_unused]] Type##Traits traits(Type); \
+    struct [[maybe_unused]] Type##Traits { \
+        using Enum [[maybe_unused]] = Type; \
+        [[maybe_unused]] static constexpr size_t count = 15; \
+        [[maybe_unused]] static constexpr std::array<Enum, count> values{ \
+            Enum::FIRST3 e1, Enum::FIRST3 e2, Enum::FIRST3 e3, Enum::FIRST3 e4, Enum::FIRST3 e5, Enum::FIRST3 e6, Enum::FIRST3 e7, Enum::FIRST3 e8, Enum::FIRST3 e9, Enum::FIRST3 e10, Enum::FIRST3 e11, Enum::FIRST3 e12, Enum::FIRST3 e13, Enum::FIRST3 e14, Enum::FIRST3 e15 \
+        }; \
+        [[maybe_unused]] static char const* toString(Enum x) { \
+            switch (x) { \
+            case Enum::FIRST3 e1: return THIRD3 e1; \
+            case Enum::FIRST3 e2: return THIRD3 e2; \
+            case Enum::FIRST3 e3: return THIRD3 e3; \
+            case Enum::FIRST3 e4: return THIRD3 e4; \
+            case Enum::FIRST3 e5: return THIRD3 e5; \
+            case Enum::FIRST3 e6: return THIRD3 e6; \
+            case Enum::FIRST3 e7: return THIRD3 e7; \
+            case Enum::FIRST3 e8: return THIRD3 e8; \
+            case Enum::FIRST3 e9: return THIRD3 e9; \
+            case Enum::FIRST3 e10: return THIRD3 e10; \
+            case Enum::FIRST3 e11: return THIRD3 e11; \
+            case Enum::FIRST3 e12: return THIRD3 e12; \
+            case Enum::FIRST3 e13: return THIRD3 e13; \
+            case Enum::FIRST3 e14: return THIRD3 e14; \
+            case Enum::FIRST3 e15: return THIRD3 e15; \
+            } \
+            assert(false); \
+            throw serialize::BadEnumValue(x); \
+        } \
+        friend Type##Traits traits(Type) { return {}; } \
+    }
+
+#define DEFINE_ENUM_IMPL_16(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16) DEFINE_ENUM_IMPL_16_(Type, RESOLVE_VALUE(e1), RESOLVE_VALUE(e2), RESOLVE_VALUE(e3), RESOLVE_VALUE(e4), RESOLVE_VALUE(e5), RESOLVE_VALUE(e6), RESOLVE_VALUE(e7), RESOLVE_VALUE(e8), RESOLVE_VALUE(e9), RESOLVE_VALUE(e10), RESOLVE_VALUE(e11), RESOLVE_VALUE(e12), RESOLVE_VALUE(e13), RESOLVE_VALUE(e14), RESOLVE_VALUE(e15), RESOLVE_VALUE(e16))
+#define DEFINE_ENUM_IMPL_16_(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16) \
+    enum class [[maybe_unused]] Type { SECOND3 e1, SECOND3 e2, SECOND3 e3, SECOND3 e4, SECOND3 e5, SECOND3 e6, SECOND3 e7, SECOND3 e8, SECOND3 e9, SECOND3 e10, SECOND3 e11, SECOND3 e12, SECOND3 e13, SECOND3 e14, SECOND3 e15, SECOND3 e16 }; \
+    struct Type##Traits; \
+    [[maybe_unused]] Type##Traits traits(Type); \
+    struct [[maybe_unused]] Type##Traits { \
+        using Enum [[maybe_unused]] = Type; \
+        [[maybe_unused]] static constexpr size_t count = 16; \
+        [[maybe_unused]] static constexpr std::array<Enum, count> values{ \
+            Enum::FIRST3 e1, Enum::FIRST3 e2, Enum::FIRST3 e3, Enum::FIRST3 e4, Enum::FIRST3 e5, Enum::FIRST3 e6, Enum::FIRST3 e7, Enum::FIRST3 e8, Enum::FIRST3 e9, Enum::FIRST3 e10, Enum::FIRST3 e11, Enum::FIRST3 e12, Enum::FIRST3 e13, Enum::FIRST3 e14, Enum::FIRST3 e15, Enum::FIRST3 e16 \
+        }; \
+        [[maybe_unused]] static char const* toString(Enum x) { \
+            switch (x) { \
+            case Enum::FIRST3 e1: return THIRD3 e1; \
+            case Enum::FIRST3 e2: return THIRD3 e2; \
+            case Enum::FIRST3 e3: return THIRD3 e3; \
+            case Enum::FIRST3 e4: return THIRD3 e4; \
+            case Enum::FIRST3 e5: return THIRD3 e5; \
+            case Enum::FIRST3 e6: return THIRD3 e6; \
+            case Enum::FIRST3 e7: return THIRD3 e7; \
+            case Enum::FIRST3 e8: return THIRD3 e8; \
+            case Enum::FIRST3 e9: return THIRD3 e9; \
+            case Enum::FIRST3 e10: return THIRD3 e10; \
+            case Enum::FIRST3 e11: return THIRD3 e11; \
+            case Enum::FIRST3 e12: return THIRD3 e12; \
+            case Enum::FIRST3 e13: return THIRD3 e13; \
+            case Enum::FIRST3 e14: return THIRD3 e14; \
+            case Enum::FIRST3 e15: return THIRD3 e15; \
+            case Enum::FIRST3 e16: return THIRD3 e16; \
+            } \
+            assert(false); \
+            throw serialize::BadEnumValue(x); \
+        } \
+        friend Type##Traits traits(Type) { return {}; } \
+    }
