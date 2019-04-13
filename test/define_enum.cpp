@@ -47,7 +47,8 @@ DEFINE_ENUM(E,
     (e7,,),
     e8,
     e9,
-    e10
+    e10,
+    e11
 );
 
 
@@ -85,4 +86,7 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
 
     REQUIRE(toString(E::e10) == "e10");
     REQUIRE(fromString<E>("e10") == E::e10);
+
+    REQUIRE(toString(E::e11) == "e11");
+    REQUIRE(fromString<E>("e11") == E::e11);
 }

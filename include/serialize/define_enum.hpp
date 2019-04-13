@@ -407,3 +407,35 @@ ISEMPTY_( \
         } \
         friend Type##Traits traits(Type) { return {}; } \
     }
+
+
+#define DEFINE_ENUM_IMPL_11(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11) DEFINE_ENUM_IMPL_11_(Type, RESOLVE_VALUE(e1), RESOLVE_VALUE(e2), RESOLVE_VALUE(e3), RESOLVE_VALUE(e4), RESOLVE_VALUE(e5), RESOLVE_VALUE(e6), RESOLVE_VALUE(e7), RESOLVE_VALUE(e8), RESOLVE_VALUE(e9), RESOLVE_VALUE(e10), RESOLVE_VALUE(e11))
+#define DEFINE_ENUM_IMPL_11_(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11) \
+    enum class [[maybe_unused]] Type { SECOND3 e1, SECOND3 e2, SECOND3 e3, SECOND3 e4, SECOND3 e5, SECOND3 e6, SECOND3 e7, SECOND3 e8, SECOND3 e9, SECOND3 e10, SECOND3 e11 }; \
+    struct Type##Traits; \
+    [[maybe_unused]] Type##Traits traits(Type); \
+    struct [[maybe_unused]] Type##Traits { \
+        using Enum [[maybe_unused]] = Type; \
+        [[maybe_unused]] static constexpr size_t count = 11; \
+        [[maybe_unused]] static constexpr std::array<Enum, count> values{ \
+            Enum::FIRST3 e1, Enum::FIRST3 e2, Enum::FIRST3 e3, Enum::FIRST3 e4, Enum::FIRST3 e5, Enum::FIRST3 e6, Enum::FIRST3 e7, Enum::FIRST3 e8, Enum::FIRST3 e9, Enum::FIRST3 e10, Enum::FIRST3 e11 \
+        }; \
+        [[maybe_unused]] static char const* toString(Enum x) { \
+            switch (x) { \
+            case Enum::FIRST3 e1: return THIRD3 e1; \
+            case Enum::FIRST3 e2: return THIRD3 e2; \
+            case Enum::FIRST3 e3: return THIRD3 e3; \
+            case Enum::FIRST3 e4: return THIRD3 e4; \
+            case Enum::FIRST3 e5: return THIRD3 e5; \
+            case Enum::FIRST3 e6: return THIRD3 e6; \
+            case Enum::FIRST3 e7: return THIRD3 e7; \
+            case Enum::FIRST3 e8: return THIRD3 e8; \
+            case Enum::FIRST3 e9: return THIRD3 e9; \
+            case Enum::FIRST3 e10: return THIRD3 e10; \
+            case Enum::FIRST3 e11: return THIRD3 e11; \
+            } \
+            assert(false); \
+            throw serialize::BadEnumValue(x); \
+        } \
+        friend Type##Traits traits(Type) { return {}; } \
+    }
