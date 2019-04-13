@@ -31,6 +31,7 @@
 
 // 3rd
 #include <boost/hana/detail/preprocessor.hpp>
+#include <boost/hana/detail/struct_macros.hpp>
 
 // std
 #include <array>
