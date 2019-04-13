@@ -40,7 +40,14 @@ namespace {
 DEFINE_ENUM(E,
     e1,
     (e2),
-    (e3,)
+    (e3,),
+    (e4, 10),
+    (e5, 11, "e55"),
+    (e6,, "e66"),
+    (e7,,),
+    e8,
+    e9,
+    e10
 );
 
 
@@ -56,4 +63,26 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
 
     REQUIRE(toString(E::e3) == "e3");
     REQUIRE(fromString<E>("e3") == E::e3);
+
+    REQUIRE(toString(E::e4) == "e4");
+    REQUIRE(fromString<E>("e4") == E::e4);
+    REQUIRE(static_cast<std::underlying_type_t<E>>(E::e4) == 10);
+
+    REQUIRE(toString(E::e5) == "e55");
+    REQUIRE(fromString<E>("e55") == E::e5);
+
+    REQUIRE(toString(E::e6) == "e66");
+    REQUIRE(fromString<E>("e66") == E::e6);
+
+    REQUIRE(toString(E::e7) == "e7");
+    REQUIRE(fromString<E>("e7") == E::e7);
+
+    REQUIRE(toString(E::e8) == "e8");
+    REQUIRE(fromString<E>("e8") == E::e8);
+
+    REQUIRE(toString(E::e9) == "e9");
+    REQUIRE(fromString<E>("e9") == E::e9);
+
+    REQUIRE(toString(E::e10) == "e10");
+    REQUIRE(fromString<E>("e10") == E::e10);
 }
