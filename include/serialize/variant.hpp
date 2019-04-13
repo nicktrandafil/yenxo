@@ -93,7 +93,7 @@ public:
         : VariantErr(
               "'" + value + "'" +
               " is not a " +
-              "'" + std::string(qualifiedTypeName<std::decay_t<T>>()) + "'" +
+              "'" + std::string(unqualifiedTypeName<std::decay_t<T>>()) + "'" +
               " value")
     {}
 };

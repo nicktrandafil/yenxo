@@ -18,6 +18,10 @@ endif()
 
 # Options
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+endif()
+
 include(CMakeDependentOption)
 
 option(${PROJECT_NAME}_enable_type_safe "Enable type_safe support" ON)

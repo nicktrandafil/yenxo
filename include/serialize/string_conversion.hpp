@@ -51,7 +51,7 @@ struct StringConversionError : public std::logic_error {
         : std::logic_error(
             "'" + value + "'" +
             " is not a " +
-            "'" + std::string(qualifiedTypeName<std::decay_t<T>>()) + "'" +
+            "'" + std::string(unqualifiedTypeName<std::decay_t<T>>()) + "'" +
             " value")
     {}
 };

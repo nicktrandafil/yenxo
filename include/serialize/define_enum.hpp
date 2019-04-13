@@ -42,14 +42,14 @@
 namespace serialize {
 
 
-class BadEnumValue : std::runtime_error {
+class BadEnumValue : public std::runtime_error {
 public:
     template <class E>
     explicit BadEnumValue(E v)
         : std::runtime_error(
               "'" + std::to_string(std::underlying_type_t<E>(v)) + "'" +
               " is not a " +
-              "'" + std::string(qualifiedTypeName<std::decay_t<E>>()) + "'" +
+              "'" + std::string(unqualifiedTypeName<std::decay_t<E>>()) + "'" +
               " value")
     {}
 };

@@ -109,4 +109,12 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
 
     REQUIRE(toString(E::e16) == "e16");
     REQUIRE(fromString<E>("e16") == E::e16);
+
+    REQUIRE_THROWS_AS(fromString<E>("e156"), StringConversionError);
+    REQUIRE_THROWS_WITH(fromString<E>("e156"), "'e156' is not a 'E' value");
+
+#ifdef NDEBUG
+    REQUIRE_THROWS_AS(toString(E(9)), BadEnumValue);
+    REQUIRE_THROWS_WITH(toString(E(9)), "'9' is not a 'E' value");
+#endif
 }
