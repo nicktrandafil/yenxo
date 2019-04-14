@@ -28,6 +28,7 @@
 
 // local
 #include <serialize/config.hpp>
+#include <serialize/enum_traits.hpp>
 #include <serialize/meta.hpp>
 #include <serialize/variant.hpp>
 #include <serialize/when.hpp>
@@ -163,6 +164,17 @@ struct ToVariantImpl<T,
             ret.push_back(toVariant(x));
         }
         return Variant(ret);
+    }
+};
+
+
+/// Specialization for types with specialized EnumTraits
+template <class T>
+struct ToVariantImpl<T,
+        When<detail::Valid<decltype(
+            EnumTraits<T>::toString(std::declval<T>()))>::value>> {
+    static Variant apply(T e) {
+        return Variant(EnumTraits<T>::toString(e));
     }
 };
 
@@ -362,6 +374,21 @@ struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
                 FromVariantImpl<typename T::mapped_type>::apply(x.second));
         }
         return ret;
+    }
+};
+
+
+/// Specialization for types with specialized EnumTraits
+template <class T>
+struct FromVariantImpl<T,
+        When<detail::Valid<decltype(
+           EnumTraits<T>::toString(std::declval<T>()))>::value>> {
+    static T apply(Variant const& var) {
+        auto const& s = var.str();
+        for (auto e: EnumTraits<T>::values) {
+            if (EnumTraits<T>::toString(e) == s) { return e; }
+        }
+        throw VariantBadType(s, type_c<T>);
     }
 };
 

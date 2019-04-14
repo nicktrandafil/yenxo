@@ -27,11 +27,10 @@
 
 
 // local
-#include <serialize/algorithm/string.hpp>
-
-// 3rd
-#include <serialize/type_name.hpp>
+#include <serialize/enum_traits.hpp>
 #include <serialize/meta.hpp>
+#include <serialize/type_name.hpp>
+#include <serialize/algorithm/string.hpp>
 
 // std
 #include <algorithm>
@@ -52,7 +51,7 @@ struct StringConversionError : public std::logic_error {
         : std::logic_error(
             "'" + value + "'" +
             " is not a " +
-            "'" + std::string(qualifiedTypeName<std::decay_t<T>>()) + "'" +
+            "'" + std::string(unqualifiedTypeName<std::decay_t<T>>()) + "'" +
             " value")
     {}
 };
@@ -84,12 +83,23 @@ struct ToStringImpl<T,
 };
 
 
+/// Types explicitly covertible to string
 template <typename T>
 struct ToStringImpl<T,
         When<detail::Valid<decltype(
             std::string(std::declval<T>()))>::value>> {
     static std::string apply(T const& x) {
         return std::string(x);
+    }
+};
+
+
+/// Types with specialized EnumTraits
+template <typename T>
+struct ToStringImpl<T, When<detail::Valid<decltype(
+        EnumTraits<T>::toString(std::declval<T>()))>::value>> {
+    static char const* apply(T x) {
+        return EnumTraits<T>::toString(x);
     }
 };
 
@@ -121,12 +131,26 @@ struct FromStringImpl<T, When<condition>> {
 };
 
 
+/// Types explicitly convertible from string
 template <typename T>
 struct FromStringImpl<T,
         When<detail::Valid<decltype(
             T(std::declval<std::string>()))>::value>> {
     static T apply(std::string const& x) {
         return T(x);
+    }
+};
+
+
+/// Types with specialized EnumTraits
+template <class T>
+struct FromStringImpl<T, When<detail::Valid<decltype(
+        EnumTraits<T>::toString(std::declval<T>()))>::value>> {
+    static T apply(std::string const& x) {
+        for (auto e: EnumTraits<T>::values) {
+            if (x == EnumTraits<T>::toString(e)) { return e; }
+        }
+        throw StringConversionError(x, type_c<T>);
     }
 };
 

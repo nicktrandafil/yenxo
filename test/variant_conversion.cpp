@@ -1,7 +1,7 @@
 /*
   MIT License
 
-  Copyright (c) 2018 Nicolai Trandafil
+  Copyright (c) 2019 Nicolai Trandafil
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 
 
 // tested
-#include <serialize/string_conversion.hpp>
+#include <serialize/variant_conversion.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
@@ -34,14 +34,6 @@ using namespace serialize;
 
 
 namespace {
-
-
-struct Hobby {
-    explicit Hobby(std::string const& str) : str(str) {}
-    [[maybe_unused]] explicit operator std::string() const { return str; }
-    bool operator==(Hobby const& rhs) const { return str == rhs.str; }
-    std::string str;
-};
 
 
 enum class E {
@@ -70,13 +62,7 @@ struct ETraits {
 }
 
 
-TEST_CASE("Check toString/fromString", "[string_conversion]") {
-    Hobby const hobby("abc");
-    std::string const str("abc");
-
-    REQUIRE(str == toString(hobby));
-    REQUIRE(hobby == fromString<Hobby>(str));
-
-    REQUIRE(toString(E::e1) == "e1");
-    REQUIRE(fromString<E>("e2") == E::e2);
+TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
+    REQUIRE(toVariant(E::e1) == Variant("e1"));
+    REQUIRE(fromVariant<E>(Variant("e2")) == E::e2);
 }
