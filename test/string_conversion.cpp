@@ -74,9 +74,27 @@ TEST_CASE("Check toString/fromString", "[string_conversion]") {
     Hobby const hobby("abc");
     std::string const str("abc");
 
+    // explicit conversion to string
     REQUIRE(str == toString(hobby));
     REQUIRE(hobby == fromString<Hobby>(str));
 
+    // EnumTraits
     REQUIRE(toString(E::e1) == "e1");
     REQUIRE(fromString<E>("e2") == E::e2);
+    REQUIRE_THROWS_AS(toString(E(9)), int);
+
+    // std::to_string
+    REQUIRE(toString(int(1)) == "1");
+}
+
+
+TEST_CASE("Check iparseWithSuffix") {
+    struct X {};
+    REQUIRE(iparseWithSuffix<X>("1.5 suf", "suf") == 1.5);
+    REQUIRE(iparseWithSuffix<X>("1.5suf", "suf") == 1.5);
+    REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5 su", "suf"), StringConversionError);
+    REQUIRE_THROWS_AS(iparseWithSuffix<X>("suf", "suf"), StringConversionError);
+    REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5", "suf"), StringConversionError);
+    REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5 l suf", "suf"), StringConversionError);
+    REQUIRE_THROWS_WITH(iparseWithSuffix<X>("1.5 su", "suf"), "'1.5 su' is not a 'X' value");
 }

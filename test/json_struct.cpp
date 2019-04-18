@@ -91,6 +91,8 @@ struct Person
     double f;
 
     std::vector<int> v;
+
+    std::optional<bool> n;
 };
 
 
@@ -98,7 +100,7 @@ struct Person
 
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
-BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby, b, u, l, ul, f, v);
+BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby, b, u, l, ul, f, v, n);
 
 
 TEST_CASE("Check simple json to struct", "[json_struct]") {
@@ -116,7 +118,8 @@ TEST_CASE("Check simple json to struct", "[json_struct]") {
             "l": 9223372036854775807,
             "ul": 18446744073709551615,
             "f": 1.1,
-            "v": [1, 2]
+            "v": [1, 2],
+            "n": null
         }
     )";
 

@@ -328,16 +328,48 @@ TEST_CASE("Check Variant", "[Variant]") {
             REQUIRE(var == Variant::fromJson(json_str));
             REQUIRE_THROWS_AS(Variant::fromJson("{abc"), std::runtime_error);
         }
+
+        SECTION("char") {
+            Variant const var(char(1));
+            rapidjson::Document expected;
+            expected.SetInt(1);
+            rapidjson::Document actual;
+            var.to(actual);
+            REQUIRE(actual == expected);
+        }
+
+        SECTION("short") {
+            Variant const var(short(1));
+            rapidjson::Document expected;
+            expected.SetInt(1);
+            rapidjson::Document actual;
+            var.to(actual);
+            REQUIRE(actual == expected);
+        }
+
+        SECTION("unsigned short") {
+            unsigned short const tmp = 1;
+            Variant const var(tmp);
+            rapidjson::Document expected;
+            expected.SetUint(1);
+            rapidjson::Document actual;
+            var.to(actual);
+            REQUIRE(actual == expected);
+        }
     }
 
     SECTION("ostream") {
         Variant var1{Variant::Map{std::make_pair("x", Variant(6))}};
         Variant var2{Variant::Map{std::make_pair("y", Variant(Variant::Vec{Variant(1), Variant(2)}))}};
         Variant var3(5);
+        Variant var4;
+        Variant var5("abc");
 
         auto const expected1 = "{ x: 6; }";
         auto const expected2 = "{ y: [ 1, 2 ]; }";
         auto const expected3 = "5";
+        auto const expected4 = "Null";
+        auto const expected5 = "abc";
 
         std::ostringstream os;
         os << var1;
@@ -352,6 +384,16 @@ TEST_CASE("Check Variant", "[Variant]") {
         os.str("");
         os << var3;
         REQUIRE(expected3 == os.str());
+
+        os.clear();
+        os.str("");
+        os << var4;
+        REQUIRE(expected4 == os.str());
+
+        os.clear();
+        os.str("");
+        os << var5;
+        REQUIRE(expected5 == os.str());
     }
 
     SECTION("Conversion for user defined types") {

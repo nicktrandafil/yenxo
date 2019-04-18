@@ -26,6 +26,7 @@
 // tested
 #include <serialize/define_enum.hpp>
 #include <serialize/string_conversion.hpp>
+#include <serialize/variant_conversion.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
@@ -117,4 +118,10 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
     REQUIRE_THROWS_AS(toString(E(9)), BadEnumValue);
     REQUIRE_THROWS_WITH(toString(E(9)), "'9' is not a 'E' value");
 #endif
+
+    REQUIRE(toVariant(E::e16) == Variant("e16"));
+    REQUIRE(fromVariant<E>(Variant("e16")) == E::e16);
+
+    REQUIRE_THROWS_AS(fromVariant<E>(Variant("e156")), VariantBadType);
+    REQUIRE_THROWS_WITH(fromVariant<E>(Variant("e156")), "'e156' is not a 'E' value");
 }

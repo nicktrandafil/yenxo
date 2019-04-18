@@ -193,7 +193,28 @@ TEST_CASE("detail::toVariant", "[variant_trait_helpers]") {
 }
 
 
+namespace {
+
+
+struct St : trait::Var<St>, trait::EqualityComparison<St> {
+    St() = default;
+    St(int x) : x(x) {}
+
+    BOOST_HANA_DEFINE_STRUCT(St,
+        (std::optional<int>, x)
+    );
+};
+
+
+}
+
+
 TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
+    SECTION("optional") {
+        Variant const expected(VariantMap{{"x", Variant(1)}});
+        REQUIRE(St(1) == fromVariant<St>(expected));
+    };
+
     Variant::Map const hobby_var{
         {"id", Variant(1)},
         {"description", Variant("Hack")}
