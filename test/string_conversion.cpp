@@ -88,7 +88,7 @@ TEST_CASE("Check toString/fromString", "[string_conversion]") {
 }
 
 
-TEST_CASE("Check iparseWithSuffix") {
+TEST_CASE("Check iparseWithSuffix", "[string_conversion]") {
     struct X {};
     REQUIRE(iparseWithSuffix<X>("1.5 suf", "suf") == 1.5);
     REQUIRE(iparseWithSuffix<X>("1.5suf", "suf") == 1.5);

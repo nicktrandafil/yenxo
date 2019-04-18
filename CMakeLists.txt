@@ -84,6 +84,8 @@ add_library(
     include/${PROJECT_NAME}/enum_traits.hpp
     include/${PROJECT_NAME}/define_enum.hpp
 
+    include/${PROJECT_NAME}/define_struct.hpp
+
     src/variant.cpp
 )
 
@@ -194,6 +196,10 @@ add_executable(
     test/variant_conversion.cpp
 
     test/define_enum.cpp
+
+    test/define_struct.cpp
+    test/define_struct_part2.cpp
+    test/define_struct_part3.cpp
 )
 
 set_target_properties(test_${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -267,6 +273,10 @@ add_test(
     "Check toString/fromString")
 
 add_test(
+    iparse_with_suffix test_${PROJECT_NAME}
+    "Check IparseWithSuffix")
+
+add_test(
     algorithm_string test_${PROJECT_NAME}
     "Check Check iendsWith")
 
@@ -281,6 +291,10 @@ add_test(
 add_test(
     define_enum test_${PROJECT_NAME}
     "Check DEFINE_ENUM")
+
+add_test(
+    define_struct test_${PROJECT_NAME}
+    "[define_struct]")
 
 
 # Coverage

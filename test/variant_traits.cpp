@@ -206,6 +206,22 @@ struct St : trait::Var<St>, trait::EqualityComparison<St> {
 };
 
 
+struct St2 : trait::Var<St2>, trait::EqualityComparison<St2> {
+    St2() = default;
+    St2(int x) : x(x) {}
+
+    constexpr static auto names() {
+        return hana::make_map(
+            hana::make_pair("x"_s, "y"_s)
+        );
+    }
+
+    BOOST_HANA_DEFINE_STRUCT(St2,
+        (int, x)
+    );
+};
+
+
 }
 
 
@@ -326,6 +342,15 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
         REQUIRE(expected == Dict::fromVariant(tmp));
         REQUIRE(tmp == Dict::toVariant(expected));
     }
+
+    SECTION("rename") {
+        Variant expected(VariantMap{{"y", Variant(2)}});
+        Variant wrong(VariantMap{{"z", Variant(2)}});
+        REQUIRE(fromVariant<St2>(expected) == St2(2));
+        REQUIRE(toVariant(St2(2)) == expected);
+        REQUIRE_THROWS_AS(fromVariant<St2>(wrong), std::logic_error);
+        REQUIRE_THROWS_WITH(fromVariant<St2>(wrong), "y not found in map");
+    }
 }
 
 
@@ -376,6 +401,23 @@ struct PersonE
     std::vector<int> cont;
     int i{0};
 };
+
+
+struct St3 : trait::VarDef<St3>, trait::EqualityComparison<St3> {
+    St3() = default;
+    St3(int x) : x(x) {}
+
+    constexpr static auto names() {
+        return hana::make_map(
+            hana::make_pair("x"_s, "y"_s)
+        );
+    }
+
+    BOOST_HANA_DEFINE_STRUCT(St3,
+        (int, x)
+    );
+};
+
 
 
 } // namespace
@@ -455,6 +497,15 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
         };
         REQUIRE(Variant(p2) == Variant(exp));
     }
+
+    SECTION("rename") {
+        Variant expected(VariantMap{{"y", Variant(2)}});
+        Variant wrong(VariantMap{{"z", Variant(2)}});
+        REQUIRE(fromVariant<St3>(expected) == St3(2));
+        REQUIRE(toVariant(St3(2)) == expected);
+        REQUIRE_THROWS_AS(fromVariant<St3>(wrong), std::logic_error);
+        REQUIRE_THROWS_WITH(fromVariant<St3>(wrong), "y not found in map, and default value is not provided");
+    }
 }
 
 
@@ -485,6 +536,29 @@ struct PersonC
 };
 
 
+struct St4 : trait::VarDefExplicit<St4>, trait::EqualityComparison<St4> {
+    St4() = default;
+    St4(int x) : x(x) {}
+
+    static auto defaults() {
+        return hana::make_map(
+            hana::make_pair("x"_s, trait::NoDefault())
+        );
+    }
+
+    constexpr static auto names() {
+        return hana::make_map(
+            hana::make_pair("x"_s, "y"_s)
+        );
+    }
+
+    BOOST_HANA_DEFINE_STRUCT(St4,
+        (int, x)
+    );
+};
+
+
+
 } // namespace
 
 
@@ -513,6 +587,15 @@ TEST_CASE("Check trait::VarDefExplicit", "[variant_traits]") {
     };
 
     REQUIRE(PersonC::fromVariant(Variant(person_var)) == person);
+
+    SECTION("rename") {
+        Variant expected(VariantMap{{"y", Variant(2)}});
+        Variant wrong(VariantMap{{"z", Variant(2)}});
+        REQUIRE(fromVariant<St4>(expected) == St4(2));
+        REQUIRE(toVariant(St4(2)) == expected);
+        REQUIRE_THROWS_AS(fromVariant<St4>(wrong), std::logic_error);
+        REQUIRE_THROWS_WITH(fromVariant<St4>(wrong), "y not found in map, and default value is not provided");
+    }
 }
 
 
