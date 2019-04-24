@@ -199,9 +199,9 @@ add_executable(
 
     test/define_enum.cpp
 
-    $<$<BOOL:${PROJECT_NAME}_test_define_struct>:test/define_struct.cpp>
-    $<$<BOOL:${PROJECT_NAME}_test_define_struct>:test/define_struct_part2.cpp>
-    $<$<BOOL:${PROJECT_NAME}_test_define_struct>:test/define_struct_part3.cpp>
+    $<$<BOOL:${${PROJECT_NAME}_test_define_struct}>:test/define_struct.cpp>
+    $<$<BOOL:${${PROJECT_NAME}_test_define_struct}>:test/define_struct_part2.cpp>
+    $<$<BOOL:${${PROJECT_NAME}_test_define_struct}>:test/define_struct_part3.cpp>
 )
 
 set_target_properties(test_${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

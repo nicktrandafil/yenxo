@@ -162,6 +162,10 @@ auto fromVariantWrap(char const* name, Variant const& x) {
     } catch (serialize::VariantErr& e) {
         e.prependPath(name);
         throw;
+    } catch (std::exception const& e) {
+        VariantErr err(e.what());
+        err.prependPath(name);
+        throw std::move(err);
     }
 }
 
