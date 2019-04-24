@@ -136,7 +136,7 @@ ISEMPTY_( \
 /// 3tuple argument extraction
 #define FIRST3e(x, ...) x
 #define SECOND3e(x, y, ...) y
-#define THIRD3e(x, y, z, ...) z
+#define THIRD3e(x, y, ...) BOOST_HANA_PP_FRONT(__VA_ARGS__)
 #define RESTe(x, y, ...) __VA_ARGS__
 
 
