@@ -30,6 +30,7 @@
 #include <serialize/type_name.hpp>
 
 // 3rd
+#include <boost/hana/tuple.hpp>
 #include <boost/hana/detail/preprocessor.hpp>
 #include <boost/hana/detail/struct_macros.hpp>
 
@@ -133,15 +134,16 @@ ISEMPTY_( \
 
 
 /// 3tuple argument extraction
-#define FIRST3e(x, y, z) x
-#define SECOND3e(x, y, z) y
-#define THIRD3e(x, y, z) z
+#define FIRST3e(x, ...) x
+#define SECOND3e(x, y, ...) y
+#define THIRD3e(x, y, z, ...) z
+#define RESTe(x, y, ...) __VA_ARGS__
 
 
 /// Generates an enum and traits structure for it
 ///
-/// --
 /// Example:
+/// -------
 /// 	DEFINE_ENUM(MyEnum,
 /// 		val0,
 /// 		(val1),
@@ -166,6 +168,9 @@ ISEMPTY_( \
         [[maybe_unused]] static constexpr std::array<Enum, count> values{ \
             Enum::FIRST3e e1  \
         }; \
+        [[maybe_unused]] static constexpr auto strings() noexcept { \
+            return boost::hana::make_tuple(boost::hana::make_tuple(RESTe e1)); \
+        } \
         [[maybe_unused]] static char const* toString(Enum x) { \
             switch (x) { case Enum::FIRST3e e1: return THIRD3e e1; } \
             assert(false); \

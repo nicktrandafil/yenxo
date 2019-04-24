@@ -34,12 +34,22 @@
 
 // std
 #include <algorithm>
+#include <cstring>
 #include <string>
 #include <stdexcept>
 #include <type_traits>
 
 
 namespace serialize {
+namespace detail {
+
+
+constexpr auto const hasStrings = boost::hana::is_valid(
+    [](auto t) -> decltype((void) decltype(t)::type::strings()) {
+});
+
+
+}
 
 
 /// \defgroup String conversion
@@ -144,11 +154,31 @@ struct FromStringImpl<T,
 
 /// Types with specialized EnumTraits
 template <class T>
-struct FromStringImpl<T, When<detail::Valid<decltype(
-        EnumTraits<T>::toString(std::declval<T>()))>::value>> {
+struct FromStringImpl<T, When<
+        detail::Valid<decltype(
+            EnumTraits<T>::toString(std::declval<T>()))>::value &&
+        !detail::hasStrings(boost::hana::type_c<EnumTraits<T>>)>> {
     static T apply(std::string const& x) {
         for (auto e: EnumTraits<T>::values) {
             if (x == EnumTraits<T>::toString(e)) { return e; }
+        }
+        throw StringConversionError(x, type_c<T>);
+    }
+};
+
+
+/// Types with specialized EnumTraits
+template <class T>
+struct FromStringImpl<T, When<
+        detail::Valid<decltype(EnumTraits<T>::strings())>::value>> {
+    static T apply(std::string const& x) {
+        auto strs = EnumTraits<T>::strings();
+        for (size_t i = 0; i < EnumTraits<T>::count; ++i) {
+            if (boost::hana::any_of(boost::hana::at_c<i>(strs), [&x](auto s) {
+                        return strcmp(s, x.c_str()) == 0;
+                    })) {
+                return EnumTraits<T>::values[i];
+            }
         }
         throw StringConversionError(x, type_c<T>);
     }
