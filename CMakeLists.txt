@@ -31,6 +31,8 @@ else()
     set(_${PROJECT_NAME}_enable_type_safe 0)
 endif()
 
+option(${PROJECT_NAME}_test_define_struct "Enable testing of DEFINE_STRUCT" OFF)
+
 if(NOT ${PROJECT_NAME}_sub)
     option(CMAKE_BUILD_TYPE "Build type" Release)
 endif()
@@ -197,9 +199,9 @@ add_executable(
 
     test/define_enum.cpp
 
-    test/define_struct.cpp
-    test/define_struct_part2.cpp
-    test/define_struct_part3.cpp
+    $<$<BOOL:${PROJECT_NAME}_test_define_struct>:test/define_struct.cpp>
+    $<$<BOOL:${PROJECT_NAME}_test_define_struct>:test/define_struct_part2.cpp>
+    $<$<BOOL:${PROJECT_NAME}_test_define_struct>:test/define_struct_part3.cpp>
 )
 
 set_target_properties(test_${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

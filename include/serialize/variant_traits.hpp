@@ -127,11 +127,11 @@ constexpr bool hasNameValue(S name) {
 
 
 template <typename T, typename S>
-constexpr auto rename(S name) {
+auto rename(S name) {
     if constexpr (hasNameValue<T>(name)) {
         return T::names()[name];
     } else {
-        return name;
+        return boost::hana::to<char const*>(name);
     }
 }
 
@@ -183,17 +183,15 @@ struct Var {
         Variant::Map ret;
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
-            auto constexpr renamed = detail::rename<Derived>(name);
+            auto const renamed = detail::rename<Derived>(name);
             if constexpr (isOptional(type_c<decltype(value)>)) {
                 if (value.has_value()) {
-                    ret[boost::hana::to<char const*>(renamed)] =
-                            detail::toVariantWrap(*value);
+                    ret[renamed] = detail::toVariantWrap(*value);
                 } else {
-                    ret[boost::hana::to<char const*>(renamed)] = Variant();
+                    ret[renamed] = Variant();
                 }
             } else {
-                ret[boost::hana::to<char const*>(renamed)] =
-                        detail::toVariantWrap(value);
+                ret[renamed] = detail::toVariantWrap(value);
             }
         }));
 
@@ -207,20 +205,18 @@ struct Var {
 
         boost::hana::for_each(boost::hana::accessors<Derived>(),
                        boost::hana::fuse([&](auto name, auto value) {
-            auto constexpr renamed = detail::rename<Derived>(name);
+            auto const renamed = detail::rename<Derived>(name);
             auto& tmp = value(ret);
-            auto const it = map.find(boost::hana::to<char const*>(renamed));
+            auto const it = map.find(renamed);
             if (map.end() == it) {
-                throw std::logic_error(
-                            boost::hana::to<char const*>(renamed) +
-                            " not found in map"s);
+                throw std::logic_error(renamed + " not found in map"s);
             } else {
                 if constexpr (isOptional(type_c<decltype(tmp)>)) {
                     if (!it->second.empty()) {
-                        tmp = detail::fromVariantWrap<decltype(*tmp)>(boost::hana::to<char const*>(renamed), it->second);
+                        tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second);
                     }
                 } else {
-                    tmp = detail::fromVariantWrap<decltype(tmp)>(boost::hana::to<char const*>(renamed), it->second);
+                    tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, it->second);
                 }
             }
         }));
@@ -260,13 +256,12 @@ struct VarDef {
         Variant::Map ret;
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
-            auto constexpr renamed = detail::rename<Derived>(name);
+            auto const renamed = detail::rename<Derived>(name);
             if constexpr (isOptional(type_c<decltype(value)>)) {
                 if (value.has_value()) {
-                    ret[boost::hana::to<char const*>(renamed)] =
-                            detail::toVariantWrap(*value);
+                    ret[renamed] = detail::toVariantWrap(*value);
                 } else if (Policy::allow_null) {
-                    ret[boost::hana::to<char const*>(renamed)] = {};
+                    ret[renamed] = {};
                 }
             } else {
                 if constexpr (!Policy::serialize_default_value &&
@@ -277,15 +272,12 @@ struct VarDef {
                 if constexpr(detail::isContainer(
                                  boost::hana::type_c<decltype(value)>)) {
                     if constexpr (!Policy::empty_container_not_required) {
-                        ret[boost::hana::to<char const*>(renamed)] =
-                                detail::toVariantWrap(value);
+                        ret[renamed] = detail::toVariantWrap(value);
                     } else if (begin(value) != end(value)) {
-                        ret[boost::hana::to<char const*>(renamed)] =
-                                detail::toVariantWrap(value);
+                        ret[renamed] = detail::toVariantWrap(value);
                     }
                 } else {
-                    ret[boost::hana::to<char const*>(renamed)] =
-                            detail::toVariantWrap(value);
+                    ret[renamed] = detail::toVariantWrap(value);
                 }
             }
         }));
@@ -302,9 +294,9 @@ struct VarDef {
 
         boost::hana::for_each(boost::hana::accessors<Derived>(),
                        boost::hana::fuse([&](auto name, auto value) {
-            auto constexpr renamed = detail::rename<Derived>(name);
+            auto const renamed = detail::rename<Derived>(name);
             auto& tmp = value(ret);
-            auto const it = map.find(boost::hana::to<char const*>(renamed));
+            auto const it = map.find(renamed);
 
             if (map.end() == it) {
                 if constexpr (detail::hasDefaultValue<Derived>(name)) {
@@ -322,7 +314,7 @@ struct VarDef {
                             ((isContainer(type_c<decltype(tmp)>) && !Policy::empty_container_not_required) ||
                                 !isContainer(type_c<decltype(tmp)>))) {
                     throw std::logic_error(
-                                boost::hana::to<char const*>(renamed) +
+                                renamed +
                                 " not found in map, and default"
                                 " value is not provided"s);
                 }
@@ -330,10 +322,10 @@ struct VarDef {
             } else {
                 if constexpr (isOptional(type_c<decltype(tmp)>)) {
                     if (!it->second.empty()) {
-                        tmp = detail::fromVariantWrap<decltype(*tmp)>(boost::hana::to<char const*>(renamed), it->second);
+                        tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second);
                     }
                 } else {
-                    tmp = detail::fromVariantWrap<decltype(tmp)>(boost::hana::to<char const*>(renamed), it->second);
+                    tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, it->second);
                 }
             }
         }));
@@ -410,10 +402,10 @@ struct UpdateFromVar {
             bool found{false};
             boost::hana::for_each(boost::hana::accessors<Derived>(),
                                   boost::hana::fuse([&](auto name, auto value) {
-                auto constexpr renamed = detail::rename<Derived>(name);
-                if (boost::hana::to<char const*>(renamed) != v.first) { return; }
+                auto const renamed = detail::rename<Derived>(name);
+                if (renamed != v.first) { return; }
                 auto& tmp = value(self);
-                tmp = detail::fromVariantWrap<decltype(tmp)>(boost::hana::to<char const*>(renamed), v.second);
+                tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, v.second);
                 found = true;
             }));
 

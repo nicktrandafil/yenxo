@@ -38,13 +38,13 @@ using namespace serialize;
 namespace {
 
 
-DEFINE_ENUM(E1,
-    e1
+DEFINE_ENUM(E1_1,
+    (e1,,"e_1", "e_2", "e_3", "e_4", "e_5", "e_6", "e_7", "e_8", "e_9", "e_10")
 );
 
 
-DEFINE_ENUM(E1_1,
-    (e1,,"e_1", "e_2", "e_3", "e_4", "e_5", "e_6", "e_7", "e_8", "e_9", "e_10")
+DEFINE_ENUM(E1,
+    e1
 );
 
 
@@ -72,9 +72,6 @@ DEFINE_ENUM(E,
 
 
 TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
-    REQUIRE(toString(E1::e1) == "e1");
-    REQUIRE(fromString<E1>("e1") == E1::e1);
-
     REQUIRE(toString(E1_1::e1) == "e_1");
     REQUIRE(fromString<E1_1>("e_2") == E1_1::e1);
     REQUIRE(fromString<E1_1>("e_3") == E1_1::e1);
@@ -104,6 +101,9 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
     REQUIRE_THROWS_WITH(fromVariant<E1_1>(Variant("e_11")), "'e_11' is not a 'E1_1' value");
 
     //
+
+    REQUIRE(toString(E1::e1) == "e1");
+    REQUIRE(fromString<E1>("e1") == E1::e1);
 
     REQUIRE(toString(E::e1) == "e1");
     REQUIRE(fromString<E>("e1") == E::e1);

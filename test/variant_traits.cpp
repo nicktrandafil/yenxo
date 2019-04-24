@@ -212,7 +212,7 @@ struct St2 : trait::Var<St2>, trait::EqualityComparison<St2> {
 
     constexpr static auto names() {
         return hana::make_map(
-            hana::make_pair("x"_s, "y"_s)
+            hana::make_pair("x"_s, "y")
         );
     }
 
@@ -409,7 +409,7 @@ struct St3 : trait::VarDef<St3>, trait::EqualityComparison<St3> {
 
     constexpr static auto names() {
         return hana::make_map(
-            hana::make_pair("x"_s, "y"_s)
+            hana::make_pair("x"_s, "y")
         );
     }
 
@@ -548,7 +548,7 @@ struct St4 : trait::VarDefExplicit<St4>, trait::EqualityComparison<St4> {
 
     constexpr static auto names() {
         return hana::make_map(
-            hana::make_pair("x"_s, "y"_s)
+            hana::make_pair("x"_s, "y")
         );
     }
 
