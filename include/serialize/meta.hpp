@@ -352,4 +352,9 @@ constexpr BooleanTypeT boolean;
 #endif
 
 
+constexpr auto const hasStrings = boost::hana::is_valid(
+    [](auto t) -> decltype((void) decltype(t)::type::strings()) {
+});
+
+
 }

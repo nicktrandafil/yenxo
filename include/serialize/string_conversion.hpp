@@ -32,6 +32,9 @@
 #include <serialize/type_name.hpp>
 #include <serialize/algorithm/string.hpp>
 
+// 3rd
+#include <boost/hana/for_each.hpp>
+
 // std
 #include <algorithm>
 #include <cstring>
@@ -41,15 +44,6 @@
 
 
 namespace serialize {
-namespace detail {
-
-
-constexpr auto const hasStrings = boost::hana::is_valid(
-    [](auto t) -> decltype((void) decltype(t)::type::strings()) {
-});
-
-
-}
 
 
 /// \defgroup String conversion
@@ -157,7 +151,7 @@ template <class T>
 struct FromStringImpl<T, When<
         detail::Valid<decltype(
             EnumTraits<T>::toString(std::declval<T>()))>::value &&
-        !detail::hasStrings(boost::hana::type_c<EnumTraits<T>>)>> {
+        !hasStrings(boost::hana::type_c<EnumTraits<T>>)>> {
     static T apply(std::string const& x) {
         for (auto e: EnumTraits<T>::values) {
             if (x == EnumTraits<T>::toString(e)) { return e; }
@@ -171,16 +165,30 @@ struct FromStringImpl<T, When<
 template <class T>
 struct FromStringImpl<T, When<
         detail::Valid<decltype(EnumTraits<T>::strings())>::value>> {
-    static T apply(std::string const& x) {
-        auto strs = EnumTraits<T>::strings();
-        for (size_t i = 0; i < EnumTraits<T>::count; ++i) {
-            if (boost::hana::any_of(boost::hana::at_c<i>(strs), [&x](auto s) {
-                        return strcmp(s, x.c_str()) == 0;
-                    })) {
-                return EnumTraits<T>::values[i];
-            }
+    template <size_t I>
+    static typename EnumTraits<T>::Enum applyImpl(
+            boost::hana::size_t<I>, std::string const& x) {
+        bool found{false};
+        boost::hana::for_each(boost::hana::at_c<I>(EnumTraits<T>::strings()),
+                              [&](auto s) {
+            found |= strcmp(s, x.c_str()) == 0;
+        });
+        if (found) {
+            return EnumTraits<T>::values[I];
+        } else {
+            return applyImpl(boost::hana::size_c<I + 1>, x);
         }
+
+        return EnumTraits<T>::values[I];
+    }
+
+    static typename EnumTraits<T>::Enum applyImpl(
+            boost::hana::size_t<EnumTraits<T>::count>, std::string const& x) {
         throw StringConversionError(x, type_c<T>);
+    }
+
+    static T apply(std::string const& x) {
+        return applyImpl(boost::hana::size_c<0>, x);
     }
 };
 
