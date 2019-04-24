@@ -64,6 +64,7 @@ add_library(
     ${PROJECT_NAME} STATIC
 
     include/${PROJECT_NAME}/meta.hpp
+    include/${PROJECT_NAME}/preprocessor.hpp
 
     include/${PROJECT_NAME}/pimpl.hpp
     include/${PROJECT_NAME}/pimpl_impl.hpp

@@ -30,6 +30,9 @@
 // 3rd
 #include <catch2/catch.hpp>
 
+// std
+#include <variant>
+
 
 using namespace serialize;
 using namespace boost;
@@ -48,6 +51,13 @@ constexpr auto cToString(boost::hana::int_<I>) {
     constexpr auto cl = I / 10;
     return cToString(boost::hana::int_c<cl>) + boost::hana::string_c<(I % 10) + 48>;
 }
+
+
+struct Com {
+    DEFINE_STRUCT(Com,
+        ((std::variant<int, float>), x, Default(1))
+    );
+};
 
 
 struct St1 : trait::Var<St1> {
