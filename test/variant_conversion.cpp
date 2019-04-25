@@ -65,4 +65,13 @@ struct ETraits {
 TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
     REQUIRE(toVariant(E::e1) == Variant("e1"));
     REQUIRE(fromVariant<E>(Variant("e2")) == E::e2);
+
+    using V = std::variant<int, std::string>;
+    REQUIRE(toVariant(V("a")) == Variant("a"));
+    REQUIRE(toVariant(V(1)) == Variant(1));
+
+    REQUIRE(fromVariant<V>(Variant(1)) == V(1));
+    REQUIRE(fromVariant<V>(Variant("a")) == V("a"));
+    REQUIRE_THROWS_AS(fromVariant<V>(Variant(1.2)) == V("a"), VariantBadType);
+    REQUIRE_THROWS_WITH(fromVariant<V>(Variant(1.5)) == V("a"), "'1.500000' is not a 'variant<int, string>' value");
 }
