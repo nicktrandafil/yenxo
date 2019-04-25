@@ -64,7 +64,10 @@ DEFINE_ENUM(E,
     e13,
     e14,
     e15,
-    e16
+    e16,
+    e17,
+    e18,
+    e19
 );
 
 
@@ -153,6 +156,15 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
 
     REQUIRE(toString(E::e16) == "e16");
     REQUIRE(fromString<E>("e16") == E::e16);
+
+    REQUIRE(toString(E::e17) == "e17");
+    REQUIRE(fromString<E>("e17") == E::e17);
+
+    REQUIRE(toString(E::e18) == "e18");
+    REQUIRE(fromString<E>("e18") == E::e18);
+
+    REQUIRE(toString(E::e19) == "e19");
+    REQUIRE(fromString<E>("e19") == E::e19);
 
     REQUIRE_THROWS_AS(fromString<E>("e156"), StringConversionError);
     REQUIRE_THROWS_WITH(fromString<E>("e156"), "'e156' is not a 'E' value");

@@ -489,3 +489,69 @@ public:
         } \
         friend Type##Traits traits(Type) { return {}; } \
     }
+
+#define DEFINE_ENUM_IMPL_17(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17) DEFINE_ENUM_IMPL_17_(Type, RESOLVE_VALUEe(e1), RESOLVE_VALUEe(e2), RESOLVE_VALUEe(e3), RESOLVE_VALUEe(e4), RESOLVE_VALUEe(e5), RESOLVE_VALUEe(e6), RESOLVE_VALUEe(e7), RESOLVE_VALUEe(e8), RESOLVE_VALUEe(e9), RESOLVE_VALUEe(e10), RESOLVE_VALUEe(e11), RESOLVE_VALUEe(e12), RESOLVE_VALUEe(e13), RESOLVE_VALUEe(e14), RESOLVE_VALUEe(e15), RESOLVE_VALUEe(e16), RESOLVE_VALUEe(e17))
+#define DEFINE_ENUM_IMPL_17_(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17) \
+    enum class [[maybe_unused]] Type { SECOND3e e1, SECOND3e e2, SECOND3e e3, SECOND3e e4, SECOND3e e5, SECOND3e e6, SECOND3e e7, SECOND3e e8, SECOND3e e9, SECOND3e e10, SECOND3e e11, SECOND3e e12, SECOND3e e13, SECOND3e e14, SECOND3e e15, SECOND3e e16, SECOND3e e17 }; \
+    struct Type##Traits; \
+    [[maybe_unused]] Type##Traits traits(Type); \
+    struct [[maybe_unused]] Type##Traits { \
+        using Enum [[maybe_unused]] = Type; \
+        [[maybe_unused]] static constexpr size_t count = 17; \
+        [[maybe_unused]] static constexpr std::array<Enum, count> values{ \
+            Enum::FIRST3e e1, Enum::FIRST3e e2, Enum::FIRST3e e3, Enum::FIRST3e e4, Enum::FIRST3e e5, Enum::FIRST3e e6, Enum::FIRST3e e7, Enum::FIRST3e e8, Enum::FIRST3e e9, Enum::FIRST3e e10, Enum::FIRST3e e11, Enum::FIRST3e e12, Enum::FIRST3e e13, Enum::FIRST3e e14, Enum::FIRST3e e15, Enum::FIRST3e e16, Enum::FIRST3e e17 \
+        }; \
+        [[maybe_unused]] static constexpr auto strings() noexcept { \
+            return boost::hana::make_tuple(boost::hana::make_tuple(RESTe e1), boost::hana::make_tuple(RESTe e2), boost::hana::make_tuple(RESTe e3), boost::hana::make_tuple(RESTe e4), boost::hana::make_tuple(RESTe e5), boost::hana::make_tuple(RESTe e6), boost::hana::make_tuple(RESTe e7), boost::hana::make_tuple(RESTe e8), boost::hana::make_tuple(RESTe e9), boost::hana::make_tuple(RESTe e10), boost::hana::make_tuple(RESTe e11), boost::hana::make_tuple(RESTe e12), boost::hana::make_tuple(RESTe e13), boost::hana::make_tuple(RESTe e14), boost::hana::make_tuple(RESTe e15), boost::hana::make_tuple(RESTe e16), boost::hana::make_tuple(RESTe e17)); \
+        } \
+        [[maybe_unused]] static char const* toString(Enum x) { \
+            switch (x) { case Enum::FIRST3e e1: return THIRD3e e1; case Enum::FIRST3e e2: return THIRD3e e2; case Enum::FIRST3e e3: return THIRD3e e3; case Enum::FIRST3e e4: return THIRD3e e4; case Enum::FIRST3e e5: return THIRD3e e5; case Enum::FIRST3e e6: return THIRD3e e6; case Enum::FIRST3e e7: return THIRD3e e7; case Enum::FIRST3e e8: return THIRD3e e8; case Enum::FIRST3e e9: return THIRD3e e9; case Enum::FIRST3e e10: return THIRD3e e10; case Enum::FIRST3e e11: return THIRD3e e11; case Enum::FIRST3e e12: return THIRD3e e12; case Enum::FIRST3e e13: return THIRD3e e13; case Enum::FIRST3e e14: return THIRD3e e14; case Enum::FIRST3e e15: return THIRD3e e15; case Enum::FIRST3e e16: return THIRD3e e16; case Enum::FIRST3e e17: return THIRD3e e17; } \
+            assert(false); \
+            throw serialize::BadEnumValue(x); \
+        } \
+        friend Type##Traits traits(Type) { return {}; } \
+    }
+
+#define DEFINE_ENUM_IMPL_18(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18) DEFINE_ENUM_IMPL_18_(Type, RESOLVE_VALUEe(e1), RESOLVE_VALUEe(e2), RESOLVE_VALUEe(e3), RESOLVE_VALUEe(e4), RESOLVE_VALUEe(e5), RESOLVE_VALUEe(e6), RESOLVE_VALUEe(e7), RESOLVE_VALUEe(e8), RESOLVE_VALUEe(e9), RESOLVE_VALUEe(e10), RESOLVE_VALUEe(e11), RESOLVE_VALUEe(e12), RESOLVE_VALUEe(e13), RESOLVE_VALUEe(e14), RESOLVE_VALUEe(e15), RESOLVE_VALUEe(e16), RESOLVE_VALUEe(e17), RESOLVE_VALUEe(e18))
+#define DEFINE_ENUM_IMPL_18_(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18) \
+    enum class [[maybe_unused]] Type { SECOND3e e1, SECOND3e e2, SECOND3e e3, SECOND3e e4, SECOND3e e5, SECOND3e e6, SECOND3e e7, SECOND3e e8, SECOND3e e9, SECOND3e e10, SECOND3e e11, SECOND3e e12, SECOND3e e13, SECOND3e e14, SECOND3e e15, SECOND3e e16, SECOND3e e17, SECOND3e e18 }; \
+    struct Type##Traits; \
+    [[maybe_unused]] Type##Traits traits(Type); \
+    struct [[maybe_unused]] Type##Traits { \
+        using Enum [[maybe_unused]] = Type; \
+        [[maybe_unused]] static constexpr size_t count = 18; \
+        [[maybe_unused]] static constexpr std::array<Enum, count> values{ \
+            Enum::FIRST3e e1, Enum::FIRST3e e2, Enum::FIRST3e e3, Enum::FIRST3e e4, Enum::FIRST3e e5, Enum::FIRST3e e6, Enum::FIRST3e e7, Enum::FIRST3e e8, Enum::FIRST3e e9, Enum::FIRST3e e10, Enum::FIRST3e e11, Enum::FIRST3e e12, Enum::FIRST3e e13, Enum::FIRST3e e14, Enum::FIRST3e e15, Enum::FIRST3e e16, Enum::FIRST3e e17, Enum::FIRST3e e18 \
+        }; \
+        [[maybe_unused]] static constexpr auto strings() noexcept { \
+            return boost::hana::make_tuple(boost::hana::make_tuple(RESTe e1), boost::hana::make_tuple(RESTe e2), boost::hana::make_tuple(RESTe e3), boost::hana::make_tuple(RESTe e4), boost::hana::make_tuple(RESTe e5), boost::hana::make_tuple(RESTe e6), boost::hana::make_tuple(RESTe e7), boost::hana::make_tuple(RESTe e8), boost::hana::make_tuple(RESTe e9), boost::hana::make_tuple(RESTe e10), boost::hana::make_tuple(RESTe e11), boost::hana::make_tuple(RESTe e12), boost::hana::make_tuple(RESTe e13), boost::hana::make_tuple(RESTe e14), boost::hana::make_tuple(RESTe e15), boost::hana::make_tuple(RESTe e16), boost::hana::make_tuple(RESTe e17), boost::hana::make_tuple(RESTe e18)); \
+        } \
+        [[maybe_unused]] static char const* toString(Enum x) { \
+            switch (x) { case Enum::FIRST3e e1: return THIRD3e e1; case Enum::FIRST3e e2: return THIRD3e e2; case Enum::FIRST3e e3: return THIRD3e e3; case Enum::FIRST3e e4: return THIRD3e e4; case Enum::FIRST3e e5: return THIRD3e e5; case Enum::FIRST3e e6: return THIRD3e e6; case Enum::FIRST3e e7: return THIRD3e e7; case Enum::FIRST3e e8: return THIRD3e e8; case Enum::FIRST3e e9: return THIRD3e e9; case Enum::FIRST3e e10: return THIRD3e e10; case Enum::FIRST3e e11: return THIRD3e e11; case Enum::FIRST3e e12: return THIRD3e e12; case Enum::FIRST3e e13: return THIRD3e e13; case Enum::FIRST3e e14: return THIRD3e e14; case Enum::FIRST3e e15: return THIRD3e e15; case Enum::FIRST3e e16: return THIRD3e e16; case Enum::FIRST3e e17: return THIRD3e e17; case Enum::FIRST3e e18: return THIRD3e e18; } \
+            assert(false); \
+            throw serialize::BadEnumValue(x); \
+        } \
+        friend Type##Traits traits(Type) { return {}; } \
+    }
+
+#define DEFINE_ENUM_IMPL_19(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18, e19) DEFINE_ENUM_IMPL_19_(Type, RESOLVE_VALUEe(e1), RESOLVE_VALUEe(e2), RESOLVE_VALUEe(e3), RESOLVE_VALUEe(e4), RESOLVE_VALUEe(e5), RESOLVE_VALUEe(e6), RESOLVE_VALUEe(e7), RESOLVE_VALUEe(e8), RESOLVE_VALUEe(e9), RESOLVE_VALUEe(e10), RESOLVE_VALUEe(e11), RESOLVE_VALUEe(e12), RESOLVE_VALUEe(e13), RESOLVE_VALUEe(e14), RESOLVE_VALUEe(e15), RESOLVE_VALUEe(e16), RESOLVE_VALUEe(e17), RESOLVE_VALUEe(e18), RESOLVE_VALUEe(e19))
+#define DEFINE_ENUM_IMPL_19_(Type, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18, e19) \
+    enum class [[maybe_unused]] Type { SECOND3e e1, SECOND3e e2, SECOND3e e3, SECOND3e e4, SECOND3e e5, SECOND3e e6, SECOND3e e7, SECOND3e e8, SECOND3e e9, SECOND3e e10, SECOND3e e11, SECOND3e e12, SECOND3e e13, SECOND3e e14, SECOND3e e15, SECOND3e e16, SECOND3e e17, SECOND3e e18, SECOND3e e19 }; \
+    struct Type##Traits; \
+    [[maybe_unused]] Type##Traits traits(Type); \
+    struct [[maybe_unused]] Type##Traits { \
+        using Enum [[maybe_unused]] = Type; \
+        [[maybe_unused]] static constexpr size_t count = 19; \
+        [[maybe_unused]] static constexpr std::array<Enum, count> values{ \
+            Enum::FIRST3e e1, Enum::FIRST3e e2, Enum::FIRST3e e3, Enum::FIRST3e e4, Enum::FIRST3e e5, Enum::FIRST3e e6, Enum::FIRST3e e7, Enum::FIRST3e e8, Enum::FIRST3e e9, Enum::FIRST3e e10, Enum::FIRST3e e11, Enum::FIRST3e e12, Enum::FIRST3e e13, Enum::FIRST3e e14, Enum::FIRST3e e15, Enum::FIRST3e e16, Enum::FIRST3e e17, Enum::FIRST3e e18, Enum::FIRST3e e19 \
+        }; \
+        [[maybe_unused]] static constexpr auto strings() noexcept { \
+            return boost::hana::make_tuple(boost::hana::make_tuple(RESTe e1), boost::hana::make_tuple(RESTe e2), boost::hana::make_tuple(RESTe e3), boost::hana::make_tuple(RESTe e4), boost::hana::make_tuple(RESTe e5), boost::hana::make_tuple(RESTe e6), boost::hana::make_tuple(RESTe e7), boost::hana::make_tuple(RESTe e8), boost::hana::make_tuple(RESTe e9), boost::hana::make_tuple(RESTe e10), boost::hana::make_tuple(RESTe e11), boost::hana::make_tuple(RESTe e12), boost::hana::make_tuple(RESTe e13), boost::hana::make_tuple(RESTe e14), boost::hana::make_tuple(RESTe e15), boost::hana::make_tuple(RESTe e16), boost::hana::make_tuple(RESTe e17), boost::hana::make_tuple(RESTe e18), boost::hana::make_tuple(RESTe e19)); \
+        } \
+        [[maybe_unused]] static char const* toString(Enum x) { \
+            switch (x) { case Enum::FIRST3e e1: return THIRD3e e1; case Enum::FIRST3e e2: return THIRD3e e2; case Enum::FIRST3e e3: return THIRD3e e3; case Enum::FIRST3e e4: return THIRD3e e4; case Enum::FIRST3e e5: return THIRD3e e5; case Enum::FIRST3e e6: return THIRD3e e6; case Enum::FIRST3e e7: return THIRD3e e7; case Enum::FIRST3e e8: return THIRD3e e8; case Enum::FIRST3e e9: return THIRD3e e9; case Enum::FIRST3e e10: return THIRD3e e10; case Enum::FIRST3e e11: return THIRD3e e11; case Enum::FIRST3e e12: return THIRD3e e12; case Enum::FIRST3e e13: return THIRD3e e13; case Enum::FIRST3e e14: return THIRD3e e14; case Enum::FIRST3e e15: return THIRD3e e15; case Enum::FIRST3e e16: return THIRD3e e16; case Enum::FIRST3e e17: return THIRD3e e17; case Enum::FIRST3e e18: return THIRD3e e18; case Enum::FIRST3e e19: return THIRD3e e19; } \
+            assert(false); \
+            throw serialize::BadEnumValue(x); \
+        } \
+        friend Type##Traits traits(Type) { return {}; } \
+    }
