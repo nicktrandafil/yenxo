@@ -63,6 +63,7 @@ Variant::~Variant() = default;
 
 Variant::Variant(bool x) : impl(x) {}
 Variant::Variant(char x) : impl(x) {}
+Variant::Variant(unsigned char x) : impl(x) {}
 Variant::Variant(short int x) : impl(x) {}
 Variant::Variant(unsigned short int x) : impl(x) {}
 Variant::Variant(int x) : impl(x) {}
@@ -300,6 +301,16 @@ char Variant::character() const {
 
 char Variant::characterOr(char x) const {
     return std::visit(GetOrHelper<char>{x}, impl->m);
+}
+
+
+unsigned char Variant::uchar() const {
+    return std::visit(GetHelper<unsigned char>(), impl->m);
+}
+
+
+unsigned char Variant::ucharOr(unsigned char x) const {
+    return std::visit(GetOrHelper<unsigned char>{x}, impl->m);
 }
 
 
