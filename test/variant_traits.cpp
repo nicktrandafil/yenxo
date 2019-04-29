@@ -383,9 +383,13 @@ struct PersonD
 };
 
 
-struct Pol {
-    static constexpr auto allow_null = true;
+struct Pol : trait::VarDefPolicy {
     static auto constexpr serialize_default_value = false;
+    static auto constexpr empty_container_not_required = true;
+};
+
+
+struct Pol2 : trait::VarDefPolicy {
     static auto constexpr empty_container_not_required = true;
 };
 
@@ -400,6 +404,22 @@ struct PersonE
     PersonE() = default;
     std::vector<int> cont;
     int i{0};
+};
+
+
+struct PersonE2
+        : trait::VarDef<PersonE2, Pol2> {
+
+    static constexpr auto defaults() {
+        return hana::make_map(hana::make_pair("i"_s, 2));
+    }
+
+    PersonE2() : i(0) {}
+
+    BOOST_HANA_DEFINE_STRUCT(PersonE2,
+        (std::vector<int>, cont),
+        (int, i)
+    );
 };
 
 
@@ -496,6 +516,10 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
             {"cont", Variant(VariantVec{Variant(1)})}
         };
         REQUIRE(Variant(p2) == Variant(exp));
+
+        PersonE2 p3;
+        p3.i = 2;
+        REQUIRE(Variant(p3) == Variant(VariantMap{{"i", Variant(2)}}));
     }
 
     SECTION("rename") {

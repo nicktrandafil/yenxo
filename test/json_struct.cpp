@@ -59,7 +59,7 @@ struct Hobby
 
 
 struct Person
-        : trait::Var<Person>
+        : trait::VarDef<Person>
         , trait::UpdateFromVar<Person>
         , trait::OStream<Person>
         , trait::EqualityComparison<Person> {
@@ -118,8 +118,7 @@ TEST_CASE("Check simple json to struct", "[json_struct]") {
             "l": 9223372036854775807,
             "ul": 18446744073709551615,
             "f": 1.1,
-            "v": [1, 2],
-            "n": null
+            "v": [1, 2]
         }
     )";
 

@@ -216,9 +216,7 @@ struct Var {
                 throw std::logic_error(renamed + " not found in map"s);
             } else {
                 if constexpr (isOptional(type_c<decltype(tmp)>)) {
-                    if (!it->second.empty()) {
-                        tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second);
-                    }
+                    tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second);
                 } else {
                     tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, it->second);
                 }
@@ -240,9 +238,6 @@ struct VarDefPolicy {
 
     /// serialize a value even if it has it's default value
     static auto constexpr serialize_default_value = true;
-
-    /// serialize empty optional as null, else drop the key
-    static auto constexpr allow_null = false;
 };
 
 
@@ -264,8 +259,6 @@ struct VarDef {
             if constexpr (isOptional(type_c<decltype(value)>)) {
                 if (value.has_value()) {
                     ret[renamed] = detail::toVariantWrap(*value);
-                } else if (Policy::allow_null) {
-                    ret[renamed] = {};
                 }
             } else {
                 if constexpr (!Policy::serialize_default_value &&
@@ -325,9 +318,7 @@ struct VarDef {
 
             } else {
                 if constexpr (isOptional(type_c<decltype(tmp)>)) {
-                    if (!it->second.empty()) {
-                        tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second);
-                    }
+                    tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second);
                 } else {
                     tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, it->second);
                 }
