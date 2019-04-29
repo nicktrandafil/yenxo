@@ -31,6 +31,8 @@ else()
     set(_${PROJECT_NAME}_enable_type_safe 0)
 endif()
 
+option(${PROJECT_NAME}_test_define_struct "Enable testing of DEFINE_STRUCT" OFF)
+
 if(NOT ${PROJECT_NAME}_sub)
     option(CMAKE_BUILD_TYPE "Build type" Release)
 endif()
@@ -62,6 +64,7 @@ add_library(
     ${PROJECT_NAME} STATIC
 
     include/${PROJECT_NAME}/meta.hpp
+    include/${PROJECT_NAME}/preprocessor.hpp
 
     include/${PROJECT_NAME}/pimpl.hpp
     include/${PROJECT_NAME}/pimpl_impl.hpp
@@ -83,6 +86,8 @@ add_library(
 
     include/${PROJECT_NAME}/enum_traits.hpp
     include/${PROJECT_NAME}/define_enum.hpp
+
+    include/${PROJECT_NAME}/define_struct.hpp
 
     src/variant.cpp
 )
@@ -194,6 +199,10 @@ add_executable(
     test/variant_conversion.cpp
 
     test/define_enum.cpp
+
+    $<$<BOOL:${${PROJECT_NAME}_test_define_struct}>:test/define_struct.cpp>
+    $<$<BOOL:${${PROJECT_NAME}_test_define_struct}>:test/define_struct_part2.cpp>
+    $<$<BOOL:${${PROJECT_NAME}_test_define_struct}>:test/define_struct_part3.cpp>
 )
 
 set_target_properties(test_${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -267,6 +276,10 @@ add_test(
     "Check toString/fromString")
 
 add_test(
+    iparse_with_suffix test_${PROJECT_NAME}
+    "Check IparseWithSuffix")
+
+add_test(
     algorithm_string test_${PROJECT_NAME}
     "Check Check iendsWith")
 
@@ -281,6 +294,10 @@ add_test(
 add_test(
     define_enum test_${PROJECT_NAME}
     "Check DEFINE_ENUM")
+
+add_test(
+    define_struct test_${PROJECT_NAME}
+    "[define_struct]")
 
 
 # Coverage

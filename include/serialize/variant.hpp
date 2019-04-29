@@ -126,6 +126,7 @@ public:
     explicit Variant(bool);
 
     explicit Variant(char);
+    explicit Variant(unsigned char);
     explicit Variant(short int);
     explicit Variant(unsigned short int);
     explicit Variant(int);
@@ -194,6 +195,19 @@ public:
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
     ///
     char characterOr(char x) const;
+
+    ///
+    /// Get unsigned char
+    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    ///
+    unsigned char uchar() const;
+    explicit operator unsigned char() const { return uchar(); }
+
+    ///
+    /// Get unsigned char or `x` if the object is empty
+    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    ///
+    unsigned char ucharOr(unsigned char x) const;
 
     ///
     /// Get short int
@@ -366,6 +380,7 @@ public:
     using Types = S<
         bool,
         char,
+        unsigned char,
         short int,
         unsigned short int,
         int,
@@ -389,6 +404,7 @@ using VariantVec = std::vector<Variant>;
 
 template <> inline bool Variant::asOr<bool>(bool x) const { return booleanOr(x); }
 template <> inline char Variant::asOr<char>(char x) const { return characterOr(x); }
+template <> inline unsigned char Variant::asOr<unsigned char>(unsigned char x) const { return ucharOr(x); }
 template <> inline short int Variant::asOr<short int>(short int x) const { return shortIntOr(x); }
 template <> inline unsigned short int Variant::asOr<unsigned short int>(unsigned short int x) const { return ushortIntOr(x); }
 template <> inline int Variant::asOr<int>(int x) const { return integerOr(x); }

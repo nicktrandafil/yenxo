@@ -1,7 +1,7 @@
 /*
   MIT License
 
-  Copyright (c) 2018 Nicolai Trandafil
+  Copyright (c) 2019 Nicolai Trandafil
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,16 @@ using namespace serialize;
 namespace {
 
 
+DEFINE_ENUM(E1_1,
+    (e1,,"e_1", "e_2", "e_3", "e_4", "e_5", "e_6", "e_7", "e_8", "e_9", "e_10")
+);
+
+
+DEFINE_ENUM(E1,
+    e1
+);
+
+
 DEFINE_ENUM(E,
     e1,
     (e2),
@@ -54,7 +64,10 @@ DEFINE_ENUM(E,
     e13,
     e14,
     e15,
-    e16
+    e16,
+    e17,
+    e18,
+    e19
 );
 
 
@@ -62,6 +75,39 @@ DEFINE_ENUM(E,
 
 
 TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
+    REQUIRE(toString(E1_1::e1) == "e_1");
+    REQUIRE(fromString<E1_1>("e_2") == E1_1::e1);
+    REQUIRE(fromString<E1_1>("e_3") == E1_1::e1);
+    REQUIRE(fromString<E1_1>("e_4") == E1_1::e1);
+    REQUIRE(fromString<E1_1>("e_5") == E1_1::e1);
+    REQUIRE(fromString<E1_1>("e_6") == E1_1::e1);
+    REQUIRE(fromString<E1_1>("e_7") == E1_1::e1);
+    REQUIRE(fromString<E1_1>("e_8") == E1_1::e1);
+    REQUIRE(fromString<E1_1>("e_9") == E1_1::e1);
+    REQUIRE(fromString<E1_1>("e_10") == E1_1::e1);
+
+    REQUIRE_THROWS_AS(fromString<E1_1>("e_11"), StringConversionError);
+    REQUIRE_THROWS_WITH(fromString<E1_1>("e_11"), "'e_11' is not a 'E1_1' value");
+
+    REQUIRE(toVariant(E1_1::e1) == Variant("e_1"));
+    REQUIRE(fromVariant<E1_1>(Variant("e_2")) == E1_1::e1);
+    REQUIRE(fromVariant<E1_1>(Variant("e_3")) == E1_1::e1);
+    REQUIRE(fromVariant<E1_1>(Variant("e_4")) == E1_1::e1);
+    REQUIRE(fromVariant<E1_1>(Variant("e_5")) == E1_1::e1);
+    REQUIRE(fromVariant<E1_1>(Variant("e_6")) == E1_1::e1);
+    REQUIRE(fromVariant<E1_1>(Variant("e_7")) == E1_1::e1);
+    REQUIRE(fromVariant<E1_1>(Variant("e_8")) == E1_1::e1);
+    REQUIRE(fromVariant<E1_1>(Variant("e_9")) == E1_1::e1);
+    REQUIRE(fromVariant<E1_1>(Variant("e_10")) == E1_1::e1);
+
+    REQUIRE_THROWS_AS(fromVariant<E1_1>(Variant("e_11")), VariantBadType);
+    REQUIRE_THROWS_WITH(fromVariant<E1_1>(Variant("e_11")), "'e_11' is not a 'E1_1' value");
+
+    //
+
+    REQUIRE(toString(E1::e1) == "e1");
+    REQUIRE(fromString<E1>("e1") == E1::e1);
+
     REQUIRE(toString(E::e1) == "e1");
     REQUIRE(fromString<E>("e1") == E::e1);
 
@@ -110,6 +156,15 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
 
     REQUIRE(toString(E::e16) == "e16");
     REQUIRE(fromString<E>("e16") == E::e16);
+
+    REQUIRE(toString(E::e17) == "e17");
+    REQUIRE(fromString<E>("e17") == E::e17);
+
+    REQUIRE(toString(E::e18) == "e18");
+    REQUIRE(fromString<E>("e18") == E::e18);
+
+    REQUIRE(toString(E::e19) == "e19");
+    REQUIRE(fromString<E>("e19") == E::e19);
 
     REQUIRE_THROWS_AS(fromString<E>("e156"), StringConversionError);
     REQUIRE_THROWS_WITH(fromString<E>("e156"), "'e156' is not a 'E' value");

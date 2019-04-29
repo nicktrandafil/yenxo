@@ -162,6 +162,7 @@ TEST_CASE("Check Variant", "[Variant]") {
         auto const types = hana::make_tuple(
             hana::type_c<bool>,
             hana::type_c<char>,
+            hana::type_c<unsigned char>,
             hana::type_c<short int>,
             hana::type_c<unsigned short int>,
             hana::type_c<int>,

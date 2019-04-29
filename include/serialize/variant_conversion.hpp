@@ -43,6 +43,8 @@
 
 // std
 #include <type_traits>
+#include <variant>
+#include <sstream>
 
 
 namespace serialize {
@@ -266,6 +268,7 @@ struct HanaMapT {
 constexpr HanaMapT hanaMap;
 
 
+/// Hana map
 template <typename T>
 struct ToVariantImpl<T, When<hanaMap(type_c<T>)>> {
     static Variant apply(T const& map) {
@@ -274,6 +277,20 @@ struct ToVariantImpl<T, When<hanaMap(type_c<T>)>> {
             ret[boost::hana::to<char const*>(key)] = toVariant(value);
         }));
         return Variant(ret);
+    }
+};
+
+
+/// Variant
+template <typename T>
+struct ToVariantImpl<T, When<
+        serialize::detail::Valid<std::variant_alternative_t<0, T>>::value>> {
+    static Variant apply(T const& var) {
+        return std::visit(
+            Overload{
+                [](auto const& x) { return toVariant(x); }
+            }, var
+        );
     }
 };
 
@@ -380,15 +397,53 @@ struct FromVariantImpl<T, When<isContainer(type_c<T>) &&
 
 /// Specialization for types with specialized EnumTraits
 template <class T>
-struct FromVariantImpl<T,
-        When<detail::Valid<decltype(
-           EnumTraits<T>::toString(std::declval<T>()))>::value>> {
+struct FromVariantImpl<T, When<
+        detail::Valid<decltype(
+            EnumTraits<T>::toString(std::declval<T>()))>::value &&
+        !hasStrings(boost::hana::type_c<EnumTraits<T>>)>> {
     static T apply(Variant const& var) {
         auto const& s = var.str();
         for (auto e: EnumTraits<T>::values) {
             if (EnumTraits<T>::toString(e) == s) { return e; }
         }
         throw VariantBadType(s, type_c<T>);
+    }
+};
+
+
+/// Specialization for types with specialized EnumTraits
+template <class T>
+struct FromVariantImpl<T, When<
+        detail::Valid<decltype(EnumTraits<T>::strings())>::value>> {
+    template <size_t I>
+    static typename EnumTraits<T>::Enum applyImpl(
+            boost::hana::size_t<I>, std::string const& x) {
+        bool found{false};
+        boost::hana::for_each(boost::hana::at_c<I>(EnumTraits<T>::strings()),
+                              [&](auto s) {
+            found |= strcmp(s, x.c_str()) == 0;
+        });
+        if (found) {
+            return EnumTraits<T>::values[I];
+        } else {
+            return applyImpl(boost::hana::size_c<I + 1>, x);
+        }
+
+        return EnumTraits<T>::values[I];
+    }
+
+    static typename EnumTraits<T>::Enum applyImpl(
+            boost::hana::size_t<EnumTraits<T>::count>, std::string const& x) {
+        throw VariantBadType(x, type_c<T>);
+    }
+
+    static T apply(std::string const& x) {
+        return applyImpl(boost::hana::size_c<0>, x);
+    }
+
+    static T apply(Variant const& var) {
+        auto const& s = var.str();
+        return applyImpl(boost::hana::size_c<0>, s);
     }
 };
 
@@ -442,6 +497,7 @@ struct FromVariantImpl<T, When<boolean(type_c<T>)>> {
 #endif
 
 
+/// Hana map
 template <typename T>
 struct FromVariantImpl<T, When<hanaMap(type_c<T>)>> {
     static T apply(Variant const& var) {
@@ -462,12 +518,39 @@ struct FromVariantImpl<T, When<hanaMap(type_c<T>)>> {
 };
 
 
+/// Hana constant
 template <typename T>
 struct FromVariantImpl<T, When<boost::hana::Constant<T>().value>> {
     static T apply(Variant const& var) {
         auto const tmp = fromVariant<typename T::value_type>(var);
         if (tmp != T::value) { throw VariantBadType(); }
         return T();
+    }
+};
+
+
+/// Variant
+template <typename T>
+struct FromVariantImpl<T, When<
+        serialize::detail::Valid<std::variant_alternative_t<0, T>>::value>> {
+    template <size_t I>
+    static T applyImpl(boost::hana::size_t<I>, Variant const& var) {
+        try {
+            return fromVariant<std::variant_alternative_t<I, T>>(var);
+        } catch (...) {
+            return applyImpl(boost::hana::size_c<I + 1>, var);
+        }
+    }
+
+    [[noreturn]] static T applyImpl(
+            boost::hana::size_t<std::variant_size_v<T>>, Variant const& var) {
+        std::ostringstream os;
+        os << var;
+        throw VariantBadType(os.str(), serialize::type_c<T>);
+    }
+
+    static T apply(Variant const& var) {
+        return applyImpl(boost::hana::size_c<0>, var);
     }
 };
 
