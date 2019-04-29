@@ -37,12 +37,12 @@ if(NOT ${PROJECT_NAME}_sub)
     option(CMAKE_BUILD_TYPE "Build type" Release)
 endif()
 
-cmake_dependent_option(coverage
+cmake_dependent_option(${PROJECT_NAME}_COVERAGE
   "Enable binary instrumentation to collect test coverage information in the DEBUG configuration"
-  ON "NOT ${PROJECT_NAME}_sub" OFF
+  ON "NOT ${PROJECT_NAME}_sub AND ${PROJECT_NAME}_TESTING AND ${CMAKE_BUILD_TYPE} STREQUAL Debug" OFF
 )
 
-cmake_dependent_option(TESTING
+cmake_dependent_option(${PROJECT_NAME}_TESTING
   "Enable testing"
   ON "NOT ${PROJECT_NAME}_sub" OFF
 )
@@ -169,7 +169,7 @@ endif()
 
 # Testing
 
-if(NOT TESTING)
+if(NOT ${PROJECT_NAME}_TESTING)
     return()
 endif()
 
@@ -302,7 +302,7 @@ add_test(
 
 # Coverage
 
-if(TESTING AND coverage AND CMAKE_BUILD_TYPE STREQUAL Debug)
+if(${PROJECT_NAME}_COVERAGE)
     add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/cov.sh
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/scripts/cov.sh ${CMAKE_BINARY_DIR}
         DEPENDS scripts/cov.sh)

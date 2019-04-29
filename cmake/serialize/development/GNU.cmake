@@ -10,8 +10,7 @@ string(CONCAT generator
   "$<$<OR:$<CONFIG:RELEASE>,"
          "$<CONFIG:RELWITHDEBINFO>,"
          "$<CONFIG:MINSIZEREL>>:${serialize_GNU_release_flags};>"
-  "$<$<AND:$<CONFIG:DEBUG>,"
-          "$<BOOL:${coverage}>>:${serialize_GNU_coverage_flags};>")
+  "$<$<BOOL:${${PROJECT_NAME}_COVERAGE}>:${serialize_GNU_coverage_flags};>")
 
 target_compile_options(${PROJECT_NAME}_development INTERFACE
   $<$<CXX_COMPILER_ID:GNU>:${generator}>)
