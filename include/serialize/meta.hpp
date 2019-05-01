@@ -242,8 +242,8 @@ constexpr auto isContainer(Type<T> const& x) {
 
 
 template <typename T>
-constexpr auto isKeyValue(Type<T> const& x) {
-    if constexpr (isPair(x)) {
+constexpr auto isKeyValue(Type<T> const&) {
+    if constexpr (isPair(type_c<T>)) {
         return isString(type_c<typename T::first_type>);
     } else {
         return false;

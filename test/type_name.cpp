@@ -60,7 +60,10 @@ struct Z {};
 namespace tz {
 
 
-template <E e>
+enum class E2 { e2 };
+
+
+template <auto e>
 struct Z {};
 
 
@@ -73,14 +76,39 @@ struct A {};
 
 TEST_CASE("Check typeName", "[utilities]") {
     REQUIRE(unqualifiedTypeName<Def>() == "Def");
-    REQUIRE(unqualifiedTypeName<a::Xyz>() == "Xyz");
-    REQUIRE(unqualifiedTypeName<Dum::Zum>() == "Zum");
-    REQUIRE(unqualifiedTypeName<tz::Z<E::e1>>() == "Z<(E)0>");
-    REQUIRE(unqualifiedTypeName<A<Z<E::e1>>>() == "A<Z<(E)0>>");
-    REQUIRE(unqualifiedTypeName<A<tz::Z<E::e1>>>() == "A<Z<(E)0>>");
     static_assert(unqualifiedTypeName<Def>() == "Def");
-    REQUIRE(unqualifiedTypeName<std::string>() == "string");
 
+    REQUIRE(unqualifiedTypeName<a::Xyz>() == "Xyz");
+    static_assert(unqualifiedTypeName<a::Xyz>() == "Xyz");
+
+    REQUIRE(unqualifiedTypeName<Dum::Zum>() == "Zum");
+    static_assert(unqualifiedTypeName<Dum::Zum>() == "Zum");
+
+    REQUIRE(unqualifiedTypeName<tz::E2>() == "E2");
+
+#if defined(__clang__)
+    REQUIRE(unqualifiedTypeName<tz::Z<E::e1>>() == "Z<E::e1>");
+    REQUIRE(unqualifiedTypeName<tz::Z<tz::E2::e2>>() == "Z<E2::e2>");
+    REQUIRE(unqualifiedTypeName<A<Z<E::e1>>>() == "A<Z<E::e1>>");
+    REQUIRE(unqualifiedTypeName<A<tz::Z<E::e1>>>() == "A<Z<E::e1>>");
+    REQUIRE(qualifiedTypeName<Z<E::e1>>() == "Z<E::e1>");
+    REQUIRE(qualifiedTypeName<tz::Z<E::e1>>() == "tz::Z<E::e1>");
+    REQUIRE(qualifiedTypeName<A<Z<E::e1>>>() == "A<Z<E::e1> >");
+    REQUIRE(qualifiedTypeName<A<tz::Z<E::e1>>>() == "A<tz::Z<E::e1> >");
+#elif defined(__GNUC__)
+    REQUIRE(unqualifiedTypeName<tz::Z<E::e1>>() == "Z<E::0>");
+//    REQUIRE(unqualifiedTypeName<tz::Z<tz::E2::e2>>() == "Z<E2::0>");
+    REQUIRE(unqualifiedTypeName<A<Z<E::e1>>>() == "A<Z<E::0>>");
+    REQUIRE(unqualifiedTypeName<A<tz::Z<E::e1>>>() == "A<Z<E::0>>");
+    REQUIRE(qualifiedTypeName<Z<E::e1>>() == "Z<(E)0>");
+    REQUIRE(qualifiedTypeName<tz::Z<E::e1>>() == "tz::Z<(E)0>");
+    REQUIRE(qualifiedTypeName<A<Z<E::e1>>>() == "A<Z<(E)0> >");
+    REQUIRE(qualifiedTypeName<A<tz::Z<E::e1>>>() == "A<tz::Z<(E)0> >");
+#else
+#error "Not supported"
+#endif
+
+    REQUIRE(unqualifiedTypeName<std::string>() == "string");
     REQUIRE(qualifiedTypeName<Def>() == "Def");
     REQUIRE(qualifiedTypeName<a::Xyz>() == "a::Xyz");
     REQUIRE(qualifiedTypeName<Dum::Zum>() == "Dum::Zum");
@@ -88,8 +116,4 @@ TEST_CASE("Check typeName", "[utilities]") {
 
     REQUIRE(qualifiedTypeName<X<Dum>>() == "X<Dum>");
     REQUIRE(qualifiedTypeName<Y<true>>() == "Y<true>");
-    REQUIRE(qualifiedTypeName<Z<E::e1>>() == "Z<(E)0>");
-    REQUIRE(qualifiedTypeName<tz::Z<E::e1>>() == "tz::Z<(E)0>");
-    REQUIRE(qualifiedTypeName<A<Z<E::e1>>>() == "A<Z<(E)0> >");
-    REQUIRE(qualifiedTypeName<A<tz::Z<E::e1>>>() == "A<tz::Z<(E)0> >");
 }

@@ -141,9 +141,8 @@ constexpr void checkOrphanKeysInDefaults(Type<T> const&) {
     boost::hana::for_each(
         decltype(boost::hana::keys(T::defaults()))(),
         [](auto key) {
-            constexpr decltype(boost::hana::keys(T())) keys;
             BOOST_HANA_CONSTANT_ASSERT_MSG(
-                key ^boost::hana::in^ keys,
+                key ^boost::hana::in^ decltype(boost::hana::keys(T()))(),
                 "There are unknown fields in defaults()");
         });
 }
@@ -261,9 +260,10 @@ struct VarDef {
                     ret[renamed] = detail::toVariantWrap(*value);
                 }
             } else {
-                if constexpr (!Policy::serialize_default_value &&
-                              detail::hasDefaultValue<Derived>(name)) {
-                    if (Derived::defaults()[name] == value) { return; }
+                if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
+                    if constexpr (!Policy::serialize_default_value && detail::hasDefaultValue<Derived>(name)) {
+                        if (Derived::defaults()[name] == value) { return; }
+                    }
                 }
 
                 if constexpr(detail::isContainer(
@@ -296,24 +296,26 @@ struct VarDef {
             auto const it = map.find(renamed);
 
             if (map.end() == it) {
-                if constexpr (detail::hasDefaultValue<Derived>(name)) {
-                    BOOST_HANA_CONSTEXPR_ASSERT_MSG(
-                        (std::is_convertible_v<
-                            std::decay_t<decltype(Derived::defaults()[name])>,
-                            std::decay_t<decltype(value(std::declval<Derived>()))>>),
-                        "The provided default type in"_s +
-                        " defaults() for "_s + name +
-                        " does not match with the actual type"_s);
+                if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
+                    if constexpr (detail::hasDefaultValue<Derived>(name)) {
+                        BOOST_HANA_CONSTEXPR_ASSERT_MSG(
+                            (std::is_convertible_v<
+                                std::decay_t<decltype(Derived::defaults()[name])>,
+                                std::decay_t<decltype(value(std::declval<Derived>()))>>),
+                            ("The provided default type in defaults() for "_s + name + " does not match with the actual type"_s).c_str()
+                        );
 
-                    tmp = Derived::defaults()[name];
-                } else if constexpr (
-                            !isOptional(type_c<decltype(tmp)>) &&
-                            ((isContainer(type_c<decltype(tmp)>) && !Policy::empty_container_not_required) ||
+                        tmp = Derived::defaults()[name];
+                        return;
+                    }
+                }
+
+                if constexpr (
+                        !isOptional(type_c<decltype(tmp)>) &&
+                        ((isContainer(type_c<decltype(tmp)>) &&
+                            !Policy::empty_container_not_required) ||
                                 !isContainer(type_c<decltype(tmp)>))) {
-                    throw std::logic_error(
-                                renamed +
-                                " not found in map, and default"
-                                " value is not provided"s);
+                    throw std::logic_error(renamed + " not found in map, and default value is not provided"s);
                 }
 
             } else {

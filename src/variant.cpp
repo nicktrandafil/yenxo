@@ -145,7 +145,7 @@ struct IntegralCheckedCast<T, U, When<std::is_signed_v<T> &&
                                       (sizeof(T) <= sizeof(U))>> {
     static T apply(U x) {
 
-#if __GNUG__
+#if defined(__GNUG__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare" // safe comparation
 
@@ -170,7 +170,7 @@ struct IntegralCheckedCast<T, U, When<std::is_unsigned_v<T> &&
                                       std::is_signed_v<U>>> {
     static T apply(U x) {
 
-#if __GNUG__
+#if defined(__GNUG__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare" // safe comparation
 
@@ -195,7 +195,7 @@ template <typename T, typename U, bool condition>
 struct IntegralCheckedCast<T, U, When<condition>> {
     static T apply(U x) {
 
-#if __GNUG__
+#if defined(__GNUG__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare" // safe comparation
 
@@ -533,7 +533,7 @@ struct FromRapidJsonValue {
 
     struct Res {
         Variant operator()(Variant&& x) const {
-            return x;
+            return std::move(x);
         }
 
         Variant operator()(Variant::Vec&& x) const {
