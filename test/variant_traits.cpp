@@ -29,6 +29,7 @@
 // local
 #include <serialize/ostream_traits.hpp>
 #include <serialize/comparison_traits.hpp>
+#include <serialize/string_conversion.hpp>
 #include <serialize/variant.hpp>
 
 // 3rd
@@ -394,6 +395,12 @@ struct Pol2 : trait::VarDefPolicy {
 };
 
 
+struct Pol3 : trait::VarDefPolicy {
+    template <class T>
+    static auto constexpr from_variant = [](auto const& x) { return serialize::fromString<T>(x.str()); };
+};
+
+
 struct PersonE
         : trait::VarDef<PersonE, Pol> {
 
@@ -438,6 +445,23 @@ struct St3 : trait::VarDef<St3>, trait::EqualityComparison<St3> {
     );
 };
 
+
+struct S1 {
+    S1() = default;
+    explicit S1(std::string const& str) : v(str) {}
+    bool operator==(S1 const& rhs) const noexcept { return v == rhs.v; }
+    std::string v;
+};
+
+struct StrStruct
+        : trait::VarDef<StrStruct, Pol3>
+        , trait::EqualityComparison<StrStruct> {
+    StrStruct() = default;
+    explicit StrStruct(std::string const& str) : str(str) {}
+    BOOST_HANA_DEFINE_STRUCT(StrStruct,
+        (S1, str)
+    );
+};
 
 
 } // namespace
@@ -501,6 +525,13 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
     SECTION("Check fromVariant with no hobby (no default value)") {
         person_var.erase("hobby");
         REQUIRE_THROWS_AS(PersonD::fromVariant(Variant(person_var)), std::logic_error);
+    }
+
+    SECTION("Check from_variant policy parameter") {
+        Variant const var(
+            VariantMap{
+                {"str", Variant("1")}});
+        REQUIRE(fromVariant<StrStruct>(var) == StrStruct("1"));
     }
 
     SECTION("Check toVariant policy redefinition") {

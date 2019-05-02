@@ -154,10 +154,11 @@ auto toVariantWrap(T&& x) {
 }
 
 
-template <typename T>
-auto fromVariantWrap(char const* name, Variant const& x) {
+template <typename T, typename F = decltype(fromVariant<T>)>
+auto fromVariantWrap(char const* name, Variant const& x,
+                     F const& from_variant = fromVariant<T>) {
     try {
-        return fromVariant<T>(x);
+        return from_variant(x);
     } catch (serialize::VariantErr& e) {
         e.prependPath(name);
         throw;
@@ -237,6 +238,10 @@ struct VarDefPolicy {
 
     /// serialize a value even if it has it's default value
     static auto constexpr serialize_default_value = true;
+
+    /// from variant conversion functional object
+    template <class T>
+    static auto constexpr from_variant = fromVariant<T>;
 };
 
 
@@ -320,9 +325,9 @@ struct VarDef {
 
             } else {
                 if constexpr (isOptional(type_c<decltype(tmp)>)) {
-                    tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second);
+                    tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second, Policy::template from_variant<decltype(*tmp)>);
                 } else {
-                    tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, it->second);
+                    tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, it->second, Policy::template from_variant<decltype(tmp)>);
                 }
             }
         }));
