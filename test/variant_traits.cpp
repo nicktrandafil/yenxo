@@ -398,6 +398,7 @@ struct Pol2 : trait::VarDefPolicy {
 struct Pol3 : trait::VarDefPolicy {
     template <class T>
     static auto constexpr from_variant = [](auto const& x) { return serialize::fromString<T>(x.str()); };
+    static auto constexpr to_variant = [](auto&& x) { return Variant(serialize::toString(std::forward<decltype(x)>(x))); };
 };
 
 
@@ -449,6 +450,7 @@ struct St3 : trait::VarDef<St3>, trait::EqualityComparison<St3> {
 struct S1 {
     S1() = default;
     explicit S1(std::string const& str) : v(str) {}
+    explicit operator std::string const&() const noexcept { return v; }
     bool operator==(S1 const& rhs) const noexcept { return v == rhs.v; }
     std::string v;
 };
@@ -532,6 +534,7 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
             VariantMap{
                 {"str", Variant("1")}});
         REQUIRE(fromVariant<StrStruct>(var) == StrStruct("1"));
+        REQUIRE(var == toVariant(StrStruct("1")));
     }
 
     SECTION("Check toVariant policy redefinition") {

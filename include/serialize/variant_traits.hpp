@@ -148,9 +148,9 @@ constexpr void checkOrphanKeysInDefaults(Type<T> const&) {
 }
 
 
-template <typename T>
-auto toVariantWrap(T&& x) {
-    return toVariant(std::forward<T>(x));
+template <typename T, typename F = decltype(toVariant)>
+auto toVariantWrap(T&& x, F const& to_variant = toVariant) {
+    return to_variant(std::forward<T>(x));
 }
 
 
@@ -242,6 +242,9 @@ struct VarDefPolicy {
     /// from variant conversion functional object
     template <class T>
     static auto constexpr from_variant = fromVariant<T>;
+
+    /// to variant conversion function object
+    static auto constexpr to_variant = toVariant;
 };
 
 
@@ -262,7 +265,7 @@ struct VarDef {
             auto const renamed = detail::rename<Derived>(name);
             if constexpr (isOptional(type_c<decltype(value)>)) {
                 if (value.has_value()) {
-                    ret[renamed] = detail::toVariantWrap(*value);
+                    ret[renamed] = detail::toVariantWrap(*value, Policy::to_variant);
                 }
             } else {
                 if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
@@ -274,12 +277,12 @@ struct VarDef {
                 if constexpr(detail::isContainer(
                                  boost::hana::type_c<decltype(value)>)) {
                     if constexpr (!Policy::empty_container_not_required) {
-                        ret[renamed] = detail::toVariantWrap(value);
+                        ret[renamed] = detail::toVariantWrap(value, Policy::to_variant);
                     } else if (begin(value) != end(value)) {
-                        ret[renamed] = detail::toVariantWrap(value);
+                        ret[renamed] = detail::toVariantWrap(value, Policy::to_variant);
                     }
                 } else {
-                    ret[renamed] = detail::toVariantWrap(value);
+                    ret[renamed] = detail::toVariantWrap(value, Policy::to_variant);
                 }
             }
         }));
