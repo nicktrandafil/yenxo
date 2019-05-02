@@ -114,10 +114,8 @@ struct ToVariantImpl : ToVariantImpl<T, When<true>> {};
 /// Fallback
 template <typename T, bool condition>
 struct ToVariantImpl<T, When<condition>> {
-    static Variant apply(T const&) {
-        static_assert(DependentFalse<T>::value,
-                      "No conversion to Variant is provided");
-        return {};
+    [[noreturn]] static Variant apply(T const&) {
+        static_assert(T::is_not_convertible_to_variant); throw 0;
     }
 };
 
@@ -321,10 +319,8 @@ struct FromVariantImpl : FromVariantImpl<T, When<true>> {};
 /// Fallback
 template <typename T, bool condition>
 struct FromVariantImpl<T, When<condition>> {
-    static T apply(Variant const&) {
-        static_assert(DependentFalse<T>::value,
-                      "No conversion from Variant is provided");
-        return {};
+    [[noreturn]] static T apply(Variant const&) {
+        static_assert(T::is_not_convertible_from_variant); throw 0;
     }
 };
 

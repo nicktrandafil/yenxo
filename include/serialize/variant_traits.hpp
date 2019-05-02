@@ -241,10 +241,10 @@ struct VarDefPolicy {
 
     /// from variant conversion functional object
     template <class T>
-    static auto constexpr from_variant = fromVariant<T>;
+    static constexpr auto from_variant = fromVariant<T>;
 
     /// to variant conversion function object
-    static auto constexpr to_variant = toVariant;
+    static constexpr auto to_variant = toVariant;
 };
 
 

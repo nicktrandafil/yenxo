@@ -59,6 +59,13 @@ struct ETraits {
 [[maybe_unused]] ETraits traits(E) { return {}; }
 
 
+struct Test {
+    static Variant toVariant(Test) { return {}; }
+    static Test fromVariant(Variant const&) { return {}; }
+    bool operator==(Test const&) const { return true; }
+};
+
+
 }
 
 
@@ -74,4 +81,7 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
     REQUIRE(fromVariant<V>(Variant("a")) == V("a"));
     REQUIRE_THROWS_AS(fromVariant<V>(Variant(1.2)) == V("a"), VariantBadType);
     REQUIRE_THROWS_WITH(fromVariant<V>(Variant(1.5)) == V("a"), "'1.500000' is not a 'variant<int, string>' value");
+
+    REQUIRE(fromVariant<Test>(Variant()) == Test());
+    REQUIRE(toVariant(Test()) == Variant());
 }
