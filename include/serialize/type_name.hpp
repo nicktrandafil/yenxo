@@ -35,26 +35,6 @@
 
 
 namespace serialize {
-namespace detail {
-
-
-constexpr std::string_view getT(std::string_view p) {
-    using namespace std;
-#ifdef __clang__
-#error "Not supported"
-#elif defined(__GNUC__)
-    auto start = p.find("T = ") + 4;
-    auto const end = p.find(';', start);
-    auto const tmp = p.rfind("::", end);
-    if (tmp > start) { start = tmp + 2; }
-    return string_view(p.data() + start, end - start);
-#elif defined(_MSC_VER)
-#error "Not supported"
-#endif
-}
-
-
-}
 
 
 template <class T, class = void>
@@ -70,6 +50,68 @@ struct UnqualifiedTypeNameT {
 /// Get unqualified type name
 template <class T>
 constexpr UnqualifiedTypeNameT<T> unqualifiedTypeName;
+
+
+namespace detail {
+
+
+constexpr std::string_view getT(std::string_view p) {
+    using namespace std;
+#if defined(__clang__)
+    auto start = p.find("T = ") + 4;
+    auto const end = p.find("]", start);
+    auto const tmp = p.rfind("::", end);
+    if (tmp != std::string_view::npos && tmp > start) { start = tmp + 2; }
+    return string_view(p.data() + start, end - start);
+#elif defined(__GNUC__)
+    auto start = p.find("T = ") + 4;
+    auto const end = p.find(";", start);
+    auto const tmp = p.rfind("::", end);
+    if (tmp != std::string_view::npos && tmp > start) { start = tmp + 2; }
+    return string_view(p.data() + start, end - start);
+#elif defined(_MSC_VER)
+#error "Not supported"
+#endif
+}
+
+
+constexpr std::string_view getTempl(std::string_view p) {
+#if defined(__clang__)
+    auto start = p.find("T = ") + 4;
+    auto const end = p.find("<", start);
+    auto const tmp = p.rfind("::", end);
+    if (tmp != std::string_view::npos && tmp > start) { start = tmp + 2; }
+    return std::string_view(p.data() + start, end - start);
+#elif defined(__GNUC__)
+    return detail::getT(p);
+#else
+#error "Not supported"
+#endif
+}
+
+
+template <auto value>
+std::string getVal() {
+    auto const pf = std::string_view(__PRETTY_FUNCTION__);
+#if defined(__clang__)
+    auto start = pf.find("value = ") + 8;
+    auto const end = pf.find("]");
+    auto tmp = pf.rfind("::", pf.rfind("::") - 1);
+    if (tmp != std::string_view::npos && tmp > start) {  start = tmp + 2; }
+    return std::string(pf.data() + start, end - start);
+#elif defined(__GNUC__)
+    auto const end = pf.find(";");
+    auto const start = pf.rfind(")", end) + 1;
+    return std::string(unqualifiedTypeName<decltype(value)>()) +
+            "::" +
+            std::string(pf.data() + start, end - start);
+#else
+#error "Not supported"
+#endif
+}
+
+
+}
 
 
 template <class T, bool condition>
@@ -88,14 +130,24 @@ struct UnqualifiedTypeNameImpl<std::string> {
 };
 
 
+template <template <auto> class T, auto v>
+struct UnqualifiedTypeNameImpl<T<v>> {
+    static std::string apply() {
+        using namespace std;
+        auto const templ = detail::getTempl(__PRETTY_FUNCTION__);
+        return string(templ) + "<" + detail::getVal<v>() + ">";
+    }
+};
+
+
 template <template <class...> class T, class... Args>
 struct UnqualifiedTypeNameImpl<T<Args...>> {
     static std::string apply() {
         using namespace std;
-        std::string const name{detail::getT(__PRETTY_FUNCTION__)};
-        string tmp = ((string(unqualifiedTypeName<Args>()) + ", ") + ...);
-        if (!tmp.empty()) { tmp.erase(tmp.end() - 2, tmp.end()); }
-        return name + "<" + tmp + ">";
+        string const templ(detail::getTempl(__PRETTY_FUNCTION__));
+        string args = ((string(unqualifiedTypeName<Args>()) + ", ") + ...);
+        if (!args.empty()) { args.erase(args.end() - 2, args.end()); }
+        return templ + "<" + args + ">";
     }
 };
 
@@ -110,16 +162,16 @@ constexpr auto UnqualifiedTypeNameT<T>::operator()() const {
 template <class T>
 constexpr std::string_view qualifiedTypeName() {
     using namespace std;
-
-#ifdef __clang__
-#error "Not supported"
-
+#if defined(__clang__)
+    string_view p = __PRETTY_FUNCTION__;
+    auto const start = p.find("T = ") + 4;
+    auto const end = p.find("]", start);
+    return string_view(p.data() + start, end - start);
 #elif defined(__GNUC__)
     string_view p = __PRETTY_FUNCTION__;
     auto const start = p.find("T = ") + 4;
-    auto const end = p.find(';', start);
+    auto const end = p.find(";", start);
     return string_view(p.data() + start, end - start);
-
 #elif defined(_MSC_VER)
 #error "Not supported"
 #endif

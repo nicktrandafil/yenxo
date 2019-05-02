@@ -195,8 +195,8 @@ struct FromStringImpl<T, When<
 
 template <typename T>
 struct FromStringT {
-    T operator()(std::string const& x) const {
-        return FromStringImpl<T>::apply(x);
+    auto operator()(std::string const& x) const {
+        return FromStringImpl<std::decay_t<T>>::apply(x);
     }
 };
 

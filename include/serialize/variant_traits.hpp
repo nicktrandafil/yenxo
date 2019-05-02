@@ -141,24 +141,24 @@ constexpr void checkOrphanKeysInDefaults(Type<T> const&) {
     boost::hana::for_each(
         decltype(boost::hana::keys(T::defaults()))(),
         [](auto key) {
-            constexpr decltype(boost::hana::keys(T())) keys;
             BOOST_HANA_CONSTANT_ASSERT_MSG(
-                key ^boost::hana::in^ keys,
+                key ^boost::hana::in^ decltype(boost::hana::keys(T()))(),
                 "There are unknown fields in defaults()");
         });
 }
 
 
-template <typename T>
-auto toVariantWrap(T&& x) {
-    return toVariant(std::forward<T>(x));
+template <typename T, typename F = decltype(toVariant)>
+auto toVariantWrap(T&& x, F const& to_variant = toVariant) {
+    return to_variant(std::forward<T>(x));
 }
 
 
-template <typename T>
-auto fromVariantWrap(char const* name, Variant const& x) {
+template <typename T, typename F = decltype(fromVariant<T>)>
+auto fromVariantWrap(char const* name, Variant const& x,
+                     F const& from_variant = fromVariant<T>) {
     try {
-        return fromVariant<T>(x);
+        return from_variant(x);
     } catch (serialize::VariantErr& e) {
         e.prependPath(name);
         throw;
@@ -238,6 +238,13 @@ struct VarDefPolicy {
 
     /// serialize a value even if it has it's default value
     static auto constexpr serialize_default_value = true;
+
+    /// from variant conversion functional object
+    template <class T>
+    static constexpr auto from_variant = fromVariant<T>;
+
+    /// to variant conversion function object
+    static constexpr auto to_variant = toVariant;
 };
 
 
@@ -258,23 +265,24 @@ struct VarDef {
             auto const renamed = detail::rename<Derived>(name);
             if constexpr (isOptional(type_c<decltype(value)>)) {
                 if (value.has_value()) {
-                    ret[renamed] = detail::toVariantWrap(*value);
+                    ret[renamed] = detail::toVariantWrap(*value, Policy::to_variant);
                 }
             } else {
-                if constexpr (!Policy::serialize_default_value &&
-                              detail::hasDefaultValue<Derived>(name)) {
-                    if (Derived::defaults()[name] == value) { return; }
+                if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
+                    if constexpr (!Policy::serialize_default_value && detail::hasDefaultValue<Derived>(name)) {
+                        if (Derived::defaults()[name] == value) { return; }
+                    }
                 }
 
                 if constexpr(detail::isContainer(
                                  boost::hana::type_c<decltype(value)>)) {
                     if constexpr (!Policy::empty_container_not_required) {
-                        ret[renamed] = detail::toVariantWrap(value);
+                        ret[renamed] = detail::toVariantWrap(value, Policy::to_variant);
                     } else if (begin(value) != end(value)) {
-                        ret[renamed] = detail::toVariantWrap(value);
+                        ret[renamed] = detail::toVariantWrap(value, Policy::to_variant);
                     }
                 } else {
-                    ret[renamed] = detail::toVariantWrap(value);
+                    ret[renamed] = detail::toVariantWrap(value, Policy::to_variant);
                 }
             }
         }));
@@ -296,31 +304,33 @@ struct VarDef {
             auto const it = map.find(renamed);
 
             if (map.end() == it) {
-                if constexpr (detail::hasDefaultValue<Derived>(name)) {
-                    BOOST_HANA_CONSTEXPR_ASSERT_MSG(
-                        (std::is_convertible_v<
-                            std::decay_t<decltype(Derived::defaults()[name])>,
-                            std::decay_t<decltype(value(std::declval<Derived>()))>>),
-                        "The provided default type in"_s +
-                        " defaults() for "_s + name +
-                        " does not match with the actual type"_s);
+                if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
+                    if constexpr (detail::hasDefaultValue<Derived>(name)) {
+                        BOOST_HANA_CONSTEXPR_ASSERT_MSG(
+                            (std::is_convertible_v<
+                                std::decay_t<decltype(Derived::defaults()[name])>,
+                                std::decay_t<decltype(value(std::declval<Derived>()))>>),
+                            ("The provided default type in defaults() for "_s + name + " does not match with the actual type"_s).c_str()
+                        );
 
-                    tmp = Derived::defaults()[name];
-                } else if constexpr (
-                            !isOptional(type_c<decltype(tmp)>) &&
-                            ((isContainer(type_c<decltype(tmp)>) && !Policy::empty_container_not_required) ||
+                        tmp = Derived::defaults()[name];
+                        return;
+                    }
+                }
+
+                if constexpr (
+                        !isOptional(type_c<decltype(tmp)>) &&
+                        ((isContainer(type_c<decltype(tmp)>) &&
+                            !Policy::empty_container_not_required) ||
                                 !isContainer(type_c<decltype(tmp)>))) {
-                    throw std::logic_error(
-                                renamed +
-                                " not found in map, and default"
-                                " value is not provided"s);
+                    throw std::logic_error(renamed + " not found in map, and default value is not provided"s);
                 }
 
             } else {
                 if constexpr (isOptional(type_c<decltype(tmp)>)) {
-                    tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second);
+                    tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second, Policy::template from_variant<decltype(*tmp)>);
                 } else {
-                    tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, it->second);
+                    tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, it->second, Policy::template from_variant<decltype(tmp)>);
                 }
             }
         }));

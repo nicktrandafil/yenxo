@@ -1,10 +1,17 @@
 language: cpp
+dist: trusty
 sudo: enabled
 
 matrix:
   include:
     - os: linux
-      compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-7']
+          packages: ['clang-7', "g++-7", "cmake"]
+      env: TOOLSET=clang++-7 TOOLSET_C=clang-7 BUILD_TYPE='Release'
+
+    - os: linux
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
@@ -12,7 +19,6 @@ matrix:
       env: TOOLSET=g++-7 TOOLSET_C=gcc-7 BUILD_TYPE='Debug'
 
     - os: linux
-      compiler: gcc
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
@@ -20,7 +26,6 @@ matrix:
       env: TOOLSET=g++-7 TOOLSET_C=gcc-7 BUILD_TYPE='Release'
 
     - os: linux
-      compiler: gcc
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
