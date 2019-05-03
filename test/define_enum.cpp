@@ -67,7 +67,20 @@ DEFINE_ENUM(E,
     e16,
     e17,
     e18,
-    e19
+    e19,
+    e20,
+    e21,
+    e22,
+    e23,
+    e24,
+    e25,
+    e26,
+    e27,
+    e28,
+    e29,
+    e30,
+    e31,
+    e32
 );
 
 
@@ -166,6 +179,67 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
     REQUIRE(toString(E::e19) == "e19");
     REQUIRE(fromString<E>("e19") == E::e19);
 
+    REQUIRE(toString(E::e20) == "e20");
+    REQUIRE(fromString<E>("e20") == E::e20);
+
+    REQUIRE(toString(E::e21) == "e21");
+    REQUIRE(fromString<E>("e21") == E::e21);
+
+    REQUIRE(toString(E::e22) == "e22");
+    REQUIRE(fromString<E>("e22") == E::e22);
+    REQUIRE(toVariant(E::e22) == Variant("e22"));
+    REQUIRE(fromVariant<E>(Variant("e22")) == E::e22);
+
+    REQUIRE(toString(E::e23) == "e23");
+    REQUIRE(fromString<E>("e23") == E::e23);
+    REQUIRE(toVariant(E::e23) == Variant("e23"));
+    REQUIRE(fromVariant<E>(Variant("e23")) == E::e23);
+
+    REQUIRE(toString(E::e24) == "e24");
+    REQUIRE(fromString<E>("e24") == E::e24);
+    REQUIRE(toVariant(E::e24) == Variant("e24"));
+    REQUIRE(fromVariant<E>(Variant("e24")) == E::e24);
+
+    REQUIRE(toString(E::e25) == "e25");
+    REQUIRE(fromString<E>("e25") == E::e25);
+    REQUIRE(toVariant(E::e25) == Variant("e25"));
+    REQUIRE(fromVariant<E>(Variant("e25")) == E::e25);
+
+    REQUIRE(toString(E::e26) == "e26");
+    REQUIRE(fromString<E>("e26") == E::e26);
+    REQUIRE(toVariant(E::e26) == Variant("e26"));
+    REQUIRE(fromVariant<E>(Variant("e26")) == E::e26);
+
+    REQUIRE(toString(E::e27) == "e27");
+    REQUIRE(fromString<E>("e27") == E::e27);
+    REQUIRE(toVariant(E::e27) == Variant("e27"));
+    REQUIRE(fromVariant<E>(Variant("e27")) == E::e27);
+
+    REQUIRE(toString(E::e28) == "e28");
+    REQUIRE(fromString<E>("e28") == E::e28);
+    REQUIRE(toVariant(E::e28) == Variant("e28"));
+    REQUIRE(fromVariant<E>(Variant("e28")) == E::e28);
+
+    REQUIRE(toString(E::e29) == "e29");
+    REQUIRE(fromString<E>("e29") == E::e29);
+    REQUIRE(toVariant(E::e29) == Variant("e29"));
+    REQUIRE(fromVariant<E>(Variant("e29")) == E::e29);
+
+    REQUIRE(toString(E::e30) == "e30");
+    REQUIRE(fromString<E>("e30") == E::e30);
+    REQUIRE(toVariant(E::e30) == Variant("e30"));
+    REQUIRE(fromVariant<E>(Variant("e30")) == E::e30);
+
+    REQUIRE(toString(E::e31) == "e31");
+    REQUIRE(fromString<E>("e31") == E::e31);
+    REQUIRE(toVariant(E::e31) == Variant("e31"));
+    REQUIRE(fromVariant<E>(Variant("e31")) == E::e31);
+
+    REQUIRE(toString(E::e32) == "e32");
+    REQUIRE(fromString<E>("e32") == E::e32);
+    REQUIRE(toVariant(E::e32) == Variant("e32"));
+    REQUIRE(fromVariant<E>(Variant("e32")) == E::e32);
+
     REQUIRE_THROWS_AS(fromString<E>("e156"), StringConversionError);
     REQUIRE_THROWS_WITH(fromString<E>("e156"), "'e156' is not a 'E' value");
 
@@ -176,6 +250,12 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
 
     REQUIRE(toVariant(E::e16) == Variant("e16"));
     REQUIRE(fromVariant<E>(Variant("e16")) == E::e16);
+
+    REQUIRE(toVariant(E::e20) == Variant("e20"));
+    REQUIRE(fromVariant<E>(Variant("e20")) == E::e20);
+
+    REQUIRE(toVariant(E::e21) == Variant("e21"));
+    REQUIRE(fromVariant<E>(Variant("e21")) == E::e21);
 
     REQUIRE_THROWS_AS(fromVariant<E>(Variant("e156")), VariantBadType);
     REQUIRE_THROWS_WITH(fromVariant<E>(Variant("e156")), "'e156' is not a 'E' value");
