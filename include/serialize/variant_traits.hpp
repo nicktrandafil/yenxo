@@ -270,6 +270,10 @@ struct VarDef {
             } else {
                 if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
                     if constexpr (!Policy::serialize_default_value && detail::hasDefaultValue<Derived>(name)) {
+                        static_assert(std::is_convertible_v<
+                                std::decay_t<decltype(Derived::defaults()[name])>,
+                                std::decay_t<decltype(value)>>,
+                             "Default value should be convertible to field type");
                         if (Derived::defaults()[name] == value) { return; }
                     }
                 }
@@ -292,7 +296,6 @@ struct VarDef {
 
     static Derived fromVariant(Variant const& x) {
         using namespace std::literals;
-        using namespace boost::hana::literals;
 
         Derived ret;
         auto const& map = x.map();
@@ -306,13 +309,10 @@ struct VarDef {
             if (map.end() == it) {
                 if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
                     if constexpr (detail::hasDefaultValue<Derived>(name)) {
-                        BOOST_HANA_CONSTEXPR_ASSERT_MSG(
-                            (std::is_convertible_v<
+                        static_assert(std::is_convertible_v<
                                 std::decay_t<decltype(Derived::defaults()[name])>,
-                                std::decay_t<decltype(value(std::declval<Derived>()))>>),
-                            ("The provided default type in defaults() for "_s + name + " does not match with the actual type"_s).c_str()
-                        );
-
+                                std::decay_t<decltype(value(std::declval<Derived>()))>>,
+                            "Default value should be convertible to field type");
                         tmp = Derived::defaults()[name];
                         return;
                     }
@@ -380,12 +380,9 @@ struct VarDefExplicit : private VarDef<Derived> {
         boost::hana::for_each(
             boost::hana::accessors<Derived>(),
             boost::hana::fuse([](auto name, auto) {
-                if constexpr (!detail::presentInDefaults<Derived>(name)) {
-                    BOOST_HANA_CONSTEXPR_ASSERT_MSG(
-                        DependentFalse<Derived>::value,
-                        name +
-                        " not present in defaults()"_s);
-                }
+                BOOST_HANA_CONSTEXPR_ASSERT_MSG(
+                    detail::presentInDefaults<Derived>(name),
+                    (name + " not present in defaults()"_s).c_str());
             }));
 
         return true;
