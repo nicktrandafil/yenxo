@@ -120,6 +120,13 @@ struct ToVariantImpl<T, When<condition>> {
 };
 
 
+/// Identity
+template <typename T>
+struct ToVariantImpl<T, When<std::is_same_v<serialize::Variant, T>>> {
+    static Variant apply(T const& x) { return x; }
+};
+
+
 /// Specialization for types with `static Variant T::toVariant(T)`
 template <typename T>
 struct ToVariantImpl<T, When<hasToVariant(type_c<T>)>> {

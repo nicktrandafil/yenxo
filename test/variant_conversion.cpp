@@ -84,4 +84,6 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
 
     REQUIRE(fromVariant<Test>(Variant()) == Test());
     REQUIRE(toVariant(Test()) == Variant());
+
+    REQUIRE(Variant(1) == toVariant(Variant(1)));
 }
