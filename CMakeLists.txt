@@ -88,6 +88,7 @@ add_library(
     include/${PROJECT_NAME}/define_enum.hpp
 
     include/${PROJECT_NAME}/define_struct.hpp
+    include/${PROJECT_NAME}/value_tag.hpp
 
     src/variant.cpp
 )

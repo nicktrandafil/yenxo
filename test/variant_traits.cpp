@@ -22,137 +22,115 @@
   SOFTWARE.
 */
 
-
-// tested
-#include <serialize/variant_traits.hpp>
-
-// local
-#include <serialize/ostream_traits.hpp>
-#include <serialize/comparison_traits.hpp>
-#include <serialize/string_conversion.hpp>
-#include <serialize/variant.hpp>
-
-// 3rd
 #include <catch2/catch.hpp>
 
-// boost
-#include <boost/hana.hpp>
+#include <serialize/comparison_traits.hpp>
+#include <serialize/ostream_traits.hpp>
+#include <serialize/string_conversion.hpp>
+#include <serialize/value_tag.hpp>
+#include <serialize/variant.hpp>
+#include <serialize/variant_traits.hpp>
 
+#include <boost/hana.hpp>
 
 namespace hana = boost::hana;
 
-
 using namespace serialize;
-
 
 using namespace hana::literals;
 using namespace std::literals;
 
-
 namespace {
-
 
 struct X {
     static Variant toVariant(X const&);
     static X fromVariant(Variant const&);
 };
 
-
 static_assert(hasFromVariant(serialize::type_c<X>));
 static_assert(hasToVariant(serialize::type_c<X>));
 
-
 struct Hobby
-        : trait::Var<Hobby>
-        , trait::UpdateFromVar<Hobby>
-        , trait::OStream<Hobby>
-        , trait::EqualityComparison<Hobby> {
+    : trait::Var<Hobby>,
+      trait::UpdateFromVar<Hobby>,
+      trait::OStream<Hobby>,
+      trait::EqualityComparison<Hobby> {
 
-    Hobby() : id(0) {}
+    Hobby()
+        : id(0) {}
 
     Hobby(int id, std::string const& description)
-        : id(id), description(description)
-    {}
+        : id(id), description(description) {}
 
     int id;
     std::string description;
 };
 
-
 struct OptPerson
-        : trait::OStream<OptPerson>
-        , trait::EqualityComparison<OptPerson> {
+    : trait::OStream<OptPerson>,
+      trait::EqualityComparison<OptPerson> {
 
     OptPerson() = default;
 
     OptPerson(std::string const& name, int age, Hobby const& hobby)
-        : name(name), age(age), hobby(hobby)
-    {}
+        : name(name), age(age), hobby(hobby) {}
 
     std::optional<std::string> name;
     std::optional<int> age;
     std::optional<Hobby> hobby;
 };
 
-
 struct Person
-        : trait::Var<Person>
-        , trait::UpdateFromVar<Person>
-        , trait::UpdateFromOpt<Person, OptPerson>
-        , trait::OStream<Person>
-        , trait::EqualityComparison<Person> {
+    : trait::Var<Person>,
+      trait::UpdateFromVar<Person>,
+      trait::UpdateFromOpt<Person, OptPerson>,
+      trait::OStream<Person>,
+      trait::EqualityComparison<Person> {
 
-    Person() : age(0) {}
+    Person()
+        : age(0) {}
 
     Person(std::string const& name, int age, Hobby const& hobby)
-        : name(name), age(age), hobby(hobby)
-    {}
+        : name(name), age(age), hobby(hobby) {}
 
     std::string name;
     int age;
     Hobby hobby;
 };
 
-
 struct PersonEx
-        : trait::Var<PersonEx>
-        , trait::OStream<PersonEx>
-        , trait::EqualityComparison<PersonEx> {
+    : trait::Var<PersonEx>,
+      trait::OStream<PersonEx>,
+      trait::EqualityComparison<PersonEx> {
 
     PersonEx() {}
     PersonEx(std::string const& name, std::vector<Hobby> const& hobbies)
-        : name(name), hobbies(hobbies)
-    {}
+        : name(name), hobbies(hobbies) {}
 
     std::string name;
     std::vector<Hobby> hobbies;
 };
 
-
 struct Dict
-        : trait::Var<Dict>
-        , trait::EqualityComparison<Dict>
-        , trait::OStream<Dict> {
+    : trait::Var<Dict>,
+      trait::EqualityComparison<Dict>,
+      trait::OStream<Dict> {
     Dict() = default;
 
     Dict(int x, std::unordered_map<std::string, int> const& map)
-        : x(x), map(map)
-    {}
+        : x(x), map(map) {}
 
     int x;
     std::unordered_map<std::string, int> map;
 };
 
-
 } // namespace
-
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 BOOST_HANA_ADAPT_STRUCT(OptPerson, name, age, hobby);
 BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
 BOOST_HANA_ADAPT_STRUCT(PersonEx, name, hobbies);
 BOOST_HANA_ADAPT_STRUCT(Dict, x, map);
-
 
 TEST_CASE("detail::toVariant", "[variant_trait_helpers]") {
     auto const x = toVariant(5);
@@ -193,38 +171,32 @@ TEST_CASE("detail::toVariant", "[variant_trait_helpers]") {
     }
 }
 
-
 namespace {
-
 
 struct St : trait::Var<St>, trait::EqualityComparison<St> {
     St() = default;
-    St(int x) : x(x) {}
+    St(int x)
+        : x(x) {}
 
     BOOST_HANA_DEFINE_STRUCT(St,
-        (std::optional<int>, x)
-    );
+                             (std::optional<int>, x));
 };
-
 
 struct St2 : trait::Var<St2>, trait::EqualityComparison<St2> {
     St2() = default;
-    St2(int x) : x(x) {}
+    St2(int x)
+        : x(x) {}
 
     constexpr static auto names() {
         return hana::make_map(
-            hana::make_pair("x"_s, "y")
-        );
+            hana::make_pair("x"_s, "y"));
     }
 
     BOOST_HANA_DEFINE_STRUCT(St2,
-        (int, x)
-    );
+                             (int, x));
 };
 
-
-}
-
+} // namespace
 
 TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
     SECTION("optional") {
@@ -234,25 +206,21 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
 
     Variant::Map const hobby_var{
         {"id", Variant(1)},
-        {"description", Variant("Hack")}
-    };
+        {"description", Variant("Hack")}};
 
     Variant::Map person_var{
         {"name", Variant("Alecu")},
         {"age", Variant(25)},
-        {"hobby", Variant(hobby_var)}
-    };
+        {"hobby", Variant(hobby_var)}};
 
     Hobby const hobby{
         1,
-        std::string("Hack")
-    };
+        std::string("Hack")};
 
     Person person{
         "Alecu",
         25,
-        hobby
-    };
+        hobby};
 
     SECTION("Check fromVariant") {
         REQUIRE(person == Person::fromVariant(Variant(person_var)));
@@ -264,16 +232,14 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
 
     SECTION("Check updateVar") {
         Variant::Map person_var{
-            {"age", Variant(26)}
-        };
+            {"age", Variant(26)}};
 
         person.updateVar(Variant(person_var));
 
         Person const person_updated{
             "Alecu",
             26,
-            hobby
-        };
+            hobby};
 
         REQUIRE(person_updated == person);
 
@@ -290,8 +256,7 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
         Person const person_updated{
             "Alecu",
             27,
-            hobby
-        };
+            hobby};
 
         REQUIRE(person_updated == person);
     }
@@ -299,30 +264,25 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
     SECTION("Check no field") {
         person_var.erase("name");
         REQUIRE_THROWS_AS(
-                    Person::fromVariant(Variant(person_var)),
-                    std::logic_error);
+            Person::fromVariant(Variant(person_var)),
+            std::logic_error);
     }
 
     Hobby hobby2{
         2,
-        "Barista"
-    };
+        "Barista"};
 
     Variant const hobby2_var{Variant::Map{
         {"id", Variant(2)},
-        {"description", Variant("Barista")}
-    }};
-
+        {"description", Variant("Barista")}}};
 
     PersonEx const person_ex{
         "P",
-        std::vector<Hobby>{hobby, hobby2}
-    };
+        std::vector<Hobby>{hobby, hobby2}};
 
     Variant person_ex_var{Variant::Map{
         std::make_pair("name", Variant("P")),
-        std::make_pair("hobbies", Variant(Variant::Vec{Variant(hobby_var), hobby2_var}))
-    }};
+        std::make_pair("hobbies", Variant(Variant::Vec{Variant(hobby_var), hobby2_var}))}};
 
     SECTION("Check struct with vector") {
         REQUIRE(person_ex == PersonEx::fromVariant(person_ex_var));
@@ -332,13 +292,11 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
     SECTION("Check dict") {
         Dict const expected{
             5,
-            {{"1", 1}, {"2", 2}}
-        };
+            {{"1", 1}, {"2", 2}}};
 
         Variant const tmp{Variant::Map{
             {"x", Variant(5)},
-            {"map", Variant({{"1", Variant(1)}, {"2", Variant(2)}})}
-        }};
+            {"map", Variant({{"1", Variant(1)}, {"2", Variant(2)}})}}};
 
         REQUIRE(expected == Dict::fromVariant(tmp));
         REQUIRE(tmp == Dict::toVariant(expected));
@@ -354,28 +312,23 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
     }
 }
 
-
 namespace {
 
-
 struct PersonD
-        : trait::VarDef<PersonD>
-        , trait::OStream<PersonD>
-        , trait::EqualityComparison<PersonD> {
+    : trait::VarDef<PersonD>,
+      trait::OStream<PersonD>,
+      trait::EqualityComparison<PersonD> {
     PersonD() {}
 
     PersonD(std::string const& name, int age, Hobby const& hobby)
-        : name(name), age(age), hobby(hobby)
-    {}
+        : name(name), age(age), hobby(hobby) {}
 
     PersonD(std::string const& name, Hobby const& hobby)
-        : name(name), hobby(hobby)
-    {}
+        : name(name), hobby(hobby) {}
 
     static auto defaults() {
         return hana::make_map(
-                    hana::make_pair("name"_s, "Efendi"s)
-        );
+            hana::make_pair("name"_s, "Efendi"s));
     }
 
     std::string name;
@@ -383,17 +336,14 @@ struct PersonD
     Hobby hobby;
 };
 
-
 struct Pol : trait::VarDefPolicy {
     static auto constexpr serialize_default_value = false;
     static auto constexpr empty_container_not_required = true;
 };
 
-
 struct Pol2 : trait::VarDefPolicy {
     static auto constexpr empty_container_not_required = true;
 };
-
 
 struct Pol3 : trait::VarDefPolicy {
     template <class T>
@@ -401,9 +351,8 @@ struct Pol3 : trait::VarDefPolicy {
     static auto constexpr to_variant = [](auto&& x) { return Variant(serialize::toString(std::forward<decltype(x)>(x))); };
 };
 
-
 struct PersonE
-        : trait::VarDef<PersonE, Pol> {
+    : trait::VarDef<PersonE, Pol> {
 
     static constexpr auto defaults() {
         return hana::make_map(hana::make_pair("i"_s, 2));
@@ -414,87 +363,77 @@ struct PersonE
     int i{0};
 };
 
-
 struct PersonE2
-        : trait::VarDef<PersonE2, Pol2> {
+    : trait::VarDef<PersonE2, Pol2> {
 
     static constexpr auto defaults() {
         return hana::make_map(hana::make_pair("i"_s, 2));
     }
 
-    PersonE2() : i(0) {}
+    PersonE2()
+        : i(0) {}
 
     BOOST_HANA_DEFINE_STRUCT(PersonE2,
-        (std::vector<int>, cont),
-        (int, i)
-    );
+                             (std::vector<int>, cont),
+                             (int, i));
 };
-
 
 struct St3 : trait::VarDef<St3>, trait::EqualityComparison<St3> {
     St3() = default;
-    St3(int x) : x(x) {}
+    St3(int x)
+        : x(x) {}
 
     constexpr static auto names() {
         return hana::make_map(
-            hana::make_pair("x"_s, "y")
-        );
+            hana::make_pair("x"_s, "y"));
     }
 
     BOOST_HANA_DEFINE_STRUCT(St3,
-        (int, x)
-    );
+                             (int, x));
 };
-
 
 struct S1 {
     S1() = default;
-    explicit S1(std::string const& str) : v(str) {}
+    explicit S1(std::string const& str)
+        : v(str) {}
     explicit operator std::string const&() const noexcept { return v; }
     bool operator==(S1 const& rhs) const noexcept { return v == rhs.v; }
     std::string v;
 };
 
 struct StrStruct
-        : trait::VarDef<StrStruct, Pol3>
-        , trait::EqualityComparison<StrStruct> {
+    : trait::VarDef<StrStruct, Pol3>,
+      trait::EqualityComparison<StrStruct> {
     StrStruct() = default;
-    explicit StrStruct(std::string const& str) : str(str) {}
+    explicit StrStruct(std::string const& str)
+        : str(str) {}
     BOOST_HANA_DEFINE_STRUCT(StrStruct,
-        (S1, str)
-    );
+                             (S1, str));
 };
 
-
 } // namespace
-
 
 BOOST_HANA_ADAPT_STRUCT(PersonD, name, age, hobby);
 BOOST_HANA_ADAPT_STRUCT(PersonE, cont, i);
 
-
 TEST_CASE("Check trait::VarDef", "[variant_traits]") {
     Variant::Map const hobby_var{
         {"id", Variant(1)},
-        {"description", Variant("Hack")}
-    };
+        {"description", Variant("Hack")}};
 
     Variant::Map person_var{
         {"name", Variant("Alecu")},
         {"age", Variant(16)},
-        {"hobby", Variant(hobby_var)}
-    };
+        {"hobby", Variant(hobby_var)}};
 
     Hobby const hobby{
         1,
-        std::string("Hack")
-    };
+        std::string("Hack")};
 
     PersonD person{
         "Alecu",
         16,
-        hobby
-    };
+        hobby};
 
     SECTION("Check toVariant with default value (should serialize)") {
         person.name = "Efendi";
@@ -547,8 +486,7 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
         p2.cont.push_back(1);
         VariantMap exp{
             {"i", Variant(0)},
-            {"cont", Variant(VariantVec{Variant(1)})}
-        };
+            {"cont", Variant(VariantVec{Variant(1)})}};
         REQUIRE(Variant(p2) == Variant(exp));
 
         PersonE2 p3;
@@ -566,26 +504,22 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
     }
 }
 
-
 namespace {
 
-
 struct PersonC
-        : trait::VarDefExplicit<PersonC>
-        , trait::OStream<PersonC>
-        , trait::EqualityComparison<PersonC> {
+    : trait::VarDefExplicit<PersonC>,
+      trait::OStream<PersonC>,
+      trait::EqualityComparison<PersonC> {
     PersonC() {}
 
     PersonC(std::string const& name, int age, Hobby const& hobby)
-        : name(name), age(age), hobby(hobby)
-    {}
+        : name(name), age(age), hobby(hobby) {}
 
     static auto defaults() {
         return hana::make_map(
-                    hana::make_pair("name"_s, "Efendi"),
-                    hana::make_pair("age"_s, 18),
-                    hana::make_pair("hobby"_s, trait::NoDefault())
-        );
+            hana::make_pair("name"_s, "Efendi"),
+            hana::make_pair("age"_s, 18),
+            hana::make_pair("hobby"_s, trait::NoDefault()));
     }
 
     std::optional<std::string> name;
@@ -593,56 +527,75 @@ struct PersonC
     Hobby hobby;
 };
 
-
 struct St4 : trait::VarDefExplicit<St4>, trait::EqualityComparison<St4> {
     St4() = default;
-    St4(int x) : x(x) {}
+    St4(int x)
+        : x(x) {}
 
     static auto defaults() {
         return hana::make_map(
-            hana::make_pair("x"_s, trait::NoDefault())
-        );
+            hana::make_pair("x"_s, trait::NoDefault()));
     }
 
     constexpr static auto names() {
         return hana::make_map(
-            hana::make_pair("x"_s, "y")
-        );
+            hana::make_pair("x"_s, "y"));
     }
 
     BOOST_HANA_DEFINE_STRUCT(St4,
-        (int, x)
-    );
+                             (int, x));
 };
 
+struct St5
+    : trait::VarDefExplicit<St5>,
+      trait::EqualityComparison<St5>,
+      trait::OStream<St5> {
+    St5() = default;
+    St5(int a, std::string b)
+        : a(a), b(b) {}
 
+    static auto metadata() {
+        return hana::make_tuple(
+            hana::make_tuple("a"_s, Default(2), Name("aa")),
+            hana::make_tuple("b"_s, Default("0"), Name("bb")));
+    }
+
+    static auto const& defaults() {
+        static auto const ret = filterDefaults(metadata());
+        return ret;
+    }
+
+    static auto const& names() {
+        static auto const ret = filterNames(metadata());
+        return ret;
+    }
+
+    BOOST_HANA_DEFINE_STRUCT(
+        St5,
+        (int, a),
+        (std::string, b));
+};
 
 } // namespace
 
-
 BOOST_HANA_ADAPT_STRUCT(PersonC, name, age, hobby);
-
 
 TEST_CASE("Check trait::VarDefExplicit", "[variant_traits]") {
     Variant::Map const hobby_var{
         {"id", Variant(1)},
-        {"description", Variant("Hack")}
-    };
+        {"description", Variant("Hack")}};
 
     Variant::Map person_var{
-        {"hobby", Variant(hobby_var)}
-    };
+        {"hobby", Variant(hobby_var)}};
 
     Hobby const hobby{
         1,
-        std::string("Hack")
-    };
+        std::string("Hack")};
 
     PersonC person{
         "Efendi",
         18,
-        hobby
-    };
+        hobby};
 
     REQUIRE(PersonC::fromVariant(Variant(person_var)) == person);
 
@@ -654,32 +607,37 @@ TEST_CASE("Check trait::VarDefExplicit", "[variant_traits]") {
         REQUIRE_THROWS_AS(fromVariant<St4>(wrong), std::logic_error);
         REQUIRE_THROWS_WITH(fromVariant<St4>(wrong), "'y' is required");
     }
-}
 
+    SECTION("metadata") {
+        Variant const expected(VariantMap{});
+        Variant const expected2(VariantMap{
+            {"aa", Variant(0)},
+            {"bb", Variant("2")},
+        });
+        REQUIRE(fromVariant<St5>(expected) == St5(2, "0"));
+        REQUIRE(fromVariant<St5>(expected2) == St5(0, "2"));
+    }
+}
 
 namespace {
 
-
 struct Car : trait::Var<Car> {
-    Car(std::string const& name, int wheels) : name(name), wheels(wheels) {}
+    Car(std::string const& name, int wheels)
+        : name(name), wheels(wheels) {}
     Car() = default;
 
     std::string name;
     int wheels{0};
 };
 
-
 } // namespace
 
-
 BOOST_HANA_ADAPT_STRUCT(Car, name, wheels);
-
 
 TEST_CASE("Check trait::Var fails", "[variant_traits]") {
     Variant car_var{Variant::Map{
         {"name", Variant("saab")},
-        {"wheels", Variant("4")}
-    }};
+        {"wheels", Variant("4")}}};
 
     REQUIRE_THROWS_AS(Car::fromVariant(car_var), VariantBadType);
     REQUIRE_THROWS_WITH(Car::fromVariant(car_var), ".wheels: expected 'int', actual 'string'");
