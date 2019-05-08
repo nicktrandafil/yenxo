@@ -80,7 +80,7 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
     REQUIRE(fromVariant<V>(Variant(1)) == V(1));
     REQUIRE(fromVariant<V>(Variant("a")) == V("a"));
     REQUIRE_THROWS_AS(fromVariant<V>(Variant(1.2)) == V("a"), VariantBadType);
-    REQUIRE_THROWS_WITH(fromVariant<V>(Variant(1.5)) == V("a"), "'1.500000' is not a 'variant<int, string>' value");
+    REQUIRE_THROWS_WITH(fromVariant<V>(Variant(1.5)) == V("a"), "'1.500000' is not of type 'variant<int, string>'");
 
     REQUIRE(fromVariant<Test>(Variant()) == Test());
     REQUIRE(toVariant(Test()) == Variant());

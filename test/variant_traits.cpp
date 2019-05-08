@@ -181,7 +181,7 @@ TEST_CASE("detail::toVariant", "[variant_trait_helpers]") {
         REQUIRE(boost::hana::equal(fromVariant<decltype(hm)>(Variant(m)), hm));
         auto hm2 = hana::make_map(hana::make_pair("b"_s, 2));
         REQUIRE_THROWS_WITH(fromVariant<decltype(hm2)>(Variant(m)),
-                            "b not found in map");
+                            "b is required");
     }
 
     SECTION("integral constant") {
@@ -278,7 +278,7 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
         REQUIRE(person_updated == person);
 
         person_var["no"] = Variant(1);
-        REQUIRE_THROWS_WITH(person.updateVar(Variant(person_var)), "'no' no such member");
+        REQUIRE_THROWS_WITH(person.updateVar(Variant(person_var)), "'no' is unknown");
     }
 
     SECTION("Check updateOpt") {
@@ -350,7 +350,7 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
         REQUIRE(fromVariant<St2>(expected) == St2(2));
         REQUIRE(toVariant(St2(2)) == expected);
         REQUIRE_THROWS_AS(fromVariant<St2>(wrong), std::logic_error);
-        REQUIRE_THROWS_WITH(fromVariant<St2>(wrong), "y not found in map");
+        REQUIRE_THROWS_WITH(fromVariant<St2>(wrong), "'y' is required");
     }
 }
 
@@ -562,7 +562,7 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
         REQUIRE(fromVariant<St3>(expected) == St3(2));
         REQUIRE(toVariant(St3(2)) == expected);
         REQUIRE_THROWS_AS(fromVariant<St3>(wrong), std::logic_error);
-        REQUIRE_THROWS_WITH(fromVariant<St3>(wrong), "y not found in map, and default value is not provided");
+        REQUIRE_THROWS_WITH(fromVariant<St3>(wrong), "'y' is required");
     }
 }
 
@@ -652,7 +652,7 @@ TEST_CASE("Check trait::VarDefExplicit", "[variant_traits]") {
         REQUIRE(fromVariant<St4>(expected) == St4(2));
         REQUIRE(toVariant(St4(2)) == expected);
         REQUIRE_THROWS_AS(fromVariant<St4>(wrong), std::logic_error);
-        REQUIRE_THROWS_WITH(fromVariant<St4>(wrong), "y not found in map, and default value is not provided");
+        REQUIRE_THROWS_WITH(fromVariant<St4>(wrong), "'y' is required");
     }
 }
 
@@ -682,6 +682,6 @@ TEST_CASE("Check trait::Var fails", "[variant_traits]") {
     }};
 
     REQUIRE_THROWS_AS(Car::fromVariant(car_var), VariantBadType);
-    REQUIRE_THROWS_WITH(Car::fromVariant(car_var), ".wheels: Attempt to get wrong type");
+    REQUIRE_THROWS_WITH(Car::fromVariant(car_var), ".wheels: expected 'int', actual 'string'");
     REQUIRE(hana::equal(int(1), int(1)));
 }
