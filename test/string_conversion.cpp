@@ -22,19 +22,13 @@
   SOFTWARE.
 */
 
-
-// tested
 #include <serialize/string_conversion.hpp>
 
-// 3rd
 #include <catch2/catch.hpp>
-
 
 using namespace serialize;
 
-
 namespace {
-
 
 struct Hobby {
     explicit Hobby(std::string const& str) : str(str) {}
@@ -43,12 +37,10 @@ struct Hobby {
     std::string str;
 };
 
-
 enum class E {
     e1,
     e2
 };
-
 
 struct ETraits {
     using Enum [[maybe_unused]] = E;
@@ -63,12 +55,9 @@ struct ETraits {
     }
 };
 
-
 [[maybe_unused]] ETraits traits(E) { return {}; }
 
-
-}
-
+} // namespace
 
 TEST_CASE("Check toString/fromString", "[string_conversion]") {
     Hobby const hobby("abc");
@@ -87,7 +76,6 @@ TEST_CASE("Check toString/fromString", "[string_conversion]") {
     REQUIRE(toString(int(1)) == "1");
 }
 
-
 TEST_CASE("Check iparseWithSuffix", "[string_conversion]") {
     struct X {};
     REQUIRE(iparseWithSuffix<X>("1.5 suf", "suf") == 1.5);
@@ -96,5 +84,5 @@ TEST_CASE("Check iparseWithSuffix", "[string_conversion]") {
     REQUIRE_THROWS_AS(iparseWithSuffix<X>("suf", "suf"), StringConversionError);
     REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5", "suf"), StringConversionError);
     REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5 l suf", "suf"), StringConversionError);
-    REQUIRE_THROWS_WITH(iparseWithSuffix<X>("1.5 su", "suf"), "'1.5 su' is not a 'X' value");
+    REQUIRE_THROWS_WITH(iparseWithSuffix<X>("1.5 su", "suf"), "'1.5 su' is not of type 'X'");
 }

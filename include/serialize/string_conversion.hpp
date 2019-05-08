@@ -22,29 +22,22 @@
   SOFTWARE.
 */
 
-
 #pragma once
 
-
-// local
+#include <serialize/algorithm/string.hpp>
 #include <serialize/enum_traits.hpp>
 #include <serialize/meta.hpp>
 #include <serialize/type_name.hpp>
-#include <serialize/algorithm/string.hpp>
 
-// 3rd
 #include <boost/hana/for_each.hpp>
 
-// std
 #include <algorithm>
 #include <cstring>
-#include <string>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 
-
 namespace serialize {
-
 
 /// \defgroup String conversion
 /// \{
@@ -53,18 +46,15 @@ struct StringConversionError : public std::logic_error {
     template <typename T>
     explicit StringConversionError(std::string value, Type<T> const&)
         : std::logic_error(
-            "'" + value + "'" +
-            " is not a " +
-            "'" + std::string(unqualifiedTypeName<std::decay_t<T>>()) + "'" +
-            " value")
-    {}
+              "'" + value + "'" +
+              " is not of type '" +
+              std::string(unqualifiedTypeName<std::decay_t<T>>()) +
+              "'") {}
 };
-
 
 /// To string conversion implementation
 template <typename T, typename = void>
 struct ToStringImpl : ToStringImpl<T, When<true>> {};
-
 
 /// Fall back
 template <typename T, bool condition>
@@ -75,38 +65,34 @@ struct ToStringImpl<T, When<condition>> {
     }
 };
 
-
 /// Conversion with `std::to_string`
 template <typename T>
 struct ToStringImpl<T,
-        When<detail::Valid<decltype(
-            std::to_string(std::declval<T>()))>::value>> {
+                    When<detail::Valid<decltype(
+                        std::to_string(std::declval<T>()))>::value>> {
     static std::string apply(T const& x) {
         return std::to_string(x);
     }
 };
 
-
 /// Types explicitly covertible to string
 template <typename T>
 struct ToStringImpl<T,
-        When<detail::Valid<decltype(
-            std::string(std::declval<T>()))>::value>> {
+                    When<detail::Valid<decltype(
+                        std::string(std::declval<T>()))>::value>> {
     static std::string apply(T const& x) {
         return std::string(x);
     }
 };
 
-
 /// Types with specialized EnumTraits
 template <typename T>
 struct ToStringImpl<T, When<detail::Valid<decltype(
-        EnumTraits<T>::toString(std::declval<T>()))>::value>> {
+                           EnumTraits<T>::toString(std::declval<T>()))>::value>> {
     static char const* apply(T x) {
         return EnumTraits<T>::toString(x);
     }
 };
-
 
 struct ToStringT {
     template <typename T>
@@ -115,15 +101,12 @@ struct ToStringT {
     }
 };
 
-
 /// To string conversion
 constexpr ToStringT const toString;
-
 
 /// From string conversion implementation
 template <typename T, typename = void>
 struct FromStringImpl : FromStringImpl<T, When<true>> {};
-
 
 /// Fall back
 template <typename T, bool condition>
@@ -134,45 +117,42 @@ struct FromStringImpl<T, When<condition>> {
     }
 };
 
-
 /// Types explicitly convertible from string
 template <typename T>
 struct FromStringImpl<T,
-        When<detail::Valid<decltype(
-            T(std::declval<std::string>()))>::value>> {
+                      When<detail::Valid<decltype(
+                          T(std::declval<std::string>()))>::value>> {
     static T apply(std::string const& x) {
         return T(x);
     }
 };
 
-
 /// Types with specialized EnumTraits
 template <class T>
 struct FromStringImpl<T, When<
-        detail::Valid<decltype(
-            EnumTraits<T>::toString(std::declval<T>()))>::value &&
-        !hasStrings(boost::hana::type_c<EnumTraits<T>>)>> {
+                             detail::Valid<decltype(
+                                 EnumTraits<T>::toString(std::declval<T>()))>::value &&
+                             !hasStrings(boost::hana::type_c<EnumTraits<T>>)>> {
     static T apply(std::string const& x) {
-        for (auto e: EnumTraits<T>::values) {
+        for (auto e : EnumTraits<T>::values) {
             if (x == EnumTraits<T>::toString(e)) { return e; }
         }
         throw StringConversionError(x, type_c<T>);
     }
 };
 
-
 /// Types with specialized EnumTraits
 template <class T>
 struct FromStringImpl<T, When<
-        detail::Valid<decltype(EnumTraits<T>::strings())>::value>> {
+                             detail::Valid<decltype(EnumTraits<T>::strings())>::value>> {
     template <size_t I>
     static typename EnumTraits<T>::Enum applyImpl(
-            boost::hana::size_t<I>, std::string const& x) {
+        boost::hana::size_t<I>, std::string const& x) {
         bool found{false};
         boost::hana::for_each(boost::hana::at_c<I>(EnumTraits<T>::strings()),
                               [&](auto s) {
-            found |= strcmp(s, x.c_str()) == 0;
-        });
+                                  found |= strcmp(s, x.c_str()) == 0;
+                              });
         if (found) {
             return EnumTraits<T>::values[I];
         } else {
@@ -183,7 +163,7 @@ struct FromStringImpl<T, When<
     }
 
     static typename EnumTraits<T>::Enum applyImpl(
-            boost::hana::size_t<EnumTraits<T>::count>, std::string const& x) {
+        boost::hana::size_t<EnumTraits<T>::count>, std::string const& x) {
         throw StringConversionError(x, type_c<T>);
     }
 
@@ -192,7 +172,6 @@ struct FromStringImpl<T, When<
     }
 };
 
-
 template <typename T>
 struct FromStringT {
     auto operator()(std::string const& x) const {
@@ -200,11 +179,9 @@ struct FromStringT {
     }
 };
 
-
 /// From string conversion
 template <typename T>
 constexpr FromStringT<T> const fromString;
-
 
 /// \throws `StringConversionError`
 template <typename T>
@@ -213,7 +190,7 @@ double iparseWithSuffix(std::string const& str, std::string const& suffix) {
         throw StringConversionError(str, type_c<T>);
     }
 
-    char *end;
+    char* end;
     auto const ret = std::strtod(str.c_str(), &end);
 
     if (end == str.c_str()) {
@@ -228,5 +205,4 @@ double iparseWithSuffix(std::string const& str, std::string const& suffix) {
     return ret;
 }
 
-
-}
+} // namespace serialize

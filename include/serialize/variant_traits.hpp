@@ -213,7 +213,7 @@ struct Var {
             auto& tmp = value(ret);
             auto const it = map.find(renamed);
             if (map.end() == it) {
-                throw std::logic_error(renamed + " not found in map"s);
+                throw std::logic_error("'"s + renamed + "' is required"s);
             } else {
                 if constexpr (isOptional(type_c<decltype(tmp)>)) {
                     tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second);
@@ -323,7 +323,7 @@ struct VarDef {
                         ((isContainer(type_c<decltype(tmp)>) &&
                             !Policy::empty_container_not_required) ||
                                 !isContainer(type_c<decltype(tmp)>))) {
-                    throw std::logic_error(renamed + " not found in map, and default value is not provided"s);
+                    throw std::logic_error("'"s + renamed + "' is required"s);
                 }
 
             } else {
@@ -412,7 +412,7 @@ struct UpdateFromVar {
             }));
 
             if (!found) {
-                throw std::logic_error("'" + v.first + "'" + " no such member");
+                throw std::logic_error("'" + v.first + "'" + " is unknown");
             }
         }
     }

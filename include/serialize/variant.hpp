@@ -22,101 +22,92 @@
   SOFTWARE.
 */
 
-
 #pragma once
 
-
-// local
 #include <serialize/meta.hpp>
 #include <serialize/pimpl.hpp>
 #include <serialize/type_name.hpp>
 
-// 3rd
 #include <rapidjson/document.h>
 
-// std
 #include <string>
 #include <type_traits>
-#include <vector>
 #include <unordered_map>
-
+#include <vector>
 
 namespace serialize {
 
-
-///
 /// An error identifying `Variant` error
-///
 class VariantErr : public std::exception {
-public:
+  public:
     explicit VariantErr(std::string const& msg)
-        : what_(msg)
-    {}
+        : what_(msg) {}
 
     char const* what() const noexcept override {
         return what_.c_str();
     }
 
     void prependPath(std::string const& val) {
-        if (path_.empty()) { what_ = ": " + what_; }
+        if (path_.empty()) {
+            what_ = ": " + what_;
+        }
         what_ = "." + val + what_;
         path_ += "." + val + path_;
     }
 
     std::string const& path() const noexcept { return path_; }
 
-private:
+  private:
     std::string what_;
     std::string path_;
 };
 
-
-///
 /// Empty Variant error
-///
 class VariantEmpty final : public VariantErr {
-public:
-    VariantEmpty() : VariantErr("Attempt to get empty `Variant`")
-    {}
+  public:
+    template <class T>
+    explicit VariantEmpty(Type<T>)
+        : VariantErr("expected '" +
+                     std::string(unqualifiedTypeName<std::decay_t<T>>()) +
+                     "', actual: 'Empty'") {}
 };
 
-
-///
 /// Bad type error
-///
 class VariantBadType final : public VariantErr {
-public:
-    VariantBadType() : VariantErr("Attempt to get wrong type") {}
+  public:
+    template <class E, class A>
+    VariantBadType(Type<E>, Type<A>)
+        : VariantErr(
+              "expected '" +
+              std::string(unqualifiedTypeName<std::decay_t<E>>()) +
+              "', actual '" +
+              std::string(unqualifiedTypeName<std::decay_t<A>>()) +
+              "'") {}
+
     VariantBadType(std::string const& msg) : VariantErr(msg) {}
+
     template <class T>
-    VariantBadType(std::string const &value, Type<T>)
+    VariantBadType(std::string const& value, Type<T>)
         : VariantErr(
               "'" + value + "'" +
-              " is not a " +
-              "'" + std::string(unqualifiedTypeName<std::decay_t<T>>()) + "'" +
-              " value")
-    {}
+              " is not of type '" +
+              std::string(unqualifiedTypeName<std::decay_t<T>>()) +
+              "'") {}
 };
 
-
-///
 /// User tried to get a type which is not able to hold the actual value
-///
 class VariantIntegralOverflow final : public VariantErr {
-public:
+  public:
     VariantIntegralOverflow(
-            std::string const& type_name,
-            std::string const& value)
+        std::string const& type_name,
+        std::string const& value)
         : VariantErr("The type '" +
-                     type_name + "' can not hold the value '" + value + "'")
-    {}
+                     type_name + "' can not hold the value '" + value + "'") {}
 };
 
-///
 /// Serialized object reprezentation class
-///
 class Variant {
-public:
+  public:
     using Map = std::unordered_map<std::string, Variant>;
     using Vec = std::vector<Variant>;
 
@@ -135,7 +126,7 @@ public:
     explicit Variant(unsigned long);
     explicit Variant(double);
 
-    explicit Variant(char const*const&);
+    explicit Variant(char const* const&);
     explicit Variant(std::string const&);
     explicit Variant(std::string&&);
 
@@ -148,8 +139,7 @@ public:
     template <typename T,
               typename = decltype(T::toVariant(std::declval<T>()))>
     explicit Variant(T const& x)
-        : Variant(T::toVariant(x))
-    {}
+        : Variant(T::toVariant(x)) {}
 
     template <typename T,
               typename = decltype(T::fromVariant(std::declval<Variant>()))>
@@ -165,183 +155,128 @@ public:
     Variant(Variant&& rhs) noexcept;
     Variant& operator=(Variant&& rhs) noexcept;
 
-    ///
     /// Get as `T` or `x` if the object is empty
-    ///
     template <typename T>
     T asOr(T x) const;
 
-    ///
     /// Get bool
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
     bool boolean() const;
     explicit operator bool() const { return boolean(); }
 
-    ///
     /// Get bool or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     bool booleanOr(bool x) const;
 
-    ///
     /// Get char
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
-    ///
     char character() const;
     explicit operator char() const { return character(); }
 
-    ///
     /// Get char or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     char characterOr(char x) const;
 
-    ///
     /// Get unsigned char
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
-    ///
     unsigned char uchar() const;
     explicit operator unsigned char() const { return uchar(); }
 
-    ///
     /// Get unsigned char or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     unsigned char ucharOr(unsigned char x) const;
 
-    ///
     /// Get short int
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
-    ///
     short int shortInt() const;
     explicit operator short int() const { return shortInt(); }
 
-    ///
     /// Get short int or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     short int shortIntOr(short int x) const;
 
-    ///
     /// Get unsigned short int
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
-    ///
     unsigned short int ushortInt() const;
     explicit operator unsigned short int() const { return ushortInt(); }
 
-    ///
     /// Get unsigned short int or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     unsigned short int ushortIntOr(unsigned short int) const;
 
-    ///
     /// Get int
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
-    ///
     int integer() const;
     explicit operator int() const { return integer(); }
 
-    ///
     /// Get int or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     int integerOr(int x) const;
 
-    ///
     /// Get unsigned int
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
-    ///
     unsigned int uint() const;
     explicit operator unsigned int() const { return uint(); }
 
-    ///
     /// Get unsigned int or `x` if the object is empty
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
-    ///
     unsigned int uintOr(unsigned int x) const;
 
-    ///
     /// Get signed long or `x` if the object is empty
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
-    ///
     signed long longInt() const;
     explicit operator signed long() const { return longInt(); }
 
-    ///
     /// Get signed long or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     signed long longInteOr(signed long x) const;
 
-    ///
     /// Get unsigned long or `x` if the object is empty
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
-    ///
     unsigned long ulongInt() const;
     explicit operator unsigned long() const { return ulongInt(); }
 
-    ///
     /// Get unsigned long or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     unsigned long ulongIntOr(unsigned long x) const;
 
-    ///
     /// Get int
     /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
-    ///
     double floating() const;
     explicit operator double() const { return floating(); }
 
-    ///
     /// Get int or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     double floatingOr(double x) const;
 
-    ///
     /// Get string
     /// \throw `VariantEmpty`, `VariantBadType`
-    ///
     std::string const& str() const;
     explicit operator std::string const&() const { return str(); }
 
-    ///
     /// Get string or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     std::string strOr(std::string const& x) const;
 
-    ///
     /// Get Vec
     /// \throw `VariantEmpty`, `VariantBadType`
-    ///
     Vec const& vec() const;
     explicit operator Vec const&() const { return vec(); }
 
-    ///
     /// Get Vec or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     Vec vecOr(Vec const& x) const;
 
-    ///
     /// Get Map
     /// \throw `VariantEmpty`, `VariantBadType`
-    ///
     Map const& map() const;
     explicit operator Map const&() const { return map(); }
 
-    ///
     /// Get Map or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
-    ///
     Map mapOr(Map const& x) const;
 
-    ///
     /// Check if Variant contains data
-    ///
     bool empty() const noexcept;
 
     /// \defgroup Variant equality comparison
@@ -365,9 +300,7 @@ public:
     std::string toJson() const;
     /// \}
 
-    ///
     /// Stream operator
-    ///
     friend std::ostream& operator<<(std::ostream& os, Variant const& var);
 
     /// \defgroup type_info
@@ -392,25 +325,31 @@ public:
         Variant::Vec,
         Variant::Map>;
 
-private:
+  private:
     struct Impl;
     Pimpl<Impl> impl;
 };
 
-
 using VariantMap = std::unordered_map<std::string, Variant>;
 using VariantVec = std::vector<Variant>;
 
+template <>
+inline bool Variant::asOr<bool>(bool x) const { return booleanOr(x); }
+template <>
+inline char Variant::asOr<char>(char x) const { return characterOr(x); }
+template <>
+inline unsigned char Variant::asOr<unsigned char>(unsigned char x) const { return ucharOr(x); }
+template <>
+inline short int Variant::asOr<short int>(short int x) const { return shortIntOr(x); }
+template <>
+inline unsigned short int Variant::asOr<unsigned short int>(unsigned short int x) const { return ushortIntOr(x); }
+template <>
+inline int Variant::asOr<int>(int x) const { return integerOr(x); }
+template <>
+inline unsigned int Variant::asOr<unsigned int>(unsigned int x) const { return uintOr(x); }
+template <>
+inline signed long Variant::asOr<signed long>(signed long x) const { return longInteOr(x); }
+template <>
+inline unsigned long Variant::asOr<unsigned long>(unsigned long x) const { return ulongIntOr(x); }
 
-template <> inline bool Variant::asOr<bool>(bool x) const { return booleanOr(x); }
-template <> inline char Variant::asOr<char>(char x) const { return characterOr(x); }
-template <> inline unsigned char Variant::asOr<unsigned char>(unsigned char x) const { return ucharOr(x); }
-template <> inline short int Variant::asOr<short int>(short int x) const { return shortIntOr(x); }
-template <> inline unsigned short int Variant::asOr<unsigned short int>(unsigned short int x) const { return ushortIntOr(x); }
-template <> inline int Variant::asOr<int>(int x) const { return integerOr(x); }
-template <> inline unsigned int Variant::asOr<unsigned int>(unsigned int x) const { return uintOr(x); }
-template <> inline signed long Variant::asOr<signed long>(signed long x) const { return longInteOr(x); }
-template <> inline unsigned long Variant::asOr<unsigned long>(unsigned long x) const { return ulongIntOr(x); }
-
-
-}
+} // namespace serialize

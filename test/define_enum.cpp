@@ -100,7 +100,7 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
     REQUIRE(fromString<E1_1>("e_10") == E1_1::e1);
 
     REQUIRE_THROWS_AS(fromString<E1_1>("e_11"), StringConversionError);
-    REQUIRE_THROWS_WITH(fromString<E1_1>("e_11"), "'e_11' is not a 'E1_1' value");
+    REQUIRE_THROWS_WITH(fromString<E1_1>("e_11"), "'e_11' is not of type 'E1_1'");
 
     REQUIRE(toVariant(E1_1::e1) == Variant("e_1"));
     REQUIRE(fromVariant<E1_1>(Variant("e_2")) == E1_1::e1);
@@ -114,7 +114,7 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
     REQUIRE(fromVariant<E1_1>(Variant("e_10")) == E1_1::e1);
 
     REQUIRE_THROWS_AS(fromVariant<E1_1>(Variant("e_11")), VariantBadType);
-    REQUIRE_THROWS_WITH(fromVariant<E1_1>(Variant("e_11")), "'e_11' is not a 'E1_1' value");
+    REQUIRE_THROWS_WITH(fromVariant<E1_1>(Variant("e_11")), "'e_11' is not of type 'E1_1'");
 
     //
 
@@ -241,11 +241,11 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
     REQUIRE(fromVariant<E>(Variant("e32")) == E::e32);
 
     REQUIRE_THROWS_AS(fromString<E>("e156"), StringConversionError);
-    REQUIRE_THROWS_WITH(fromString<E>("e156"), "'e156' is not a 'E' value");
+    REQUIRE_THROWS_WITH(fromString<E>("e156"), "'e156' is not of type 'E'");
 
 #ifdef NDEBUG
     REQUIRE_THROWS_AS(toString(E(9)), BadEnumValue);
-    REQUIRE_THROWS_WITH(toString(E(9)), "'9' is not a 'E' value");
+    REQUIRE_THROWS_WITH(toString(E(9)), "'9' is not of type 'E'");
 #endif
 
     REQUIRE(toVariant(E::e16) == Variant("e16"));
@@ -258,5 +258,5 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
     REQUIRE(fromVariant<E>(Variant("e21")) == E::e21);
 
     REQUIRE_THROWS_AS(fromVariant<E>(Variant("e156")), VariantBadType);
-    REQUIRE_THROWS_WITH(fromVariant<E>(Variant("e156")), "'e156' is not a 'E' value");
+    REQUIRE_THROWS_WITH(fromVariant<E>(Variant("e156")), "'e156' is not of type 'E'");
 }
