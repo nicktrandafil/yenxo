@@ -264,6 +264,18 @@ struct GetHelper<T, When<std::is_integral_v<T>>> {
 };
 
 template <typename T>
+struct GetHelper<T, When<std::is_reference_v<T>>> {
+    T operator()(T x) const noexcept { return x; }
+    [[noreturn]] T operator()(std::monostate) const {
+        throw VariantEmpty(type_c<T>);
+    }
+    template <typename U>
+    [[noreturn]] T operator()(U const&) const {
+        throw VariantBadType(type_c<T>, type_c<U>);
+    }
+};
+
+template <typename T>
 struct GetOrHelper : GetHelper<T> {
     GetOrHelper(T const& t) : t(t) {}
 
@@ -373,12 +385,20 @@ Variant::Vec Variant::vecOr(Vec const& x) const {
     return std::visit(GetOrHelper<Vec>{x}, impl->m);
 }
 
+Variant::Vec& Variant::modifyVec() {
+    return std::visit(GetHelper<Vec&>(), impl->m);
+}
+
 Variant::Map const& Variant::map() const {
     return std::visit(GetHelper<Map>(), impl->m);
 }
 
 Variant::Map Variant::mapOr(Map const& x) const {
     return std::visit(GetOrHelper<Map>{x}, impl->m);
+}
+
+Variant::Map& Variant::modifyMap() {
+    return std::visit(GetHelper<Map&>(), impl->m);
 }
 
 bool Variant::operator==(Variant const& rhs) const noexcept {

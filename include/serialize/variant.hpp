@@ -262,6 +262,7 @@ public:
     /// \throw `VariantEmpty`, `VariantBadType`
     Vec const& vec() const;
     explicit operator Vec const&() const { return vec(); }
+    Vec& modifyVec();
 
     /// Get Vec or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`
@@ -271,6 +272,7 @@ public:
     /// \throw `VariantEmpty`, `VariantBadType`
     Map const& map() const;
     explicit operator Map const&() const { return map(); }
+    Map& modifyMap();
 
     /// Get Map or `x` if the object is empty
     /// \throw `VariantBadType`, `VariantIntegralOverflow`

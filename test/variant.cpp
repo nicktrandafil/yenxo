@@ -22,30 +22,21 @@
   SOFTWARE.
 */
 
-
-// tested
+#include <serialize/type_name.hpp>
 #include <serialize/variant.hpp>
 
-// local
-#include <serialize/type_name.hpp>
-
-// 3rd
 #include <catch2/catch.hpp>
-#include <rapidjson/document.h>
 
-// boost
 #include <boost/hana.hpp>
 
-// std
+#include <rapidjson/document.h>
+
 #include <limits.h>
 #include <sstream>
 
-
 namespace hana = boost::hana;
 
-
 using namespace serialize;
-
 
 TEST_CASE("Check Variant", "[Variant]") {
     SECTION("boolean") {
@@ -205,7 +196,7 @@ TEST_CASE("Check Variant", "[Variant]") {
                         // min - 1 out of range
                         auto const y_min_in_x_1 = static_cast<X>(static_cast<double>(y_min) - 1);
                         if (std::to_string(static_cast<double>(y_min) - 1) ==
-                                std::to_string(static_cast<double>(y_min_in_x_1))) {
+                            std::to_string(static_cast<double>(y_min_in_x_1))) {
                             REQUIRE_THROWS_AS(
                                 static_cast<Y>(Variant(y_min_in_x_1)),
                                 VariantIntegralOverflow);
@@ -215,21 +206,21 @@ TEST_CASE("Check Variant", "[Variant]") {
                             REQUIRE_THROWS_WITH(
                                 static_cast<Y>(Variant(y_min_in_x_1)),
                                 "The type '" +
-                                        std::string(unqualifiedTypeName<Y>()) +
-                                        "' can not hold the value '" +
-                                        std::to_string(y_min_in_x_1) + "'");
+                                    std::string(unqualifiedTypeName<Y>()) +
+                                    "' can not hold the value '" +
+                                    std::to_string(y_min_in_x_1) + "'");
                             REQUIRE_THROWS_WITH(
                                 Variant(y_min_in_x_1).asOr<Y>(1),
                                 "The type '" +
-                                        std::string(unqualifiedTypeName<Y>()) +
-                                        "' can not hold the value '" +
-                                        std::to_string(y_min_in_x_1) + "'");
+                                    std::string(unqualifiedTypeName<Y>()) +
+                                    "' can not hold the value '" +
+                                    std::to_string(y_min_in_x_1) + "'");
                         }
 
                         // max + 1 out of range
                         auto const y_max_in_x_1 = static_cast<X>(static_cast<double>(y_max) + 1);
                         if (std::to_string(static_cast<double>(y_max) + 1) ==
-                                std::to_string(static_cast<double>(y_max_in_x_1))) {
+                            std::to_string(static_cast<double>(y_max_in_x_1))) {
                             REQUIRE_THROWS_AS(
                                 static_cast<Y>(Variant(y_max_in_x_1)),
                                 VariantIntegralOverflow);
@@ -239,15 +230,15 @@ TEST_CASE("Check Variant", "[Variant]") {
                             REQUIRE_THROWS_WITH(
                                 static_cast<Y>(Variant(y_max_in_x_1)),
                                 "The type '" +
-                                        std::string(unqualifiedTypeName<Y>()) +
-                                        "' can not hold the value '" +
-                                        std::to_string(y_max_in_x_1) + "'");
+                                    std::string(unqualifiedTypeName<Y>()) +
+                                    "' can not hold the value '" +
+                                    std::to_string(y_max_in_x_1) + "'");
                             REQUIRE_THROWS_WITH(
                                 Variant(y_max_in_x_1).asOr<Y>(1),
                                 "The type '" +
-                                        std::string(unqualifiedTypeName<Y>()) +
-                                        "' can not hold the value '" +
-                                        std::to_string(y_max_in_x_1) + "'");
+                                    std::string(unqualifiedTypeName<Y>()) +
+                                    "' can not hold the value '" +
+                                    std::to_string(y_max_in_x_1) + "'");
                         }
                     });
             });
@@ -279,9 +270,8 @@ TEST_CASE("Check Variant", "[Variant]") {
                 std::make_pair("x", Variant(6)),
                 std::make_pair("y", Variant(Variant::Vec{Variant(1), Variant(2)})),
                 std::make_pair("z", Variant(Variant::Map{
-                    std::make_pair("a", Variant("a")),
-                    std::make_pair("b", Variant("b"))}))
-            }};
+                                        std::make_pair("a", Variant("a")),
+                                        std::make_pair("b", Variant("b"))}))}};
             REQUIRE(expected == Variant::from(rapidjson::Document().Parse(raw)));
         }
     }
@@ -312,12 +302,12 @@ TEST_CASE("Check Variant", "[Variant]") {
 
             rapidjson::Document json;
             Variant{Variant::Map{
-                std::make_pair("x", Variant(6)),
+                        std::make_pair("x", Variant(6)),
                         std::make_pair("y", Variant(Variant::Vec{Variant(1), Variant(2)})),
-                std::make_pair("z", Variant(Variant::Map{
-                    std::make_pair("a", Variant("a")),
-                    std::make_pair("b", Variant("b"))}))
-            }}.to(json);
+                        std::make_pair("z", Variant(Variant::Map{
+                                                std::make_pair("a", Variant("a")),
+                                                std::make_pair("b", Variant("b"))}))}}
+                .to(json);
 
             REQUIRE(expected == json);
         }
@@ -429,10 +419,24 @@ TEST_CASE("Check Variant", "[Variant]") {
 
         REQUIRE(Variant::from(rapidjson::Document().Parse(json)) ==
                 Variant(Variant::Vec{
-                            Variant(Variant::Map{{"abc", Variant(1)}})}));
+                    Variant(Variant::Map{{"abc", Variant(1)}})}));
     }
 
     SECTION("typeInfo") {
         REQUIRE(Variant(int(1)).typeInfo() == typeid(int(1)));
+    }
+
+    SECTION("modifyVec") {
+        Variant v(VariantVec{Variant(1)});
+        v.modifyVec().push_back(Variant(2));
+        Variant expected(VariantVec{Variant(1), Variant(2)});
+        REQUIRE(v == expected);
+    }
+
+    SECTION("modifyMap") {
+        Variant v(VariantMap{});
+        v.modifyMap().emplace("a", Variant(2));
+        Variant expected(VariantMap{{"a", Variant(2)}});
+        REQUIRE(v == expected);
     }
 }
