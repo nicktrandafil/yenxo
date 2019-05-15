@@ -22,11 +22,11 @@
   SOFTWARE.
 */
 
+#include <serialize/meta.hpp>
+#include <serialize/type_name.hpp>
 #include <serialize/variant.hpp>
 
-#include <serialize/meta.hpp>
 #include <serialize/pimpl_impl.hpp>
-#include <serialize/type_name.hpp>
 
 #include <rapidjson/error/en.h>
 #include <rapidjson/stringbuffer.h>

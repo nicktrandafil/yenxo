@@ -1,6 +1,6 @@
 Language:        Cpp
 # BasedOnStyle:  LLVM
-AccessModifierOffset: -2
+AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
@@ -8,11 +8,11 @@ AlignEscapedNewlines: Right
 AlignOperands:   true
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
-AllowShortBlocksOnASingleLine: true
-AllowShortCaseLabelsOnASingleLine: true
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: All
-AllowShortIfStatementsOnASingleLine: true
-AllowShortLoopsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
@@ -61,19 +61,15 @@ ForEachMacros:
   - BOOST_FOREACH
 IncludeBlocks:   Regroup
 IncludeCategories:
-  - Regex:           '^<(serialize|tags|fmt)/'
+  - Regex:           '^<(rapidjson)/.*'
     Priority:        5
-  - Regex:           '^<Q.*'
-    Priority:        6
   - Regex:           '^<boost/'
-    Priority:        7
-  - Regex:           '^<catch2/'
     Priority:        4
-  - Regex:           '^<gui/.*hpp>$'
+  - Regex:           '^<catch2/'
     Priority:        3
-  - Regex:           '^<.*\.hpp>$'
+  - Regex:           '^<serialize/pimpl_impl.hpp>$'
     Priority:        2
-  - Regex:           '^".*\.h"'
+  - Regex:           '^<serialize/.*hpp>$'
     Priority:        1
 IncludeIsMainRegex: '(Test)?$'
 IndentCaseLabels: false

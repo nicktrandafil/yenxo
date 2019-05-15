@@ -39,7 +39,7 @@ namespace serialize {
 
 /// An error identifying `Variant` error
 class VariantErr : public std::exception {
-  public:
+public:
     explicit VariantErr(std::string const& msg)
         : what_(msg) {}
 
@@ -57,14 +57,14 @@ class VariantErr : public std::exception {
 
     std::string const& path() const noexcept { return path_; }
 
-  private:
+private:
     std::string what_;
     std::string path_;
 };
 
 /// Empty Variant error
 class VariantEmpty final : public VariantErr {
-  public:
+public:
     template <class T>
     explicit VariantEmpty(Type<T>)
         : VariantErr("expected '" +
@@ -74,7 +74,7 @@ class VariantEmpty final : public VariantErr {
 
 /// Bad type error
 class VariantBadType final : public VariantErr {
-  public:
+public:
     template <class E, class A>
     VariantBadType(Type<E>, Type<A>)
         : VariantErr(
@@ -97,7 +97,7 @@ class VariantBadType final : public VariantErr {
 
 /// User tried to get a type which is not able to hold the actual value
 class VariantIntegralOverflow final : public VariantErr {
-  public:
+public:
     VariantIntegralOverflow(
         std::string const& type_name,
         std::string const& value)
@@ -107,7 +107,7 @@ class VariantIntegralOverflow final : public VariantErr {
 
 /// Serialized object reprezentation class
 class Variant {
-  public:
+public:
     using Map = std::unordered_map<std::string, Variant>;
     using Vec = std::vector<Variant>;
 
@@ -325,7 +325,7 @@ class Variant {
         Variant::Vec,
         Variant::Map>;
 
-  private:
+private:
     struct Impl;
     Pimpl<Impl> impl;
 };
