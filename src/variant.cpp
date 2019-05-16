@@ -267,11 +267,11 @@ template <typename T>
 struct GetHelper<T, When<std::is_reference_v<T>>> {
     T operator()(T x) const noexcept { return x; }
     [[noreturn]] T operator()(std::monostate) const {
-        throw VariantEmpty(type_c<T>);
+        throw VariantEmpty(type_c<std::remove_reference_t<T>>);
     }
     template <typename U>
     [[noreturn]] T operator()(U const&) const {
-        throw VariantBadType(type_c<T>, type_c<U>);
+        throw VariantBadType(type_c<std::remove_reference_t<T>>, type_c<U>);
     }
 };
 
