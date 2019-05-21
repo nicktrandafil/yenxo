@@ -24,22 +24,18 @@
 
 #pragma once
 
-// local
 #include <serialize/config.hpp>
 #include <serialize/enum_traits.hpp>
 #include <serialize/meta.hpp>
 #include <serialize/variant.hpp>
 #include <serialize/when.hpp>
 
-// 3rd
 #if SERIALIZE_ENABLE_TYPE_SAFE
 #include <type_safe/strong_typedef.hpp>
 #endif
 
-// boost
 #include <boost/hana.hpp>
 
-// std
 #include <sstream>
 #include <type_traits>
 #include <variant>
@@ -368,7 +364,9 @@ struct FromVariantImpl<T, When<
     static T apply(Variant const& var) {
         auto const& s = var.str();
         for (auto e : EnumTraits<T>::values) {
-            if (EnumTraits<T>::toString(e) == s) { return e; }
+            if (EnumTraits<T>::toString(e) == s) {
+                return e;
+            }
         }
         throw VariantBadType(s, type_c<T>);
     }
