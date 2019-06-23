@@ -22,14 +22,14 @@
   SOFTWARE.
 */
 
-#include <catch2/catch.hpp>
-
 #include <serialize/comparison_traits.hpp>
 #include <serialize/ostream_traits.hpp>
 #include <serialize/string_conversion.hpp>
 #include <serialize/value_tag.hpp>
 #include <serialize/variant.hpp>
 #include <serialize/variant_traits.hpp>
+
+#include <catch2/catch.hpp>
 
 #include <boost/hana.hpp>
 
@@ -196,6 +196,22 @@ struct St2 : trait::Var<St2>, trait::EqualityComparison<St2> {
                              (int, x));
 };
 
+struct ParentU : trait::UpdateFromVar<ParentU>, trait::EqualityComparison<ParentU> {
+    ParentU() : name("a"), age(30) {}
+    BOOST_HANA_DEFINE_STRUCT(
+        ParentU,
+        (std::string, name),
+        (int, age));
+};
+
+struct PersonU : trait::UpdateFromVar<PersonU>, trait::EqualityComparison<PersonU> {
+    PersonU() : age(9) {}
+    BOOST_HANA_DEFINE_STRUCT(
+        PersonU,
+        (int, age),
+        (ParentU, parent));
+};
+
 } // namespace
 
 TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
@@ -245,6 +261,27 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
 
         person_var["no"] = Variant(1);
         REQUIRE_THROWS_WITH(person.updateVar(Variant(person_var)), "'no' is unknown");
+    }
+
+    SECTION("Check updateVar rec") {
+        auto const var = Variant::fromJson(R"(
+            {
+                "age": 10,
+                "parent": {
+                    "name": "b"
+                }
+            })");
+
+        PersonU person;
+        person.parent.age = 99;
+
+        PersonU person_expected;
+        person_expected.parent.age = 99;
+        person_expected.age = 10;
+        person_expected.parent.name = "b";
+
+        person.updateVar(Variant(var));
+        REQUIRE(person == person_expected);
     }
 
     SECTION("Check updateOpt") {

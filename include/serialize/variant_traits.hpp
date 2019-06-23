@@ -59,6 +59,11 @@ constexpr auto const isContainer = boost::hana::is_valid(
     [](auto t) -> decltype((void)begin(std::declval<typename decltype(t)::type>())) {
     });
 
+/// Has member `updateVar(serialize::Variant const&)`
+constexpr auto const hasUpdateVar = boost::hana::is_valid(
+    [](auto t) -> decltype((void)std::declval<typename decltype(t)::type>().updateVar(std::declval<Variant>())) {
+    });
+
 /// Is `name` is present in `defaults()` of `T`
 template <typename T, typename S>
 constexpr bool presentInDefaults(S name) {
@@ -389,7 +394,11 @@ struct UpdateFromVar {
                         return;
                     }
                     auto& tmp = value(self);
-                    tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, v.second);
+                    if constexpr (detail::hasUpdateVar(boost::hana::type_c<std::remove_reference_t<decltype(tmp)>>)) {
+                        tmp.updateVar(v.second);
+                    } else {
+                        tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, v.second);
+                    }
                     found = true;
                 }));
 
