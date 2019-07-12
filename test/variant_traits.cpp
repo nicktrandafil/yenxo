@@ -383,9 +383,8 @@ struct Pol2 : trait::VarDefPolicy {
 };
 
 struct Pol3 : trait::VarDefPolicy {
-    template <class T>
-    static auto constexpr from_variant = [](auto const& x) { return serialize::fromString<T>(x.str()); };
-    static auto constexpr to_variant = [](auto&& x) { return Variant(serialize::toString(std::forward<decltype(x)>(x))); };
+    static auto constexpr from_variant = [](auto& x, Variant const& var) { x = serialize::fromString<std::remove_reference_t<decltype(x)>>(var.str()); };
+    static auto constexpr to_variant = [](Variant& var, auto&& x) { var = Variant(serialize::toString(std::forward<std::remove_reference_t<decltype(x)>>(x))); };
 };
 
 struct PersonE

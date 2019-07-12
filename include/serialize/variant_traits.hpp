@@ -133,16 +133,15 @@ constexpr void checkOrphanKeysInDefaults(Type<T> const&) {
         });
 }
 
-template <typename T, typename F = decltype(toVariant)>
-auto toVariantWrap(T&& x, F const& to_variant = toVariant) {
-    return to_variant(std::forward<T>(x));
+template <typename T, typename F = decltype(toVariant2)>
+void toVariantWrap(Variant& var, T&& val, F const& to_variant = toVariant2) {
+    to_variant(var, std::forward<T>(val));
 }
 
-template <typename T, typename F = decltype(fromVariant<T>)>
-auto fromVariantWrap(char const* name, Variant const& x,
-                     F const& from_variant = fromVariant<T>) {
+template <typename T, typename F = decltype(fromVariant2)>
+void fromVariantWrap(T& val, Variant const& var, char const* name, F const& from_variant = fromVariant2) {
     try {
-        return from_variant(x);
+        return from_variant(val, var);
     } catch (serialize::VariantErr& e) {
         e.prependPath(name);
         throw;
@@ -173,12 +172,12 @@ struct Var {
                 auto const renamed = detail::rename<Derived>(name);
                 if constexpr (isOptional(type_c<decltype(value)>)) {
                     if (value.has_value()) {
-                        ret[renamed] = detail::toVariantWrap(*value);
+                        detail::toVariantWrap(ret[renamed], *value);
                     } else {
                         ret[renamed] = Variant();
                     }
                 } else {
-                    ret[renamed] = detail::toVariantWrap(value);
+                    detail::toVariantWrap(ret[renamed], value);
                 }
             }));
 
@@ -200,9 +199,11 @@ struct Var {
                     throw std::logic_error("'"s + renamed + "' is required"s);
                 } else {
                     if constexpr (isOptional(type_c<decltype(tmp)>)) {
-                        tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second);
+                        std::remove_reference_t<decltype(*tmp)> under;
+                        detail::fromVariantWrap(under, it->second, renamed);
+                        tmp = std::move(under);
                     } else {
-                        tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, it->second);
+                        detail::fromVariantWrap(tmp, it->second, renamed);
                     }
                 }
             }));
@@ -223,11 +224,10 @@ struct VarDefPolicy {
     static auto constexpr serialize_default_value = true;
 
     /// from variant conversion functional object
-    template <class T>
-    static constexpr auto from_variant = fromVariant<T>;
+    static constexpr auto from_variant = fromVariant2;
 
     /// to variant conversion function object
-    static constexpr auto to_variant = toVariant;
+    static constexpr auto to_variant = toVariant2;
 };
 
 /// Adds conversion support to and from `Variant`, defaulting missings fields
@@ -248,7 +248,7 @@ struct VarDef {
                 auto const renamed = detail::rename<Derived>(name);
                 if constexpr (isOptional(type_c<decltype(value)>)) {
                     if (value.has_value()) {
-                        ret[renamed] = detail::toVariantWrap(*value, Policy::to_variant);
+                        detail::toVariantWrap(ret[renamed], *value, Policy::to_variant);
                     }
                 } else {
                     if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
@@ -266,12 +266,12 @@ struct VarDef {
                     if constexpr (detail::isContainer(
                                       boost::hana::type_c<decltype(value)>)) {
                         if constexpr (!Policy::empty_container_not_required) {
-                            ret[renamed] = detail::toVariantWrap(value, Policy::to_variant);
+                            detail::toVariantWrap(ret[renamed], value, Policy::to_variant);
                         } else if (begin(value) != end(value)) {
-                            ret[renamed] = detail::toVariantWrap(value, Policy::to_variant);
+                            detail::toVariantWrap(ret[renamed], value, Policy::to_variant);
                         }
                     } else {
-                        ret[renamed] = detail::toVariantWrap(value, Policy::to_variant);
+                        detail::toVariantWrap(ret[renamed], value, Policy::to_variant);
                     }
                 }
             }));
@@ -314,9 +314,11 @@ struct VarDef {
 
                 } else {
                     if constexpr (isOptional(type_c<decltype(tmp)>)) {
-                        tmp = detail::fromVariantWrap<decltype(*tmp)>(renamed, it->second, Policy::template from_variant<decltype(*tmp)>);
+                        std::remove_reference_t<decltype(*tmp)> under;
+                        detail::fromVariantWrap(under, it->second, renamed, Policy::from_variant);
+                        tmp = std::move(under);
                     } else {
-                        tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, it->second, Policy::template from_variant<decltype(tmp)>);
+                        detail::fromVariantWrap(tmp, it->second, renamed, Policy::from_variant);
                     }
                 }
             }));
@@ -397,7 +399,7 @@ struct UpdateFromVar {
                     if constexpr (detail::hasUpdateVar(boost::hana::type_c<std::remove_reference_t<decltype(tmp)>>)) {
                         tmp.updateVar(v.second);
                     } else {
-                        tmp = detail::fromVariantWrap<decltype(tmp)>(renamed, v.second);
+                        detail::fromVariantWrap<decltype(tmp)>(tmp, v.second, renamed);
                     }
                     found = true;
                 }));

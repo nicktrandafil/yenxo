@@ -63,8 +63,8 @@ struct HasToVariantT {
 constexpr HasToVariantT hasToVariant;
 
 struct ToVariantT {
-    template <typename... Args>
-    auto operator()(Args&&... args) const;
+    template <typename T>
+    auto operator()(T&& args) const;
 };
 
 /// Convinient shortcut function
@@ -266,10 +266,9 @@ struct ToVariantImpl<T, When<
     }
 };
 
-template <typename... Args>
-auto ToVariantT::operator()(Args&&... args) const {
-    return ToVariantImpl<std::decay_t<Args>...>::apply(
-        std::forward<Args>(args)...);
+template <typename T>
+auto ToVariantT::operator()(T&& val) const {
+    return ToVariantImpl<std::decay_t<T>>::apply(std::forward<T>(val));
 }
 
 template <typename T>
@@ -514,5 +513,23 @@ template <typename T>
 auto FromVariantT<T>::operator()(Variant const& x) const {
     return FromVariantImpl<std::decay_t<T>>::apply(x);
 }
+
+struct ToVariantT2 {
+    template <class T>
+    void operator()(Variant& var, T&& val) const {
+        var = toVariant(std::forward<T>(val));
+    }
+};
+
+constexpr ToVariantT2 toVariant2;
+
+struct FromVariantT2 {
+    template <class T>
+    void operator()(T& val, Variant const& var) const {
+        val = fromVariant<T>(var);
+    }
+};
+
+constexpr FromVariantT2 fromVariant2;
 
 } // namespace serialize
