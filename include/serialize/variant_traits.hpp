@@ -36,18 +36,7 @@
 /// Some add-ons for enabling to and from Variant conversion
 
 namespace serialize::trait {
-
-/// Specify stub for default value (means no default value specified)
-struct NoDefault {
-    BOOST_HANA_DEFINE_STRUCT(NoDefault);
-};
-
 namespace detail {
-
-/// Does a type has a static member function `defaults()`
-constexpr auto const hasDefaults = boost::hana::is_valid(
-    [](auto t) -> decltype((void)decltype(t)::type::defaults()) {
-    });
 
 /// Is the type a container
 constexpr auto const isContainer = boost::hana::is_valid(
@@ -59,35 +48,26 @@ constexpr auto const hasUpdateVar = boost::hana::is_valid(
     [](auto t) -> decltype((void)std::declval<typename decltype(t)::type>().updateVar(std::declval<Variant>())) {
     });
 
-/// Is `name` is present in `defaults()` of `T`
-template <typename T, typename S>
-constexpr bool presentInDefaults(S name) {
-    using Found = decltype(
-        name ^ boost::hana::in ^ boost::hana::keys(T::defaults()));
-    return boost::hana::value<Found>();
-}
+struct Default {
+    /// Does a type has a static member function `defaults()`
+    static constexpr auto const has = boost::hana::is_valid(
+        [](auto t) -> decltype((void)decltype(t)::type::defaults()) {
+        });
 
-/// Does type of provided entry in `defaults()` for `name` is `NoDefault`
-template <typename T, typename S>
-constexpr bool noDefault(S name) {
-    return std::is_same_v<std::remove_reference_t<decltype(T::defaults()[name])>,
-                          NoDefault>;
-}
-
-/// Does the field `name` has a default value in the class `C`
-template <typename T, typename S>
-constexpr bool hasDefaultValue(S name) {
-    if constexpr (hasDefaults(boost::hana::type_c<T>)) {
-        if constexpr (presentInDefaults<T>(name)) {
-            return !noDefault<T>(name);
-        } else {
-            return false;
-        }
-    } else {
-        (void)name;
-        return false;
+    /// Does the field `name` has a default value in the class `C`
+    template <typename T, typename S>
+    static constexpr bool hasValue(Type<T>, S name) {
+        using Found = decltype(
+            name ^ boost::hana::in ^ boost::hana::keys(T::defaults()));
+        return boost::hana::value<Found>();
     }
-}
+
+    /// Default value for `name`
+    template <class T, class S>
+    static auto value(Type<T>, S name) {
+        return T::defaults()[name];
+    }
+};
 
 struct Rename {
     /// Does a type has a static member function `names()`
@@ -95,7 +75,7 @@ struct Rename {
         [](auto t) -> decltype((void)decltype(t)::type::names()) {
         });
 
-    /// Is `name` is present in `defaults()` of `T`
+    /// Is `name` is present in `names()` of `T`
     template <typename T, typename S>
     static constexpr bool presentInNames(S name) {
         using Found = decltype(
@@ -130,17 +110,6 @@ struct Rename {
         return rename<T>(name);
     }
 };
-
-template <typename T>
-constexpr void checkOrphanKeysInDefaults(Type<T> const&) {
-    boost::hana::for_each(
-        decltype(boost::hana::keys(T::defaults()))(),
-        [](auto key) {
-            BOOST_HANA_CONSTANT_ASSERT_MSG(
-                key ^ boost::hana::in ^ decltype(boost::hana::keys(T()))(),
-                "There are unknown fields in defaults()");
-        });
-}
 
 template <typename T, typename F = decltype(toVariant2)>
 void toVariantWrap(Variant& var, T&& val, F const& to_variant = toVariant2) {
@@ -179,6 +148,9 @@ struct VarDefPolicy {
 
     /// rename function object
     static constexpr detail::Rename rename{};
+
+    /// defaults policy
+    using Defaults = detail::Default;
 };
 
 /// Adds conversion support to and from `Variant`
@@ -263,13 +235,13 @@ struct VarDef {
                         detail::toVariantWrap(ret[renamed], *value, Policy::to_variant);
                     }
                 } else {
-                    if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
-                        if constexpr (!Policy::serialize_default_value && detail::hasDefaultValue<Derived>(name)) {
+                    if constexpr (Policy::Defaults::has(type_c<Derived>)) {
+                        if constexpr (!Policy::serialize_default_value && Policy::Defaults::hasValue(type_c<Derived>, name)) {
                             static_assert(std::is_convertible_v<
-                                              std::remove_reference_t<decltype(Derived::defaults()[name])>,
+                                              decltype(Policy::Defaults::value(type_c<Derived>, name)),
                                               std::remove_reference_t<decltype(value)>>,
                                           "Default value should be convertible to field type");
-                            if (Derived::defaults()[name] == value) {
+                            if (Policy::Defaults::value(type_c<Derived>, name) == value) {
                                 return;
                             }
                         }
@@ -305,13 +277,13 @@ struct VarDef {
                 auto const it = map.find(renamed);
 
                 if (map.end() == it) {
-                    if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
-                        if constexpr (detail::hasDefaultValue<Derived>(name)) {
+                    if constexpr (Policy::Defaults::has(boost::hana::type_c<Derived>)) {
+                        if constexpr (Policy::Defaults::hasValue(type_c<Derived>, name)) {
                             static_assert(std::is_convertible_v<
-                                              std::remove_reference_t<decltype(Derived::defaults()[name])>,
+                                              decltype(Policy::Defaults::value(type_c<Derived>, name)),
                                               std::remove_reference_t<decltype(value(std::declval<Derived>()))>>,
                                           "Default value should be convertible to field type");
-                            tmp = Derived::defaults()[name];
+                            tmp = Policy::Defaults::value(type_c<Derived>, name);
                             return;
                         }
                     }
@@ -340,55 +312,6 @@ struct VarDef {
 
 protected:
     ~VarDef() = default;
-};
-
-/// Adds conversion support to and from `Variant`, defaulting missings fields
-/// Specifically adds members:
-///     `static Variant toVariant(Derived)`
-/// 	`static Derived fromVariant(Variant)`
-///
-/// Requires a static member function `defaults()` of hana map to be presented
-/// in `Derived`, where the kays are member names and the values are convertible
-/// to the corresponding members.
-///
-/// Ensures:
-/// 	- default value presented for every member (use `NoDefault` as stub);
-/// 	- types of default values are convertible to the correspondig members;
-/// 	- there are no unknown fields in the dict
-template <typename Derived>
-struct VarDefExplicit : private VarDef<Derived> {
-    static Derived fromVariant(Variant const& x) {
-        static_assert(check());
-        return VarDef<Derived>::fromVariant(x);
-    }
-
-    static Variant toVariant(Derived const& x) {
-        static_assert(check());
-        return VarDef<Derived>::toVariant(x);
-    }
-
-    static constexpr bool check() {
-        using namespace boost::hana::literals;
-
-        static_assert(
-            detail::hasDefaults(boost::hana::type_c<Derived>),
-            "The T must have `defaults` static member function");
-
-        detail::checkOrphanKeysInDefaults(type_c<Derived>);
-
-        boost::hana::for_each(
-            boost::hana::accessors<Derived>(),
-            boost::hana::fuse([](auto name, auto) {
-                BOOST_HANA_CONSTEXPR_ASSERT_MSG(
-                    detail::presentInDefaults<Derived>(name),
-                    (name + " not present in defaults()"_s).c_str());
-            }));
-
-        return true;
-    }
-
-protected:
-    ~VarDefExplicit() = default;
 };
 
 /// Adds member `void update(Variant)`

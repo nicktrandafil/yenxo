@@ -580,7 +580,7 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
 namespace {
 
 struct PersonC
-    : trait::VarDefExplicit<PersonC>,
+    : trait::VarDef<PersonC>,
       trait::OStream<PersonC>,
       trait::EqualityComparison<PersonC> {
     PersonC() {}
@@ -591,8 +591,7 @@ struct PersonC
     static auto defaults() {
         return hana::make_map(
             hana::make_pair("name"_s, "Efendi"),
-            hana::make_pair("age"_s, 18),
-            hana::make_pair("hobby"_s, trait::NoDefault()));
+            hana::make_pair("age"_s, 18));
     }
 
     std::optional<std::string> name;
@@ -600,15 +599,10 @@ struct PersonC
     Hobby hobby;
 };
 
-struct St4 : trait::VarDefExplicit<St4>, trait::EqualityComparison<St4> {
+struct St4 : trait::VarDef<St4>, trait::EqualityComparison<St4> {
     St4() = default;
     St4(int x)
         : x(x) {}
-
-    static auto defaults() {
-        return hana::make_map(
-            hana::make_pair("x"_s, trait::NoDefault()));
-    }
 
     constexpr static auto names() {
         return hana::make_map(
@@ -620,7 +614,7 @@ struct St4 : trait::VarDefExplicit<St4>, trait::EqualityComparison<St4> {
 };
 
 struct St5
-    : trait::VarDefExplicit<St5>,
+    : trait::VarDef<St5>,
       trait::EqualityComparison<St5>,
       trait::OStream<St5> {
     St5() = default;

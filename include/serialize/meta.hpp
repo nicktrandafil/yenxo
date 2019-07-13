@@ -22,37 +22,29 @@
   SOFTWARE.
 */
 
-
 #pragma once
 
-
-// local
 #include <serialize/config.hpp>
 #include <serialize/when.hpp>
 
-// 3rd
 #if SERIALIZE_ENABLE_TYPE_SAFE
-#include <type_safe/strong_typedef.hpp>
 #include <type_safe/constrained_type.hpp>
+#include <type_safe/strong_typedef.hpp>
 #include <type_safe/types.hpp>
 #endif
 
-// hana
-#include <boost/hana/tuple.hpp>
-#include <boost/hana/contains.hpp>
-#include <boost/hana/type.hpp>
 #include <boost/hana/any_of.hpp>
+#include <boost/hana/contains.hpp>
 #include <boost/hana/traits.hpp>
+#include <boost/hana/tuple.hpp>
+#include <boost/hana/type.hpp>
 
-// std
 #include <optional>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
-
 namespace serialize {
-
 
 template <typename... Args>
 struct S {
@@ -65,83 +57,67 @@ struct S {
     template <typename Key>
     constexpr static bool convertible() {
         return boost::hana::any_of(
-                    boost::hana::tuple<boost::hana::type<Args>...>{},
-                    [](auto x) {
-            return std::is_convertible_v<Key, typename decltype(x)::type>;
-        });
+            boost::hana::tuple<boost::hana::type<Args>...>{},
+            [](auto x) {
+                return std::is_convertible_v<Key, typename decltype(x)::type>;
+            });
     }
 
     template <typename Key>
     constexpr static bool anyOf() {
-        return boost::hana::type_c<Key> ^boost::hana::in^
-                boost::hana::tuple<boost::hana::type<Args>...>{};
+        return boost::hana::type_c<Key> ^ boost::hana::in ^
+               boost::hana::tuple<boost::hana::type<Args>...>{};
     }
 };
 
-
 namespace detail {
 
-
-template <typename ...Args>
+template <typename... Args>
 struct Valid : std::true_type {};
 
-
-template <typename ...Args>
+template <typename... Args>
 constexpr bool valid(Args&&...) { return true; }
-
 
 template <typename F, typename AS, typename = void>
 struct Callable : Callable<F, AS, When<true>> {};
 
-
 template <typename F, typename AS, bool fallback>
 struct Callable<F, AS, When<fallback>> : std::false_type {};
 
-
-template <typename F, typename ...Args>
+template <typename F, typename... Args>
 struct Callable<
-        F,
-        S<Args...>,
-        When<Valid<decltype(
-            std::declval<F>()(std::declval<Args>()...))>::value>>
-    : std::true_type
-{};
-
+    F,
+    S<Args...>,
+    When<Valid<decltype(
+        std::declval<F>()(std::declval<Args>()...))>::value>>
+    : std::true_type {};
 
 } // namespace detail
 
-
 template <typename T>
-struct Type {};
-
+struct Type { using type = T; };
 
 template <typename T>
 constexpr Type<T> type_c;
 
-
-template <typename F, typename ...Args>
+template <typename F, typename... Args>
 constexpr bool callable(F&&, Type<Args> const&...) noexcept {
     return detail::Callable<F, S<Args...>>::value;
 }
 
-
-template <typename ...Args>
+template <typename... Args>
 struct Overload : public Args... {
     using Args::operator()...;
 };
 
-
-template <typename ...Args>
-Overload(Args...) -> Overload<Args...>;
-
+template <typename... Args>
+Overload(Args...)->Overload<Args...>;
 
 template <typename T>
 struct DependentFalse : std::false_type {};
 
-
 template <auto...>
 struct DependentFalseV : std::false_type {};
-
 
 ///
 /// Is `T` the `std::optional` type
@@ -149,27 +125,21 @@ struct DependentFalseV : std::false_type {};
 template <typename T>
 struct IsOptional : std::false_type {};
 
-
 template <typename T>
 struct IsOptional<std::optional<T>> : std::true_type {};
-
 
 template <typename T>
 constexpr auto isOptional(serialize::Type<T>) {
     return IsOptional<std::decay_t<T>>::value;
 }
 
-
 namespace detail {
-
 
 template <typename T, typename = void>
 struct IsIterable : IsIterable<T, When<true>> {};
 
-
 template <typename T, bool condition>
 struct IsIterable<T, When<condition>> : std::false_type {};
-
 
 template <typename T>
 struct IsIterable<
@@ -182,64 +152,51 @@ struct IsIterable<
                    ++std::declval<decltype(begin(std::declval<T&>()))&>(),
 
                    // operator*
-                   *begin(std::declval<T&>())))
-               >)>> : std::true_type
+                   *begin(std::declval<T&>())))>)>> : std::true_type
 
 {};
-
 
 template <typename T, typename = void>
 struct IsString : IsString<T, When<true>> {};
 
-
 template <typename T, bool condition>
 struct IsString<T, When<condition>> : std::false_type {};
 
-
 template <typename T>
 struct IsString<
-        T,
-        When<std::is_convertible_v<T,
-             std::basic_string<typename T::value_type,
-                               typename T::traits_type,
-                               typename T::allocator_type>>>> : std::true_type {};
-
-
+    T,
+    When<std::is_convertible_v<T,
+                               std::basic_string<typename T::value_type,
+                                                 typename T::traits_type,
+                                                 typename T::allocator_type>>>> : std::true_type {};
 
 template <typename T>
 struct IsPair : std::false_type {};
 
-
 template <typename First, typename Second>
 struct IsPair<std::pair<First, Second>> : std::true_type {};
 
-
 } // namespace detail
-
 
 template <typename T>
 constexpr auto isPair(Type<T> const&) {
     return detail::IsPair<T>::value;
 }
 
-
 template <typename T>
 constexpr auto isString(Type<T> const&) {
     return detail::IsString<T>::value;
 }
-
 
 template <typename T>
 constexpr auto isIterable(Type<T> const&) {
     return detail::IsIterable<T>::value;
 }
 
-
 template <typename T>
 constexpr auto isContainer(Type<T> const& x) {
     return isIterable(x) && !isString(x);
 }
-
 
 template <typename T>
 constexpr auto isKeyValue(Type<T> const&) {
@@ -250,16 +207,13 @@ constexpr auto isKeyValue(Type<T> const&) {
     }
 }
 
+constexpr auto hasPushBack = boost::hana::is_valid(
+    [](auto x) -> decltype((void)boost::hana::traits::declval(x)
+                               .push_back(std::declval<typename decltype(x)::type::value_type>())) {});
 
-constexpr auto hasPushBack = boost::hana::is_valid([](auto x) ->
-    decltype((void) boost::hana::traits::declval(x).push_back(std::declval<typename decltype(x)::type::value_type>()))
-{});
-
-
-constexpr auto hasEmplace = boost::hana::is_valid([](auto x) ->
-    decltype((void) boost::hana::traits::declval(x).emplace(std::declval<typename decltype(x)::type::value_type>()))
-{});
-
+constexpr auto hasEmplace = boost::hana::is_valid(
+    [](auto x) -> decltype((void)boost::hana::traits::declval(x)
+                               .emplace(std::declval<typename decltype(x)::type::value_type>())) {});
 
 #if SERIALIZE_ENABLE_TYPE_SAFE
 template <typename T>
@@ -270,7 +224,6 @@ struct StrongTypeDefImpl {
     static constexpr auto const value = decltype(test(std::declval<T>()))();
 };
 
-
 struct StrongTypedefT {
     template <typename T>
     constexpr bool operator()(Type<T> const&) const {
@@ -278,12 +231,10 @@ struct StrongTypedefT {
     }
 };
 
-
 ///
 /// Tests if type is `type_safe::strong_typedef`
 ///
 constexpr StrongTypedefT strongTypeDef;
-
 
 template <typename T>
 struct ConstrainedTypeImpl {
@@ -293,7 +244,6 @@ struct ConstrainedTypeImpl {
     static constexpr auto const value = decltype(test(std::declval<T>()))();
 };
 
-
 struct ConstrainedTypeT {
     template <typename T>
     constexpr bool operator()(Type<T> const&) const {
@@ -301,12 +251,10 @@ struct ConstrainedTypeT {
     }
 };
 
-
 ///
 /// Tests if type is `type_safe::constrained_type`
 ///
 constexpr ConstrainedTypeT constrainedType;
-
 
 template <typename T>
 struct IntegerTypeImpl {
@@ -316,7 +264,6 @@ struct IntegerTypeImpl {
     static constexpr auto const value = decltype(test(std::declval<T>()))();
 };
 
-
 struct IntegerTypeT {
     template <typename T>
     constexpr bool operator()(Type<T> const&) const {
@@ -324,12 +271,10 @@ struct IntegerTypeT {
     }
 };
 
-
 ///
 /// Tests if type is `type_safe::integer`
 ///
 constexpr IntegerTypeT integerType;
-
 
 template <typename T>
 struct FloatingPointTypeImpl {
@@ -339,7 +284,6 @@ struct FloatingPointTypeImpl {
     static constexpr auto const value = decltype(test(std::declval<T>()))();
 };
 
-
 struct FloatingPointTypeT {
     template <typename T>
     constexpr bool operator()(Type<T> const&) const {
@@ -347,20 +291,16 @@ struct FloatingPointTypeT {
     }
 };
 
-
 ///
 /// Tests if type is `type_safe::integer`
 ///
 constexpr FloatingPointTypeT floatingPoint;
 
-
 template <typename T>
 struct BooleanTypeImpl : std::false_type {};
 
-
 template <>
 struct BooleanTypeImpl<type_safe::boolean> : std::true_type {};
-
 
 struct BooleanTypeT {
     template <typename T>
@@ -369,17 +309,14 @@ struct BooleanTypeT {
     }
 };
 
-
 ///
 /// Tests if type is `type_safe::integer`
 ///
 constexpr BooleanTypeT boolean;
 #endif
 
-
 constexpr auto const hasStrings = boost::hana::is_valid(
-    [](auto t) -> decltype((void) decltype(t)::type::strings()) {
-});
+    [](auto t) -> decltype((void)decltype(t)::type::strings()) {
+    });
 
-
-}
+} // namespace serialize
