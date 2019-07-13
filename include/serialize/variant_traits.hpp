@@ -67,14 +67,6 @@ constexpr bool presentInDefaults(S name) {
     return boost::hana::value<Found>();
 }
 
-/// Is `name` is present in `defaults()` of `T`
-template <typename T, typename S>
-constexpr bool presentInNames(S name) {
-    using Found = decltype(
-        name ^ boost::hana::in ^ boost::hana::keys(T::names()));
-    return boost::hana::value<Found>();
-}
-
 /// Does type of provided entry in `defaults()` for `name` is `NoDefault`
 template <typename T, typename S>
 constexpr bool noDefault(S name) {
@@ -102,6 +94,14 @@ struct Rename {
     static constexpr auto const hasNames = boost::hana::is_valid(
         [](auto t) -> decltype((void)decltype(t)::type::names()) {
         });
+
+    /// Is `name` is present in `defaults()` of `T`
+    template <typename T, typename S>
+    static constexpr bool presentInNames(S name) {
+        using Found = decltype(
+            name ^ boost::hana::in ^ boost::hana::keys(T::names()));
+        return boost::hana::value<Found>();
+    }
 
     /// Does the field `name` has a name value in the class `C`
     template <typename T, typename S>
