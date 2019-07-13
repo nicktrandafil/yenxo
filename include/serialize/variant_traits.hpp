@@ -70,7 +70,7 @@ constexpr bool presentInDefaults(S name) {
 /// Does type of provided entry in `defaults()` for `name` is `NoDefault`
 template <typename T, typename S>
 constexpr bool noDefault(S name) {
-    return std::is_same_v<std::decay_t<decltype(T::defaults()[name])>,
+    return std::is_same_v<std::remove_reference_t<decltype(T::defaults()[name])>,
                           NoDefault>;
 }
 
@@ -266,8 +266,8 @@ struct VarDef {
                     if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
                         if constexpr (!Policy::serialize_default_value && detail::hasDefaultValue<Derived>(name)) {
                             static_assert(std::is_convertible_v<
-                                              std::decay_t<decltype(Derived::defaults()[name])>,
-                                              std::decay_t<decltype(value)>>,
+                                              std::remove_reference_t<decltype(Derived::defaults()[name])>,
+                                              std::remove_reference_t<decltype(value)>>,
                                           "Default value should be convertible to field type");
                             if (Derived::defaults()[name] == value) {
                                 return;
@@ -308,8 +308,8 @@ struct VarDef {
                     if constexpr (detail::hasDefaults(boost::hana::type_c<Derived>)) {
                         if constexpr (detail::hasDefaultValue<Derived>(name)) {
                             static_assert(std::is_convertible_v<
-                                              std::decay_t<decltype(Derived::defaults()[name])>,
-                                              std::decay_t<decltype(value(std::declval<Derived>()))>>,
+                                              std::remove_reference_t<decltype(Derived::defaults()[name])>,
+                                              std::remove_reference_t<decltype(value(std::declval<Derived>()))>>,
                                           "Default value should be convertible to field type");
                             tmp = Derived::defaults()[name];
                             return;
