@@ -447,6 +447,34 @@ struct StrStruct
                              (S1, str));
 };
 
+struct CamelCase {
+    template <class T, class S>
+    std::string operator()(Type<T>, S name) const {
+        std::string renamed = boost::hana::to<char const*>(name);
+        assert(renamed.size());
+        renamed[0] = char(std::tolower(renamed[0]));
+        for (size_t i = 0; i < renamed.size();) {
+            if (renamed[i] == '_' && i + 1 < renamed.size()) {
+                renamed[i + 1] = char(toupper(renamed[i + 1]));
+                renamed.erase(i, 1);
+            } else {
+                ++i;
+            }
+        }
+        return renamed;
+    }
+};
+
+struct CamelCasePolicy : trait::VarDefPolicy {
+    static constexpr CamelCase rename{};
+};
+
+struct AutoCamelCase : trait::VarDef<AutoCamelCase, CamelCasePolicy>,
+                       trait::EqualityComparison<AutoCamelCase> {
+    BOOST_HANA_DEFINE_STRUCT(AutoCamelCase,
+                             (std::string, hello_world_2_boo));
+};
+
 } // namespace
 
 BOOST_HANA_ADAPT_STRUCT(PersonD, name, age, hobby);
@@ -530,13 +558,22 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
         REQUIRE(Variant(p3) == Variant(VariantMap{{"i", Variant(2)}}));
     }
 
-    SECTION("rename") {
+    SECTION("default rename") {
         Variant expected(VariantMap{{"y", Variant(2)}});
         Variant wrong(VariantMap{{"z", Variant(2)}});
         REQUIRE(fromVariant<St3>(expected) == St3(2));
         REQUIRE(toVariant(St3(2)) == expected);
         REQUIRE_THROWS_AS(fromVariant<St3>(wrong), std::logic_error);
         REQUIRE_THROWS_WITH(fromVariant<St3>(wrong), "'y' is required");
+    }
+
+    SECTION("rename policy") {
+        Variant var(VariantMap{{"helloWorld2Boo", Variant("")}});
+        AutoCamelCase st;
+        REQUIRE(toVariant(st) == var);
+        var.modifyMap().begin()->second = Variant("a");
+        st.hello_world_2_boo = "a";
+        REQUIRE(fromVariant<AutoCamelCase>(var) == st);
     }
 }
 

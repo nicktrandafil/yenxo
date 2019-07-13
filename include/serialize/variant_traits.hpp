@@ -49,11 +49,6 @@ constexpr auto const hasDefaults = boost::hana::is_valid(
     [](auto t) -> decltype((void)decltype(t)::type::defaults()) {
     });
 
-/// Does a type has a static member function `names()`
-constexpr auto const hasNames = boost::hana::is_valid(
-    [](auto t) -> decltype((void)decltype(t)::type::names()) {
-    });
-
 /// Is the type a container
 constexpr auto const isContainer = boost::hana::is_valid(
     [](auto t) -> decltype((void)begin(std::declval<typename decltype(t)::type>())) {
@@ -102,25 +97,39 @@ constexpr bool hasDefaultValue(S name) {
     }
 }
 
-/// Does the field `name` has a name value in the class `C`
-template <typename T, typename S>
-constexpr bool hasNameValue(S name) {
-    if constexpr (hasNames(boost::hana::type_c<T>)) {
-        return presentInNames<T>(name);
-    } else {
-        (void)name;
-        return false;
-    }
-}
+struct Rename {
+    /// Does a type has a static member function `names()`
+    static constexpr auto const hasNames = boost::hana::is_valid(
+        [](auto t) -> decltype((void)decltype(t)::type::names()) {
+        });
 
-template <typename T, typename S>
-auto rename(S name) {
-    if constexpr (hasNameValue<T>(name)) {
-        return T::names()[name];
-    } else {
-        return boost::hana::to<char const*>(name);
+    /// Does the field `name` has a name value in the class `C`
+    template <typename T, typename S>
+    static constexpr bool hasNameValue(S name) {
+        if constexpr (hasNames(boost::hana::type_c<T>)) {
+            return presentInNames<T>(name);
+        } else {
+            (void)name;
+            return false;
+        }
     }
-}
+
+    /// \return name from map returned by `T::names()` static member function,
+    ///         if present, else identity
+    template <typename T, typename S>
+    static char const* rename(S name) {
+        if constexpr (hasNameValue<T>(name)) {
+            return T::names()[name];
+        } else {
+            return boost::hana::to<char const*>(name);
+        }
+    }
+
+    template <class T, class S>
+    char const* operator()(Type<T>, S name) const noexcept {
+        return rename<T>(name);
+    }
+};
 
 template <typename T>
 constexpr void checkOrphanKeysInDefaults(Type<T> const&) {
@@ -138,8 +147,8 @@ void toVariantWrap(Variant& var, T&& val, F const& to_variant = toVariant2) {
     to_variant(var, std::forward<T>(val));
 }
 
-template <typename T, typename F = decltype(fromVariant2)>
-void fromVariantWrap(T& val, Variant const& var, char const* name, F const& from_variant = fromVariant2) {
+template <typename T, typename S, typename F = decltype(fromVariant2)>
+void fromVariantWrap(T& val, Variant const& var, S const& name, F const& from_variant = fromVariant2) {
     try {
         return from_variant(val, var);
     } catch (serialize::VariantErr& e) {
@@ -154,6 +163,24 @@ void fromVariantWrap(T& val, Variant const& var, char const* name, F const& from
 
 } // namespace detail
 
+/// Configuaratoin for `VarDef`
+struct VarDefPolicy {
+    /// treat missing keys as empty containers
+    static auto constexpr empty_container_not_required = false;
+
+    /// serialize a value even if it has it's default value
+    static auto constexpr serialize_default_value = true;
+
+    /// from variant conversion functional object
+    static constexpr auto from_variant = fromVariant2;
+
+    /// to variant conversion function object
+    static constexpr auto to_variant = toVariant2;
+
+    /// rename function object
+    static constexpr detail::Rename rename{};
+};
+
 /// Adds conversion support to and from `Variant`
 /// Specifically, adds methods:
 ///     `static Variant toVariant(Derived)`
@@ -162,14 +189,14 @@ void fromVariantWrap(T& val, Variant const& var, char const* name, F const& from
 /// The methods does not deal with optional types and default values. Therefore,
 /// for the method `fromVariant` all members must be presented in a variant,
 /// and, for the method `toVariant` all fields will be serialized into a variant
-template <typename Derived>
+template <typename Derived, typename Policy = VarDefPolicy>
 struct Var {
     static Variant toVariant(Derived const& x) {
         Variant::Map ret;
 
         boost::hana::for_each(
             x, boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = detail::rename<Derived>(name);
+                auto const renamed = Policy::rename(type_c<Derived>, name);
                 if constexpr (isOptional(type_c<decltype(value)>)) {
                     if (value.has_value()) {
                         detail::toVariantWrap(ret[renamed], *value);
@@ -192,7 +219,7 @@ struct Var {
         boost::hana::for_each(
             boost::hana::accessors<Derived>(),
             boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = detail::rename<Derived>(name);
+                auto const renamed = Policy::rename(type_c<Derived>, name);
                 auto& tmp = value(ret);
                 auto const it = map.find(renamed);
                 if (map.end() == it) {
@@ -215,21 +242,6 @@ protected:
     ~Var() = default;
 };
 
-/// Configuaratoin for `VarDef`
-struct VarDefPolicy {
-    /// treat missing keys as empty containers
-    static auto constexpr empty_container_not_required = false;
-
-    /// serialize a value even if it has it's default value
-    static auto constexpr serialize_default_value = true;
-
-    /// from variant conversion functional object
-    static constexpr auto from_variant = fromVariant2;
-
-    /// to variant conversion function object
-    static constexpr auto to_variant = toVariant2;
-};
-
 /// Adds conversion support to and from `Variant`, defaulting missings fields
 /// Specifically adds members:
 ///     `static Variant toVariant(Derived)`
@@ -245,7 +257,7 @@ struct VarDef {
 
         boost::hana::for_each(
             x, boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = detail::rename<Derived>(name);
+                auto const renamed = Policy::rename(type_c<Derived>, name);
                 if constexpr (isOptional(type_c<decltype(value)>)) {
                     if (value.has_value()) {
                         detail::toVariantWrap(ret[renamed], *value, Policy::to_variant);
@@ -288,7 +300,7 @@ struct VarDef {
         boost::hana::for_each(
             boost::hana::accessors<Derived>(),
             boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = detail::rename<Derived>(name);
+                auto const renamed = Policy::rename(type_c<Derived>, name);
                 auto& tmp = value(ret);
                 auto const it = map.find(renamed);
 
@@ -381,7 +393,7 @@ protected:
 
 /// Adds member `void update(Variant)`
 /// Updates the specified fields
-template <typename Derived>
+template <typename Derived, typename Policy = VarDefPolicy>
 struct UpdateFromVar {
     void updateVar(Variant const& x) {
         Derived& self = static_cast<Derived&>(*this);
@@ -391,7 +403,7 @@ struct UpdateFromVar {
             boost::hana::for_each(
                 boost::hana::accessors<Derived>(),
                 boost::hana::fuse([&](auto name, auto value) {
-                    auto const renamed = detail::rename<Derived>(name);
+                    auto const renamed = Policy::rename(type_c<Derived>, name);
                     if (renamed != v.first) {
                         return;
                     }
