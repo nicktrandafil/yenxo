@@ -16,4 +16,4 @@ target_compile_options(${PROJECT_NAME}_development INTERFACE
   $<$<CXX_COMPILER_ID:GNU>:${generator}>)
 
 target_link_libraries(${PROJECT_NAME}_development INTERFACE
-$<$<CXX_COMPILER_ID:GNU>:${generator}>)
+  $<$<CXX_COMPILER_ID:GNU>:${generator}>)

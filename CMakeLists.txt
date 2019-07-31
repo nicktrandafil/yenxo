@@ -33,18 +33,14 @@ endif()
 
 option(${PROJECT_NAME}_test_define_struct "Enable testing of DEFINE_STRUCT" OFF)
 
-if(NOT ${PROJECT_NAME}_sub)
-    option(CMAKE_BUILD_TYPE "Build type" Release)
-endif()
+cmake_dependent_option(${PROJECT_NAME}_TESTING
+  "Enable testing"
+  ON "NOT ${PROJECT_NAME}_sub" OFF
+)
 
 cmake_dependent_option(${PROJECT_NAME}_COVERAGE
   "Enable binary instrumentation to collect test coverage information in the DEBUG configuration"
   ON "NOT ${PROJECT_NAME}_sub AND ${PROJECT_NAME}_TESTING AND ${CMAKE_BUILD_TYPE} STREQUAL Debug" OFF
-)
-
-cmake_dependent_option(${PROJECT_NAME}_TESTING
-  "Enable testing"
-  ON "NOT ${PROJECT_NAME}_sub" OFF
 )
 
 

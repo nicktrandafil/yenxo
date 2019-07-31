@@ -117,7 +117,7 @@ struct ToVariantImpl<T, When<hasToVariant(type_c<T>)>> {
 
 /// Specialization for Variant build-in supported types
 template <typename T>
-struct ToVariantImpl<T, When<Variant::Types::convertible<T>()>> {
+struct ToVariantImpl<T, When<!std::is_enum_v<T> && Variant::Types::convertible<T>()>> {
     static Variant apply(T x) { return Variant(x); }
 };
 

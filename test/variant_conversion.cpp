@@ -66,6 +66,29 @@ struct Test {
 };
 
 
+enum E2 {
+    val1,
+    val2
+};
+
+
+struct E2Traits {
+    using Enum = E2;
+    static constexpr auto count = 2;
+    [[maybe_unused]] static constexpr std::array<Enum, count> values{Enum::val1, Enum::val2};
+    static char  const* toString(Enum x) {
+        switch (x) {
+            case Enum::val1: return "val1";
+            case Enum::val2: return "val2";
+        }
+        throw 1;
+    }
+};
+
+
+E2Traits traits(E2) { return {}; }
+
+
 }
 
 
@@ -86,4 +109,6 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
     REQUIRE(toVariant(Test()) == Variant());
 
     REQUIRE(Variant(1) == toVariant(Variant(1)));
+
+    REQUIRE(Variant("val1") == toVariant(E2::val1));
 }
