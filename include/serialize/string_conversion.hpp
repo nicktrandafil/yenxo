@@ -48,7 +48,7 @@ struct StringConversionError : public std::logic_error {
         : std::logic_error(
               "'" + value + "'" +
               " is not of type '" +
-              std::string(unqualifiedTypeName<std::decay_t<T>>()) +
+              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<T>>>()) +
               "'") {}
 };
 
@@ -96,8 +96,8 @@ struct ToStringImpl<T, When<detail::Valid<decltype(
 
 struct ToStringT {
     template <typename T>
-    std::string operator()(T const& x) const {
-        return ToStringImpl<T>::apply(x);
+    std::string operator()(T&& x) const {
+        return ToStringImpl<std::decay_t<T>>::apply(std::forward<T>(x));
     }
 };
 
@@ -175,7 +175,7 @@ struct FromStringImpl<T, When<
 template <typename T>
 struct FromStringT {
     auto operator()(std::string const& x) const {
-        return FromStringImpl<std::decay_t<T>>::apply(x);
+        return FromStringImpl<std::remove_cv_t<std::remove_reference_t<T>>>::apply(x);
     }
 };
 

@@ -130,7 +130,7 @@ struct IsOptional<std::optional<T>> : std::true_type {};
 
 template <typename T>
 constexpr auto isOptional(serialize::Type<T>) {
-    return IsOptional<std::decay_t<T>>::value;
+    return IsOptional<std::remove_cv_t<std::remove_reference_t<T>>>::value;
 }
 
 namespace detail {

@@ -55,7 +55,7 @@ struct HasToVariantImpl {
 struct HasToVariantT {
     template <typename T>
     constexpr auto operator()(Type<T> const&) const {
-        return HasToVariantImpl<std::decay_t<T>>::value;
+        return HasToVariantImpl<T>::value;
     }
 };
 
@@ -83,7 +83,7 @@ struct HasFromVariantImpl {
 struct HasFromVariantT {
     template <typename T>
     constexpr auto operator()(Type<T> const&) const {
-        return HasFromVariantImpl<std::decay_t<T>>::value;
+        return HasFromVariantImpl<T>::value;
     }
 };
 
@@ -178,8 +178,7 @@ struct ToVariantImpl<T, When<
 template <typename T>
 struct ToVariantImpl<T, When<constrainedType(type_c<T>)>> {
     static Variant apply(T const& st) {
-        return ToVariantImpl<std::decay_t<typename T::value_type>>::apply(
-            st.get_value());
+        return ToVariantImpl<typename T::value_type>::apply(st.get_value());
     }
 };
 
@@ -236,7 +235,7 @@ struct HanaMapImpl {
 struct HanaMapT {
     template <typename T>
     constexpr bool operator()(Type<T> const&) const {
-        return HanaMapImpl<std::decay_t<T>>::value;
+        return HanaMapImpl<T>::value;
     }
 };
 
@@ -422,7 +421,7 @@ struct FromVariantImpl<T, When<
 template <typename T>
 struct FromVariantImpl<T, When<constrainedType(type_c<T>)>> {
     static T apply(Variant const& var) {
-        return T(FromVariantImpl<std::decay_t<typename T::value_type>>::apply(var));
+        return T(FromVariantImpl<typename T::value_type>::apply(var));
     }
 };
 
@@ -511,7 +510,7 @@ struct FromVariantImpl<T, When<
 
 template <typename T>
 auto FromVariantT<T>::operator()(Variant const& x) const {
-    return FromVariantImpl<std::decay_t<T>>::apply(x);
+    return FromVariantImpl<std::remove_cv_t<std::remove_reference_t<T>>>::apply(x);
 }
 
 struct ToVariantT2 {

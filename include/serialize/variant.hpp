@@ -68,7 +68,7 @@ public:
     template <class T>
     explicit VariantEmpty(Type<T>)
         : VariantErr("expected '" +
-                     std::string(unqualifiedTypeName<std::decay_t<T>>()) +
+                     std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<T>>>()) +
                      "', actual: 'Empty'") {}
 };
 
@@ -79,9 +79,9 @@ public:
     VariantBadType(Type<E>, Type<A>)
         : VariantErr(
               "expected '" +
-              std::string(unqualifiedTypeName<std::decay_t<E>>()) +
+              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<E>>>()) +
               "', actual '" +
-              std::string(unqualifiedTypeName<std::decay_t<A>>()) +
+              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<A>>>()) +
               "'") {}
 
     VariantBadType(std::string const& msg) : VariantErr(msg) {}
@@ -91,7 +91,7 @@ public:
         : VariantErr(
               "'" + value + "'" +
               " is not of type '" +
-              std::string(unqualifiedTypeName<std::decay_t<T>>()) +
+              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<T>>>()) +
               "'") {}
 };
 

@@ -44,7 +44,7 @@ class BadEnumValue : public std::runtime_error {
         : std::runtime_error(
               "'" + std::to_string(std::underlying_type_t<E>(v)) + "'" +
               " is not of type '" +
-              std::string(unqualifiedTypeName<std::decay_t<E>>()) + "'") {}
+              std::string(unqualifiedTypeName<E>()) + "'") {}
 };
 
 } // namespace serialize

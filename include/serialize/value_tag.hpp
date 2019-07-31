@@ -44,7 +44,7 @@ template <class T>
 struct Default {
     template <class U, class = std::enable_if_t<
                            !std::is_trivial_v<T> &&
-                           !std::is_same_v<std::decay_t<U>, Default>>>
+                           !std::is_same_v<std::remove_cv_t<std::remove_reference_t<U>>, Default>>>
     explicit Default(U&& x) : value(std::forward<U>(x)) {}
 
     template <class U, class = std::enable_if_t<
@@ -56,7 +56,7 @@ struct Default {
 };
 
 template <class T>
-Default(T)->Default<std::decay_t<T>>;
+Default(T)->Default<T>;
 
 /// A name tag
 struct Name {
@@ -88,7 +88,7 @@ auto filterDefaults(M&& m) {
                             boost::hana::remove_if(
                                 x,
                                 [](auto const& x) {
-                                    return std::negation<WrappedInDefault<std::decay_t<decltype(x)>>>();
+                                    return std::negation<WrappedInDefault<std::remove_cv_t<std::remove_reference_t<decltype(x)>>>>();
                                 }),
                             boost::hana::at_c<0>(x));
                     }),
@@ -110,7 +110,7 @@ auto filterNames(M&& m) {
                             boost::hana::remove_if(
                                 x,
                                 [](auto const& x) {
-                                    return std::negation<std::is_same<Name, std::decay_t<decltype(x)>>>();
+                                    return std::negation<std::is_same<Name, std::remove_cv_t<std::remove_reference_t<decltype(x)>>>>();
                                 }),
                             boost::hana::at_c<0>(x));
                     }),
