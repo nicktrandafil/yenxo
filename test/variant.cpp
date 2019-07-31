@@ -39,6 +39,9 @@ namespace hana = boost::hana;
 using namespace serialize;
 
 TEST_CASE("Check Variant", "[Variant]") {
+    REQUIRE(Variant().empty());
+    REQUIRE(!Variant(1).empty());
+
     SECTION("boolean") {
         bool const expected{true};
         auto const x = Variant(expected);
@@ -263,7 +266,8 @@ TEST_CASE("Check Variant", "[Variant]") {
                     "z": {
                         "a": "a",
                         "b": "b"
-                    }
+                    },
+                    "a": null
                 }
             )";
             Variant expected{Variant::Map{
@@ -271,7 +275,8 @@ TEST_CASE("Check Variant", "[Variant]") {
                 std::make_pair("y", Variant(Variant::Vec{Variant(1), Variant(2)})),
                 std::make_pair("z", Variant(Variant::Map{
                                         std::make_pair("a", Variant("a")),
-                                        std::make_pair("b", Variant("b"))}))}};
+                                        std::make_pair("b", Variant("b"))})),
+                std::make_pair("a", Variant())}};
             REQUIRE(expected == Variant::from(rapidjson::Document().Parse(raw)));
         }
     }
@@ -293,7 +298,8 @@ TEST_CASE("Check Variant", "[Variant]") {
                     "z": {
                         "a": "a",
                         "b": "b"
-                    }
+                    },
+                    "a": null
                 }
             )";
 
@@ -306,7 +312,8 @@ TEST_CASE("Check Variant", "[Variant]") {
                         std::make_pair("y", Variant(Variant::Vec{Variant(1), Variant(2)})),
                         std::make_pair("z", Variant(Variant::Map{
                                                 std::make_pair("a", Variant("a")),
-                                                std::make_pair("b", Variant("b"))}))}}
+                                                std::make_pair("b", Variant("b"))})),
+                        std::make_pair("a", Variant())}}
                 .to(json);
 
             REQUIRE(expected == json);
