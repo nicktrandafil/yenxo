@@ -38,11 +38,6 @@
 namespace serialize::trait {
 namespace detail {
 
-/// Is the type a container
-constexpr auto const isContainer = boost::hana::is_valid(
-    [](auto t) -> decltype((void)begin(std::declval<typename decltype(t)::type>())) {
-    });
-
 /// Has member `updateVar(serialize::Variant const&)`
 constexpr auto const hasUpdateVar = boost::hana::is_valid(
     [](auto t) -> decltype((void)std::declval<typename decltype(t)::type>().updateVar(std::declval<Variant>())) {
@@ -247,8 +242,7 @@ struct VarDef {
                         }
                     }
 
-                    if constexpr (detail::isContainer(
-                                      boost::hana::type_c<decltype(value)>)) {
+                    if constexpr (isContainer(type_c<decltype(value)>)) {
                         if constexpr (!Policy::empty_container_not_required) {
                             detail::toVariantWrap(ret[renamed], value, Policy::to_variant);
                         } else if (begin(value) != end(value)) {

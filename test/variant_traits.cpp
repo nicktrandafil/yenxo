@@ -411,7 +411,8 @@ struct PersonE2
 
     BOOST_HANA_DEFINE_STRUCT(PersonE2,
                              (std::vector<int>, cont),
-                             (int, i));
+                             (int, i),
+                             (std::string, s));
 };
 
 struct St3 : trait::VarDef<St3>, trait::EqualityComparison<St3> {
@@ -555,7 +556,7 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
 
         PersonE2 p3;
         p3.i = 2;
-        REQUIRE(Variant(p3) == Variant(VariantMap{{"i", Variant(2)}}));
+        REQUIRE(Variant(p3) == Variant(VariantMap{{"i", Variant(2)}, {"s", Variant("")}}));
     }
 
     SECTION("default rename") {
