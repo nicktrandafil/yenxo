@@ -86,7 +86,7 @@ struct E2Traits {
 };
 
 
-E2Traits traits(E2) { return {}; }
+[[maybe_unused]] E2Traits traits(E2) { return {}; }
 
 
 }
