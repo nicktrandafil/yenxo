@@ -70,15 +70,13 @@ struct WrappedInDefault : std::false_type {};
 template <class T>
 struct WrappedInDefault<Default<T>> : std::true_type {};
 
-constexpr auto const unwrap = [](auto&& x) {
-    return boost::hana::make_pair(
-        boost::hana::at_c<0>(std::forward<decltype(x)>(x)),
-        boost::hana::at_c<1>(std::forward<decltype(x)>(x)).value);
+constexpr auto const unwrap = [](auto const& x) {
+    return boost::hana::make_pair(boost::hana::at_c<0>(x), boost::hana::at_c<1>(x).value);
 };
 
 template <class M>
 auto filterDefaults(M&& m) {
-    return boost::hana::to_map(
+    return boost::hana::unpack(
         boost::hana::transform(
             boost::hana::filter(
                 boost::hana::transform(
@@ -95,12 +93,13 @@ auto filterDefaults(M&& m) {
                 [](auto const& x) {
                     return boost::hana::length(x) > boost::hana::size_c<1>;
                 }),
-            unwrap));
+            unwrap),
+        boost::hana::make_map);
 }
 
 template <class M>
 auto filterNames(M&& m) {
-    return boost::hana::to_map(
+    return boost::hana::unpack(
         boost::hana::transform(
             boost::hana::filter(
                 boost::hana::transform(
@@ -117,7 +116,8 @@ auto filterNames(M&& m) {
                 [](auto const& x) {
                     return boost::hana::length(x) > boost::hana::size_c<1>;
                 }),
-            unwrap));
+            unwrap),
+        boost::hana::make_map);
 }
 
 } // namespace serialize
