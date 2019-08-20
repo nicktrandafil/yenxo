@@ -88,6 +88,8 @@ add_library(
 
     include/${PROJECT_NAME}/genuine_struct.hpp
 
+    include/serialize.hpp
+
     src/variant.cpp
 )
 
@@ -164,6 +166,9 @@ if(NOT ${PROJECT_NAME}_sub AND ${PROJECT_NAME}_all_imported_deps)
 else()
     install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 endif()
+
+# Doc
+add_subdirectory(doc)
 
 
 # Testing

@@ -37,6 +37,7 @@
 
 namespace serialize {
 
+/// \ingroup group-exceptions
 /// An error identifying `Variant` error
 class VariantErr : public std::exception {
 public:
@@ -62,6 +63,7 @@ private:
     std::string path_;
 };
 
+/// \ingroup group-exceptions
 /// Empty Variant error
 class VariantEmpty final : public VariantErr {
 public:
@@ -72,6 +74,7 @@ public:
                      "', actual: 'Empty'") {}
 };
 
+/// \ingroup goup-exceptions
 /// Bad type error
 class VariantBadType final : public VariantErr {
 public:
@@ -95,6 +98,7 @@ public:
               "'") {}
 };
 
+/// \ingroup group-exceptions
 /// User tried to get a type which is not able to hold the actual value
 class VariantIntegralOverflow final : public VariantErr {
 public:
@@ -105,7 +109,8 @@ public:
                      type_name + "' can not hold the value '" + value + "'") {}
 };
 
-/// Serialized object reprezentation class
+/// \ingroup group-datatypes
+/// Serialized object representation. Think of it as an DOM object.
 class Variant {
 public:
     using Map = std::unordered_map<std::string, Variant>;
