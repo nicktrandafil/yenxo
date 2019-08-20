@@ -66,7 +66,7 @@ private:
 class VariantEmpty final : public VariantErr {
 public:
     template <class T>
-    explicit VariantEmpty(Type<T>)
+    explicit VariantEmpty(boost::hana::basic_type<T>)
         : VariantErr("expected '" +
                      std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<T>>>()) +
                      "', actual: 'Empty'") {}
@@ -76,7 +76,7 @@ public:
 class VariantBadType final : public VariantErr {
 public:
     template <class E, class A>
-    VariantBadType(Type<E>, Type<A>)
+    VariantBadType(boost::hana::basic_type<E>, boost::hana::basic_type<A>)
         : VariantErr(
               "expected '" +
               std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<E>>>()) +
@@ -87,7 +87,7 @@ public:
     VariantBadType(std::string const& msg) : VariantErr(msg) {}
 
     template <class T>
-    VariantBadType(std::string const& value, Type<T>)
+    VariantBadType(std::string const& value, boost::hana::basic_type<T>)
         : VariantErr(
               "'" + value + "'" +
               " is not of type '" +

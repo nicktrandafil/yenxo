@@ -51,7 +51,7 @@ struct Default {
 
     /// Does the field `name` has a default value in the class `C`
     template <typename T, typename S>
-    static constexpr bool hasValue(Type<T>, S name) {
+    static constexpr bool hasValue(boost::hana::basic_type<T>, S name) {
         using Found = decltype(
             name ^ boost::hana::in ^ boost::hana::keys(T::defaults()));
         return boost::hana::value<Found>();
@@ -59,7 +59,7 @@ struct Default {
 
     /// Default value for `name`
     template <class T, class S>
-    static auto value(Type<T>, S name) {
+    static auto value(boost::hana::basic_type<T>, S name) {
         return T::defaults()[name];
     }
 };
@@ -101,7 +101,7 @@ struct Rename {
     }
 
     template <class T, class S>
-    char const* operator()(Type<T>, S name) const noexcept {
+    char const* operator()(boost::hana::basic_type<T>, S name) const noexcept {
         return rename<T>(name);
     }
 };
@@ -163,8 +163,8 @@ struct Var {
 
         boost::hana::for_each(
             x, boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = Policy::rename(type_c<Derived>, name);
-                if constexpr (isOptional(type_c<decltype(value)>)) {
+                auto const renamed = Policy::rename(boost::hana::type_c<Derived>, name);
+                if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
                     if (value.has_value()) {
                         detail::toVariantWrap(ret[renamed], *value);
                     } else {
@@ -186,13 +186,13 @@ struct Var {
         boost::hana::for_each(
             boost::hana::accessors<Derived>(),
             boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = Policy::rename(type_c<Derived>, name);
+                auto const renamed = Policy::rename(boost::hana::type_c<Derived>, name);
                 auto& tmp = value(ret);
                 auto const it = map.find(renamed);
                 if (map.end() == it) {
                     throw std::logic_error("'"s + renamed + "' is required"s);
                 } else {
-                    if constexpr (isOptional(type_c<decltype(tmp)>)) {
+                    if constexpr (isOptional(boost::hana::type_c<decltype(tmp)>)) {
                         std::remove_reference_t<decltype(*tmp)> under;
                         detail::fromVariantWrap(under, it->second, renamed);
                         tmp = std::move(under);
@@ -224,25 +224,25 @@ struct VarDef {
 
         boost::hana::for_each(
             x, boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = Policy::rename(type_c<Derived>, name);
-                if constexpr (isOptional(type_c<decltype(value)>)) {
+                auto const renamed = Policy::rename(boost::hana::type_c<Derived>, name);
+                if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
                     if (value.has_value()) {
                         detail::toVariantWrap(ret[renamed], *value, Policy::to_variant);
                     }
                 } else {
-                    if constexpr (Policy::Defaults::has(type_c<Derived>)) {
-                        if constexpr (!Policy::serialize_default_value && Policy::Defaults::hasValue(type_c<Derived>, name)) {
+                    if constexpr (Policy::Defaults::has(boost::hana::type_c<Derived>)) {
+                        if constexpr (!Policy::serialize_default_value && Policy::Defaults::hasValue(boost::hana::type_c<Derived>, name)) {
                             static_assert(std::is_convertible_v<
-                                              decltype(Policy::Defaults::value(type_c<Derived>, name)),
+                                              decltype(Policy::Defaults::value(boost::hana::type_c<Derived>, name)),
                                               std::remove_reference_t<decltype(value)>>,
                                           "Default value should be convertible to field type");
-                            if (Policy::Defaults::value(type_c<Derived>, name) == value) {
+                            if (Policy::Defaults::value(boost::hana::type_c<Derived>, name) == value) {
                                 return;
                             }
                         }
                     }
 
-                    if constexpr (isContainer(type_c<decltype(value)>)) {
+                    if constexpr (isContainer(boost::hana::type_c<decltype(value)>)) {
                         if constexpr (!Policy::empty_container_not_required) {
                             detail::toVariantWrap(ret[renamed], value, Policy::to_variant);
                         } else if (begin(value) != end(value)) {
@@ -266,32 +266,32 @@ struct VarDef {
         boost::hana::for_each(
             boost::hana::accessors<Derived>(),
             boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = Policy::rename(type_c<Derived>, name);
+                auto const renamed = Policy::rename(boost::hana::type_c<Derived>, name);
                 auto& tmp = value(ret);
                 auto const it = map.find(renamed);
 
                 if (map.end() == it) {
                     if constexpr (Policy::Defaults::has(boost::hana::type_c<Derived>)) {
-                        if constexpr (Policy::Defaults::hasValue(type_c<Derived>, name)) {
+                        if constexpr (Policy::Defaults::hasValue(boost::hana::type_c<Derived>, name)) {
                             static_assert(std::is_convertible_v<
-                                              decltype(Policy::Defaults::value(type_c<Derived>, name)),
+                                              decltype(Policy::Defaults::value(boost::hana::type_c<Derived>, name)),
                                               std::remove_reference_t<decltype(value(std::declval<Derived>()))>>,
                                           "Default value should be convertible to field type");
-                            tmp = Policy::Defaults::value(type_c<Derived>, name);
+                            tmp = Policy::Defaults::value(boost::hana::type_c<Derived>, name);
                             return;
                         }
                     }
 
                     if constexpr (
-                        !isOptional(type_c<decltype(tmp)>) &&
-                        ((isContainer(type_c<decltype(tmp)>) &&
+                        !isOptional(boost::hana::type_c<decltype(tmp)>) &&
+                        ((isContainer(boost::hana::type_c<decltype(tmp)>) &&
                           !Policy::empty_container_not_required) ||
-                         !isContainer(type_c<decltype(tmp)>))) {
+                         !isContainer(boost::hana::type_c<decltype(tmp)>))) {
                         throw std::logic_error("'"s + renamed + "' is required"s);
                     }
 
                 } else {
-                    if constexpr (isOptional(type_c<decltype(tmp)>)) {
+                    if constexpr (isOptional(boost::hana::type_c<decltype(tmp)>)) {
                         std::remove_reference_t<decltype(*tmp)> under;
                         detail::fromVariantWrap(under, it->second, renamed, Policy::from_variant);
                         tmp = std::move(under);
@@ -320,7 +320,7 @@ struct UpdateFromVar {
             boost::hana::for_each(
                 boost::hana::accessors<Derived>(),
                 boost::hana::fuse([&](auto name, auto value) {
-                    auto const renamed = Policy::rename(type_c<Derived>, name);
+                    auto const renamed = Policy::rename(boost::hana::type_c<Derived>, name);
                     if (renamed != v.first) {
                         return;
                     }
@@ -353,7 +353,7 @@ struct UpdateFromOpt {
             x,
             boost::hana::fuse([&](auto rkey, auto rvalue) {
                 auto found = boost::hana::to_map(boost::hana::accessors<Derived>())[rkey];
-                if constexpr (isOptional(type_c<decltype(rvalue)>)) {
+                if constexpr (isOptional(boost::hana::type_c<decltype(rvalue)>)) {
                     if (rvalue) {
                         found(self) = *rvalue;
                     }

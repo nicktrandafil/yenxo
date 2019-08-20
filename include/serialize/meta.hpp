@@ -57,7 +57,7 @@ struct S {
     template <typename Key>
     constexpr static bool convertible() {
         return boost::hana::any_of(
-            boost::hana::tuple<boost::hana::type<Args>...>{},
+            boost::hana::tuple_t<Args...>,
             [](auto x) {
                 return std::is_convertible_v<Key, typename decltype(x)::type>;
             });
@@ -65,8 +65,7 @@ struct S {
 
     template <typename Key>
     constexpr static bool anyOf() {
-        return boost::hana::type_c<Key> ^ boost::hana::in ^
-               boost::hana::tuple<boost::hana::type<Args>...>{};
+        return boost::hana::type_c<Key> ^ boost::hana::in ^ boost::hana::tuple_t<Args...>;
     }
 };
 
@@ -94,14 +93,8 @@ struct Callable<
 
 } // namespace detail
 
-template <typename T>
-struct Type { using type = T; };
-
-template <typename T>
-constexpr Type<T> type_c;
-
 template <typename F, typename... Args>
-constexpr bool callable(F&&, Type<Args> const&...) noexcept {
+constexpr bool callable(F&&, boost::hana::basic_type<Args> const&...) noexcept {
     return detail::Callable<F, S<Args...>>::value;
 }
 
@@ -129,7 +122,7 @@ template <typename T>
 struct IsOptional<std::optional<T>> : std::true_type {};
 
 template <typename T>
-constexpr auto isOptional(serialize::Type<T>) {
+constexpr auto isOptional(boost::hana::basic_type<T>) {
     return IsOptional<std::remove_cv_t<std::remove_reference_t<T>>>::value;
 }
 
@@ -144,7 +137,7 @@ struct IsIterable<T, When<condition>> : std::false_type {};
 template <typename T>
 struct IsIterable<
     T,
-    When<valid(type_c<decltype((
+    When<valid(boost::hana::type_c<decltype((
                    // begin/end and operator !=
                    begin(std::declval<T&>()) != end(std::declval<T&>()),
 
@@ -179,29 +172,29 @@ struct IsPair<std::pair<First, Second>> : std::true_type {};
 } // namespace detail
 
 template <typename T>
-constexpr auto isPair(Type<T> const&) {
+constexpr auto isPair(boost::hana::basic_type<T> const&) {
     return detail::IsPair<T>::value;
 }
 
 template <typename T>
-constexpr auto isString(Type<T> const&) {
+constexpr auto isString(boost::hana::basic_type<T> const&) {
     return detail::IsString<T>::value;
 }
 
 template <typename T>
-constexpr auto isIterable(Type<T> const&) {
+constexpr auto isIterable(boost::hana::basic_type<T> const&) {
     return detail::IsIterable<T>::value;
 }
 
 template <typename T>
-constexpr auto isContainer(Type<T> const& x) {
+constexpr auto isContainer(boost::hana::basic_type<T> const& x) {
     return isIterable(x) && !isString(x);
 }
 
 template <typename T>
-constexpr auto isKeyValue(Type<T> const&) {
-    if constexpr (isPair(type_c<T>)) {
-        return isString(type_c<typename T::first_type>);
+constexpr auto isKeyValue(boost::hana::basic_type<T> const&) {
+    if constexpr (isPair(boost::hana::type_c<T>)) {
+        return isString(boost::hana::type_c<typename T::first_type>);
     } else {
         return false;
     }
@@ -226,7 +219,7 @@ struct StrongTypeDefImpl {
 
 struct StrongTypedefT {
     template <typename T>
-    constexpr bool operator()(Type<T> const&) const {
+    constexpr bool operator()(boost::hana::basic_type<T> const&) const {
         return StrongTypeDefImpl<T>::value;
     }
 };
@@ -246,7 +239,7 @@ struct ConstrainedTypeImpl {
 
 struct ConstrainedTypeT {
     template <typename T>
-    constexpr bool operator()(Type<T> const&) const {
+    constexpr bool operator()(boost::hana::basic_type<T> const&) const {
         return ConstrainedTypeImpl<T>::value;
     }
 };
@@ -266,7 +259,7 @@ struct IntegerTypeImpl {
 
 struct IntegerTypeT {
     template <typename T>
-    constexpr bool operator()(Type<T> const&) const {
+    constexpr bool operator()(boost::hana::basic_type<T> const&) const {
         return IntegerTypeImpl<T>::value;
     }
 };
@@ -286,7 +279,7 @@ struct FloatingPointTypeImpl {
 
 struct FloatingPointTypeT {
     template <typename T>
-    constexpr bool operator()(Type<T> const&) const {
+    constexpr bool operator()(boost::hana::basic_type<T> const&) const {
         return FloatingPointTypeImpl<T>::value;
     }
 };
@@ -304,7 +297,7 @@ struct BooleanTypeImpl<type_safe::boolean> : std::true_type {};
 
 struct BooleanTypeT {
     template <typename T>
-    constexpr bool operator()(Type<T> const&) const {
+    constexpr bool operator()(boost::hana::basic_type<T> const&) const {
         return BooleanTypeImpl<T>::value;
     }
 };

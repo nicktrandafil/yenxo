@@ -86,11 +86,11 @@ template <typename T, bool condition>
 struct GetHelper<T, When<condition>> {
     T const& operator()(T const& x) const noexcept { return x; }
     [[noreturn]] T const& operator()(std::monostate) const {
-        throw VariantEmpty(type_c<T>);
+        throw VariantEmpty(boost::hana::type_c<T>);
     }
     template <typename U>
     [[noreturn]] T const& operator()(U const&) const {
-        throw VariantBadType(type_c<T>, type_c<U>);
+        throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<U>);
     }
 };
 
@@ -222,7 +222,7 @@ constexpr IntegralCheckedCastT<T> integralCheckedCast;
 template <typename T>
 struct GetHelper<T, When<std::is_integral_v<T>>> {
     [[noreturn]] T operator()(std::monostate) const {
-        throw VariantEmpty(type_c<T>);
+        throw VariantEmpty(boost::hana::type_c<T>);
     }
 
     T operator()(bool x) const {
@@ -257,21 +257,21 @@ struct GetHelper<T, When<std::is_integral_v<T>>> {
         return integralCheckedCast<T>(x);
     }
 
-    T operator()(double) const { throw VariantBadType(type_c<T>, type_c<double>); }
-    T operator()(std::string) const { throw VariantBadType(type_c<T>, type_c<std::string>); }
-    T operator()(Variant::Vec) const { throw VariantBadType(type_c<T>, type_c<Variant::Vec>); }
-    T operator()(Variant::Map) const { throw VariantBadType(type_c<T>, type_c<Variant::Map>); }
+    T operator()(double) const { throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<double>); }
+    T operator()(std::string) const { throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<std::string>); }
+    T operator()(Variant::Vec) const { throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<Variant::Vec>); }
+    T operator()(Variant::Map) const { throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<Variant::Map>); }
 };
 
 template <typename T>
 struct GetHelper<T, When<std::is_reference_v<T>>> {
     T operator()(T x) const noexcept { return x; }
     [[noreturn]] T operator()(std::monostate) const {
-        throw VariantEmpty(type_c<std::remove_reference_t<T>>);
+        throw VariantEmpty(boost::hana::type_c<std::remove_reference_t<T>>);
     }
     template <typename U>
     [[noreturn]] T operator()(U const&) const {
-        throw VariantBadType(type_c<std::remove_reference_t<T>>, type_c<U>);
+        throw VariantBadType(boost::hana::type_c<std::remove_reference_t<T>>, boost::hana::type_c<U>);
     }
 };
 

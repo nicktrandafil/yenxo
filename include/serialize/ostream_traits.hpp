@@ -48,16 +48,16 @@ struct OStream {
         os << unqualifiedTypeName<Derived>() << " { ";
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
-            if constexpr (isOptional(type_c<decltype(value)>)) {
+            if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
                 if (value.has_value()) {
                     os << boost::hana::to<char const*>(name)
                        << ": "
                        << *value
                        << "; ";
                 }
-            } else if constexpr (isContainer(type_c<decltype(value)>)) {
+            } else if constexpr (isContainer(boost::hana::type_c<decltype(value)>)) {
                 os << boost::hana::to<char const*>(name);
-                if constexpr (isKeyValue(type_c<typename decltype(value)::value_type>)) {
+                if constexpr (isKeyValue(boost::hana::type_c<typename decltype(value)::value_type>)) {
                     os << ": { ";
                     for (auto const& x: value) {
                         os << x.first
@@ -76,7 +76,7 @@ struct OStream {
                     os << "]; ";
                 }
 #if SERIALIZE_ENABLE_TYPE_SAFE
-            } else if constexpr (strongTypeDef(type_c<Derived>)) {
+            } else if constexpr (strongTypeDef(boost::hana::type_c<Derived>)) {
                 os << static_cast<type_safe::underlying_type<Derived>>(x);
 #endif
             } else {

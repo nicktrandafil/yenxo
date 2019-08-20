@@ -47,8 +47,8 @@ struct X {
     static X fromVariant(Variant const&);
 };
 
-static_assert(hasFromVariant(serialize::type_c<X>));
-static_assert(hasToVariant(serialize::type_c<X>));
+static_assert(hasFromVariant(boost::hana::type_c<X>));
+static_assert(hasToVariant(boost::hana::type_c<X>));
 
 struct Hobby
     : trait::Var<Hobby>,
@@ -450,7 +450,7 @@ struct StrStruct
 
 struct CamelCase {
     template <class T, class S>
-    std::string operator()(Type<T>, S name) const {
+    std::string operator()(boost::hana::basic_type<T>, S name) const {
         std::string renamed = boost::hana::to<char const*>(name);
         assert(renamed.size());
         renamed[0] = char(std::tolower(renamed[0]));

@@ -44,7 +44,7 @@ namespace serialize {
 /// Class indicating an error during to/from string conversion
 struct StringConversionError : public std::logic_error {
     template <typename T>
-    explicit StringConversionError(std::string value, Type<T> const&)
+    explicit StringConversionError(std::string value, boost::hana::basic_type<T> const&)
         : std::logic_error(
               "'" + value + "'" +
               " is not of type '" +
@@ -137,7 +137,7 @@ struct FromStringImpl<T, When<
         for (auto e : EnumTraits<T>::values) {
             if (x == EnumTraits<T>::toString(e)) { return e; }
         }
-        throw StringConversionError(x, type_c<T>);
+        throw StringConversionError(x, boost::hana::type_c<T>);
     }
 };
 
@@ -164,7 +164,7 @@ struct FromStringImpl<T, When<
 
     static typename EnumTraits<T>::Enum applyImpl(
         boost::hana::size_t<EnumTraits<T>::count>, std::string const& x) {
-        throw StringConversionError(x, type_c<T>);
+        throw StringConversionError(x, boost::hana::type_c<T>);
     }
 
     static T apply(std::string const& x) {
@@ -187,19 +187,19 @@ constexpr FromStringT<T> const fromString;
 template <typename T>
 double iparseWithSuffix(std::string const& str, std::string const& suffix) {
     if (!iendsWith(str, suffix)) {
-        throw StringConversionError(str, type_c<T>);
+        throw StringConversionError(str, boost::hana::type_c<T>);
     }
 
     char* end;
     auto const ret = std::strtod(str.c_str(), &end);
 
     if (end == str.c_str()) {
-        throw StringConversionError(str, type_c<T>);
+        throw StringConversionError(str, boost::hana::type_c<T>);
     }
     if (!std::all_of(static_cast<char const*>(end),
                      str.c_str() + str.size() - suffix.size(),
                      [](auto x) { return std::isspace(x); })) {
-        throw StringConversionError(str, type_c<T>);
+        throw StringConversionError(str, boost::hana::type_c<T>);
     }
 
     return ret;

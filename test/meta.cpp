@@ -26,7 +26,7 @@
 #include <serialize/meta.hpp>
 
 
-namespace hana = boost::hana;
+using namespace boost::hana;
 
 
 using namespace serialize;
@@ -63,7 +63,7 @@ struct Foo {
 
 static_assert(callable(foo1));
 static_assert(callable(foo2, type_c<int>));
-static_assert(!callable(foo2, type_c<int>, Type<int>()));
+static_assert(!callable(foo2, type_c<int>, type_c<int>));
 static_assert(callable(Foo()));
 static_assert(callable(Foo()));
 static_assert(isIterable(type_c<std::vector<int>>));
