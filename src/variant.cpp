@@ -264,6 +264,27 @@ struct GetHelper<T, When<std::is_integral_v<T>>> {
 };
 
 template <typename T>
+struct GetHelper<T, When<std::is_floating_point_v<T>>> {
+    [[noreturn]] T operator()(std::monostate) const {
+        throw VariantEmpty(boost::hana::type_c<T>);
+    }
+
+    T operator()(bool x) const noexcept { return x; }
+    T operator()(char x) const noexcept { return x; }
+    T operator()(short int x) const noexcept { return x; }
+    T operator()(unsigned short int x) const noexcept { return x; }
+    T operator()(int x) const noexcept { return x; }
+    T operator()(unsigned int x) const noexcept { return x; }
+    T operator()(signed long x) const noexcept { return x; }
+    T operator()(unsigned long x) const noexcept { return x; }
+    T operator()(double x) const noexcept { return x; }
+
+    T operator()(std::string) const { throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<std::string>); }
+    T operator()(Variant::Vec) const { throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<Variant::Vec>); }
+    T operator()(Variant::Map) const { throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<Variant::Map>); }
+};
+
+template <typename T>
 struct GetHelper<T, When<std::is_reference_v<T>>> {
     T operator()(T x) const noexcept { return x; }
     [[noreturn]] T operator()(std::monostate) const {

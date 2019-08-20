@@ -251,6 +251,29 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE_THROWS_AS(Variant(Variant::Map()).integer(), VariantBadType);
     }
 
+    SECTION("allow integral type to double conversions") {
+        auto const types = hana::tuple_t<
+            bool,
+            char,
+            unsigned char,
+            short int,
+            unsigned short int,
+            int,
+            unsigned int>;
+
+        hana::for_each(
+            types,
+            [&](auto x) {
+            auto const lhs = Variant(typename decltype(x)::type()).floating();
+            auto const rhs = double(typename decltype(x)::type());
+                REQUIRE((!(lhs < rhs) && !(lhs > rhs)) /* the same lhs == rhs, but without warning */);
+            });
+
+        REQUIRE_THROWS_AS(Variant(1.1).integer(), VariantBadType);
+        REQUIRE_THROWS_AS(Variant(Variant::Vec()).integer(), VariantBadType);
+        REQUIRE_THROWS_AS(Variant(Variant::Map()).integer(), VariantBadType);
+    }
+
     SECTION("from JSON") {
         SECTION("int") {
             auto const raw = R"(5)";
