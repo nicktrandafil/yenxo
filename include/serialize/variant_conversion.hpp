@@ -304,6 +304,38 @@ struct FromVariantImpl<T, When<Variant::Types::anyOf<T>()>> {
     static T apply(Variant const& x) { return static_cast<T>(x); }
 };
 
+namespace detail {
+
+template <class F>
+inline void tryCatch(F&& f, size_t i) {
+    try {
+        f();
+    } catch (serialize::VariantErr& e) {
+        e.prependPath(std::to_string(i));
+        throw;
+    } catch (std::exception const& e) {
+        VariantErr err(e.what());
+        err.prependPath(std::to_string(i));
+        throw std::move(err);
+    }
+}
+
+template <class F, class S>
+inline void tryCatch(F&& f, S s) {
+    try {
+        f();
+    } catch (serialize::VariantErr& e) {
+        e.prependPath(boost::hana::to<char const*>(s));
+        throw;
+    } catch (std::exception const& e) {
+        VariantErr err(e.what());
+        err.prependPath(boost::hana::to<char const*>(s));
+        throw std::move(err);
+    }
+}
+
+} // namespace detail
+
 /// Specialization for collection types (with push_back)
 template <typename T>
 struct FromVariantImpl<T, When<
@@ -313,8 +345,9 @@ struct FromVariantImpl<T, When<
                               !std::is_same_v<T, serialize::VariantVec>>> {
     static T apply(Variant const& var) {
         T ret;
+        size_t i = 0;
         for (auto const& x : var.vec()) {
-            ret.push_back(fromVariant<typename T::value_type>(x));
+            detail::tryCatch([&] { ret.push_back(fromVariant<typename T::value_type>(x)); }, i++);
         }
         return ret;
     }
@@ -330,8 +363,9 @@ struct FromVariantImpl<T, When<
                               !std::is_same_v<T, serialize::VariantVec>>> {
     static T apply(Variant const& var) {
         T ret;
+        size_t i = 0;
         for (auto const& x : var.vec()) {
-            ret.emplace(fromVariant<typename T::value_type>(x));
+            detail::tryCatch([&] { ret.emplace(fromVariant<typename T::value_type>(x)); }, i++);
         }
         return ret;
     }
@@ -463,7 +497,7 @@ struct FromVariantImpl<T, When<hanaMap(boost::hana::type_c<T>)>> {
                                   if (map.end() == it) {
                                       throw std::logic_error(boost::hana::to<char const*>(key) + " is required"s);
                                   }
-                                  value = fromVariant<decltype(value)>(it->second);
+                                  detail::tryCatch([&] { value = fromVariant<decltype(value)>(it->second); }, key);
                               }));
         return ret;
     }

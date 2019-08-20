@@ -22,25 +22,20 @@
   SOFTWARE.
 */
 
-
-// tested
 #include <serialize/variant_conversion.hpp>
 
-// 3rd
 #include <catch2/catch.hpp>
 
+#include <set>
 
 using namespace serialize;
 
-
 namespace {
-
 
 enum class E {
     e1,
     e2
 };
-
 
 struct ETraits {
     using Enum [[maybe_unused]] = E;
@@ -55,9 +50,7 @@ struct ETraits {
     }
 };
 
-
 [[maybe_unused]] ETraits traits(E) { return {}; }
-
 
 struct Test {
     static Variant toVariant(Test) { return {}; }
@@ -65,32 +58,27 @@ struct Test {
     bool operator==(Test const&) const { return true; }
 };
 
-
 enum E2 {
     val1,
     val2
 };
 
-
 struct E2Traits {
     using Enum = E2;
     static constexpr auto count = 2;
     [[maybe_unused]] static constexpr std::array<Enum, count> values{Enum::val1, Enum::val2};
-    static char  const* toString(Enum x) {
+    static char const* toString(Enum x) {
         switch (x) {
-            case Enum::val1: return "val1";
-            case Enum::val2: return "val2";
+        case Enum::val1: return "val1";
+        case Enum::val2: return "val2";
         }
         throw 1;
     }
 };
 
-
 [[maybe_unused]] E2Traits traits(E2) { return {}; }
 
-
-}
-
+} // namespace
 
 TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
     REQUIRE(toVariant(E::e1) == Variant("e1"));
@@ -111,4 +99,20 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
     REQUIRE(Variant(1) == toVariant(Variant(1)));
 
     REQUIRE(Variant("val1") == toVariant(E2::val1));
+
+    SECTION("vector") {
+        REQUIRE_THROWS_WITH(fromVariant<std::vector<E>>(Variant(VariantVec{Variant("e1"), Variant("e3")})), ".1: 'e3' is not of type 'E'");
+    }
+
+    SECTION("set") {
+        REQUIRE_THROWS_WITH(fromVariant<std::set<E>>(Variant(VariantVec{Variant("e1"), Variant("e3")})), ".1: 'e3' is not of type 'E'");
+    }
+
+    SECTION("hana map") {
+        auto tmp = boost::hana::make_map(
+            boost::hana::make_pair(BOOST_HANA_STRING("a"), E()),
+            boost::hana::make_pair(BOOST_HANA_STRING("b"), E()));
+
+        REQUIRE_THROWS_WITH(fromVariant2(tmp, Variant(VariantMap{{"a", Variant("e1")}, {"b", Variant("e3")}})), ".b: 'e3' is not of type 'E'");
+    }
 }
