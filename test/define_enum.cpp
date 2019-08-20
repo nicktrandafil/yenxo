@@ -25,6 +25,7 @@
 #include <serialize/define_enum.hpp>
 #include <serialize/string_conversion.hpp>
 #include <serialize/variant_conversion.hpp>
+#include <sstream>
 
 #include <catch2/catch.hpp>
 
@@ -246,4 +247,8 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
 
     REQUIRE_THROWS_AS(fromVariant<E>(Variant("e156")), VariantBadType);
     REQUIRE_THROWS_WITH(fromVariant<E>(Variant("e156")), "'e156' is not of type 'E'");
+
+    std::ostringstream os;
+    os << E::e3;
+    REQUIRE(os.str() == "e3");
 }
