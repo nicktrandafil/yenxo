@@ -75,8 +75,10 @@ struct OStream {
                     }
                     os << "]; ";
                 }
+#if SERIALIZE_ENABLE_TYPE_SAFE
             } else if constexpr (strongTypeDef(type_c<Derived>)) {
                 os << static_cast<type_safe::underlying_type<Derived>>(x);
+#endif
             } else {
                 os << boost::hana::to<char const*>(name)
                    << ": "
