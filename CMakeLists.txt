@@ -86,6 +86,8 @@ add_library(
     include/${PROJECT_NAME}/define_struct.hpp
     include/${PROJECT_NAME}/value_tag.hpp
 
+    include/${PROJECT_NAME}/genuine_struct.hpp
+
     src/variant.cpp
 )
 
