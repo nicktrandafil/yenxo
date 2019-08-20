@@ -38,7 +38,7 @@
 namespace serialize {
 
 class BadEnumValue : public std::runtime_error {
-  public:
+public:
     template <class E>
     explicit BadEnumValue(E v)
         : std::runtime_error(
