@@ -1,15 +1,13 @@
-// serialize
 #include <variant.hpp>
 #include <variant_traits.hpp>
 
 using namespace serialize;
 
-struct Hobby : trait::Var<Hobby> {  // enables serialization/deserialization
+struct Hobby : trait::Var<Hobby> { // enables serialization/deserialization
     Hobby() : id(0) {}
 
     Hobby(int id, std::string const& description)
-        : id(id), description(description)
-    {}
+        : id(id), description(description) {}
 
     int id;
     std::string description;
@@ -19,8 +17,7 @@ struct Person : trait::Var<Person> {
     Person() : age(0) {}
 
     Person(std::string const& name, int age, Hobby const& hobby)
-        : name(name), age(age), hobby(hobby)
-    {}
+        : name(name), age(age), hobby(hobby) {}
 
     std::string name;
     int age;

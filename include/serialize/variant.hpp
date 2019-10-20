@@ -286,17 +286,11 @@ public:
     /// Check if Variant contains data
     bool empty() const noexcept;
 
-    /// \defgroup Variant equality comparison
-    /// \{
     bool operator==(Variant const& rhs) const noexcept;
     bool operator!=(Variant const& rhs) const noexcept;
-    /// \}
 
-    /// \defgroup Formats Serialized data formats
-
-    /// \defgroup Json
-    /// \ingroup Formats
-    /// \{
+    /// \ingroup group-json
+    /// @{
     static Variant from(rapidjson::Value const& json);
 
     /// \throw `std::runtime_error` on `json` parse
@@ -305,18 +299,13 @@ public:
     rapidjson::Document& to(rapidjson::Document& json) const;
 
     std::string toJson() const;
-    /// \}
+    /// @}
 
-    /// Stream operator
     friend std::ostream& operator<<(std::ostream& os, Variant const& var);
 
-    /// \defgroup type_info
-    /// \ingroup type_info
-    /// \{
     std::type_info const& typeInfo() const;
-    /// \}
 
-    /// List of supported types
+    // list of supported types
     using Types = S<
         bool,
         char,

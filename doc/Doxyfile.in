@@ -105,12 +105,7 @@ HTML_FILE_EXTENSION     = .html
 HTML_HEADER             = @serialize_SOURCE_DIR@/doc/header.html
 HTML_FOOTER             = @serialize_SOURCE_DIR@/doc/footer.html
 HTML_EXTRA_STYLESHEET   =
-HTML_EXTRA_FILES        = @Boost.Hana_SOURCE_DIR@/doc/js/chart.js \
-                          @Boost.Hana_SOURCE_DIR@/doc/js/hana.js \
-                          @Boost.Hana_SOURCE_DIR@/doc/js/highcharts-data.js \
-                          @Boost.Hana_SOURCE_DIR@/doc/js/highcharts-exporting.js \
-                          @Boost.Hana_SOURCE_DIR@/doc/js/highcharts.js
-
+HTML_EXTRA_FILES        =
 HTML_COLORSTYLE_HUE     = 75  # 0 - 359
 HTML_COLORSTYLE_SAT     = 100 # 0 - 255
 HTML_COLORSTYLE_GAMMA   = 80
@@ -118,16 +113,9 @@ HTML_TIMESTAMP          = NO
 HTML_DYNAMIC_SECTIONS   = YES
 HTML_INDEX_NUM_ENTRIES  = 0 # Fully expand trees in the Indexes by default
 DISABLE_INDEX           = YES
-GENERATE_TREEVIEW       = @HANA_GENERATE_TREEVIEW@
+GENERATE_TREEVIEW       = YES
 TREEVIEW_WIDTH          = 270
 EXT_LINKS_IN_WINDOW     = NO
 FORMULA_FONTSIZE        = 10
 FORMULA_TRANSPARENT     = YES
-SEARCHENGINE            = @HANA_SEARCHENGINE@
-
-# Mathjax (HTML only)
-USE_MATHJAX             = YES
-MATHJAX_FORMAT          = HTML-CSS
-MATHJAX_RELPATH         = https://cdn.mathjax.org/mathjax/latest
-MATHJAX_EXTENSIONS      =
-MATHJAX_CODEFILE        = @Boost.Hana_SOURCE_DIR@/doc/js/mathjax-config.js
+SEARCHENGINE            = YES

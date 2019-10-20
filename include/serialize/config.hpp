@@ -22,10 +22,14 @@
   SOFTWARE.
 */
 
-
 #pragma once
 
-
+#if defined(SERIALIZE_DOXYGEN_INVOKED)
+/// \ingroup group-config
+/// Enables `type_safe` support
+#define SERIALIZE_ENABLE_TYPE_SAFE 1
+#else
 #ifndef SERIALIZE_ENABLE_TYPE_SAFE
 #define SERIALIZE_ENABLE_TYPE_SAFE 1
+#endif
 #endif

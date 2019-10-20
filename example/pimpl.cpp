@@ -1,7 +1,7 @@
 /*
   MIT License
 
-  Copyright (c) 2018 Nicolai Trandafil
+  Copyright (c) 2019 Nicolai Trandafil
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,20 +22,14 @@
   SOFTWARE.
 */
 
-#pragma once
+#include "pipml.hpp"
 
-#include <string>
+#include <serialize/pimpl_impl.hpp>
 
-namespace serialize {
-
-/// \ingroup group-utility
-/// Test case insensitively if a string ends with suffix
-inline bool iendsWith(std::string const& str, std::string const& end) {
-    return std::equal(
-        end.rbegin(), end.rend(), str.rbegin(),
-        [](auto c1, auto c2) {
-            return std::tolower(c1) == std::tolower(c2);
-        });
-}
-
-} // namespace serialize
+struct X::Impl {};
+X::X() = default;
+X::~X() = default;
+X::X(X const&) = default;
+X& X::operator=(X const&) = default;
+X::X(X&&) = default;
+X& X::operator=(X&&) = default;

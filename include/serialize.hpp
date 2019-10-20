@@ -24,17 +24,27 @@
 
 #pragma ocne
 
-//! @defgroup group-datatypes
+//! @defgroup group-datatypes Data types
 //! Data types provided by the library.
 
-//! @defgroup group-exceptions
+//! @defgroup group-exceptions Exceptions
 //! Exceptions provided by the library.
 
-//! @defgroup group-traits
-//! Mix-in traits provided by the library.
+//! @defgroup group-traits Opt-in traits
+//! Opt-in traits provided by the library.
 
-//! @defgroup group-serde
-//! Serialization/deserialization function objects provided by the library.
+//! @defgroup group-func Function objects
+//! Function objects provided by the library.
+
+//! @defgroup group-formats Serialized data formats
+//! Data formats available to convert to/from
+
+//! @defgroup group-json JSON
+//! \ingroup group-formats
+//! JSON data format
+
+//! @defgroup group-utility Utility
+//! Helper utilities
 
 #include <serialize/comparison_traits.hpp>
 #include <serialize/define_enum.hpp>
