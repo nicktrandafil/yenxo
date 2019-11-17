@@ -22,21 +22,15 @@
   SOFTWARE.
 */
 
-
 #pragma once
 
-
-// std
-#include <vector>
 #include <unordered_map>
-
+#include <vector>
 
 namespace serialize {
-
 
 class Variant;
 using VariantMap = std::unordered_map<std::string, Variant>;
 using VariantVec = std::vector<Variant>;
 
-
-}
+} // namespace serialize

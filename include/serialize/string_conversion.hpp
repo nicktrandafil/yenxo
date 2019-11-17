@@ -24,14 +24,12 @@
 
 #pragma once
 
-#include <serialize/algorithm/string.hpp>
 #include <serialize/enum_traits.hpp>
 #include <serialize/meta.hpp>
 #include <serialize/type_name.hpp>
 
 #include <boost/hana/for_each.hpp>
 
-#include <algorithm>
 #include <cstring>
 #include <stdexcept>
 #include <string>
@@ -39,9 +37,9 @@
 
 namespace serialize {
 
-/// \defgroup String conversion
-/// \{
-/// Class indicating an error during to/from string conversion
+/// String conversion error
+/// \ingroup group-exceptions
+/// An error during `toString`/`fromString` conversion
 struct StringConversionError : public std::logic_error {
     template <typename T>
     explicit StringConversionError(std::string value, boost::hana::basic_type<T> const&)
@@ -52,11 +50,27 @@ struct StringConversionError : public std::logic_error {
               "'") {}
 };
 
-/// To string conversion implementation
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+/// To string conversion
+/// \ingroup group-function
+/// Converts the `type` to string
+constexpr auto toString = [](auto&& type) {
+    return tag - dispatched;
+};
+
+/// From string conversion
+/// \ingroup group-function
+/// Converts the `string` to type
+template <class T>
+constexpr auto fromString = [](std::string const&) {
+    return tag - dispatched;
+};
+#else
+// To string conversion implementation
 template <typename T, typename = void>
 struct ToStringImpl : ToStringImpl<T, When<true>> {};
 
-/// Fall back
+// Fall back
 template <typename T, bool condition>
 struct ToStringImpl<T, When<condition>> {
     static std::string apply(T const&) {
@@ -65,7 +79,7 @@ struct ToStringImpl<T, When<condition>> {
     }
 };
 
-/// Conversion with `std::to_string`
+// Conversion with `std::to_string`
 template <typename T>
 struct ToStringImpl<T,
                     When<detail::Valid<decltype(
@@ -75,7 +89,7 @@ struct ToStringImpl<T,
     }
 };
 
-/// Types explicitly covertible to string
+// Types explicitly covertible to string
 template <typename T>
 struct ToStringImpl<T,
                     When<detail::Valid<decltype(
@@ -85,7 +99,7 @@ struct ToStringImpl<T,
     }
 };
 
-/// Types with specialized EnumTraits
+// Types with specialized EnumTraits
 template <typename T>
 struct ToStringImpl<T, When<detail::Valid<decltype(
                            EnumTraits<T>::toString(std::declval<T>()))>::value>> {
@@ -101,14 +115,13 @@ struct ToStringT {
     }
 };
 
-/// To string conversion
-constexpr ToStringT const toString;
+constexpr ToStringT const toString{};
 
-/// From string conversion implementation
+// From string conversion implementation
 template <typename T, typename = void>
 struct FromStringImpl : FromStringImpl<T, When<true>> {};
 
-/// Fall back
+// Fall back
 template <typename T, bool condition>
 struct FromStringImpl<T, When<condition>> {
     static T apply(std::string const&) {
@@ -117,7 +130,7 @@ struct FromStringImpl<T, When<condition>> {
     }
 };
 
-/// Types explicitly convertible from string
+// Types explicitly convertible from string
 template <typename T>
 struct FromStringImpl<T,
                       When<detail::Valid<decltype(
@@ -127,7 +140,7 @@ struct FromStringImpl<T,
     }
 };
 
-/// Types with specialized EnumTraits
+// Types with specialized EnumTraits
 template <class T>
 struct FromStringImpl<T, When<
                              detail::Valid<decltype(
@@ -141,7 +154,7 @@ struct FromStringImpl<T, When<
     }
 };
 
-/// Types with specialized EnumTraits
+// Types with specialized EnumTraits
 template <class T>
 struct FromStringImpl<T, When<
                              detail::Valid<decltype(EnumTraits<T>::strings())>::value>> {
@@ -179,30 +192,10 @@ struct FromStringT {
     }
 };
 
-/// From string conversion
+// From string conversion
 template <typename T>
 constexpr FromStringT<T> const fromString;
 
-/// \throws `StringConversionError`
-template <typename T>
-double iparseWithSuffix(std::string const& str, std::string const& suffix) {
-    if (!iendsWith(str, suffix)) {
-        throw StringConversionError(str, boost::hana::type_c<T>);
-    }
-
-    char* end;
-    auto const ret = std::strtod(str.c_str(), &end);
-
-    if (end == str.c_str()) {
-        throw StringConversionError(str, boost::hana::type_c<T>);
-    }
-    if (!std::all_of(static_cast<char const*>(end),
-                     str.c_str() + str.size() - suffix.size(),
-                     [](auto x) { return std::isspace(x); })) {
-        throw StringConversionError(str, boost::hana::type_c<T>);
-    }
-
-    return ret;
-}
+#endif
 
 } // namespace serialize

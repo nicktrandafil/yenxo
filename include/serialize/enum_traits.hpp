@@ -22,40 +22,65 @@
   SOFTWARE.
 */
 
-
 #pragma once
 
-
-// local
-#include <serialize/when.hpp>
 #include <serialize/meta.hpp>
+#include <serialize/when.hpp>
 
-// std
 #include <array>
-
 
 namespace serialize {
 
-
-/// To describe an enum properties specialize the template for the enum,
-/// and define the properties present below
+/// Enum traits
+/// \ingroup group-enum
+///
+/// To describe an enum's properties specialize the template for the enum,
+/// and define the properties:
+/// * Enum typedef;
+/// * `static constexpr size_t count` member;
+/// * `static constexpr std::array<Enum, count> values` member collection;
+/// * `static char const* toString(Enum)` member function;
+/// * `static constexpr auto strings()` member function that returns `boost::hana::tuple` of `boost::hana::tuple` of `char const*`s (optional).
+///
+/// The `EnumTraits` is used by `toString`, `fromString`, `toVariant` and `fromVariant`
+/// function objects to do the job.
+///
+/// Define enum,
+/// @snippet test/string_conversion.cpp enum1
+///
+/// specialize the EnumTraits,
+/// @snippet test/string_conversion.cpp enum1_traits
+///
+/// use `serialize::toString` and `fromString`.
+/// @snippet test/string_conversion.cpp enum1_string
+///
+/// Another way to describe properties of an enum (say `E`) is to define a struct (say `ETraits`)
+/// with the properties mentioned above and declare a function in the same namespace
+/// as the enum `ETraits traits(E)`.
+///
+/// Define enum,
+/// @snippet test/string_conversion.cpp enum2
+///
+/// define trait struct,
+/// @snippet test/string_conversion.cpp enum2_traits
+///
+/// provide `traits` function definition,
+/// @snippet test/string_conversion.cpp enum2_traits_adl
+///
+/// use `toString` and `fromString`.
+/// @snippet test/string_conversion.cpp enum2_string
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+template <class Enum>
+struct EnumTraits;
+#else
 template <class E, class = When<true>>
-struct EnumTraits;/* {
-    // required
-    using Enum = E;
-    static constexpr size_t count = Enum::count;
-    static constexpr std::array<Enum, count> values = Enum::values;
-
-    // optional
-    char const* toString(Enum);
-};*/
-
+struct EnumTraits;
+#endif
 
 template <class T>
 struct EnumTraits<T,
-        When<std::is_enum_v<T> &&
-             detail::Valid<decltype(traits(std::declval<T>()))>::value>>
-                : decltype(traits(std::declval<T>())) {};
+                  When<std::is_enum_v<T> &&
+                       detail::Valid<decltype(traits(std::declval<T>()))>::value>>
+    : decltype(traits(std::declval<T>())) {};
 
-
-}
+} // namespace serialize

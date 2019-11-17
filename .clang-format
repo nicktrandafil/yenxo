@@ -61,7 +61,7 @@ ForEachMacros:
   - BOOST_FOREACH
 IncludeBlocks:   Regroup
 IncludeCategories:
-  - Regex:           '^<(rapidjson)/.*'
+  - Regex:           '^<rapidjson/'
     Priority:        5
   - Regex:           '^<boost/'
     Priority:        4

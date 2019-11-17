@@ -30,6 +30,9 @@
 
 namespace serialize {
 
+/// Genuine struct
+/// \ingroup group-traits
+/// Opts-in `trait::VarDef`, `trait::EqualityComparison`, `trait::OStream`.
 template <class T>
 struct GenuineStruct : serialize::trait::VarDef<T>, serialize::trait::EqualityComparison<T>, serialize::trait::OStream<T> {};
 

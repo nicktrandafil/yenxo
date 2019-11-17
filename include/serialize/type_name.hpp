@@ -22,38 +22,35 @@
   SOFTWARE.
 */
 
-
 #pragma once
 
-
-// local
 #include <serialize/when.hpp>
 
-// std
 #include <string>
 #include <string_view>
 
-
 namespace serialize {
 
-
+/// Get unqualified type name
+/// \ingroup group-utility
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+template <class T>
+constexpr auto unqualifiedTypeName = []() {
+    return ...;
+};
+#else
 template <class T, class = void>
 struct UnqualifiedTypeNameImpl : UnqualifiedTypeNameImpl<T, When<true>> {};
-
 
 template <class T>
 struct UnqualifiedTypeNameT {
     constexpr auto operator()() const;
 };
 
-
-/// Get unqualified type name
 template <class T>
 constexpr UnqualifiedTypeNameT<T> unqualifiedTypeName;
 
-
 namespace detail {
-
 
 constexpr std::string_view getT(std::string_view p) {
     using namespace std;
@@ -74,7 +71,6 @@ constexpr std::string_view getT(std::string_view p) {
 #endif
 }
 
-
 constexpr std::string_view getTempl(std::string_view p) {
 #if defined(__clang__)
     auto start = p.find("T = ") + 4;
@@ -89,7 +85,6 @@ constexpr std::string_view getTempl(std::string_view p) {
 #endif
 }
 
-
 template <auto value>
 std::string getVal() {
     auto const pf = std::string_view(__PRETTY_FUNCTION__);
@@ -97,22 +92,20 @@ std::string getVal() {
     auto start = pf.find("value = ") + 8;
     auto const end = pf.find("]");
     auto tmp = pf.rfind("::", pf.rfind("::") - 1);
-    if (tmp != std::string_view::npos && tmp > start) {  start = tmp + 2; }
+    if (tmp != std::string_view::npos && tmp > start) { start = tmp + 2; }
     return std::string(pf.data() + start, end - start);
 #elif defined(__GNUC__)
     auto const end = pf.find(";");
     auto const start = pf.rfind(")", end) + 1;
     return std::string(unqualifiedTypeName<decltype(value)>()) +
-            "::" +
-            std::string(pf.data() + start, end - start);
+           "::" +
+           std::string(pf.data() + start, end - start);
 #else
 #error "Not supported"
 #endif
 }
 
-
-}
-
+} // namespace detail
 
 template <class T, bool condition>
 struct UnqualifiedTypeNameImpl<T, When<condition>> {
@@ -121,14 +114,12 @@ struct UnqualifiedTypeNameImpl<T, When<condition>> {
     }
 };
 
-
 template <>
 struct UnqualifiedTypeNameImpl<std::string> {
     static constexpr std::string_view apply() {
         return "string";
     }
 };
-
 
 template <template <auto> class T, auto v>
 struct UnqualifiedTypeNameImpl<T<v>> {
@@ -138,7 +129,6 @@ struct UnqualifiedTypeNameImpl<T<v>> {
         return string(templ) + "<" + detail::getVal<v>() + ">";
     }
 };
-
 
 template <template <class...> class T, class... Args>
 struct UnqualifiedTypeNameImpl<T<Args...>> {
@@ -151,14 +141,14 @@ struct UnqualifiedTypeNameImpl<T<Args...>> {
     }
 };
 
-
 template <class T>
 constexpr auto UnqualifiedTypeNameT<T>::operator()() const {
     return UnqualifiedTypeNameImpl<T>::apply();
 }
-
+#endif
 
 /// Get unqualified type name
+/// \ingroup group-utility
 template <class T>
 constexpr std::string_view qualifiedTypeName() {
     using namespace std;
@@ -177,5 +167,4 @@ constexpr std::string_view qualifiedTypeName() {
 #endif
 }
 
-
-}
+} // namespace serialize

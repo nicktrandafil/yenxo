@@ -165,122 +165,122 @@ public:
     T asOr(T x) const;
 
     /// Get bool
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     bool boolean() const;
     explicit operator bool() const { return boolean(); }
 
     /// Get bool or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     bool booleanOr(bool x) const;
 
     /// Get char
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     char character() const;
     explicit operator char() const { return character(); }
 
     /// Get char or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     char characterOr(char x) const;
 
     /// Get unsigned char
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     unsigned char uchar() const;
     explicit operator unsigned char() const { return uchar(); }
 
     /// Get unsigned char or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     unsigned char ucharOr(unsigned char x) const;
 
     /// Get short int
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     short int shortInt() const;
     explicit operator short int() const { return shortInt(); }
 
     /// Get short int or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     short int shortIntOr(short int x) const;
 
     /// Get unsigned short int
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     unsigned short int ushortInt() const;
     explicit operator unsigned short int() const { return ushortInt(); }
 
     /// Get unsigned short int or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     unsigned short int ushortIntOr(unsigned short int) const;
 
     /// Get int
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     int integer() const;
     explicit operator int() const { return integer(); }
 
     /// Get int or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     int integerOr(int x) const;
 
     /// Get unsigned int
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     unsigned int uint() const;
     explicit operator unsigned int() const { return uint(); }
 
     /// Get unsigned int or `x` if the object is empty
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     unsigned int uintOr(unsigned int x) const;
 
     /// Get signed long or `x` if the object is empty
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     signed long longInt() const;
     explicit operator signed long() const { return longInt(); }
 
     /// Get signed long or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     signed long longInteOr(signed long x) const;
 
     /// Get unsigned long or `x` if the object is empty
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     unsigned long ulongInt() const;
     explicit operator unsigned long() const { return ulongInt(); }
 
     /// Get unsigned long or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     unsigned long ulongIntOr(unsigned long x) const;
 
     /// Get int
-    /// \throw `VariantEmpty`, `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     double floating() const;
     explicit operator double() const { return floating(); }
 
     /// Get int or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     double floatingOr(double x) const;
 
     /// Get string
-    /// \throw `VariantEmpty`, `VariantBadType`
+    /// \throw VariantEmpty, VariantBadType
     std::string const& str() const;
     explicit operator std::string const&() const { return str(); }
 
     /// Get string or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     std::string strOr(std::string const& x) const;
 
     /// Get Vec
-    /// \throw `VariantEmpty`, `VariantBadType`
+    /// \throw VariantEmpty, VariantBadType
     Vec const& vec() const;
     explicit operator Vec const&() const { return vec(); }
     Vec& modifyVec();
 
     /// Get Vec or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     Vec vecOr(Vec const& x) const;
 
     /// Get Map
-    /// \throw `VariantEmpty`, `VariantBadType`
+    /// \throw VariantEmpty, VariantBadType
     Map const& map() const;
     explicit operator Map const&() const { return map(); }
     Map& modifyMap();
 
     /// Get Map or `x` if the object is empty
-    /// \throw `VariantBadType`, `VariantIntegralOverflow`
+    /// \throw VariantBadType, VariantIntegralOverflow
     Map mapOr(Map const& x) const;
 
     /// Check if Variant contains data
@@ -293,7 +293,7 @@ public:
     /// @{
     static Variant from(rapidjson::Value const& json);
 
-    /// \throw `std::runtime_error` on `json` parse
+    /// \throw std::runtime_error on `json` parse
     static Variant fromJson(std::string const& json);
 
     rapidjson::Document& to(rapidjson::Document& json) const;

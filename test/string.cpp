@@ -22,20 +22,26 @@
   SOFTWARE.
 */
 
-
-// tested
 #include <serialize/algorithm/string.hpp>
 
-// 3rd
 #include <catch2/catch.hpp>
 
-
 using namespace serialize;
-
 
 TEST_CASE("Check iendsWith", "[algorithms]") {
     REQUIRE(iendsWith("", ""));
     REQUIRE(iendsWith("a", ""));
     REQUIRE(iendsWith("heLlO", "Llo"));
     REQUIRE_FALSE(iendsWith("lO", "Llo"));
+}
+
+TEST_CASE("Check iparseWithSuffix", "[string_conversion]") {
+    struct X {};
+    REQUIRE(iparseWithSuffix<X>("1.5 suf", "suf") == 1.5);
+    REQUIRE(iparseWithSuffix<X>("1.5suf", "suf") == 1.5);
+    REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5 su", "suf"), StringConversionError);
+    REQUIRE_THROWS_AS(iparseWithSuffix<X>("suf", "suf"), StringConversionError);
+    REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5", "suf"), StringConversionError);
+    REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5 l suf", "suf"), StringConversionError);
+    REQUIRE_THROWS_WITH(iparseWithSuffix<X>("1.5 su", "suf"), "'1.5 su' is not of type 'X'");
 }

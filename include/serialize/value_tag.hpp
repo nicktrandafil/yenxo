@@ -39,7 +39,21 @@
 
 namespace serialize {
 
+/// \defgroup group-directives Directives
+/// \ingroup group-struct
+/// Directives to change default serialization and deserialization
+/// behaviour. The directives can have any order.
+
 /// A default value tag
+/// \ingroup group-directives
+/// This directive can be used to provide a default value for a struct member.
+/// Providing a default value the member implicitly becomes optional.
+///
+/// \code
+/// DEFINE_STRUCT(MyStruct
+///     (string, name, Default("Siri"))
+/// );
+/// \endcode
 template <class T>
 struct Default {
     template <class U, class = std::enable_if_t<
@@ -59,6 +73,14 @@ template <class T>
 Default(T)->Default<T>;
 
 /// A name tag
+/// \ingroup group-directives
+/// This directive can be used to provide different name for a struct member.
+///
+/// \code
+/// DEFINE_STRUCT(MyStruct
+///     (string, name, Name("surname"))
+/// );
+/// \endcode
 struct Name {
     constexpr Name(char const* x) : value(x) {}
     char const* value;

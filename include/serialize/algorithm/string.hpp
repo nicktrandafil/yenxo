@@ -24,6 +24,9 @@
 
 #pragma once
 
+#include <serialize/string_conversion.hpp>
+
+#include <algorithm>
 #include <string>
 
 namespace serialize {
@@ -36,6 +39,30 @@ inline bool iendsWith(std::string const& str, std::string const& end) {
         [](auto c1, auto c2) {
             return std::tolower(c1) == std::tolower(c2);
         });
+}
+
+/// Parse a double with siffux
+/// \ingroup group-utility
+/// \throws StringConversionError
+template <typename T>
+double iparseWithSuffix(std::string const& str, std::string const& suffix) {
+    if (!iendsWith(str, suffix)) {
+        throw StringConversionError(str, boost::hana::type_c<T>);
+    }
+
+    char* end;
+    auto const ret = std::strtod(str.c_str(), &end);
+
+    if (end == str.c_str()) {
+        throw StringConversionError(str, boost::hana::type_c<T>);
+    }
+    if (!std::all_of(static_cast<char const*>(end),
+                     str.c_str() + str.size() - suffix.size(),
+                     [](auto x) { return std::isspace(x); })) {
+        throw StringConversionError(str, boost::hana::type_c<T>);
+    }
+
+    return ret;
 }
 
 } // namespace serialize

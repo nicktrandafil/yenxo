@@ -46,6 +46,8 @@
 
 namespace serialize {
 
+/// Sequence of types
+/// \ingroup group-meta
 template <typename... Args>
 struct S {
     template <typename T>
@@ -71,33 +73,22 @@ struct S {
 
 namespace detail {
 
+/// A helper in SFINAE context
+/// \ingroup group-details
+/// Evaluates to `std::true_type` if `Args` are valid in SFINAE context.
 template <typename... Args>
 struct Valid : std::true_type {};
 
-template <typename... Args>
-constexpr bool valid(Args&&...) { return true; }
-
-template <typename F, typename AS, typename = void>
-struct Callable : Callable<F, AS, When<true>> {};
-
-template <typename F, typename AS, bool fallback>
-struct Callable<F, AS, When<fallback>> : std::false_type {};
-
-template <typename F, typename... Args>
-struct Callable<
-    F,
-    S<Args...>,
-    When<Valid<decltype(
-        std::declval<F>()(std::declval<Args>()...))>::value>>
-    : std::true_type {};
-
 } // namespace detail
 
-template <typename F, typename... Args>
-constexpr bool callable(F&&, boost::hana::basic_type<Args> const&...) noexcept {
-    return detail::Callable<F, S<Args...>>::value;
-}
-
+/// `std::variant` visitor function objects overloads
+/// \ingroup group-meta
+/// In the cobe below
+/// \code
+///     Overload{[](int) {}, [](double) {}};
+/// \endcode
+/// the expression returns a function object that has
+/// to overloads of `operator()`.
 template <typename... Args>
 struct Overload : public Args... {
     using Args::operator()...;
@@ -106,62 +97,98 @@ struct Overload : public Args... {
 template <typename... Args>
 Overload(Args...)->Overload<Args...>;
 
-template <typename T>
+/// A helper in `static_assert` context
+/// \ingroup group-meta
+/// Always Evaluates to `std::false_type`. The type is
+/// templated in order to delay the `static_assert` until
+/// the function is actually instantiated by providing a type
+/// parameter.
+template <typename>
 struct DependentFalse : std::false_type {};
 
+/// A helper in `static_assert` context
+/// \ingroup group-meta
+/// Same as DependentFalse but just for value template arguments.
 template <auto...>
 struct DependentFalseV : std::false_type {};
 
-///
-/// Is `T` the `std::optional` type
-///
-template <typename T>
-struct IsOptional : std::false_type {};
+namespace detail {
 
 template <typename T>
-struct IsOptional<std::optional<T>> : std::true_type {};
+struct IsOptionalImpl : std::false_type {};
 
+template <typename T>
+struct IsOptionalImpl<std::optional<T>> : std::true_type {};
+
+} // namespace detail
+
+/// Test if `T` is `std::optional`
+/// \ingroup group-meta
 template <typename T>
 constexpr auto isOptional(boost::hana::basic_type<T>) {
-    return IsOptional<std::remove_cv_t<std::remove_reference_t<T>>>::value;
+    return detail::IsOptionalImpl<std::remove_cv_t<std::remove_reference_t<T>>>::value;
 }
 
+#ifndef SERIALIZE_DOXYGEN_INVOKED
 namespace detail {
 
 template <typename T, typename = void>
-struct IsIterable : IsIterable<T, When<true>> {};
+struct IsIterableImpl : IsIterableImpl<T, When<true>> {};
 
 template <typename T, bool condition>
-struct IsIterable<T, When<condition>> : std::false_type {};
+struct IsIterableImpl<T, When<condition>> : std::false_type {};
 
 template <typename T>
-struct IsIterable<
+struct IsIterableImpl<
     T,
-    When<valid(boost::hana::type_c<decltype((
-                   // begin/end and operator !=
-                   begin(std::declval<T&>()) != end(std::declval<T&>()),
+    When<detail::Valid<decltype(
+        // begin/end and operator !=
+        begin(std::declval<T&>()) != end(std::declval<T&>()),
 
-                   // operator ++
-                   ++std::declval<decltype(begin(std::declval<T&>()))&>(),
+        // operator ++
+        ++std::declval<decltype(begin(std::declval<T&>()))&>(),
 
-                   // operator*
-                   *begin(std::declval<T&>())))>)>> : std::true_type
+        // operator*
+        *begin(std::declval<T&>()))>::value>> : std::true_type
 
 {};
 
+} // namespace detail
+#endif
+
+/// Test if `T` is an iterable type
+/// \ingroup group-meta
+template <typename T>
+constexpr auto isIterable(boost::hana::basic_type<T> const&) {
+    return detail::IsIterableImpl<T>::value;
+}
+
+#ifndef SERIALIZE_DOXYGEN_INVOKED
+namespace detail {
+
 template <typename T, typename = void>
-struct IsString : IsString<T, When<true>> {};
+struct IsStringImpl : IsStringImpl<T, When<true>> {};
 
 template <typename T, bool condition>
-struct IsString<T, When<condition>> : std::false_type {};
+struct IsStringImpl<T, When<condition>> : std::false_type {};
 
 template <typename T>
-struct IsString<
+struct IsStringImpl<
     T,
     When<std::is_convertible_v<T,
                                std::basic_string<typename T::value_type,
                                                  typename T::traits_type,
                                                  typename T::allocator_type>>>> : std::true_type {};
+
+} // namespace detail
+#endif
+
+template <typename T>
+constexpr auto isString(boost::hana::basic_type<T> const&) {
+    return detail::IsStringImpl<T>::value;
+}
+
+namespace detail {
 
 template <typename T>
 struct IsPair : std::false_type {};
@@ -171,26 +198,22 @@ struct IsPair<std::pair<First, Second>> : std::true_type {};
 
 } // namespace detail
 
+/// Test if `T` is `std::pair`
+/// \ingroup group-meta
 template <typename T>
 constexpr auto isPair(boost::hana::basic_type<T> const&) {
     return detail::IsPair<T>::value;
 }
 
-template <typename T>
-constexpr auto isString(boost::hana::basic_type<T> const&) {
-    return detail::IsString<T>::value;
-}
-
-template <typename T>
-constexpr auto isIterable(boost::hana::basic_type<T> const&) {
-    return detail::IsIterable<T>::value;
-}
-
+/// Test if `T` is a container
+/// \ingroup group-meta
 template <typename T>
 constexpr auto isContainer(boost::hana::basic_type<T> const& x) {
     return isIterable(x) && !isString(x);
 }
 
+/// Test if `T` is a `std::pair` with `std::string` key
+/// \ingroup group-meta
 template <typename T>
 constexpr auto isKeyValue(boost::hana::basic_type<T> const&) {
     if constexpr (isPair(boost::hana::type_c<T>)) {
@@ -200,15 +223,26 @@ constexpr auto isKeyValue(boost::hana::basic_type<T> const&) {
     }
 }
 
+/// Test if `type` is has `push_back` method
+/// \ingroup group-meta
 constexpr auto hasPushBack = boost::hana::is_valid(
-    [](auto x) -> decltype((void)boost::hana::traits::declval(x)
-                               .push_back(std::declval<typename decltype(x)::type::value_type>())) {});
+    [](auto type) -> decltype((void)boost::hana::traits::declval(type)
+                                  .push_back(std::declval<typename decltype(type)::type::value_type>())) {});
 
+/// Test if `type` is has `emplace` method
+/// \ingroup group-meta
 constexpr auto hasEmplace = boost::hana::is_valid(
     [](auto x) -> decltype((void)boost::hana::traits::declval(x)
                                .emplace(std::declval<typename decltype(x)::type::value_type>())) {});
 
 #if SERIALIZE_ENABLE_TYPE_SAFE
+/// Tests if type is `type_safe::strong_typedef`
+/// \ingroup group-meta
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+constexpr auto strongTypeDef = [](auto type) {
+    return isStrongTypeDef(type);
+};
+#else
 template <typename T>
 struct StrongTypeDefImpl {
     template <typename Tag, typename U>
@@ -224,11 +258,16 @@ struct StrongTypedefT {
     }
 };
 
-///
-/// Tests if type is `type_safe::strong_typedef`
-///
 constexpr StrongTypedefT strongTypeDef;
+#endif
 
+/// Tests if type is `type_safe::constrained_type`
+/// \ingroup group-meta
+#ifdef SERIALIZE_DOXYGEN_IVOKED
+constexpr auto constrainedType = [](auto type) {
+    return isConstrainedType(type);
+};
+#else
 template <typename T>
 struct ConstrainedTypeImpl {
     template <typename U, class Constraint, class Verifier>
@@ -244,11 +283,16 @@ struct ConstrainedTypeT {
     }
 };
 
-///
-/// Tests if type is `type_safe::constrained_type`
-///
 constexpr ConstrainedTypeT constrainedType;
+#endif
 
+/// Tests if type is `type_safe::integer`
+/// \ingroup group-meta
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+constexpr auto integerType = [](auto type) {
+    return isIntegerType(type);
+};
+#else
 template <typename T>
 struct IntegerTypeImpl {
     template <typename IntegerT, class Policy /* = arithmetic_policy_default*/>
@@ -264,11 +308,16 @@ struct IntegerTypeT {
     }
 };
 
-///
-/// Tests if type is `type_safe::integer`
-///
 constexpr IntegerTypeT integerType;
+#endif
 
+/// Tests if type is `type_safe::floating_point`
+/// \ingroup group-meta
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+constexpr auto floatingPoint = [](auto type) {
+    return isFloatingPoint(type);
+};
+#else
 template <typename T>
 struct FloatingPointTypeImpl {
     template <typename FloatT>
@@ -284,11 +333,13 @@ struct FloatingPointTypeT {
     }
 };
 
-///
-/// Tests if type is `type_safe::integer`
-///
 constexpr FloatingPointTypeT floatingPoint;
+#endif
 
+/// Tests if type is `type_safe::boolean`
+/// \ingroup group-meta
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+#else
 template <typename T>
 struct BooleanTypeImpl : std::false_type {};
 
@@ -302,12 +353,12 @@ struct BooleanTypeT {
     }
 };
 
-///
-/// Tests if type is `type_safe::integer`
-///
 constexpr BooleanTypeT boolean;
 #endif
+#endif
 
+/// Test if `T` has `T::strings()` static member
+/// \ingroup group-meta
 constexpr auto const hasStrings = boost::hana::is_valid(
     [](auto t) -> decltype((void)decltype(t)::type::strings()) {
     });

@@ -22,15 +22,11 @@
   SOFTWARE.
 */
 
-
 #include <serialize/meta.hpp>
-
 
 using namespace boost::hana;
 
-
 using namespace serialize;
-
 
 #if __GNUG__
 #pragma GCC diagnostic push
@@ -39,33 +35,11 @@ using namespace serialize;
 #pragma GCC diagnostic ignored "-Wundefined-internal"
 #pragma GCC diagnostic ignored "-Wunneeded-member-function"
 
-
-namespace {
-
-
-int foo1();
-int foo2(int);
-
-
-struct Foo {
-    void operator()() const;
-};
-
-
-} // namespace
-
-
 #pragma GCC diagnostic pop
 #else
 #error The compiler not supported
 #endif
 
-
-static_assert(callable(foo1));
-static_assert(callable(foo2, type_c<int>));
-static_assert(!callable(foo2, type_c<int>, type_c<int>));
-static_assert(callable(Foo()));
-static_assert(callable(Foo()));
 static_assert(isIterable(type_c<std::vector<int>>));
 static_assert(isString(type_c<std::string>));
 static_assert(isPair(type_c<std::pair<int, std::string>>));

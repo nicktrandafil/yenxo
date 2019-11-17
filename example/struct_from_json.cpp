@@ -1,5 +1,5 @@
-#include <variant.hpp>
-#include <variant_traits.hpp>
+#include <serialize/variant.hpp>
+#include <serialize/variant_traits.hpp>
 
 using namespace serialize;
 
@@ -36,7 +36,7 @@ int main() {
         }
     )";
 
-    Person const p = Person::fromVariant(Variant::from(rapidjson::Document().Parse(json))));
+    Person const p = Person::fromVariant(Variant::from(rapidjson::Document().Parse(json)));
 }
 
 // add reflection

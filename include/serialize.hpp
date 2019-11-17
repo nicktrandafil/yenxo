@@ -33,18 +33,40 @@
 //! @defgroup group-traits Opt-in traits
 //! Opt-in traits provided by the library.
 
-//! @defgroup group-func Function objects
+//! @defgroup group-function Function objects
 //! Function objects provided by the library.
 
 //! @defgroup group-formats Serialized data formats
-//! Data formats available to convert to/from
+//! Data formats available to convert to/from.
 
 //! @defgroup group-json JSON
 //! \ingroup group-formats
-//! JSON data format
+//! JSON data format.
 
 //! @defgroup group-utility Utility
-//! Helper utilities
+//! Helper utilities provided by the library.
+
+//! @defgroup group-concepts Concepts
+//! Concepts provided by the library.
+
+//! @defgroup group-enum Enum
+//! @ingroup group-concepts
+//! The `Enum` concept represents `enum`-like user-defined types.
+
+//! @defgroup group-struct Struct
+//! @ingroup group-concepts
+//! The `Struct` concept represents `struct`-like user-defined types.
+
+//! @defgroup group-config Configuration options
+//! Configurable options to tweak the global behavior of the library.
+
+//! @defgroup group-meta Meta utility
+//! Helper utilities on types
+
+//! @defgroup group-details Details
+//! Implementation details. Do not rely on anything here, even if it is
+//! documented.
 
 #include <serialize/comparison_traits.hpp>
 #include <serialize/define_enum.hpp>
+#include <serialize/string_conversion.hpp>

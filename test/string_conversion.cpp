@@ -37,16 +37,19 @@ struct Hobby {
     std::string str;
 };
 
+/// [enum2]
 enum class E {
     e1,
     e2
 };
+/// [enum2]
 
+/// [enum2_traits]
 struct ETraits {
     using Enum [[maybe_unused]] = E;
-    [[maybe_unused]] static constexpr size_t count = 2;
-    [[maybe_unused]] static constexpr std::array<Enum, count> values{Enum::e1, Enum::e2};
-    [[maybe_unused]] static char const* toString(Enum x) {
+    static constexpr size_t count = 2;
+    static constexpr std::array<Enum, count> values{Enum::e1, Enum::e2};
+    static char const* toString(Enum x) {
         switch (x) {
         case Enum::e1: return "e1";
         case Enum::e2: return "e2";
@@ -54,10 +57,43 @@ struct ETraits {
         throw 1;
     }
 };
+/// [enum2_traits]
 
-[[maybe_unused]] ETraits traits(E) { return {}; }
+/// [enum2_traits_adl]
+ETraits traits(E) { return {}; }
+/// [enum2_traits_adl]
+
+// [enum1]
+enum class E2 {
+    v3,
+    v4
+};
+// [enum1]
 
 } // namespace
+
+/// [enum1_traits]
+namespace serialize {
+template <>
+struct EnumTraits<E2> {
+    using Enum = E2;
+    static constexpr size_t count = 2;
+    static constexpr std::array<Enum, count> values = {Enum::v3, Enum::v4};
+    static char const* toString(Enum e) {
+        switch (e) {
+        case Enum::v3: return "v3";
+        case Enum::v4: return "v4";
+        }
+        throw 0;
+    }
+    static constexpr auto strings() {
+        return boost::hana::make_tuple(
+            boost::hana::make_tuple("v3", "3"),
+            boost::hana::make_tuple("v4", "4"));
+    }
+};
+} // namespace serialize
+/// [enum1_traits]
 
 TEST_CASE("Check toString/fromString", "[string_conversion]") {
     Hobby const hobby("abc");
@@ -67,22 +103,18 @@ TEST_CASE("Check toString/fromString", "[string_conversion]") {
     REQUIRE(str == toString(hobby));
     REQUIRE(hobby == fromString<Hobby>(str));
 
-    // EnumTraits
+    /// [enum2_string]
     REQUIRE(toString(E::e1) == "e1");
     REQUIRE(fromString<E>("e2") == E::e2);
     REQUIRE_THROWS_AS(toString(E(9)), int);
+    /// [enum2_string]
+
+    /// [enum1_string]
+    REQUIRE(toString(E2::v3) == "v3");
+    REQUIRE(fromString<E2>("v4") == E2::v4);
+    REQUIRE(fromString<E2>("4") == E2::v4);
+    /// [enum1_string]
 
     // std::to_string
     REQUIRE(toString(int(1)) == "1");
-}
-
-TEST_CASE("Check iparseWithSuffix", "[string_conversion]") {
-    struct X {};
-    REQUIRE(iparseWithSuffix<X>("1.5 suf", "suf") == 1.5);
-    REQUIRE(iparseWithSuffix<X>("1.5suf", "suf") == 1.5);
-    REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5 su", "suf"), StringConversionError);
-    REQUIRE_THROWS_AS(iparseWithSuffix<X>("suf", "suf"), StringConversionError);
-    REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5", "suf"), StringConversionError);
-    REQUIRE_THROWS_AS(iparseWithSuffix<X>("1.5 l suf", "suf"), StringConversionError);
-    REQUIRE_THROWS_WITH(iparseWithSuffix<X>("1.5 su", "suf"), "'1.5 su' is not of type 'X'");
 }

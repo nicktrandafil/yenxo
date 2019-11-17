@@ -37,6 +37,8 @@
 
 namespace serialize {
 
+/// \ingroup group-exceptions
+/// Enum value is not handled or the value is not of the enum at all
 class BadEnumValue : public std::runtime_error {
 public:
     template <class E>
@@ -49,58 +51,58 @@ public:
 
 } // namespace serialize
 
-/// Enum init
-/// Given a tuple (x) || (x,) || (x,1,) || (x,1,"x") || (x,,"x") || (x,,)
-/// produces       x  ||  x   ||  x = 1 ||  x = 1    || x        || x
+// Enum init
+// Given a tuple (x) || (x,) || (x,1,) || (x,1,"x") || (x,,"x") || (x,,)
+// produces       x  ||  x   ||  x = 1 ||  x = 1    || x        || x
 #define EQe(...) EQe_IMPL(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__)
 #define EQe_IMPL(N, ...)               \
     BOOST_HANA_PP_CONCAT(EQe_IMPL_, N) \
     (__VA_ARGS__)
 #define EQe_IMPL_1(x) x
-#define EQe_IMPL_2(x, y) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
+#define EQe_IMPL_2(x, y) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
 #define EQe_IMPL_2_EMPTY(_01, x, y)              \
     BOOST_HANA_PP_CONCAT(EQe_IMPL_2_EMPTY_, _01) \
     (x, y)
 #define EQe_IMPL_2_EMPTY_0(x, y) x = y
 #define EQe_IMPL_2_EMPTY_1(x, y) x
-#define EQe_IMPL_3(x, y, ...) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
-#define EQe_IMPL_4(x, y, ...) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
-#define EQe_IMPL_5(x, y, ...) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
-#define EQe_IMPL_6(x, y, ...) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
-#define EQe_IMPL_7(x, y, ...) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
-#define EQe_IMPL_8(x, y, ...) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
-#define EQe_IMPL_9(x, y, ...) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
-#define EQe_IMPL_10(x, y, ...) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
-#define EQe_IMPL_11(x, y, ...) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
-#define EQe_IMPL_12(x, y, ...) EQe_IMPL_2_EMPTY(ISEMPTY(y), x, y)
+#define EQe_IMPL_3(x, y, ...) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
+#define EQe_IMPL_4(x, y, ...) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
+#define EQe_IMPL_5(x, y, ...) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
+#define EQe_IMPL_6(x, y, ...) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
+#define EQe_IMPL_7(x, y, ...) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
+#define EQe_IMPL_8(x, y, ...) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
+#define EQe_IMPL_9(x, y, ...) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
+#define EQe_IMPL_10(x, y, ...) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
+#define EQe_IMPL_11(x, y, ...) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
+#define EQe_IMPL_12(x, y, ...) EQe_IMPL_2_EMPTY(IS_EMPTY(y), x, y)
 
-/// Enum string representation
-/// Given a tuple (x) || (x,) || (x,1,) || (x,1,"x") || (x,,"x") || (x,,)
-/// produces      #x  || #x   || #x     || "x"       || "x"      || #x
+// Enum string representation
+// Given a tuple (x) || (x,) || (x,1,) || (x,1,"x") || (x,,"x") || (x,,)
+// produces      #x  || #x   || #x     || "x"       || "x"      || #x
 #define STRe(...) STRe_IMPL(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__)
 #define STRe_IMPL(N, ...)               \
     BOOST_HANA_PP_CONCAT(STRe_IMPL_, N) \
     (__VA_ARGS__)
 #define STRe_IMPL_1(x) #x
 #define STRe_IMPL_2(x, ...) #x
-#define STRe_IMPL_3(y, z, x) STRe_IMPL_3_EMPTY(ISEMPTY(x), y, x)
-#define STRe_IMPL_4(y, z, x, ...) STRe_IMPL_3_EMPTY(ISEMPTY(x), y, x), __VA_ARGS__
-#define STRe_IMPL_5(y, z, x, ...) STRe_IMPL_3_EMPTY(ISEMPTY(x), y, x), __VA_ARGS__
-#define STRe_IMPL_6(y, z, x, ...) STRe_IMPL_3_EMPTY(ISEMPTY(x), y, x), __VA_ARGS__
-#define STRe_IMPL_7(y, z, x, ...) STRe_IMPL_3_EMPTY(ISEMPTY(x), y, x), __VA_ARGS__
-#define STRe_IMPL_8(y, z, x, ...) STRe_IMPL_3_EMPTY(ISEMPTY(x), y, x), __VA_ARGS__
-#define STRe_IMPL_9(y, z, x, ...) STRe_IMPL_3_EMPTY(ISEMPTY(x), y, x), __VA_ARGS__
-#define STRe_IMPL_10(y, z, x, ...) STRe_IMPL_3_EMPTY(ISEMPTY(x), y, x), __VA_ARGS__
-#define STRe_IMPL_11(y, z, x, ...) STRe_IMPL_3_EMPTY(ISEMPTY(x), y, x), __VA_ARGS__
-#define STRe_IMPL_12(y, z, x, ...) STRe_IMPL_3_EMPTY(ISEMPTY(x), y, x), __VA_ARGS__
+#define STRe_IMPL_3(y, z, x) STRe_IMPL_3_EMPTY(IS_EMPTY(x), y, x)
+#define STRe_IMPL_4(y, z, x, ...) STRe_IMPL_3_EMPTY(IS_EMPTY(x), y, x), __VA_ARGS__
+#define STRe_IMPL_5(y, z, x, ...) STRe_IMPL_3_EMPTY(IS_EMPTY(x), y, x), __VA_ARGS__
+#define STRe_IMPL_6(y, z, x, ...) STRe_IMPL_3_EMPTY(IS_EMPTY(x), y, x), __VA_ARGS__
+#define STRe_IMPL_7(y, z, x, ...) STRe_IMPL_3_EMPTY(IS_EMPTY(x), y, x), __VA_ARGS__
+#define STRe_IMPL_8(y, z, x, ...) STRe_IMPL_3_EMPTY(IS_EMPTY(x), y, x), __VA_ARGS__
+#define STRe_IMPL_9(y, z, x, ...) STRe_IMPL_3_EMPTY(IS_EMPTY(x), y, x), __VA_ARGS__
+#define STRe_IMPL_10(y, z, x, ...) STRe_IMPL_3_EMPTY(IS_EMPTY(x), y, x), __VA_ARGS__
+#define STRe_IMPL_11(y, z, x, ...) STRe_IMPL_3_EMPTY(IS_EMPTY(x), y, x), __VA_ARGS__
+#define STRe_IMPL_12(y, z, x, ...) STRe_IMPL_3_EMPTY(IS_EMPTY(x), y, x), __VA_ARGS__
 #define STRe_IMPL_3_EMPTY(_01, x, y)              \
     BOOST_HANA_PP_CONCAT(STRe_IMPL_3_EMPTY_, _01) \
     (x, y)
 #define STRe_IMPL_3_EMPTY_0(x, y) y
 #define STRe_IMPL_3_EMPTY_1(x, y) #x
 
-/// Resolve a value entry argument
-/// If argument is a tuple produces: (x, EQe x, STRe x) else (x, x, #x)
+// Resolve a value entry argument
+// If argument is a tuple produces: (x, EQe x, STRe x) else (x, x, #x)
 #define RESOLVE_VALUEe(e) \
     RESOLVE_VALUEe_IMPL(IS_TUPLE(e), e)
 #define RESOLVE_VALUEe_IMPL(_01, e)                 \
@@ -109,25 +111,25 @@ public:
 #define RESOLVE_VALUEe_IMPL_0(e) (e, e, #e)                             // not tuple
 #define RESOLVE_VALUEe_IMPL_1(e) (BOOST_HANA_PP_FRONT e, EQe e, STRe e) // tuple
 
-/// 3tuple argument extraction
+// 3tuple argument extraction
 #define FIRST3e(x, ...) x
 #define SECOND3e(x, y, ...) y
 #define THIRD3e(x, y, ...) BOOST_HANA_PP_FRONT(__VA_ARGS__)
 #define RESTe(x, y, ...) __VA_ARGS__
 
-/// Generates an enum and traits structure for it
+/// Generates an enum and `serialize::EnumTraits` for it
+/// \ingroup group-enum
 ///
-/// Example:
+/// Example
 /// -------
-/// 	DEFINE_ENUM(MyEnum,
-/// 		val0,
-/// 		(val1),
-/// 		(val2, 4),
-/// 		(val3,, "string_repr"),
-/// 		(val4, 9, "string_repr2")
-/// 	);
+/// @include example/define_enum.cpp
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+auto DEFINE_ENUM(...) = ;
+#define DEFINE_STRUCT(Type, ...) see documentation
+#else
 #define DEFINE_ENUM(Type, ...) \
     DEFINE_ENUM_IMPL(BOOST_HANA_PP_NARG(__VA_ARGS__), Type, __VA_ARGS__)
+#endif
 
 #define DEFINE_ENUM_IMPL(N, Type, ...)         \
     BOOST_HANA_PP_CONCAT(DEFINE_ENUM_IMPL_, N) \

@@ -46,15 +46,15 @@ struct Ignore {};
 
 } // namespace serialize::detail
 
-/// Nth element of 2-tuple
+// Nth element of 2-tuple
 #define NTH1OF2s(a, b) a
 #define NTH2OF2s(a, b) b
 
 #define EVALs(...) __VA_ARGS__
 
-/// Given a tuple (a, b, c, d)      || (a, b, c)             || (a, b)
-/// produces      ((a, b), (c, d))  || ((a, b), (c, Ignore)) || ((a, b), (Ignore, Ignore))
-/// \note requires at least 2 arguments and at most 4
+// Given a tuple (a, b, c, d)      || (a, b, c)             || (a, b)
+// produces      ((a, b), (c, d))  || ((a, b), (c, Ignore)) || ((a, b), (Ignore, Ignore))
+// \note requires at least 2 arguments and at most 4
 #define RESOLVE_VALUEs(...) RESOLVE_VALUEs_IMPL(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__)
 #define RESOLVE_VALUEs_IMPL(N, ...)               \
     BOOST_HANA_PP_CONCAT(RESOLVE_VALUEs_IMPL_, N) \
@@ -71,62 +71,27 @@ struct Ignore {};
 #define EXTRs_IMPL_0(t) t // not tuple
 #define EXTRs_IMPL_1(t) EVALs t
 
-/// Define a struct
+/// Generates a hana-struct adding some meta-information as static members
+/// \ingroup group-struct
 ///
-/// --
-/// Example:
-///
-/// The declarating
-///
-/// 	struct A {
-/// 		DEFINE_STRUCT(A,
-/// 			(int, a),
-/// 			(int, b, Default(10)),
-/// 			(double, c, Name("cc"_s)),
-/// 			(string, d, Name("dd"_s), Default("ab")),
-/// 			(bool, e, Default(false), Name("flag"_s));
-/// 	};
-///
-/// will generate the code
-///
-/// 	struct A {
-/// 		int a;
-/// 		int b;
-/// 		double c;
-/// 		string d;
-/// 		bool d;
-///
-/// 		struct hana_accessors_impl {
-/// 		...
-/// 		};
-///
-/// 		static auto defaults() {
-/// 			return make_map(
-/// 				make_pair("b"_s, 10),
-/// 				make_pair("d"_s, "ab"),
-/// 				make_pair("e"_s, false)
-/// 			);
-/// 		}
-///
-/// 		static auto names() {
-/// 			return make_map(
-/// 				make_pair("c"_s, "cc"_s),
-/// 				make_pair("d"_s, "dd"_s),
-/// 				make_pair("e"_s, "flag"_s)
-/// 			);
-/// 		}
-/// 	};
-///
-/// --
-/// Effectively forwards first two arguments to `BOOST_HANA_DEFINE_STRUCT`.
-/// Extra arguments (`Name` and `Default`) compose two maps returned by
+/// Effectively forwards first two arguments of the tuple arguments
+/// to `BOOST_HANA_DEFINE_STRUCT`. Extra arguments of the tuple
+/// arguments (`Name` and `Default`) compose two maps returned by
 /// generated static methods `defaults()` and `names()`. Keys in maps are
 /// member names (as hana strings). Values are the arguments passed to
 /// `Default` and `Name`. Types `Default` and `Name` are just tags and do not
 /// appear in the generated code.
-
+///
+/// Example
+/// -------
+/// @include example/define_struct.cpp
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+auto DEFINE_STRUCT(...) = ;
+#define DEFINE_STRUCT(Type, ...) see documentation
+#else
 #define DEFINE_STRUCT(...) \
     DEFINE_STRUCT_IMPL(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__)
+#endif
 
 #define DEFINE_STRUCT_IMPL(N, ...)               \
     BOOST_HANA_PP_CONCAT(DEFINE_STRUCT_IMPL_, N) \

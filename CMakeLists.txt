@@ -170,14 +170,22 @@ endif()
 # Doc
 add_subdirectory(doc)
 
-
 # Testing
 
 if(NOT ${PROJECT_NAME}_TESTING)
     return()
 endif()
 
+add_custom_target(check
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMENT "Build and then run all the tests and examples."
+    USES_TERMINAL)
+
 enable_testing()
+
+# Examples
+add_subdirectory(example)
 
 find_package(Catch2 QUIET REQUIRED)
 
@@ -220,88 +228,8 @@ target_link_libraries(
     ${PROJECT_NAME}_development
 )
 
-
-# Test cases
-
-add_test(
-    check_variant test_${PROJECT_NAME}
-    "Check Variant")
-
-add_test(
-    traits_var_update_from_var test_${PROJECT_NAME}
-    "[variant_trait_helpers]")
-
-add_test(
-    variant_traits test_${PROJECT_NAME}
-    "Check trait::Var and trait::UpdateFromVar")
-
-add_test(
-    traits_var_def test_${PROJECT_NAME}
-    "Check trait::VarDef")
-
-add_test(
-    traits_var_def_explicit test_${PROJECT_NAME}
-    "Check trait::VarDefExplicit")
-
-add_test(
-    traits_ostream test_${PROJECT_NAME}
-    "Check trait::OStream")
-
-add_test(
-    traits_equality_comparison test_${PROJECT_NAME}
-    "Check trait::EqualityComparison")
-
-add_test(
-    type_name test_${PROJECT_NAME}
-    "Check typeName")
-
-add_test(
-    simple_json_to_struct test_${PROJECT_NAME}
-    "Check simple json to struct")
-
-add_test(
-    traits_var_fails test_${PROJECT_NAME}
-    "Check trait::Var fails")
-
-add_test(
-    traits_var_nonintrusive test_${PROJECT_NAME}
-    "Check trait::Var nonintrusive")
-
-add_test(
-    traits_var_strong_typedef test_${PROJECT_NAME}
-    "Check trait::Var with type_safe::strong_typedef")
-
-add_test(
-    traits_var_constraint_type test_${PROJECT_NAME}
-    "Check trait::Var with type_safe::constraint_type")
-
-add_test(
-    string_conversion test_${PROJECT_NAME}
-    "Check toString/fromString")
-
-add_test(
-    iparse_with_suffix test_${PROJECT_NAME}
-    "Check IparseWithSuffix")
-
-add_test(
-    algorithm_string test_${PROJECT_NAME}
-    "Check Check iendsWith")
-
-add_test(
-    traits_var_type_safe test_${PROJECT_NAME}
-    "Check trait::Var with type_safe build-in types")
-
-add_test(
-    variant_conversion test_${PROJECT_NAME}
-    "Check toVariant/fromVariant")
-
-add_test(
-    define_enum test_${PROJECT_NAME}
-    "Check DEFINE_ENUM")
-
-add_test(
-    define_struct test_${PROJECT_NAME}
-    "[define_struct]")
+add_test(test_serialize test_${PROJECT_NAME})
+add_dependencies(check test_${PROJECT_NAME})
 
 
 # Coverage

@@ -33,23 +33,34 @@
 #include <type_traits>
 
 /// \file variant_traits.hpp
-/// Some add-ons for enabling to and from Variant conversion
+/// Some add-ons for enabling to and from `Variant` conversion
+
+/// \defgroup group-traits-auto-variant Variant conversion
+/// \ingroup group-traits
+/// `Variant` conversion for user defined types
+
+/// \defgroup group-traits-auto-variant-policy Policies
+/// \ingroup group-traits-auto-variant
+/// The traits' settings
 
 namespace serialize::trait {
 namespace detail {
 
 /// Has member `updateVar(serialize::Variant const&)`
+/// \ingroup group-details
 constexpr auto const hasUpdateVar = boost::hana::is_valid(
     [](auto t) -> decltype((void)std::declval<typename decltype(t)::type>().updateVar(std::declval<Variant>())) {
     });
 
+/// A policy to deal with default values of a struct
+/// \ingroup group-traits-auto-variant-policy
 struct Default {
     /// Does a type has a static member function `defaults()`
     static constexpr auto const has = boost::hana::is_valid(
         [](auto t) -> decltype((void)decltype(t)::type::defaults()) {
         });
 
-    /// Does the field `name` has a default value in the class `C`
+    /// Does the member `name` has a default value in the class `C`
     template <typename T, typename S>
     static constexpr bool hasValue(boost::hana::basic_type<T>, S name) {
         using Found = decltype(
@@ -64,6 +75,8 @@ struct Default {
     }
 };
 
+/// A policy to deal with member names of a struct
+/// \ingroup group-traits-auto-variant-policy
 struct Rename {
     /// Does a type has a static member function `names()`
     static constexpr auto const hasNames = boost::hana::is_valid(
@@ -78,7 +91,7 @@ struct Rename {
         return boost::hana::value<Found>();
     }
 
-    /// Does the field `name` has a name value in the class `C`
+    /// Does the member `name` has a name value in the class `C`
     template <typename T, typename S>
     static constexpr bool hasNameValue(S name) {
         if constexpr (hasNames(boost::hana::type_c<T>)) {
@@ -90,7 +103,7 @@ struct Rename {
     }
 
     /// \return name from map returned by `T::names()` static member function,
-    ///         if present, else identity
+    /// if present, else identity
     template <typename T, typename S>
     static char const* rename(S name) {
         if constexpr (hasNameValue<T>(name)) {
@@ -100,6 +113,7 @@ struct Rename {
         }
     }
 
+    /// \see rename
     template <class T, class S>
     char const* operator()(boost::hana::basic_type<T>, S name) const noexcept {
         return rename<T>(name);
@@ -128,6 +142,7 @@ void fromVariantWrap(T& val, Variant const& var, S const& name, F const& from_va
 } // namespace detail
 
 /// Configuaratoin for `VarDef`
+/// \ingroup group-traits-auto-variant-policy
 struct VarDefPolicy {
     /// treat missing keys as empty containers
     static auto constexpr empty_container_not_required = false;
@@ -152,13 +167,15 @@ struct VarDefPolicy {
 };
 
 /// Adds conversion support to and from `Variant`
+/// \ingroup group-traits-auto-variant
+///
 /// Specifically, adds methods:
 ///     `static Variant toVariant(Derived)`
 ///     `static Derived fromVariant(Variant)`
 ///
 /// The methods does not deal with optional types and default values. Therefore,
 /// for the method `fromVariant` all members must be presented in a variant,
-/// and, for the method `toVariant` all fields will be serialized into a variant
+/// and, for the method `toVariant` all members will be serialized into a variant.
 template <typename Derived, typename Policy = VarDefPolicy>
 struct Var {
     static Variant toVariant(Derived const& x) {
@@ -212,14 +229,22 @@ protected:
     ~Var() = default;
 };
 
-/// Adds conversion support to and from `Variant`, defaulting missings fields
+/// Adds conversion support to and from `Variant`
+/// \ingroup group-traits-auto-variant
+///
 /// Specifically adds members:
 ///     `static Variant toVariant(Derived)`
 /// 	`static Derived fromVariant(Variant)`
 ///
-/// Requires a static member function `defaults` of hana map to be presented in
-/// `Derived`, where the kays are member names and the values are convertible
-/// to the corresponding members.
+/// Unlike `Var` supports 'default values' and 'member renaming' concepts.
+///
+/// A static member function `auto defaults()` can be presented in `Derived`.
+/// The method returns hana map, keys in the which are member names and values are convertible
+/// to the corresponding members field that denotes to default value for the class member.
+///
+/// A static member function `auto names()` can be presented in `Derived`.
+/// The method returns hana tuple of pairs where the first element is member name as hana string
+/// and the second element is a string that denotes a different name for the class member.
 template <typename Derived, class Policy = VarDefPolicy>
 struct VarDef {
     static Variant toVariant(Derived const& x) {
@@ -323,7 +348,9 @@ protected:
 };
 
 /// Adds member `void update(Variant)`
-/// Updates the specified fields
+/// \ingroup group-traits-auto-variant
+///
+/// Updates the specified fields. Supports 'renaming concept'.
 template <typename Derived, typename Policy = VarDefPolicy>
 struct UpdateFromVar {
     void updateVar(Variant const& x) {
@@ -358,7 +385,9 @@ protected:
 };
 
 /// Adds member `void update(Opt const&)`
-/// Updates the specified fields
+/// \ingroup group-traits-auto-variant
+///
+/// Updates the specified fields.
 template <typename Derived, typename Opt>
 struct UpdateFromOpt {
     void updateOpt(Opt const& x) {
