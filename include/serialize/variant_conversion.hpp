@@ -337,6 +337,12 @@ struct FromVariantImpl<T, When<condition>> {
     }
 };
 
+// Identity
+template <typename T>
+struct FromVariantImpl<T, When<std::is_same_v<serialize::Variant, T>>> {
+    static Variant apply(T const& x) { return x; }
+};
+
 // Specialization for types with `static T T::fromVariant(Variant)`
 template <typename T>
 struct FromVariantImpl<T, When<hasFromVariant(boost::hana::type_c<T>)>> {
