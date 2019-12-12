@@ -166,6 +166,17 @@ struct ToVariantImpl<T,
     }
 };
 
+// Specialization for pair
+template <typename T>
+struct ToVariantImpl<T, When<isPair(boost::hana::type_c<T>)>> {
+    static Variant apply(T const& pair) {
+        VariantMap tmp;
+        tmp["first"] = toVariant(pair.first);
+        tmp["second"] = toVariant(pair.second);
+        return Variant(tmp);
+    }
+};
+
 // Specialization for collection types
 template <typename T>
 struct ToVariantImpl<T,
@@ -435,6 +446,16 @@ struct FromVariantImpl<T, When<isContainer(boost::hana::type_c<T>) &&
                 FromVariantImpl<typename T::mapped_type>::apply(x.second));
         }
         return ret;
+    }
+};
+
+// Specialization for pair
+template <typename T>
+struct FromVariantImpl<T, When<isPair(boost::hana::type_c<T>)>> {
+    static T apply(Variant const& var) {
+        return T(
+            serialize::fromVariant<typename T::first_type>(var.map().at("first")),
+            serialize::fromVariant<typename T::second_type>(var.map().at("second")));
     }
 };
 
