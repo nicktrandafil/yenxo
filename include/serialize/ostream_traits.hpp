@@ -51,7 +51,7 @@ struct OStream {
                                       }
                                   } else if constexpr (isContainer(boost::hana::type_c<decltype(value)>)) {
                                       os << boost::hana::to<char const*>(name);
-                                      if constexpr (isKeyValue(boost::hana::type_c<typename decltype(value)::value_type>)) {
+                                      if constexpr (isPair(boost::hana::type_c<typename decltype(value)::value_type>)) {
                                           os << ": { ";
                                           for (auto const& x : value) {
                                               os << x.first
