@@ -476,6 +476,20 @@ struct AutoCamelCase : trait::VarDef<AutoCamelCase, CamelCasePolicy>,
                              (std::string, hello_world_2_boo));
 };
 
+struct Pol4 : trait::VarDefPolicy {
+    static auto constexpr allow_extra_parameters = false;
+};
+
+struct AdditionalProp : trait::VarDef<AdditionalProp, Pol4>, trait::EqualityComparison<AdditionalProp> {
+    constexpr static auto names() {
+        return hana::make_map(
+            hana::make_pair("y"_s, "z"));
+    }
+    BOOST_HANA_DEFINE_STRUCT(AdditionalProp,
+                             (int, x),
+                             (int, y));
+};
+
 } // namespace
 
 BOOST_HANA_ADAPT_STRUCT(PersonD, name, age, hobby);
@@ -575,6 +589,22 @@ TEST_CASE("Check trait::VarDef", "[variant_traits]") {
         var.modifyMap().begin()->second = Variant("a");
         st.hello_world_2_boo = "a";
         REQUIRE(fromVariant<AutoCamelCase>(var) == st);
+    }
+
+    SECTION("additional prop policy") {
+        Variant var(VariantMap{{"x", Variant(1)}, {"z", Variant(2)}});
+
+        AdditionalProp expected;
+        expected.x = 1;
+        expected.y = 2;
+
+        AdditionalProp p;
+        REQUIRE_NOTHROW(fromVariant2(p, var));
+        REQUIRE(expected == p);
+
+        var.modifyMap()["u"] = Variant(3);
+        REQUIRE_THROWS_AS(fromVariant2(p, var), std::logic_error);
+        REQUIRE_THROWS_WITH(fromVariant2(p, var), "'u' is unknown");
     }
 }
 
