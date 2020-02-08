@@ -63,12 +63,12 @@ struct ETraits {
 ETraits traits(E) { return {}; }
 /// [enum2_traits_adl]
 
-// [enum1]
+/// [enum1]
 enum class E2 {
     v3,
     v4
 };
-// [enum1]
+/// [enum1]
 
 } // namespace
 
