@@ -136,7 +136,7 @@ struct VarDefPolicy {
     static auto constexpr serialize_default_value = true;
 
     /// allow extra parameters not described in the struct
-    static auto constexpr allow_extra_parameters = true;
+    static auto constexpr allow_additional_peroperties = true;
 
     /// from variant conversion functional object
     static constexpr auto from_variant = fromVariant2;
@@ -264,7 +264,7 @@ struct VarDef {
         using namespace std::literals;
         Derived ret;
 
-        using MapT = std::conditional_t<Policy::allow_extra_parameters, decltype(x.map()), std::decay_t<decltype(x.map())>>;
+        using MapT = std::conditional_t<Policy::allow_additional_peroperties, decltype(x.map()), std::decay_t<decltype(x.map())>>;
         MapT map = x.map();
 
         boost::hana::for_each(
@@ -303,13 +303,13 @@ struct VarDef {
                         detail::fromVariantWrap(tmp, it->second, renamed, Policy::from_variant);
                     }
 
-                    if constexpr (!Policy::allow_extra_parameters) {
+                    if constexpr (!Policy::allow_additional_peroperties) {
                         map.erase(it);
                     }
                 }
             }));
 
-        if constexpr (!Policy::allow_extra_parameters) {
+        if constexpr (!Policy::allow_additional_peroperties) {
             if (!map.empty()) {
                 throw std::logic_error("'" + map.begin()->first + "' is unknown");
             }

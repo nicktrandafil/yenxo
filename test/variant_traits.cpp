@@ -477,7 +477,7 @@ struct AutoCamelCase : trait::VarDef<AutoCamelCase, CamelCasePolicy>,
 };
 
 struct Pol4 : trait::VarDefPolicy {
-    static auto constexpr allow_extra_parameters = false;
+    static auto constexpr allow_additional_peroperties = false;
 };
 
 struct AdditionalProp : trait::VarDef<AdditionalProp, Pol4>, trait::EqualityComparison<AdditionalProp> {
