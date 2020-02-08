@@ -56,7 +56,7 @@ install:
   - git clone --recurse-submodules https://github.com/Tencent/rapidjson.git
   - cd rapidjson
   - mkdir build/ && cd build/
-  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DRAPIDJSON_BUILD_TESTS=OFF ..
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DRAPIDJSON_BUILD_TESTS=OFF -DRAPIDJSON_BUILD_EXAMPLES=OFF -DRAPIDJSON_BUILD_DOC=OFF ..
   - cmake --build .
   - sudo cmake --build . --target install
   - cd ../../
