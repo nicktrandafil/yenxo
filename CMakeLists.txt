@@ -33,6 +33,8 @@ endif()
 
 option(${PROJECT_NAME}_test_define_struct "Enable testing of DEFINE_STRUCT" OFF)
 
+option(${PROJECT_NAME}_build_snippets "Enable building snippets" OFF)
+
 cmake_dependent_option(${PROJECT_NAME}_TESTING
   "Enable testing"
   ON "NOT ${PROJECT_NAME}_sub" OFF
@@ -230,6 +232,15 @@ target_link_libraries(
 
 add_test(test_serialize test_${PROJECT_NAME})
 add_dependencies(check test_${PROJECT_NAME})
+
+
+# Snippets
+if(${PROJECT_NAME}_build_snippets)
+    find_package(benchmark QUIET REQUIRED)
+    add_executable(${PROJECT_NAME}_snippets snippets/snippets.cpp)
+    set_target_properties(${PROJECT_NAME}_snippets PROPERTIES CXX_STANDARD 17)
+    target_link_libraries(${PROJECT_NAME}_snippets benchmark::benchmark ${PROJECT_NAME}_development)
+endif()
 
 
 # Coverage
