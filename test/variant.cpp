@@ -22,6 +22,7 @@
   SOFTWARE.
 */
 
+#include <serialize/exception.hpp>
 #include <serialize/type_name.hpp>
 #include <serialize/variant.hpp>
 
@@ -39,8 +40,8 @@ namespace hana = boost::hana;
 using namespace serialize;
 
 TEST_CASE("Check Variant", "[Variant]") {
-    REQUIRE(Variant().empty());
-    REQUIRE(!Variant(1).empty());
+    REQUIRE(Variant().null());
+    REQUIRE(!Variant(1).null());
 
     SECTION("boolean") {
         bool const expected{true};
@@ -52,7 +53,7 @@ TEST_CASE("Check Variant", "[Variant]") {
     }
 
     SECTION("char") {
-        char const expected{7};
+        char const expected{-7};
         auto const x = Variant(expected);
         REQUIRE(expected == x.character());
         REQUIRE_THROWS_AS(Variant().character(), VariantEmpty);
@@ -60,7 +61,16 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(Variant().characterOr(1) == 1);
     }
 
-    SECTION("short int") {
+    SECTION("uchar") {
+        unsigned char const expected{7};
+        auto const x = Variant(expected);
+        REQUIRE(expected == x.character());
+        REQUIRE_THROWS_AS(Variant().uchar(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").uchar(), VariantBadType);
+        REQUIRE(Variant().ucharOr(1) == 1);
+    }
+
+    SECTION("unsigned short int") {
         unsigned short int const expected{3};
         auto const x = Variant(expected);
         REQUIRE(expected == x.ushortInt());
@@ -264,8 +274,8 @@ TEST_CASE("Check Variant", "[Variant]") {
         hana::for_each(
             types,
             [&](auto x) {
-            auto const lhs = Variant(typename decltype(x)::type()).floating();
-            auto const rhs = double(typename decltype(x)::type());
+                auto const lhs = Variant(typename decltype(x)::type()).floating();
+                auto const rhs = double(typename decltype(x)::type());
                 REQUIRE((!(lhs < rhs) && !(lhs > rhs)) /* the same lhs == rhs, but without warning */);
             });
 

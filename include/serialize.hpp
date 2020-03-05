@@ -69,4 +69,5 @@
 
 #include <serialize/comparison_traits.hpp>
 #include <serialize/define_enum.hpp>
+#include <serialize/exception.hpp>
 #include <serialize/string_conversion.hpp>

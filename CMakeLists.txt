@@ -90,6 +90,8 @@ add_library(
 
     include/${PROJECT_NAME}/genuine_struct.hpp
 
+    include/${PROJECT_NAME}/exception.hpp
+
     include/serialize.hpp
 
     src/variant.cpp
@@ -239,7 +241,7 @@ if(${PROJECT_NAME}_build_snippets)
     find_package(benchmark QUIET REQUIRED)
     add_executable(${PROJECT_NAME}_snippets snippets/snippets.cpp)
     set_target_properties(${PROJECT_NAME}_snippets PROPERTIES CXX_STANDARD 17)
-    target_link_libraries(${PROJECT_NAME}_snippets benchmark::benchmark ${PROJECT_NAME}_development)
+    target_link_libraries(${PROJECT_NAME}_snippets benchmark::benchmark ${PROJECT_NAME}_development ${PROJECT_NAME})
 endif()
 
 

@@ -44,13 +44,11 @@ static_assert(sizeof(Var) == 16);
 
 int work(Var var) {
     static int state = 0;
-    std::visit(
-        Overload{
-            [&](int x) { state += x; },
-            [&](double x) { state += static_cast<int>(x); },
-            [&](long x) { state += static_cast<int>(x); },
-            [&](void* x) { state += reinterpret_cast<size_t>(x); }},
-        var.val);
+    std::visit(Overload{[&](int x) { state += x; },
+                        [&](double x) { state += static_cast<int>(x); },
+                        [&](long x) { state += static_cast<int>(x); },
+                        [&](void* x) { state += reinterpret_cast<size_t>(x); }},
+               var.val);
     return state;
 }
 
@@ -96,7 +94,6 @@ static void bm_set_var2(benchmark::State& state) {
 }
 BENCHMARK(bm_set_var2);
 
-
 struct Union {
     union {
         int int_v;
@@ -105,6 +102,7 @@ struct Union {
         void* ptr_v;
     } val;
     uint8_t type{0};
+    std::array<char, 7> padding;
 };
 static_assert(sizeof(Union) == 16);
 
@@ -146,5 +144,41 @@ static void bm_set_union(benchmark::State& state) {
     }
 }
 BENCHMARK(bm_set_union);
+
+struct X {
+    bool operator==(X const& rhs) const {
+        return x == rhs.x && y == rhs.y;
+    }
+    bool operator!=(X const& rhs) const {
+        return !(*this == rhs);
+    }
+    int x;
+    int y;
+};
+
+struct X2 {
+    bool operator==(X2 const& rhs) const {
+        return x == rhs.x && y == rhs.y;
+    }
+    bool operator!=(X2 const& rhs) const {
+        return x != rhs.x || y != rhs.y;
+    }
+    int x;
+    int y;
+};
+
+static void bm_not_equal_using_equal(benchmark::State& state) {
+    X x{5, 6};
+    X y{6, 7};
+    for (auto _ : state) { benchmark::DoNotOptimize(x != y); }
+}
+BENCHMARK(bm_not_equal_using_equal);
+
+static void bm_not_equal(benchmark::State& state) {
+    X2 x{5, 6};
+    X2 y{6, 7};
+    for (auto _ : state) { benchmark::DoNotOptimize(x != y); }
+}
+BENCHMARK(bm_not_equal);
 
 BENCHMARK_MAIN();
