@@ -22,20 +22,14 @@
   SOFTWARE.
 */
 
+#include <serialize/variant.hpp>
+
+#include <rapidjson/document.h>
+
 #include <benchmark/benchmark.h>
 #include <variant>
 
-namespace {
-
-template <typename... Args>
-struct Overload : public Args... {
-    using Args::operator()...;
-};
-
-template <typename... Args>
-Overload(Args...)->Overload<Args...>;
-
-} // namespace
+using namespace serialize;
 
 struct Var {
     std::variant<int, double, long, void*> val;
@@ -180,5 +174,70 @@ static void bm_not_equal(benchmark::State& state) {
     for (auto _ : state) { benchmark::DoNotOptimize(x != y); }
 }
 BENCHMARK(bm_not_equal);
+
+static void bm_var_default_construct(benchmark::State& state) {
+    for (auto _ : state) {
+        Variant var;
+        benchmark::DoNotOptimize(var);
+    }
+}
+BENCHMARK(bm_var_default_construct);
+
+static void bm_var_copy_construct(benchmark::State& state) {
+    for (auto _ : state) {
+        Variant var;
+        benchmark::DoNotOptimize(var);
+        Variant var2(var);
+        benchmark::DoNotOptimize(var2);
+    }
+}
+BENCHMARK(bm_var_copy_construct);
+
+static void bm_var_move_construct(benchmark::State& state) {
+    for (auto _ : state) {
+        Variant var;
+        benchmark::DoNotOptimize(var);
+        Variant var2(std::move(var));
+        benchmark::DoNotOptimize(var2);
+    }
+}
+BENCHMARK(bm_var_move_construct);
+
+static void bm_var_from_json(benchmark::State& state) {
+    auto const raw = R"({
+        "x": 6,
+        "y": [1, 2],
+        "z": {
+            "a": "a",
+            "b": "b"
+        },
+        "a": null
+    })";
+
+    for (auto _ : state) {
+        auto var = serialize::Variant::fromJson(raw);
+        benchmark::DoNotOptimize(var);
+    }
+}
+BENCHMARK(bm_var_from_json);
+
+static void bm_var_rj_json(benchmark::State& state) {
+    auto const raw = R"({
+        "x": 6,
+        "y": [1, 2],
+        "z": {
+            "a": "a",
+            "b": "b"
+        },
+        "a": null
+    })";
+
+    for (auto _ : state) {
+        rapidjson::Document doc;
+        doc.Parse(raw);
+        benchmark::DoNotOptimize(doc);
+    }
+}
+BENCHMARK(bm_var_rj_json);
 
 BENCHMARK_MAIN();

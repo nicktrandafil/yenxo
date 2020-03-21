@@ -167,9 +167,7 @@ struct IntegralCheckedCast : IntegralCheckedCast<T, U, When<true>> {
 
 // safe conversion
 template <typename T, typename U>
-struct IntegralCheckedCast<
-        T, U,
-        When<same_sign_v<T, U> && sizeof(T) >= sizeof(U) && !std::is_same_v<T, bool>>> {
+struct IntegralCheckedCast<T, U, When<same_sign_v<T, U> && sizeof(T) >= sizeof(U)>> {
     static T apply(U x) noexcept {
         return x;
     }
