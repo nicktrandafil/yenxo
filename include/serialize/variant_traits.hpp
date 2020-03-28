@@ -32,9 +32,6 @@
 
 #include <type_traits>
 
-/// \file variant_traits.hpp
-/// Some add-ons for enabling to and from `Variant` conversion
-
 /// \defgroup group-traits-auto-variant Variant conversion
 /// \ingroup group-traits
 /// `Variant` conversion for user defined types

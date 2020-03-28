@@ -26,6 +26,7 @@
 
 #include <catch2/catch.hpp>
 
+#include <map>
 #include <set>
 
 using namespace serialize;
@@ -48,6 +49,7 @@ struct ETraits {
         }
         throw 1;
     }
+    static constexpr std::string_view typeName() noexcept { return "E"; }
 };
 
 [[maybe_unused]] ETraits traits(E) { return {}; }
@@ -81,6 +83,20 @@ struct E2Traits {
 } // namespace
 
 TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
+    REQUIRE(toVariant(Variant(1)) == Variant(1));
+    struct X {
+        static serialize::Variant toVariant(X const&) { return Variant(1); }
+    };
+    REQUIRE(toVariant(X()) == Variant(1));
+    boost::hana::for_each(Variant::Types::rebind_t<boost::hana::tuple>(), [](auto type) {
+        REQUIRE(toVariant(typename decltype(type)::type()) ==
+                Variant(typename decltype(type)::type()));
+    });
+    REQUIRE(toVariant(std::map<std::string, int>{{"1", 1}}) ==
+            Variant(VariantMap{{"1", Variant(1)}}));
+    REQUIRE(toVariant(std::pair(1, "1")) ==
+            Variant(VariantMap{{"first", Variant(1)}, {"second", Variant("1")}}));
+
     REQUIRE(toVariant(E::e1) == Variant("e1"));
     REQUIRE(fromVariant<E>(Variant("e2")) == E::e2);
 
@@ -91,7 +107,7 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
     REQUIRE(fromVariant<V>(Variant(1)) == V(1));
     REQUIRE(fromVariant<V>(Variant("a")) == V("a"));
     REQUIRE_THROWS_AS(fromVariant<V>(Variant(1.2)) == V("a"), VariantBadType);
-    REQUIRE_THROWS_WITH(fromVariant<V>(Variant(1.5)) == V("a"), "'1.5' is not of type 'variant<int, string>'");
+    REQUIRE_THROWS_WITH(fromVariant<V>(Variant(1.5)) == V("a"), "'1.5' is not of type 'one of [int32, string]'");
 
     REQUIRE(fromVariant<Test>(Variant()) == Test());
     REQUIRE(toVariant(Test()) == Variant());

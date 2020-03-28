@@ -40,8 +40,7 @@ namespace {
 
 
 struct Hobby
-        : trait::EqualityComparison<Hobby>
-        , trait::OStream<Hobby> {
+        : trait::EqualityComparison<Hobby> {
     Hobby(int id, std::string const& description)
         : id(id), description(description)
     {}
@@ -52,8 +51,7 @@ struct Hobby
 
 
 struct Person
-        : trait::EqualityComparison<Person>
-        , trait::OStream<Person> {
+        : trait::EqualityComparison<Person> {
     Person(std::string const& name, int age, Hobby const& hobby)
         : name(name), age(age), hobby(hobby)
     {}

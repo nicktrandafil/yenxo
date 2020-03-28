@@ -24,9 +24,9 @@
 
 #pragma once
 
-#if defined(SERIALIZE_DOXYGEN_INVOKED)
+#ifdef SERIALIZE_DOXYGEN_INVOKED
 /// \ingroup group-config
-/// Enables `type_safe` support
+/// Enables `toVariant` and `fromVariant` for `type_safe` types.
 #define SERIALIZE_ENABLE_TYPE_SAFE 1
 #else
 #ifndef SERIALIZE_ENABLE_TYPE_SAFE

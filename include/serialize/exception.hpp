@@ -37,22 +37,22 @@ namespace serialize {
 /// An error identifying `Variant` error
 class VariantErr : public std::exception {
 public:
-    explicit VariantErr(std::string const& msg)
-        : what_(msg) {}
+    explicit VariantErr(std::string const& msg) : what_(msg) {
+    }
 
     char const* what() const noexcept override {
         return what_.c_str();
     }
 
     void prependPath(std::string const& val) {
-        if (path_.empty()) {
-            what_ = ": " + what_;
-        }
+        if (path_.empty()) { what_ = ": " + what_; }
         what_ = "." + val + what_;
         path_ += "." + val + path_;
     }
 
-    std::string const& path() const noexcept { return path_; }
+    std::string const& path() const noexcept {
+        return path_;
+    }
 
 private:
     std::string what_;
@@ -64,10 +64,9 @@ private:
 class VariantEmpty final : public VariantErr {
 public:
     template <class T>
-    explicit VariantEmpty(boost::hana::basic_type<T>)
-        : VariantErr("expected '" +
-                     std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<T>>>()) +
-                     "', actual: 'Empty'") {}
+    explicit VariantEmpty(boost::hana::basic_type<T> t)
+        : VariantErr("expected '" + std::string(typeName(t)) + "', actual: 'Empty'") {
+    }
 };
 
 /// \ingroup goup-exceptions
@@ -75,34 +74,29 @@ public:
 class VariantBadType final : public VariantErr {
 public:
     template <class E, class A>
-    VariantBadType(boost::hana::basic_type<E>, boost::hana::basic_type<A>)
-        : VariantErr(
-              "expected '" +
-              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<E>>>()) +
-              "', actual '" +
-              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<A>>>()) +
-              "'") {}
+    VariantBadType(boost::hana::basic_type<E> e, boost::hana::basic_type<A> a)
+        : VariantErr("expected '" + std::string(typeName(e)) + "', actual '" +
+                     std::string(typeName(a)) + "'") {
+    }
 
-    VariantBadType(std::string const& msg) : VariantErr(msg) {}
+    VariantBadType(std::string const& msg) : VariantErr(msg) {
+    }
 
     template <class T>
-    VariantBadType(std::string const& value, boost::hana::basic_type<T>)
-        : VariantErr(
-              "'" + value + "'" +
-              " is not of type '" +
-              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<T>>>()) +
-              "'") {}
+    VariantBadType(std::string const& value, boost::hana::basic_type<T> t)
+        : VariantErr("'" + value + "'" + " is not of type '" + std::string(typeName(t)) +
+                     "'") {
+    }
 };
 
 /// \ingroup group-exceptions
 /// User tried to get a type which is not able to hold the actual value
 class VariantIntegralOverflow final : public VariantErr {
 public:
-    VariantIntegralOverflow(
-        std::string const& type_name,
-        std::string const& value)
-        : VariantErr("The type '" +
-                     type_name + "' can not hold the value '" + value + "'") {}
+    VariantIntegralOverflow(std::string const& type_name, std::string const& value)
+        : VariantErr("The type '" + type_name + "' can not hold the value '" + value +
+                     "'") {
+    }
 };
 
 } // namespace serialize

@@ -78,7 +78,6 @@ add_library(
     include/${PROJECT_NAME}/type_name.hpp
 
     include/${PROJECT_NAME}/string_conversion.hpp
-    include/${PROJECT_NAME}/algorithm/string.hpp
 
     include/${PROJECT_NAME}/config.hpp
 
@@ -210,7 +209,6 @@ add_executable(
     test/json_struct.cpp
     test/type_safe.cpp
     test/string_conversion.cpp
-    test/string.cpp
 
     test/variant_conversion.cpp
 

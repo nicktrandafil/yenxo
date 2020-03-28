@@ -22,99 +22,88 @@
   SOFTWARE.
 */
 
-
 // tested
 #include <serialize/ostream_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
 
-
 using namespace serialize;
-
 
 namespace {
 
+struct Hobby : trait::OStream<Hobby> {
+    Hobby(int id, std::string const& description) : id(id), description(description) {
+    }
 
-struct Hobby
-        : trait::OStream<Hobby> {
-    Hobby(int id, std::string const& description)
-        : id(id), description(description)
-    {}
+    friend constexpr std::string_view typeNameImpl(Hobby const*) {
+        return "Hobby";
+    }
 
     int id;
     std::string description;
 };
 
-
-struct Person
-        : trait::OStream<Person> {
+struct Person : trait::OStream<Person> {
 
     Person(std::string const& name, int age, Hobby const& hobby)
-        : name(name), age(age), hobby(hobby)
-    {}
+        : name(name), age(age), hobby(hobby) {
+    }
+
+    friend constexpr std::string_view typeNameImpl(Person const*) {
+        return "Person";
+    }
 
     std::string name;
     std::optional<int> age;
     Hobby hobby;
 };
 
+struct Dict : trait::OStream<Dict> {
+    Dict(int x, std::unordered_map<std::string, int> const& map) : x(x), map(map) {
+    }
 
-struct Dict
-        : trait::OStream<Dict> {
-    Dict(int x, std::unordered_map<std::string, int> const& map)
-        : x(x), map(map)
-    {}
+    friend constexpr std::string_view typeNameImpl(Dict const*) {
+        return "Dict";
+    }
 
     int x;
     std::unordered_map<std::string, int> map;
 };
 
+struct Vec : trait::OStream<Vec> {
+    Vec(int x, std::vector<int> const& vec) : x(x), vec(vec) {
+    }
 
-struct Vec
-        : trait::OStream<Vec> {
-    Vec(int x, std::vector<int> const& vec)
-        : x(x), vec(vec)
-    {}
+    friend constexpr std::string_view typeNameImpl(Vec const*) {
+        return "Vec";
+    }
 
     int x;
     std::vector<int> vec;
 };
 
-
 } // namespace
-
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
 BOOST_HANA_ADAPT_STRUCT(Dict, x, map);
 BOOST_HANA_ADAPT_STRUCT(Vec, x, vec);
 
-
 TEST_CASE("Check trait::OStream", "[ostream_traits]") {
-    Hobby const hobby{
-        1,
-        std::string("Hack")
-    };
+    Hobby const hobby{1, std::string("Hack")};
 
-    Person person{
-        "Efendi",
-        18,
-        hobby
-    };
+    Person person{"Efendi", 18, hobby};
 
     std::ostringstream os;
 
-
     SECTION("simple") {
         os << person;
-        REQUIRE(os.str() == "Person { name: Efendi; age: 18; hobby: Hobby { id: 1; description: Hack; }; }");
+        REQUIRE(os.str() == "Person { name: Efendi; age: 18; hobby: Hobby { id: 1; "
+                            "description: Hack; }; }");
     }
 
-    Dict const expected{
-        1,
-        {{"1", 1}, {"2", 2}}
-    };
+    Dict const expected{1, {{"1", 1}, {"2", 2}}};
 
     SECTION("dict") {
         os << expected;

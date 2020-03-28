@@ -39,7 +39,7 @@ namespace serialize::trait {
 template <typename Derived>
 struct OStream {
     friend std::ostream& operator<<(std::ostream& os, Derived const& x) {
-        os << unqualifiedTypeName<Derived>() << " { ";
+        os << typeName(boost::hana::type_c<Derived>) << " { ";
 
         boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
                                   if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {

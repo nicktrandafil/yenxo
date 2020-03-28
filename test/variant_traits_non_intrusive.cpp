@@ -22,7 +22,6 @@
   SOFTWARE.
 */
 
-
 // tested
 #include <serialize/variant_traits.hpp>
 
@@ -33,35 +32,31 @@
 // 3rd
 #include <catch2/catch.hpp>
 
-
 using namespace serialize;
-
 
 namespace {
 
-
 struct UserDefinedStr : private std::string {
     UserDefinedStr() = default;
-    UserDefinedStr(std::string const& x) : std::string(x) {}
-    std::string str() const { return static_cast<std::string>(*this); }
+    UserDefinedStr(std::string const& x) : std::string(x) {
+    }
+    std::string str() const {
+        return static_cast<std::string>(*this);
+    }
 
     bool operator==(UserDefinedStr const& rhs) const {
         return static_cast<std::string const&>(*this) ==
-                static_cast<std::string const&>(rhs);
+               static_cast<std::string const&>(rhs);
     }
 
-    friend std::ostream& operator<<(std::ostream& out,
-                                    UserDefinedStr const& x) {
+    friend std::ostream& operator<<(std::ostream& out, UserDefinedStr const& x) {
         return out << static_cast<std::string const&>(x);
     }
 };
 
-
 } // namespace
 
-
 namespace serialize {
-
 
 template <>
 struct FromVariantImpl<UserDefinedStr> {
@@ -70,7 +65,6 @@ struct FromVariantImpl<UserDefinedStr> {
     }
 };
 
-
 template <>
 struct ToVariantImpl<UserDefinedStr> {
     static Variant apply(UserDefinedStr const& x) {
@@ -78,38 +72,31 @@ struct ToVariantImpl<UserDefinedStr> {
     }
 };
 
-
-}
-
+} // namespace serialize
 
 namespace {
 
-
-struct Hobby
-        : trait::Var<Hobby>
-        , trait::EqualityComparison<Hobby>
-        , trait::OStream<Hobby> {
+struct Hobby : trait::Var<Hobby>,
+               trait::EqualityComparison<Hobby>,
+               trait::OStream<Hobby> {
     Hobby() = default;
-    Hobby(int id, std::string const& description)
-        : id(id), description(description)
-    {}
+    Hobby(int id, std::string const& description) : id(id), description(description) {
+    }
+
+    friend constexpr std::string_view typeNameImpl(Hobby const*) {
+        return "Hobby";
+    }
 
     int id{0};
     UserDefinedStr description;
 };
 
-
 } // namespace
-
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 
-
 TEST_CASE("Check trait::Var nonintrusive", "[variant_traits]") {
-    Variant::Map map{
-        {"id", Variant(9)},
-        {"description", Variant("abc")}
-    };
+    Variant::Map map{{"id", Variant(9)}, {"description", Variant("abc")}};
 
     Hobby const h(9, "abc");
 

@@ -55,17 +55,17 @@ Variant::Variant(char x) noexcept : type_tag_(TypeTag::char_), value_(x) {
 }
 Variant::Variant(unsigned char x) noexcept : type_tag_(TypeTag::uchar), value_(x) {
 }
-Variant::Variant(short int x) noexcept : type_tag_(TypeTag::int16), value_(x) {
+Variant::Variant(int16_t x) noexcept : type_tag_(TypeTag::int16), value_(x) {
 }
-Variant::Variant(unsigned short int x) noexcept : type_tag_(TypeTag::uint16), value_(x) {
+Variant::Variant(uint16_t x) noexcept : type_tag_(TypeTag::uint16), value_(x) {
 }
-Variant::Variant(int x) noexcept : type_tag_(TypeTag::int32), value_(x) {
+Variant::Variant(int32_t x) noexcept : type_tag_(TypeTag::int32), value_(x) {
 }
-Variant::Variant(unsigned int x) noexcept : type_tag_(TypeTag::uint32), value_(x) {
+Variant::Variant(uint32_t x) noexcept : type_tag_(TypeTag::uint32), value_(x) {
 }
-Variant::Variant(signed long x) noexcept : type_tag_(TypeTag::int64), value_(x) {
+Variant::Variant(int64_t x) noexcept : type_tag_(TypeTag::int64), value_(x) {
 }
-Variant::Variant(unsigned long x) noexcept : type_tag_(TypeTag::uint64), value_(x) {
+Variant::Variant(uint64_t x) noexcept : type_tag_(TypeTag::uint64), value_(x) {
 }
 Variant::Variant(double x) noexcept : type_tag_(TypeTag::double_), value_(x) {
 }
@@ -179,7 +179,7 @@ struct IntegralCheckedCast<
         When<same_sign_v<T, U> && sizeof(T) < sizeof(U) && !std::is_same_v<T, bool>>> {
     static T apply(U x) {
         if (x < std::numeric_limits<T>::min() || x > std::numeric_limits<T>::max()) {
-            throw VariantIntegralOverflow(std::string(unqualifiedTypeName<T>()),
+            throw VariantIntegralOverflow(std::string(typeName(boost::hana::type_c<T>)),
                                           std::to_string(x));
         } else {
             return static_cast<T>(x);
@@ -210,7 +210,7 @@ struct IntegralCheckedCast<
 #else
 #error The compiler not supported
 #endif
-            throw VariantIntegralOverflow(std::string(unqualifiedTypeName<T>()),
+            throw VariantIntegralOverflow(std::string(typeName(boost::hana::type_c<T>)),
                                           std::to_string(x));
         }
         return static_cast<T>(x);
@@ -223,7 +223,7 @@ struct IntegralCheckedCast<T, U,
                                 sizeof(T) >= sizeof(U) && !std::is_same_v<T, bool>>> {
     static T apply(U x) {
         if (x < 0) {
-            throw VariantIntegralOverflow(std::string(unqualifiedTypeName<T>()),
+            throw VariantIntegralOverflow(std::string(typeName(boost::hana::type_c<T>)),
                                           std::to_string(x));
         } else {
             return static_cast<T>(x);
@@ -244,7 +244,7 @@ struct IntegralCheckedCast<T, U,
 #else
 #error The compiler not supported
 #endif
-            throw VariantIntegralOverflow(std::string(unqualifiedTypeName<T>()),
+            throw VariantIntegralOverflow(std::string(typeName(boost::hana::type_c<T>)),
                                           std::to_string(x));
         }
         return static_cast<T>(x);
@@ -256,8 +256,8 @@ struct IntegralCheckedCast<bool, U,
                            When<!std::is_same_v<bool, U> && std::is_unsigned_v<U>>> {
     static bool apply(U x) {
         if (x > 1) {
-            throw VariantIntegralOverflow(std::string(unqualifiedTypeName<bool>()),
-                                          std::to_string(x));
+            throw VariantIntegralOverflow(
+                    std::string(typeName(boost::hana::type_c<bool>)), std::to_string(x));
         } else {
             return x;
         }
@@ -269,8 +269,8 @@ struct IntegralCheckedCast<bool, U,
                            When<!std::is_same_v<bool, U> && std::is_signed_v<U>>> {
     static bool apply(U x) {
         if (x > 1 || x < 0) {
-            throw VariantIntegralOverflow(std::string(unqualifiedTypeName<bool>()),
-                                          std::to_string(x));
+            throw VariantIntegralOverflow(
+                    std::string(typeName(boost::hana::type_c<bool>)), std::to_string(x));
         } else {
             return x;
         }
@@ -307,22 +307,22 @@ struct GetHelper<T, When<std::is_integral_v<T>>> {
     static T apply(char x) noexcept(noexcept(integralCheckedCast<T>(x))) {
         return integralCheckedCast<T>(x);
     }
-    static T apply(short int x) noexcept(noexcept(integralCheckedCast<T>(x))) {
+    static T apply(int16_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
         return integralCheckedCast<T>(x);
     }
-    static T apply(unsigned short int x) noexcept(noexcept(integralCheckedCast<T>(x))) {
+    static T apply(uint16_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
         return integralCheckedCast<T>(x);
     }
-    static T apply(int x) noexcept(noexcept(integralCheckedCast<T>(x))) {
+    static T apply(int32_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
         return integralCheckedCast<T>(x);
     }
-    static T apply(unsigned int x) noexcept(noexcept(integralCheckedCast<T>(x))) {
+    static T apply(uint32_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
         return integralCheckedCast<T>(x);
     }
-    static T apply(signed long x) noexcept(noexcept(integralCheckedCast<T>(x))) {
+    static T apply(int64_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
         return integralCheckedCast<T>(x);
     }
-    static T apply(unsigned long x) noexcept(noexcept(integralCheckedCast<T>(x))) {
+    static T apply(uint64_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
         return integralCheckedCast<T>(x);
     }
     [[noreturn]] static T apply(double) {
@@ -350,22 +350,22 @@ struct GetHelper<T, When<std::is_floating_point_v<T>>> {
     static T apply(char x) noexcept {
         return x;
     }
-    static T apply(short int x) noexcept {
+    static T apply(int16_t x) noexcept {
         return x;
     }
-    static T apply(unsigned short int x) noexcept {
+    static T apply(uint16_t x) noexcept {
         return x;
     }
-    static T apply(int x) noexcept {
+    static T apply(int32_t x) noexcept {
         return x;
     }
-    static T apply(unsigned int x) noexcept {
+    static T apply(uint32_t x) noexcept {
         return x;
     }
-    static T apply(signed long x) noexcept {
+    static T apply(int64_t x) noexcept {
         return x;
     }
-    static T apply(unsigned long x) noexcept {
+    static T apply(uint64_t x) noexcept {
         return x;
     }
     static T apply(double x) noexcept {
@@ -401,7 +401,7 @@ struct GetHelper<T, When<std::is_reference_v<T>>> {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wreturn-type" // safe comparation
 template <class T, class U>
-T getHelper(Variant::TypeTag tag, U value_) {
+decltype(auto) getHelper(Variant::TypeTag tag, U value_) {
     using TypeTag = Variant::TypeTag;
     switch (tag) {
     case TypeTag::null: return GetHelper<T>::apply(value_.null_);
@@ -422,7 +422,6 @@ T getHelper(Variant::TypeTag tag, U value_) {
     case TypeTag::map:
         return GetHelper<T>::apply(*reinterpret_cast<Variant::Map*>(value_.ptr));
     }
-    assert(false);
 }
 #pragma GCC diagnostic pop
 #else
@@ -439,36 +438,36 @@ T getHelper(Variant::TypeTag tag, U value_) {
     }                                                                                    \
     (void)x
 
-char Variant::character() const {
+char Variant::char8() const {
     return getHelper<char>(type_tag_, value_);
 }
 
-char Variant::characterOr(char x) const {
+char Variant::char8Or(char x) const {
     GET_HELPER(char, type_tag_, value_, x);
 }
 
-unsigned char Variant::uchar() const {
+unsigned char Variant::uchar8() const {
     return getHelper<unsigned char>(type_tag_, value_);
 }
 
-unsigned char Variant::ucharOr(unsigned char x) const {
+unsigned char Variant::uchar8Or(unsigned char x) const {
     GET_HELPER(unsigned char, type_tag_, value_, x);
 }
 
-short int Variant::shortInt() const {
-    return getHelper<short int>(type_tag_, value_);
+int16_t Variant::int16() const {
+    return getHelper<int16_t>(type_tag_, value_);
 }
 
-short int Variant::shortIntOr(short int x) const {
-    GET_HELPER(short int, type_tag_, value_, x);
+int16_t Variant::int16Or(int16_t x) const {
+    GET_HELPER(int16_t, type_tag_, value_, x);
 }
 
-unsigned short int Variant::ushortInt() const {
-    return getHelper<unsigned short int>(type_tag_, value_);
+uint16_t Variant::uint16() const {
+    return getHelper<uint16_t>(type_tag_, value_);
 }
 
-unsigned short int Variant::ushortIntOr(unsigned short int x) const {
-    GET_HELPER(unsigned short int, type_tag_, value_, x);
+uint16_t Variant::uint16Or(uint16_t x) const {
+    GET_HELPER(uint16_t, type_tag_, value_, x);
 }
 
 bool Variant::boolean() const {
@@ -479,36 +478,36 @@ bool Variant::booleanOr(bool x) const {
     GET_HELPER(bool, type_tag_, value_, x);
 }
 
-int Variant::integer() const {
-    return getHelper<int>(type_tag_, value_);
+int32_t Variant::int32() const {
+    return getHelper<int32_t>(type_tag_, value_);
 }
 
-int Variant::integerOr(int x) const {
-    GET_HELPER(int, type_tag_, value_, x);
+int32_t Variant::int32Or(int32_t x) const {
+    GET_HELPER(int32_t, type_tag_, value_, x);
 }
 
-unsigned int Variant::uint() const {
-    return getHelper<unsigned int>(type_tag_, value_);
+uint32_t Variant::uint32() const {
+    return getHelper<uint32_t>(type_tag_, value_);
 }
 
-unsigned int Variant::uintOr(unsigned int x) const {
-    GET_HELPER(unsigned int, type_tag_, value_, x);
+uint32_t Variant::uint32Or(uint32_t x) const {
+    GET_HELPER(uint32_t, type_tag_, value_, x);
 }
 
-signed long Variant::longInt() const {
-    return getHelper<signed long>(type_tag_, value_);
+int64_t Variant::int64() const {
+    return getHelper<int64_t>(type_tag_, value_);
 }
 
-signed long Variant::longInteOr(signed long x) const {
-    GET_HELPER(signed long, type_tag_, value_, x);
+int64_t Variant::int64Or(int64_t x) const {
+    GET_HELPER(int64_t, type_tag_, value_, x);
 }
 
-unsigned long Variant::ulongInt() const {
-    return getHelper<unsigned long>(type_tag_, value_);
+uint64_t Variant::uint64() const {
+    return getHelper<uint64_t>(type_tag_, value_);
 }
 
-unsigned long Variant::ulongIntOr(unsigned long x) const {
-    GET_HELPER(unsigned long, type_tag_, value_, x);
+uint64_t Variant::uint64Or(uint64_t x) const {
+    GET_HELPER(uint64_t, type_tag_, value_, x);
 }
 
 double Variant::floating() const {
@@ -520,7 +519,7 @@ double Variant::floatingOr(double x) const {
 }
 
 std::string const& Variant::str() const {
-    return getHelper<std::string&>(type_tag_, value_);
+    return getHelper<std::string>(type_tag_, value_);
 }
 
 std::string Variant::strOr(std::string const& x) const {
@@ -528,7 +527,7 @@ std::string Variant::strOr(std::string const& x) const {
 }
 
 Variant::Vec const& Variant::vec() const {
-    return getHelper<Vec&>(type_tag_, value_);
+    return getHelper<Vec>(type_tag_, value_);
 }
 
 Variant::Vec Variant::vecOr(Vec const& x) const {
@@ -540,7 +539,7 @@ Variant::Vec& Variant::modifyVec() {
 }
 
 Variant::Map const& Variant::map() const {
-    return getHelper<Map&>(type_tag_, value_);
+    return getHelper<Map>(type_tag_, value_);
 }
 
 Variant::Map Variant::mapOr(Map const& x) const {
@@ -625,11 +624,11 @@ struct FromJson : rapidjson::BaseReaderHandler<Encoding, FromJson<Encoding>> {
         val(b);
         return true;
     }
-    bool Int(int i) {
+    bool Int(int32_t i) {
         val(i);
         return true;
     }
-    bool Uint(unsigned u) {
+    bool Uint(uint32_t u) {
         val(u);
         return true;
     }
@@ -812,18 +811,17 @@ std::type_info const& Variant::typeInfo() const noexcept {
     case TypeTag::boolean: return typeid(bool);
     case TypeTag::char_: return typeid(char);
     case TypeTag::uchar: return typeid(unsigned char);
-    case TypeTag::int16: return typeid(short);
-    case TypeTag::uint16: return typeid(unsigned short);
-    case TypeTag::int32: return typeid(int);
-    case TypeTag::uint32: return typeid(unsigned int);
-    case TypeTag::int64: return typeid(signed long);
-    case TypeTag::uint64: return typeid(unsigned long);
+    case TypeTag::int16: return typeid(int16_t);
+    case TypeTag::uint16: return typeid(uint16_t);
+    case TypeTag::int32: return typeid(int32_t);
+    case TypeTag::uint32: return typeid(uint32_t);
+    case TypeTag::int64: return typeid(int64_t);
+    case TypeTag::uint64: return typeid(uint64_t);
     case TypeTag::double_: return typeid(double);
     case TypeTag::string: return typeid(std::string);
     case TypeTag::vec: return typeid(Vec);
     case TypeTag::map: return typeid(Map);
     }
-    assert(false);
 }
 #pragma GCC diagnostic pop
 #else

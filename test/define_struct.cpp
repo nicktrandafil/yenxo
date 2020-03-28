@@ -42,17 +42,6 @@ using namespace boost::hana::literals;
 namespace {
 
 
-constexpr auto cToString(boost::hana::int_<0>) {
-    return ""_s;
-}
-
-template <int I>
-constexpr auto cToString(boost::hana::int_<I>) {
-    constexpr auto cl = I / 10;
-    return cToString(boost::hana::int_c<cl>) + boost::hana::string_c<(I % 10) + 48>;
-}
-
-
 struct Com {
     DEFINE_STRUCT(Com,
         ((std::variant<int, float>), x, Default(1))

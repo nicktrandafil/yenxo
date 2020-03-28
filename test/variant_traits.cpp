@@ -53,7 +53,6 @@ static_assert(hasToVariant(boost::hana::type_c<X>));
 struct Hobby
     : trait::Var<Hobby>,
       trait::UpdateFromVar<Hobby>,
-      trait::OStream<Hobby>,
       trait::EqualityComparison<Hobby> {
 
     Hobby()
@@ -67,8 +66,7 @@ struct Hobby
 };
 
 struct OptPerson
-    : trait::OStream<OptPerson>,
-      trait::EqualityComparison<OptPerson> {
+    : trait::EqualityComparison<OptPerson> {
 
     OptPerson() = default;
 
@@ -84,7 +82,6 @@ struct Person
     : trait::Var<Person>,
       trait::UpdateFromVar<Person>,
       trait::UpdateFromOpt<Person, OptPerson>,
-      trait::OStream<Person>,
       trait::EqualityComparison<Person> {
 
     Person()
@@ -100,7 +97,6 @@ struct Person
 
 struct PersonEx
     : trait::Var<PersonEx>,
-      trait::OStream<PersonEx>,
       trait::EqualityComparison<PersonEx> {
 
     PersonEx() {}
@@ -113,8 +109,7 @@ struct PersonEx
 
 struct Dict
     : trait::Var<Dict>,
-      trait::EqualityComparison<Dict>,
-      trait::OStream<Dict> {
+      trait::EqualityComparison<Dict> {
     Dict() = default;
 
     Dict(int x, std::unordered_map<std::string, int> const& map)
@@ -143,7 +138,7 @@ TEST_CASE("detail::toVariant", "[variant_trait_helpers]") {
 
     struct X {
         static Variant toVariant(X const& x) { return Variant(x.m); }
-        static X fromVariant(Variant const& x) { return {x.integer()}; }
+        static X fromVariant(Variant const& x) { return {x.int32()}; }
         int m{5};
     };
 
@@ -198,6 +193,7 @@ struct St2 : trait::Var<St2>, trait::EqualityComparison<St2> {
 
 struct ParentU : trait::UpdateFromVar<ParentU>, trait::EqualityComparison<ParentU> {
     ParentU() : name("a"), age(30) {}
+
     BOOST_HANA_DEFINE_STRUCT(
         ParentU,
         (std::string, name),
@@ -353,7 +349,6 @@ namespace {
 
 struct PersonD
     : trait::VarDef<PersonD>,
-      trait::OStream<PersonD>,
       trait::EqualityComparison<PersonD> {
     PersonD() {}
 
@@ -612,7 +607,6 @@ namespace {
 
 struct PersonC
     : trait::VarDef<PersonC>,
-      trait::OStream<PersonC>,
       trait::EqualityComparison<PersonC> {
     PersonC() {}
 
@@ -646,8 +640,7 @@ struct St4 : trait::VarDef<St4>, trait::EqualityComparison<St4> {
 
 struct St5
     : trait::VarDef<St5>,
-      trait::EqualityComparison<St5>,
-      trait::OStream<St5> {
+      trait::EqualityComparison<St5> {
     St5() = default;
     St5(int a, std::string b)
         : a(a), b(b) {}
@@ -666,6 +659,10 @@ struct St5
     static auto const& names() {
         static auto const ret = filterNames(metadata());
         return ret;
+    }
+
+    static constexpr std::string_view typeName() noexcept {
+        return "St5";
     }
 
     BOOST_HANA_DEFINE_STRUCT(
@@ -738,6 +735,6 @@ TEST_CASE("Check trait::Var fails", "[variant_traits]") {
         {"wheels", Variant("4")}}};
 
     REQUIRE_THROWS_AS(Car::fromVariant(car_var), VariantBadType);
-    REQUIRE_THROWS_WITH(Car::fromVariant(car_var), ".wheels: expected 'int', actual 'string'");
+    REQUIRE_THROWS_WITH(Car::fromVariant(car_var), ".wheels: expected 'int32', actual 'string'");
     REQUIRE(hana::equal(int(1), int(1)));
 }

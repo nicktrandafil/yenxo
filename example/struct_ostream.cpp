@@ -2,6 +2,7 @@
 #include <serialize/ostream_traits.hpp>
 #include <serialize/variant.hpp>
 #include <serialize/variant_traits.hpp>
+#include <rapidjson/document.h>
 
 #include <iostream>
 
@@ -17,6 +18,10 @@ struct Hobby
     Hobby(int id, std::string const& description)
         : id(id), description(description) {}
 
+    friend constexpr std::string_view typeNameImpl(Hobby const*) noexcept {
+        return "Hobby";
+    }
+
     int id;
     std::string description;
 };
@@ -29,6 +34,10 @@ struct Person
 
     Person(std::string const& name, int age, Hobby const& hobby)
         : name(name), age(age), hobby(hobby) {}
+
+    friend constexpr std::string_view typeNameImpl(Person const*) noexcept {
+        return "Person";
+    }
 
     std::string name;
     int age;

@@ -37,7 +37,6 @@ namespace {
 
 struct Hobby : trait::Var<Hobby>,
                trait::UpdateFromVar<Hobby>,
-               trait::OStream<Hobby>,
                trait::EqualityComparison<Hobby> {
 
     Hobby() : id(0) {
@@ -52,7 +51,6 @@ struct Hobby : trait::Var<Hobby>,
 
 struct Person : trait::VarDef<Person>,
                 trait::UpdateFromVar<Person>,
-                trait::OStream<Person>,
                 trait::EqualityComparison<Person> {
 
     Person() : age(0) {

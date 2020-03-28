@@ -25,7 +25,6 @@
 #pragma once
 
 #include <serialize/meta.hpp>
-#include <serialize/type_name.hpp>
 
 #include <rapidjson/fwd.h>
 
@@ -69,12 +68,12 @@ public:
     explicit Variant(bool) noexcept;
     explicit Variant(char) noexcept;
     explicit Variant(unsigned char) noexcept;
-    explicit Variant(short int) noexcept;
-    explicit Variant(unsigned short int) noexcept;
-    explicit Variant(int) noexcept;
-    explicit Variant(unsigned int x) noexcept;
-    explicit Variant(signed long) noexcept;
-    explicit Variant(unsigned long) noexcept;
+    explicit Variant(int16_t) noexcept;
+    explicit Variant(uint16_t) noexcept;
+    explicit Variant(int32_t) noexcept;
+    explicit Variant(uint32_t) noexcept;
+    explicit Variant(int64_t) noexcept;
+    explicit Variant(uint64_t) noexcept;
     explicit Variant(double) noexcept;
 
     explicit Variant(char const* const&);
@@ -121,93 +120,93 @@ public:
 
     /// Get char
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    char character() const;
+    char char8() const;
     explicit operator char() const {
-        return character();
+        return char8();
     }
 
     /// Get char or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    char characterOr(char x) const;
+    char char8Or(char x) const;
 
     /// Get unsigned char
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned char uchar() const;
+    unsigned char uchar8() const;
     explicit operator unsigned char() const {
-        return uchar();
+        return uchar8();
     }
 
     /// Get unsigned char or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    unsigned char ucharOr(unsigned char x) const;
+    unsigned char uchar8Or(unsigned char x) const;
 
-    /// Get short int
+    /// Get int16
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    short int shortInt() const;
-    explicit operator short int() const {
-        return shortInt();
+    int16_t int16() const;
+    explicit operator int16_t() const {
+        return int16();
     }
 
-    /// Get short int or `x` if the object is null
+    /// Get int16 or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    short int shortIntOr(short int x) const;
+    int16_t int16Or(int16_t x) const;
 
-    /// Get unsigned short int
+    /// Get uint16
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned short int ushortInt() const;
-    explicit operator unsigned short int() const {
-        return ushortInt();
+    uint16_t uint16() const;
+    explicit operator uint16_t() const {
+        return uint16();
     }
 
-    /// Get unsigned short int or `x` if the object is null
+    /// Get uint16 or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    unsigned short int ushortIntOr(unsigned short int) const;
+    uint16_t uint16Or(uint16_t) const;
 
-    /// Get int
+    /// Get int32
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    int integer() const;
-    explicit operator int() const {
-        return integer();
+    int32_t int32() const;
+    explicit operator int32_t() const {
+        return int32();
     }
 
-    /// Get int or `x` if the object is null
+    /// Get int32 or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    int integerOr(int x) const;
+    int32_t int32Or(int32_t x) const;
 
-    /// Get unsigned int
+    /// Get uint32
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned int uint() const;
-    explicit operator unsigned int() const {
-        return uint();
+    uint32_t uint32() const;
+    explicit operator uint32_t() const {
+        return uint32();
     }
 
-    /// Get unsigned int or `x` if the object is null
+    /// Get uint32 or `x` if the object is null
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned int uintOr(unsigned int x) const;
+    uint32_t uint32Or(uint32_t x) const;
 
-    /// Get signed long or `x` if the object is null
+    /// Get int64 or `x` if the object is null
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    signed long longInt() const;
-    explicit operator signed long() const {
-        return longInt();
+    int64_t int64() const;
+    explicit operator int64_t() const {
+        return int64();
     }
 
-    /// Get signed long or `x` if the object is null
+    /// Get int64 or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    signed long longInteOr(signed long x) const;
+    int64_t int64Or(int64_t x) const;
 
-    /// Get unsigned long or `x` if the object is null
+    /// Get uint64 or `x` if the object is null
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned long ulongInt() const;
-    explicit operator unsigned long() const {
-        return ulongInt();
+    uint64_t uint64() const;
+    explicit operator uint64_t() const {
+        return uint64();
     }
 
-    /// Get unsigned long or `x` if the object is null
+    /// Get uint64 or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    unsigned long ulongIntOr(unsigned long x) const;
+    uint64_t uint64Or(uint64_t x) const;
 
-    /// Get int
+    /// Get double
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     double floating() const;
     explicit operator double() const {
@@ -279,10 +278,14 @@ public:
         return type_tag_;
     }
 
+    static constexpr std::string_view typeName() noexcept {
+        return "variant";
+    }
+
     // list of supported types
-    using Types = S<NullType, bool, char, unsigned char, short int, unsigned short int,
-                    int, unsigned int, signed long, unsigned long, double, std::string,
-                    Variant::Vec, Variant::Map>;
+    using Types =
+            S<NullType, bool, char, unsigned char, int64_t, uint64_t, int32_t, uint32_t,
+              int64_t, uint64_t, double, std::string, Variant::Vec, Variant::Map>;
 
 private:
     struct Impl;
@@ -337,35 +340,35 @@ inline bool Variant::asOr<bool>(bool x) const {
 }
 template <>
 inline char Variant::asOr<char>(char x) const {
-    return characterOr(x);
+    return char8Or(x);
 }
 template <>
 inline unsigned char Variant::asOr<unsigned char>(unsigned char x) const {
-    return ucharOr(x);
+    return uchar8Or(x);
 }
 template <>
-inline short int Variant::asOr<short int>(short int x) const {
-    return shortIntOr(x);
+inline int16_t Variant::asOr<int16_t>(int16_t x) const {
+    return int16Or(x);
 }
 template <>
-inline unsigned short int Variant::asOr<unsigned short int>(unsigned short int x) const {
-    return ushortIntOr(x);
+inline uint16_t Variant::asOr<uint16_t>(uint16_t x) const {
+    return uint16Or(x);
 }
 template <>
-inline int Variant::asOr<int>(int x) const {
-    return integerOr(x);
+inline int32_t Variant::asOr<int32_t>(int32_t x) const {
+    return int32Or(x);
 }
 template <>
-inline unsigned int Variant::asOr<unsigned int>(unsigned int x) const {
-    return uintOr(x);
+inline uint32_t Variant::asOr<uint32_t>(uint32_t x) const {
+    return uint32Or(x);
 }
 template <>
-inline signed long Variant::asOr<signed long>(signed long x) const {
-    return longInteOr(x);
+inline int64_t Variant::asOr<int64_t>(int64_t x) const {
+    return int64Or(x);
 }
 template <>
-inline unsigned long Variant::asOr<unsigned long>(unsigned long x) const {
-    return ulongIntOr(x);
+inline uint64_t Variant::asOr<uint64_t>(uint64_t x) const {
+    return uint64Or(x);
 }
 
 } // namespace serialize
