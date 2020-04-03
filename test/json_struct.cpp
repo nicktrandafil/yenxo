@@ -22,63 +22,45 @@
   SOFTWARE.
 */
 
-
-// tested
+#include <serialize/comparison_traits.hpp>
+#include <serialize/ostream_traits.hpp>
 #include <serialize/variant.hpp>
 #include <serialize/variant_traits.hpp>
 
-// local
-#include <serialize/ostream_traits.hpp>
-#include <serialize/comparison_traits.hpp>
-
-// 3rd
 #include <catch2/catch.hpp>
 
+#include <rapidjson/document.h>
 
 using namespace serialize;
 
-
 namespace {
 
+struct Hobby : trait::Var<Hobby>,
+               trait::UpdateFromVar<Hobby>,
+               trait::EqualityComparison<Hobby> {
 
-struct Hobby
-        : trait::Var<Hobby>
-        , trait::UpdateFromVar<Hobby>
-        , trait::OStream<Hobby>
-        , trait::EqualityComparison<Hobby> {
+    Hobby() : id(0) {
+    }
 
-    Hobby() : id(0) {}
-
-    Hobby(int id, std::string const& description)
-        : id(id), description(description)
-    {}
+    Hobby(int id, std::string const& description) : id(id), description(description) {
+    }
 
     int id;
     std::string description;
 };
 
+struct Person : trait::VarDef<Person>,
+                trait::UpdateFromVar<Person>,
+                trait::EqualityComparison<Person> {
 
-struct Person
-        : trait::VarDef<Person>
-        , trait::UpdateFromVar<Person>
-        , trait::OStream<Person>
-        , trait::EqualityComparison<Person> {
+    Person() : age(0) {
+    }
 
-    Person() : age(0) {}
-
-    Person(std::string const& name,
-           int age,
-           Hobby const& hobby,
-           bool b,
-           unsigned u,
-           long l,
-           unsigned long ul,
-           double f,
-           std::vector<int>&& v
-           )
+    Person(std::string const& name, int age, Hobby const& hobby, bool b, unsigned u,
+           long l, unsigned long ul, double f, std::vector<int>&& v)
         : name(name), age(age), hobby(hobby), b(b), u(u), l(l), ul(ul), f(f),
-          v(std::move(v))
-    {}
+          v(std::move(v)) {
+    }
 
     std::string name;
     int age;
@@ -95,13 +77,10 @@ struct Person
     std::optional<bool> n;
 };
 
-
 } // namespace
-
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby, b, u, l, ul, f, v, n);
-
 
 TEST_CASE("Check simple json to struct", "[json_struct]") {
     auto const json = R"(
@@ -122,22 +101,17 @@ TEST_CASE("Check simple json to struct", "[json_struct]") {
         }
     )";
 
-    Hobby const hobby{
-        10,
-        "Barista"
-    };
+    Hobby const hobby{10, "Barista"};
 
-    Person const expected{
-        "Efendi",
-        20,
-        hobby,
-        true,
-        4294967295u,
-        9223372036854775807,
-        18446744073709551615U,
-        1.1,
-        {1, 2}
-    };
+    Person const expected{"Efendi",
+                          20,
+                          hobby,
+                          true,
+                          4294967295u,
+                          9223372036854775807,
+                          18446744073709551615U,
+                          1.1,
+                          {1, 2}};
 
     rapidjson::Document d;
     d.Parse(json);

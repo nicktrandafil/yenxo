@@ -28,7 +28,7 @@
 
 using namespace serialize;
 
-namespace {
+namespace test_string_conversion {
 
 struct Hobby {
     explicit Hobby(std::string const& str) : str(str) {}
@@ -56,11 +56,12 @@ struct ETraits {
         }
         throw 1;
     }
+    static constexpr std::string_view typeName() noexcept { return "E"; }
 };
 /// [enum2_traits]
 
 /// [enum2_traits_adl]
-ETraits traits(E) { return {}; }
+ETraits traits(E);
 /// [enum2_traits_adl]
 
 /// [enum1]
@@ -70,7 +71,9 @@ enum class E2 {
 };
 /// [enum1]
 
-} // namespace
+} // namespace test_string_conversion
+
+using namespace test_string_conversion;
 
 /// [enum1_traits]
 namespace serialize {
@@ -91,6 +94,10 @@ struct EnumTraits<E2> {
             boost::hana::make_tuple("v3", "3"),
             boost::hana::make_tuple("v4", "4"));
     }
+
+    static constexpr std::string_view typeName() noexcept {
+        return "E2";
+    }
 };
 } // namespace serialize
 /// [enum1_traits]
@@ -106,6 +113,7 @@ TEST_CASE("Check toString/fromString", "[string_conversion]") {
     /// [enum2_string]
     REQUIRE(toString(E::e1) == "e1");
     REQUIRE(fromString<E>("e2") == E::e2);
+    REQUIRE_THROWS_WITH(fromString<E>("9"), "'9' is not of type 'E'");
     REQUIRE_THROWS_AS(toString(E(9)), int);
     /// [enum2_string]
 
@@ -113,6 +121,7 @@ TEST_CASE("Check toString/fromString", "[string_conversion]") {
     REQUIRE(toString(E2::v3) == "v3");
     REQUIRE(fromString<E2>("v4") == E2::v4);
     REQUIRE(fromString<E2>("4") == E2::v4);
+    REQUIRE_THROWS_WITH(fromString<E2>("9"), "'9' is not of type 'E2'");
     /// [enum1_string]
 
     // std::to_string

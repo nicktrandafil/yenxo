@@ -38,6 +38,7 @@
 #include <boost/hana/traits.hpp>
 #include <boost/hana/tuple.hpp>
 #include <boost/hana/type.hpp>
+#include <boost/hana/string.hpp>
 
 #include <optional>
 #include <type_traits>
@@ -55,6 +56,9 @@ struct S {
 
     template <template <class...> class T>
     using rebind = T<Args...>;
+
+    template <template <class...> class T>
+    using rebind_t = T<boost::hana::type<Args>...>;
 
     template <typename Key>
     constexpr static bool convertible() {
@@ -81,14 +85,14 @@ struct Valid : std::true_type {};
 
 } // namespace detail
 
-/// `std::variant` visitor function objects overloads
+/// `std::variant` visitor function objects overload
 /// \ingroup group-meta
 /// In the cobe below
 /// \code
 ///     Overload{[](int) {}, [](double) {}};
 /// \endcode
 /// the expression returns a function object that has
-/// to overloads of `operator()`.
+/// two overloads of `operator()`.
 template <typename... Args>
 struct Overload : public Args... {
     using Args::operator()...;
@@ -263,7 +267,7 @@ constexpr StrongTypedefT strongTypeDef;
 
 /// Tests if type is `type_safe::constrained_type`
 /// \ingroup group-meta
-#ifdef SERIALIZE_DOXYGEN_IVOKED
+#ifdef SERIALIZE_DOXYGEN_INVOKED
 constexpr auto constrainedType = [](auto type) {
     return isConstrainedType(type);
 };
@@ -362,5 +366,21 @@ constexpr BooleanTypeT boolean;
 constexpr auto const hasStrings = boost::hana::is_valid(
     [](auto t) -> decltype((void)decltype(t)::type::strings()) {
     });
+
+/// Compile time `to_string` for integer
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+template <int I>
+constexpr auto cToString(boost::hana::int_<I>) noexcept { ... }
+#else
+constexpr auto cToString(boost::hana::int_<0>) noexcept {
+    return BOOST_HANA_STRING("");
+}
+
+template <int I>
+constexpr auto cToString(boost::hana::int_<I>) noexcept {
+    constexpr auto cl = I / 10;
+    return cToString(boost::hana::int_c<cl>) + boost::hana::string_c<(I % 10) + 48>;
+}
+#endif
 
 } // namespace serialize

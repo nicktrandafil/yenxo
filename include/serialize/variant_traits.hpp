@@ -32,9 +32,6 @@
 
 #include <type_traits>
 
-/// \file variant_traits.hpp
-/// Some add-ons for enabling to and from `Variant` conversion
-
 /// \defgroup group-traits-auto-variant Variant conversion
 /// \ingroup group-traits
 /// `Variant` conversion for user defined types
@@ -170,8 +167,8 @@ struct VarDefPolicy {
 /// \ingroup group-traits-auto-variant
 ///
 /// Specifically, adds methods:
-///     `static Variant toVariant(Derived)`
-///     `static Derived fromVariant(Variant)`
+/// * `static Variant toVariant(Derived)`
+/// * `static Derived fromVariant(Variant)`
 ///
 /// The methods does not deal with optional types and default values. Therefore,
 /// for the method `fromVariant` all members must be presented in a variant,
@@ -233,8 +230,8 @@ protected:
 /// \ingroup group-traits-auto-variant
 ///
 /// Specifically adds members:
-///     `static Variant toVariant(Derived)`
-/// 	`static Derived fromVariant(Variant)`
+/// * `static Variant toVariant(Derived)`
+/// * `static Derived fromVariant(Variant)`
 ///
 /// Unlike `Var` supports 'default values' and 'member renaming' concepts.
 ///

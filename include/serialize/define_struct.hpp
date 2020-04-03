@@ -71,13 +71,13 @@ struct Ignore {};
 #define EXTRs_IMPL_0(t) t // not tuple
 #define EXTRs_IMPL_1(t) EVALs t
 
-/// Generates a hana-struct adding some meta-information as static members
+/// Generates a Boost.Hana.Struct adding some meta-information as static members
 /// \ingroup group-struct
 ///
-/// Effectively forwards first two arguments of the tuple arguments
+/// Effectively forwards first two arguments of tuple arguments
 /// to `BOOST_HANA_DEFINE_STRUCT`. Extra arguments of the tuple
 /// arguments (`Name` and `Default`) compose two maps returned by
-/// generated static methods `defaults()` and `names()`. Keys in maps are
+/// generated static methods `defaults()` and `names()`. Keys in the maps are
 /// member names (as hana strings). Values are the arguments passed to
 /// `Default` and `Name`. Types `Default` and `Name` are just tags and do not
 /// appear in the generated code.

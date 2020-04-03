@@ -22,98 +22,91 @@
   SOFTWARE.
 */
 
-
-// tested
+#include <serialize/define_enum.hpp>
 #include <serialize/type_name.hpp>
 
-// 3rd
 #include <catch2/catch.hpp>
 
+#include <map>
 
 using namespace serialize;
 
+namespace {
 
-struct Def {};
+/// [sn_static_method]
+struct Def {
+    constexpr static std::string_view typeName() noexcept {
+        return "Def";
+    }
+};
+/// [sn_static_method]
 
+/// [sn_adl]
+struct Def2 {
+    friend constexpr std::string_view typeNameImpl(Def2 const*) noexcept {
+        return "Def2";
+    }
+};
+/// [sn_adl]
 
-namespace a { struct Xyz {}; }
+} // namespace
 
+/// [sn_spec]
+namespace {
+struct Def3 {};
+} // namespace
 
-struct Dum { struct Zum {}; };
+namespace serialize {
+template <>
+struct TypeNameImpl<Def3> {
+    static constexpr std::string_view apply() noexcept {
+        return "Def3";
+    }
+};
+/// [sn_spec]
 
+} // namespace serialize
 
-template <typename T>
-struct X {};
+namespace {
 
+/// [sn_enum]
+DEFINE_ENUM(E1, e1, e2);
+/// [sn_enum]
 
-template <bool b>
-struct Y {};
-
-
-enum class E { e1 };
-
-
-template <E e>
-struct Z {};
-
-
-namespace tz {
-
-
-enum class E2 { e2 };
-
-
-template <auto e>
-struct Z {};
-
-
-}
-
-
-template <class T>
-struct A {};
-
+} // namespace
 
 TEST_CASE("Check typeName", "[utilities]") {
-    REQUIRE(unqualifiedTypeName<Def>() == "Def");
-    static_assert(unqualifiedTypeName<Def>() == "Def");
+    /// [sn_udt_checks]
+    static_assert(typeName(boost::hana::type_c<Def>) == "Def");
+    REQUIRE(typeName(boost::hana::type_c<Def>) == "Def");
+    static_assert(typeName(boost::hana::type_c<Def2>) == "Def2");
+    REQUIRE(typeName(boost::hana::type_c<Def2>) == "Def2");
+    static_assert(typeName(boost::hana::type_c<Def3>) == "Def3");
+    REQUIRE(typeName(boost::hana::type_c<Def3>) == "Def3");
+    /// [sn_udt_checks]
 
-    REQUIRE(unqualifiedTypeName<a::Xyz>() == "Xyz");
-    static_assert(unqualifiedTypeName<a::Xyz>() == "Xyz");
+    /// [sn_enum_checks]
+    static_assert(typeName(boost::hana::type_c<E1>) == "E1");
+    REQUIRE(typeName(boost::hana::type_c<E1>) == "E1");
+    /// [sn_enum_checks]
 
-    REQUIRE(unqualifiedTypeName<Dum::Zum>() == "Zum");
-    static_assert(unqualifiedTypeName<Dum::Zum>() == "Zum");
+    REQUIRE(typeName(boost::hana::type_c<std::integral_constant<E1, E1::e1>>) == "E1{0}");
 
-    REQUIRE(unqualifiedTypeName<tz::E2>() == "E2");
+    REQUIRE(typeName(boost::hana::type_c<std::vector<int>>) == "list of int32");
+    REQUIRE(typeName(boost::hana::type_c<std::map<int, std::string>>) == "map of int32-string");
 
-#if defined(__clang__)
-    REQUIRE(unqualifiedTypeName<tz::Z<E::e1>>() == "Z<E::e1>");
-    REQUIRE(unqualifiedTypeName<tz::Z<tz::E2::e2>>() == "Z<E2::e2>");
-    REQUIRE(unqualifiedTypeName<A<Z<E::e1>>>() == "A<Z<E::e1>>");
-    REQUIRE(unqualifiedTypeName<A<tz::Z<E::e1>>>() == "A<Z<E::e1>>");
-    REQUIRE(qualifiedTypeName<Z<E::e1>>() == "Z<E::e1>");
-    REQUIRE(qualifiedTypeName<tz::Z<E::e1>>() == "tz::Z<E::e1>");
-    REQUIRE(qualifiedTypeName<A<Z<E::e1>>>() == "A<Z<E::e1> >");
-    REQUIRE(qualifiedTypeName<A<tz::Z<E::e1>>>() == "A<tz::Z<E::e1> >");
-#elif defined(__GNUC__)
-//    REQUIRE(unqualifiedTypeName<tz::Z<E::e1>>() == "Z<E::0>");
-//    REQUIRE(unqualifiedTypeName<tz::Z<tz::E2::e2>>() == "Z<E2::0>");
-//    REQUIRE(unqualifiedTypeName<A<Z<E::e1>>>() == "A<Z<E::0>>");
-//    REQUIRE(unqualifiedTypeName<A<tz::Z<E::e1>>>() == "A<Z<E::0>>");
-//    REQUIRE(qualifiedTypeName<Z<E::e1>>() == "Z<(E)0>");
-//    REQUIRE(qualifiedTypeName<tz::Z<E::e1>>() == "tz::Z<(E)0>");
-//    REQUIRE(qualifiedTypeName<A<Z<E::e1>>>() == "A<Z<(E)0> >");
-//    REQUIRE(qualifiedTypeName<A<tz::Z<E::e1>>>() == "A<tz::Z<(E)0> >");
-#else
-#error "Not supported"
-#endif
-
-    REQUIRE(unqualifiedTypeName<std::string>() == "string");
-    REQUIRE(qualifiedTypeName<Def>() == "Def");
-    REQUIRE(qualifiedTypeName<a::Xyz>() == "a::Xyz");
-    REQUIRE(qualifiedTypeName<Dum::Zum>() == "Dum::Zum");
-    static_assert(qualifiedTypeName<Def>() == "Def");
-
-    REQUIRE(qualifiedTypeName<X<Dum>>() == "X<Dum>");
-    REQUIRE(qualifiedTypeName<Y<true>>() == "Y<true>");
+    REQUIRE(typeName(boost::hana::type_c<float>) == "float");
+    REQUIRE(typeName(boost::hana::type_c<double>) == "double");
+    REQUIRE(typeName(boost::hana::type_c<wchar_t>) == "wchar");
+    REQUIRE(typeName(boost::hana::type_c<std::optional<char>>) == "optional char8");
+    REQUIRE(typeName(boost::hana::type_c<std::nullptr_t>) == "nullptr");
+    REQUIRE(typeName(boost::hana::type_c<std::monostate>) == "null");
+    REQUIRE(typeName(boost::hana::type_c<std::variant<char, bool>>) == "one of [char8, boolean]");
+    REQUIRE(typeName(boost::hana::type_c<bool>) == "boolean");
+    REQUIRE(typeName(boost::hana::type_c<char>) == "char8");
+    REQUIRE(typeName(boost::hana::type_c<unsigned char>) == "uchar8");
+    REQUIRE(typeName(boost::hana::type_c<uint16_t>) == "uint16");
+    REQUIRE(typeName(boost::hana::type_c<int32_t>) == "int32");
+    REQUIRE(typeName(boost::hana::type_c<uint32_t>) == "uint32");
+    REQUIRE(typeName(boost::hana::type_c<std::string>) == "string");
 }

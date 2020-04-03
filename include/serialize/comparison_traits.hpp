@@ -31,6 +31,10 @@ namespace serialize::trait {
 
 /// \ingroup group-traits
 /// Enables equality comparison for `Derived`
+/// \pre `Derived` should be a Boost.Hana.Struct.
+/// Example
+/// -------
+/// @include example/equality_comparison.cpp
 template <typename Derived>
 struct EqualityComparison {
     friend bool operator==(Derived const& lhs, Derived const& rhs) {

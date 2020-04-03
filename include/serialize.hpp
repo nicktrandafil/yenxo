@@ -36,13 +36,6 @@
 //! @defgroup group-function Function objects
 //! Function objects provided by the library.
 
-//! @defgroup group-formats Serialized data formats
-//! Data formats available to convert to/from.
-
-//! @defgroup group-json JSON
-//! \ingroup group-formats
-//! JSON data format.
-
 //! @defgroup group-utility Utility
 //! Helper utilities provided by the library.
 
@@ -69,4 +62,5 @@
 
 #include <serialize/comparison_traits.hpp>
 #include <serialize/define_enum.hpp>
+#include <serialize/exception.hpp>
 #include <serialize/string_conversion.hpp>

@@ -26,6 +26,7 @@
 
 #include <serialize/config.hpp>
 #include <serialize/enum_traits.hpp>
+#include <serialize/exception.hpp>
 #include <serialize/meta.hpp>
 #include <serialize/variant.hpp>
 #include <serialize/when.hpp>

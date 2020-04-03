@@ -46,7 +46,7 @@ struct StringConversionError : public std::logic_error {
         : std::logic_error(
               "'" + value + "'" +
               " is not of type '" +
-              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<T>>>()) +
+              std::string(typeName(boost::hana::type_c<T>)) +
               "'") {}
 };
 

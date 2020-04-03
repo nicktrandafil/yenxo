@@ -25,10 +25,8 @@
 #pragma once
 
 #include <serialize/meta.hpp>
-#include <serialize/pimpl.hpp>
-#include <serialize/type_name.hpp>
 
-#include <rapidjson/document.h>
+#include <rapidjson/fwd.h>
 
 #include <string>
 #include <type_traits>
@@ -37,99 +35,46 @@
 
 namespace serialize {
 
-/// \ingroup group-exceptions
-/// An error identifying `Variant` error
-class VariantErr : public std::exception {
-public:
-    explicit VariantErr(std::string const& msg)
-        : what_(msg) {}
-
-    char const* what() const noexcept override {
-        return what_.c_str();
-    }
-
-    void prependPath(std::string const& val) {
-        if (path_.empty()) {
-            what_ = ": " + what_;
-        }
-        what_ = "." + val + what_;
-        path_ += "." + val + path_;
-    }
-
-    std::string const& path() const noexcept { return path_; }
-
-private:
-    std::string what_;
-    std::string path_;
-};
-
-/// \ingroup group-exceptions
-/// Empty Variant error
-class VariantEmpty final : public VariantErr {
-public:
-    template <class T>
-    explicit VariantEmpty(boost::hana::basic_type<T>)
-        : VariantErr("expected '" +
-                     std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<T>>>()) +
-                     "', actual: 'Empty'") {}
-};
-
-/// \ingroup goup-exceptions
-/// Bad type error
-class VariantBadType final : public VariantErr {
-public:
-    template <class E, class A>
-    VariantBadType(boost::hana::basic_type<E>, boost::hana::basic_type<A>)
-        : VariantErr(
-              "expected '" +
-              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<E>>>()) +
-              "', actual '" +
-              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<A>>>()) +
-              "'") {}
-
-    VariantBadType(std::string const& msg) : VariantErr(msg) {}
-
-    template <class T>
-    VariantBadType(std::string const& value, boost::hana::basic_type<T>)
-        : VariantErr(
-              "'" + value + "'" +
-              " is not of type '" +
-              std::string(unqualifiedTypeName<std::remove_cv_t<std::remove_reference_t<T>>>()) +
-              "'") {}
-};
-
-/// \ingroup group-exceptions
-/// User tried to get a type which is not able to hold the actual value
-class VariantIntegralOverflow final : public VariantErr {
-public:
-    VariantIntegralOverflow(
-        std::string const& type_name,
-        std::string const& value)
-        : VariantErr("The type '" +
-                     type_name + "' can not hold the value '" + value + "'") {}
-};
-
 /// \ingroup group-datatypes
-/// Serialized object representation. Think of it as an DOM object.
+/// Serialized object representation. Think of it as a DOM object.
 class Variant {
 public:
+    struct NullType {};
     using Map = std::unordered_map<std::string, Variant>;
     using Vec = std::vector<Variant>;
 
-    Variant();
-    ~Variant();
+    enum class TypeTag : uint8_t {
+        null,
+        boolean,
+        char_,
+        uchar,
+        int16,
+        uint16,
+        int32,
+        uint32,
+        int64,
+        uint64,
+        double_,
+        string,
+        vec,
+        map
+    };
 
-    explicit Variant(bool);
+    ~Variant() noexcept;
 
-    explicit Variant(char);
-    explicit Variant(unsigned char);
-    explicit Variant(short int);
-    explicit Variant(unsigned short int);
-    explicit Variant(int);
-    explicit Variant(unsigned int);
-    explicit Variant(signed long);
-    explicit Variant(unsigned long);
-    explicit Variant(double);
+    Variant() noexcept;
+
+    Variant(NullType x) noexcept;
+    explicit Variant(bool) noexcept;
+    explicit Variant(char) noexcept;
+    explicit Variant(unsigned char) noexcept;
+    explicit Variant(int16_t) noexcept;
+    explicit Variant(uint16_t) noexcept;
+    explicit Variant(int32_t) noexcept;
+    explicit Variant(uint32_t) noexcept;
+    explicit Variant(int64_t) noexcept;
+    explicit Variant(uint64_t) noexcept;
+    explicit Variant(double) noexcept;
 
     explicit Variant(char const* const&);
     explicit Variant(std::string const&);
@@ -141,13 +86,11 @@ public:
     explicit Variant(Map const&);
     explicit Variant(Map&&);
 
-    template <typename T,
-              typename = decltype(T::toVariant(std::declval<T>()))>
-    explicit Variant(T const& x)
-        : Variant(T::toVariant(x)) {}
+    template <typename T, typename = decltype(T::toVariant(std::declval<T>()))>
+    explicit Variant(T const& x) : Variant(T::toVariant(x)) {
+    }
 
-    template <typename T,
-              typename = decltype(T::fromVariant(std::declval<Variant>()))>
+    template <typename T, typename = decltype(T::fromVariant(std::declval<Variant>()))>
     explicit operator T() const {
         return T::fromVariant(*this);
     }
@@ -160,131 +103,157 @@ public:
     Variant(Variant&& rhs) noexcept;
     Variant& operator=(Variant&& rhs) noexcept;
 
-    /// Get as `T` or `x` if the object is empty
+    /// Get as `T` or `x` if the object is null
     template <typename T>
     T asOr(T x) const;
 
     /// Get bool
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     bool boolean() const;
-    explicit operator bool() const { return boolean(); }
+    explicit operator bool() const {
+        return boolean();
+    }
 
-    /// Get bool or `x` if the object is empty
+    /// Get bool or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
     bool booleanOr(bool x) const;
 
     /// Get char
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    char character() const;
-    explicit operator char() const { return character(); }
+    char char8() const;
+    explicit operator char() const {
+        return char8();
+    }
 
-    /// Get char or `x` if the object is empty
+    /// Get char or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    char characterOr(char x) const;
+    char char8Or(char x) const;
 
     /// Get unsigned char
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned char uchar() const;
-    explicit operator unsigned char() const { return uchar(); }
+    unsigned char uchar8() const;
+    explicit operator unsigned char() const {
+        return uchar8();
+    }
 
-    /// Get unsigned char or `x` if the object is empty
+    /// Get unsigned char or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    unsigned char ucharOr(unsigned char x) const;
+    unsigned char uchar8Or(unsigned char x) const;
 
-    /// Get short int
+    /// Get int16
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    short int shortInt() const;
-    explicit operator short int() const { return shortInt(); }
+    int16_t int16() const;
+    explicit operator int16_t() const {
+        return int16();
+    }
 
-    /// Get short int or `x` if the object is empty
+    /// Get int16 or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    short int shortIntOr(short int x) const;
+    int16_t int16Or(int16_t x) const;
 
-    /// Get unsigned short int
+    /// Get uint16
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned short int ushortInt() const;
-    explicit operator unsigned short int() const { return ushortInt(); }
+    uint16_t uint16() const;
+    explicit operator uint16_t() const {
+        return uint16();
+    }
 
-    /// Get unsigned short int or `x` if the object is empty
+    /// Get uint16 or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    unsigned short int ushortIntOr(unsigned short int) const;
+    uint16_t uint16Or(uint16_t) const;
 
-    /// Get int
+    /// Get int32
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    int integer() const;
-    explicit operator int() const { return integer(); }
+    int32_t int32() const;
+    explicit operator int32_t() const {
+        return int32();
+    }
 
-    /// Get int or `x` if the object is empty
+    /// Get int32 or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    int integerOr(int x) const;
+    int32_t int32Or(int32_t x) const;
 
-    /// Get unsigned int
+    /// Get uint32
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned int uint() const;
-    explicit operator unsigned int() const { return uint(); }
+    uint32_t uint32() const;
+    explicit operator uint32_t() const {
+        return uint32();
+    }
 
-    /// Get unsigned int or `x` if the object is empty
+    /// Get uint32 or `x` if the object is null
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned int uintOr(unsigned int x) const;
+    uint32_t uint32Or(uint32_t x) const;
 
-    /// Get signed long or `x` if the object is empty
+    /// Get int64 or `x` if the object is null
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    signed long longInt() const;
-    explicit operator signed long() const { return longInt(); }
+    int64_t int64() const;
+    explicit operator int64_t() const {
+        return int64();
+    }
 
-    /// Get signed long or `x` if the object is empty
+    /// Get int64 or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    signed long longInteOr(signed long x) const;
+    int64_t int64Or(int64_t x) const;
 
-    /// Get unsigned long or `x` if the object is empty
+    /// Get uint64 or `x` if the object is null
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned long ulongInt() const;
-    explicit operator unsigned long() const { return ulongInt(); }
+    uint64_t uint64() const;
+    explicit operator uint64_t() const {
+        return uint64();
+    }
 
-    /// Get unsigned long or `x` if the object is empty
+    /// Get uint64 or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    unsigned long ulongIntOr(unsigned long x) const;
+    uint64_t uint64Or(uint64_t x) const;
 
-    /// Get int
+    /// Get double
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
     double floating() const;
-    explicit operator double() const { return floating(); }
+    explicit operator double() const {
+        return floating();
+    }
 
-    /// Get int or `x` if the object is empty
+    /// Get int or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
     double floatingOr(double x) const;
 
     /// Get string
     /// \throw VariantEmpty, VariantBadType
     std::string const& str() const;
-    explicit operator std::string const&() const { return str(); }
+    explicit operator std::string const&() const {
+        return str();
+    }
 
-    /// Get string or `x` if the object is empty
+    /// Get string or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
     std::string strOr(std::string const& x) const;
 
     /// Get Vec
     /// \throw VariantEmpty, VariantBadType
     Vec const& vec() const;
-    explicit operator Vec const&() const { return vec(); }
+    explicit operator Vec const&() const {
+        return vec();
+    }
     Vec& modifyVec();
 
-    /// Get Vec or `x` if the object is empty
+    /// Get Vec or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
     Vec vecOr(Vec const& x) const;
 
     /// Get Map
     /// \throw VariantEmpty, VariantBadType
     Map const& map() const;
-    explicit operator Map const&() const { return map(); }
+    explicit operator Map const&() const {
+        return map();
+    }
     Map& modifyMap();
 
-    /// Get Map or `x` if the object is empty
+    /// Get Map or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
     Map mapOr(Map const& x) const;
 
     /// Check if Variant contains data
-    bool empty() const noexcept;
+    bool null() const noexcept;
 
     bool operator==(Variant const& rhs) const noexcept;
     bool operator!=(Variant const& rhs) const noexcept;
@@ -303,49 +272,103 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, Variant const& var);
 
-    std::type_info const& typeInfo() const;
+    std::type_info const& typeInfo() const noexcept;
+
+    TypeTag type() const noexcept {
+        return type_tag_;
+    }
+
+    static constexpr std::string_view typeName() noexcept {
+        return "variant";
+    }
 
     // list of supported types
-    using Types = S<
-        bool,
-        char,
-        unsigned char,
-        short int,
-        unsigned short int,
-        int,
-        unsigned int,
-        signed long,
-        unsigned long,
-        double,
-        std::string,
-        Variant::Vec,
-        Variant::Map>;
+    using Types =
+            S<NullType, bool, char, unsigned char, int64_t, uint64_t, int32_t, uint32_t,
+              int64_t, uint64_t, double, std::string, Variant::Vec, Variant::Map>;
 
 private:
     struct Impl;
-    Pimpl<Impl> impl;
+    TypeTag type_tag_;
+    union ValueType {
+        ValueType() = default;
+        ValueType(NullType x) noexcept : null_(x) {
+        }
+        ValueType(bool x) noexcept : bool_(x) {
+        }
+        ValueType(char x) noexcept : char_(x) {
+        }
+        ValueType(unsigned char x) noexcept : uchar(x) {
+        }
+        ValueType(int16_t x) noexcept : int16(x) {
+        }
+        ValueType(uint16_t x) noexcept : uint16(x) {
+        }
+        ValueType(int32_t x) noexcept : int32(x) {
+        }
+        ValueType(uint32_t x) noexcept : uint32(x) {
+        }
+        ValueType(int64_t x) noexcept : int64(x) {
+        }
+        ValueType(uint64_t x) noexcept : uint64(x) {
+        }
+        ValueType(double x) noexcept : double_(x) {
+        }
+        ValueType(void* x) noexcept : ptr(x) {
+        }
+        NullType null_;
+        bool bool_;
+        char char_;
+        unsigned char uchar;
+        int16_t int16;
+        uint16_t uint16;
+        int32_t int32;
+        uint32_t uint32;
+        int64_t int64;
+        uint64_t uint64;
+        double double_;
+        void* ptr;
+    } value_;
 };
 
 using VariantMap = std::unordered_map<std::string, Variant>;
 using VariantVec = std::vector<Variant>;
 
 template <>
-inline bool Variant::asOr<bool>(bool x) const { return booleanOr(x); }
+inline bool Variant::asOr<bool>(bool x) const {
+    return booleanOr(x);
+}
 template <>
-inline char Variant::asOr<char>(char x) const { return characterOr(x); }
+inline char Variant::asOr<char>(char x) const {
+    return char8Or(x);
+}
 template <>
-inline unsigned char Variant::asOr<unsigned char>(unsigned char x) const { return ucharOr(x); }
+inline unsigned char Variant::asOr<unsigned char>(unsigned char x) const {
+    return uchar8Or(x);
+}
 template <>
-inline short int Variant::asOr<short int>(short int x) const { return shortIntOr(x); }
+inline int16_t Variant::asOr<int16_t>(int16_t x) const {
+    return int16Or(x);
+}
 template <>
-inline unsigned short int Variant::asOr<unsigned short int>(unsigned short int x) const { return ushortIntOr(x); }
+inline uint16_t Variant::asOr<uint16_t>(uint16_t x) const {
+    return uint16Or(x);
+}
 template <>
-inline int Variant::asOr<int>(int x) const { return integerOr(x); }
+inline int32_t Variant::asOr<int32_t>(int32_t x) const {
+    return int32Or(x);
+}
 template <>
-inline unsigned int Variant::asOr<unsigned int>(unsigned int x) const { return uintOr(x); }
+inline uint32_t Variant::asOr<uint32_t>(uint32_t x) const {
+    return uint32Or(x);
+}
 template <>
-inline signed long Variant::asOr<signed long>(signed long x) const { return longInteOr(x); }
+inline int64_t Variant::asOr<int64_t>(int64_t x) const {
+    return int64Or(x);
+}
 template <>
-inline unsigned long Variant::asOr<unsigned long>(unsigned long x) const { return ulongIntOr(x); }
+inline uint64_t Variant::asOr<uint64_t>(uint64_t x) const {
+    return uint64Or(x);
+}
 
 } // namespace serialize

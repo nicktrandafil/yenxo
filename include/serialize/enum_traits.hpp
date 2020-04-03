@@ -40,7 +40,8 @@ namespace serialize {
 /// * `static constexpr size_t count` member;
 /// * `static constexpr std::array<Enum, count> values` member collection;
 /// * `static char const* toString(Enum)` member function;
-/// * `static constexpr auto strings()` member function that returns `boost::hana::tuple` of `boost::hana::tuple` of `char const*`s (optional).
+/// * `static constexpr auto strings()` member function that returns `boost::hana::tuple` of `boost::hana::tuple` of `char const*`s (optional);
+/// * `static constexpr std::string_view typeName() noexcept` member function (required to enable `fromString`).
 ///
 /// The `EnumTraits` is used by `toString`, `fromString`, `toVariant` and `fromVariant`
 /// function objects to do the job.

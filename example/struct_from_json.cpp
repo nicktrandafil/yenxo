@@ -1,5 +1,6 @@
 #include <serialize/variant.hpp>
 #include <serialize/variant_traits.hpp>
+#include <rapidjson/document.h>
 
 using namespace serialize;
 
