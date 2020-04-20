@@ -28,6 +28,27 @@
 
 namespace serialize {
 
-bool query_string(Variant& out, std::string const& str);
+class QueryStringError : public std::runtime_error {
+public:
+    explicit QueryStringError(std::string const& error, std::string const& input = {},
+                              std::string const& expected = {},
+                              std::size_t error_pos = std::string::npos)
+        : std::runtime_error(error), input(input), expected(expected), error_pos(error_pos) {
+    }
 
-}
+    bool isParseError() const noexcept {
+        return error_pos != std::string::npos;
+    }
+
+    std::string prettyParseError() const;
+
+private:
+    std::string input;
+    std::string expected;
+    std::size_t error_pos;
+};
+
+/// \throw QueryStringError
+void query_string(Variant& out, std::string const& str);
+
+} // namespace serialize
