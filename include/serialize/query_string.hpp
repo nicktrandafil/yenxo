@@ -28,6 +28,8 @@
 
 namespace serialize {
 
+/// Query string parse error
+/// \ingroup group-exceptions
 class QueryStringError : public std::runtime_error {
 public:
     explicit QueryStringError(std::string const& error, std::string const& input = {},
@@ -48,7 +50,11 @@ private:
     std::size_t error_pos;
 };
 
+/// Parse a query string
+/// Supports deep objects and arrays.
+/// \ingroup group-http
 /// \throw QueryStringError
-void query_string(Variant& out, std::string const& str);
+/// \return VariantMap
+Variant query_string(std::string const& str);
 
 } // namespace serialize

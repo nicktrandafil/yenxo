@@ -202,7 +202,7 @@ std::vector<Parameter> parseParameters(std::string const& str) {
 
 } // namespace
 
-void query_string(Variant& out, std::string const& str) {
+Variant query_string(std::string const& str) {
     // limits
     constexpr auto const array_length_limit = 20;
     constexpr auto const object_depth_limit = 20;
@@ -212,10 +212,11 @@ void query_string(Variant& out, std::string const& str) {
     auto const parameters = parseParameters(str);
 
     // construct DOM
+    VariantMap out;
     for (auto const& p : parameters) {
-        auto param = &out.modifyMap()[p.key.name];
+        auto param = &out[p.key.name];
 
-        if (out.map().size() > object_property_count_limit) {
+        if (out.size() > object_property_count_limit) {
             throw QueryStringError("object property count limit exceed " +
                                    std::to_string(object_property_count_limit));
         }
@@ -300,6 +301,8 @@ void query_string(Variant& out, std::string const& str) {
             *param = Variant(VariantVec{*param, Variant(p.value)});
         }
     }
+
+    return Variant(out);
 }
 
 } // namespace serialize
