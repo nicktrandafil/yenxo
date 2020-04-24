@@ -35,7 +35,8 @@ public:
     explicit QueryStringError(std::string const& error, std::string const& input = {},
                               std::string const& expected = {},
                               std::size_t error_pos = std::string::npos)
-        : std::runtime_error(error), input(input), expected(expected), error_pos(error_pos) {
+        : std::runtime_error(error), input(input), expected(expected),
+          error_pos(error_pos) {
     }
 
     bool isParseError() const noexcept {
@@ -51,7 +52,41 @@ private:
 };
 
 /// Parse a query string
-/// Supports deep objects and arrays.
+///
+/// Supports deep objects and arrays. The function, with regards to optimization
+/// considerations, limits the resulting object dimension:
+/// * object_property_count_limit=20;
+/// * object_depth_limit=20;
+/// * array_length_limit=20.
+///
+/// Examples
+/// --------
+/// Simple scalar parameter:
+/// @snippet test/query_string.cpp simple_value
+/// The `_j` string literal produces `Variant` from a JSON. The literal is introduced just
+/// to shorten examples and is not available in the library interface.
+///
+/// Make an array parameter just duplicating the parameter name:
+/// @snippet test/query_string.cpp array_by_duplicate
+///
+/// Make an array parameter using empty square brackets:
+/// @snippet test/query_string.cpp array_by_empty_brackets
+///
+/// For array parameters indexes can be specified (0 - first index):
+/// @snippet test/query_string.cpp array_by_index
+/// The array is filled with `null`-values until the index, if no
+/// values specified in the query string.
+///
+/// Make an object parameter:
+/// @snippet test/query_string.cpp simple_object
+///
+/// Brackets can be (and recommended to be) percent-encoded:
+/// @snippet test/query_string.cpp simple_object_enc
+///
+/// Array indexes (`[2]` and object keys `[b]`) can be composed in any way:
+/// @snippet test/query_string.cpp array_in_object
+/// @snippet test/query_string.cpp object_in_array 
+///
 /// \ingroup group-http
 /// \throw QueryStringError
 /// \return VariantMap

@@ -80,12 +80,6 @@ TEST_CASE("Check query_string", "[query]") {
                 R"(expecting <alternative><parameter><empty_parameter> here: "=x&")");
     }
 
-    SECTION("two empty params, an invalid key (brakets are not allowed)") {
-        REQUIRE_THROWS_AS(query_string("&a[b]d=x&"), QueryStringError);
-        REQUIRE_THROWS_WITH(query_string("&a[b]d=x&"),
-                            R"(expecting "=" here: "[b]d=x&")");
-    }
-
     SECTION("two empty params, an invalid key") {
         REQUIRE_THROWS_AS(query_string("&a[b]d=x&"_b), QueryStringError);
         REQUIRE_THROWS_WITH(query_string("&a[b]d=x&"_b), R"(expecting "=" here: "d=x&")");
@@ -100,12 +94,71 @@ TEST_CASE("Check query_string", "[query]") {
                 Variant::fromJson(R"({"xy": {"a": "[xy]"}})"));
     }
 
+    SECTION("character after brackets") {
+        REQUIRE_THROWS_AS(query_string("a[b]d=x"), QueryStringError);
+        REQUIRE_THROWS_WITH(query_string("a[b]d=x"), R"(expecting "=" here: "d=x")");
+    }
+
+    SECTION("expected closing bracket") {
+        REQUIRE_THROWS_WITH(query_string("a[b[=x"),
+                            R"(expecting <close_bracket> here: "[=x")");
+    }
+
+    SECTION("expected opening bracket") {
+        REQUIRE_THROWS_WITH(query_string("a]b=x"), R"(expecting "=" here: "]b=x")");
+    }
+
+    SECTION("invalid xdigit") {
+        REQUIRE_THROWS_WITH(query_string("a%5x=x"), R"(expecting <xdigit> here: "x=x")");
+    }
+
+    SECTION("invalid xdigit") {
+        REQUIRE_THROWS_WITH(query_string("a=="),
+                            R"(expecting <alternative><value><empty_value> here: "=")");
+    }
+
+    SECTION("double close bracket") {
+        REQUIRE_THROWS_WITH(query_string("a[b]]=x"), R"(expecting "=" here: "]=x")");
+    }
+
+    SECTION("brackets are allowed in value") {
+        REQUIRE(query_string("a=x[0]") == R"({"a": "x[0]"})"_j);
+    }
+
+    SECTION("brackets are allowed in value") {
+        REQUIRE(query_string("a=x%5b0%5d") == R"({"a": "x[0]"})"_j);
+    }
+
     SECTION("simple value") {
-        REQUIRE(query_string("a=b"_b) == R"({"a": "b"})"_j);
+        /// [simple_value]
+        REQUIRE(query_string("a=b") == R"({"a": "b"})"_j);
+        /// [simple_value]
     }
 
     SECTION("array by duplicate") {
+        /// [array_by_duplicate]
         REQUIRE(query_string("a=b&a=c") == R"({"a": ["b", "c"]})"_j);
+        /// [array_by_duplicate]
+    }
+
+    SECTION("array by empty square brackets") {
+        /// [array_by_empty_brackets]
+        REQUIRE(query_string("a[]=b") == R"({"a": ["b"]})"_j);
+        /// [array_by_empty_brackets]
+    }
+
+    SECTION("array by empty square brackets two values") {
+        REQUIRE(query_string("a[]=b&a[]=c") == R"({"a": ["b", "c"]})"_j);
+    }
+
+    SECTION("array by empty square brackets in map") {
+        REQUIRE(query_string("a[b][]=b&a[b][]=c") == R"({"a": {"b": ["b", "c"]}})"_j);
+    }
+
+    SECTION("array by empty square are not allowed in the middle of a parameter") {
+        REQUIRE_THROWS_WITH(
+                query_string("a[][u]=b"),
+                "empty brackets are not expected in the middle of a parameter");
     }
 
     SECTION("array by index") {
@@ -117,7 +170,21 @@ TEST_CASE("Check query_string", "[query]") {
     }
 
     SECTION("array by index, fill till specified") {
+        /// [array_by_index]
         REQUIRE(query_string("a[1]=b"_b) == R"({"a": [null, "b"]})"_j);
+        /// [array_by_index]
+    }
+
+    SECTION("simple map") {
+        /// [simple_object]
+        REQUIRE(query_string("a[b]=c") == R"({"a": {"b": "c"}})"_j);
+        /// [simple_object]
+    }
+
+    SECTION("simple map with percent encoded brackets") {
+        /// [simple_object_enc]
+        REQUIRE(query_string("a%5bb%5d=c") == R"({"a": {"b": "c"}})"_j);
+        /// [simple_object_enc]
     }
 
     SECTION("mixed array") {
@@ -142,13 +209,17 @@ TEST_CASE("Check query_string", "[query]") {
     }
 
     SECTION("array in object") {
+        /// [array_in_object]
         REQUIRE(query_string("a[b][1]=1&a[b]=2"_b) ==
                 R"({"a": {"b": [null, "1", "2"]}})"_j);
+        /// [array_in_object]
     }
 
     SECTION("object in array") {
+        /// [object_in_array]
         REQUIRE(query_string("a[1][b]=1&a[1][c]=2"_b) ==
                 R"({"a": [null, {"b": "1", "c": "2"}]})"_j);
+        /// [object_in_array]
     }
 
     SECTION("object property count limit almost exceed") {

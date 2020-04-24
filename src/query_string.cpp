@@ -73,15 +73,14 @@ public:
     Grammar() : Grammar::base_type(query_string) {
         using phx::at_c;
         using phx::construct;
-        using phx::val;
         using qi::alnum;
         using qi::char_;
         using qi::eoi;
-        using qi::eps;
         using qi::expect;
         using qi::fail;
         using qi::lexeme;
         using qi::lit;
+        using qi::omit;
         using qi::on_error;
         using qi::xdigit;
 
@@ -89,26 +88,25 @@ public:
 
         unreserved %= alnum | char_('-') | char_(".") | char_("_") | char_("~");
 
-        encoded_open_bracket %= lit("%5b") | lit("%5B");
-        encoded_close_bracket %= lit("%5d") | lit("%5D");
+        open_bracket %= lit("%5b")[_val = '['] | lit("%5B")[_val = '['] | char_("[");
+        close_bracket %= lit("%5d")[_val = ']'] | lit("%5D")[_val = ']'] | char_("]");
 
         pct_encoded = lexeme[lit('%') > xdigit > xdigit]
                             [_val = phx::bind(&byte, at_c<0>(_1), at_c<1>(_1))] -
-                      (eps(_r1) >> (encoded_open_bracket | encoded_close_bracket));
+                      (open_bracket | close_bracket);
 
         sub_delims %= char_('!') | char_('$') | char_('\'') | char_('(') | char_(')') |
                       char_('*') | char_('+') | char_(',') | char_(';');
 
-        pchar %= unreserved | pct_encoded(_r1) | sub_delims | char_(':') | char_('@');
+        pchar %= unreserved | pct_encoded | sub_delims | char_(':') | char_('@');
 
-        key %= +pchar(val(true)) >>
-               *(encoded_open_bracket > *pchar(val(true)) > encoded_close_bracket);
+        key %= +pchar > *(omit[open_bracket] > *pchar > omit[close_bracket]);
 
-        value %= *pchar(val(false));
+        value %= +(pchar | open_bracket | close_bracket);
+        empty_value = &lit('&') | eoi;
 
-        parameter %= key > lit('=') > value;
-
-        empty_parameter %= &lit('&') | eoi;
+        parameter %= key > lit('=') > (value | empty_value);
+        empty_parameter = &lit('&') | eoi;
 
         query_string %= expect[parameter | empty_parameter] % lit('&');
 
@@ -116,10 +114,11 @@ public:
         pct_encoded.name("pct_encoded");
         pchar.name("pchar");
         sub_delims.name("sub_delims");
-        encoded_open_bracket.name("encoded_open_bracket");
-        encoded_close_bracket.name("encoded_close_bracket");
+        open_bracket.name("open_bracket");
+        close_bracket.name("close_bracket");
         key.name("key");
         value.name("value");
+        empty_value.name("empty_value");
         parameter.name("parameter");
         empty_parameter.name("empty_parameter");
         query_string.name("query_string");
@@ -147,13 +146,14 @@ private:
 
 private:
     qi::rule<Iterator, char()> unreserved;
-    qi::rule<Iterator, char(bool)> pct_encoded;
-    qi::rule<Iterator, char(bool)> pchar;
+    qi::rule<Iterator, char()> pct_encoded;
+    qi::rule<Iterator, char()> pchar;
     qi::rule<Iterator, char()> sub_delims;
-    qi::rule<Iterator, void()> encoded_open_bracket;
-    qi::rule<Iterator, void()> encoded_close_bracket;
+    qi::rule<Iterator, char()> open_bracket;
+    qi::rule<Iterator, char()> close_bracket;
     qi::rule<Iterator, Key()> key;
     qi::rule<Iterator, std::string()> value;
+    qi::rule<Iterator, void()> empty_value;
     qi::rule<Iterator, Parameter()> parameter;
     qi::rule<Iterator, void()> empty_parameter;
     qi::rule<Iterator, std::vector<Parameter>()> query_string;
@@ -230,6 +230,22 @@ Variant query_string(std::string const& str) {
         for (auto key_it = p.key.nested_keys.begin(); key_it != p.key.nested_keys.end();
              ++key_it) {
             auto const& key_str = *key_it;
+
+            if (key_str.empty()) {
+                if (std::next(key_it) != p.key.nested_keys.end()) {
+                    throw QueryStringError("empty brackets are not expected in the "
+                                           "middle of a parameter");
+                }
+
+                if (param->type() == Variant::TypeTag::null) {
+                    *param = Variant(VariantVec());
+                } else if (param->type() != Variant::TypeTag::vec &&
+                           param->type() != Variant::TypeTag::map) {
+                    *param = Variant(VariantVec{*param});
+                }
+
+                continue;
+            }
 
             int64_t array_index{-1};
             try {
