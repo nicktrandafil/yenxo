@@ -283,6 +283,11 @@ public:
         return "variant";
     }
 
+    /// Test if the value is a scalar
+    inline bool isScalar() const noexcept {
+        return type_tag_ != TypeTag::map && type_tag_ != TypeTag::vec;
+    }
+
     // list of supported types
     using Types =
             S<NullType, bool, char, unsigned char, int64_t, uint64_t, int32_t, uint32_t,

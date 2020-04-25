@@ -36,8 +36,11 @@ namespace phx = boost::phoenix;
 namespace fus = boost::fusion;
 namespace ascii = boost::spirit::qi::ascii;
 
+using namespace std::string_literals;
+
 namespace serialize {
 namespace {
+
 int8_t digit(char digit) {
     if (digit <= '9') {
         assert(digit >= '0');
@@ -58,7 +61,8 @@ int8_t byte(char digit1, char digit2) {
 // clang-format off
 BOOST_FUSION_DEFINE_STRUCT_INLINE(Key,
     (std::string, name)
-    (std::vector<std::string>, nested_keys)
+    (std::vector<std::string>, index_operators)
+    (bool, empty_index_operator)
 )
 
 BOOST_FUSION_DEFINE_STRUCT_INLINE(Parameter,
@@ -80,6 +84,7 @@ public:
         using qi::fail;
         using qi::lexeme;
         using qi::lit;
+        using qi::matches;
         using qi::omit;
         using qi::on_error;
         using qi::xdigit;
@@ -100,7 +105,9 @@ public:
 
         pchar %= unreserved | pct_encoded | sub_delims | char_(':') | char_('@');
 
-        key %= +pchar > *(omit[open_bracket] > *pchar > omit[close_bracket]);
+        index_operator %= omit[open_bracket] >> +pchar > omit[close_bracket];
+        empty_index_operator = open_bracket > (close_bracket | +pchar);
+        key %= +pchar > *index_operator > matches[empty_index_operator];
 
         value %= +(pchar | open_bracket | close_bracket);
         empty_value = &lit('&') | eoi;
@@ -116,6 +123,8 @@ public:
         sub_delims.name("sub_delims");
         open_bracket.name("open_bracket");
         close_bracket.name("close_bracket");
+        index_operator.name("index_operator");
+        empty_index_operator.name("empty_index_operator");
         key.name("key");
         value.name("value");
         empty_value.name("empty_value");
@@ -151,6 +160,8 @@ private:
     qi::rule<Iterator, char()> sub_delims;
     qi::rule<Iterator, char()> open_bracket;
     qi::rule<Iterator, char()> close_bracket;
+    qi::rule<Iterator, std::string()> index_operator;
+    qi::rule<Iterator, void()> empty_index_operator;
     qi::rule<Iterator, Key()> key;
     qi::rule<Iterator, std::string()> value;
     qi::rule<Iterator, void()> empty_value;
@@ -200,13 +211,51 @@ std::vector<Parameter> parseParameters(std::string const& str) {
     return out;
 }
 
+QueryStringError makeArrayIndexError(std::string const& key, uint8_t len) {
+    return QueryStringError("array index out of range [0, " + std::to_string(len - 1) +
+                            "] for " + key);
+}
+
+QueryStringError makeArrayLengthError(std::string const& key, uint8_t len) {
+    return QueryStringError("array length exceed " + std::to_string(len) + " for " + key);
+}
+
+QueryStringError makeObjectPropertyCountError(std::string const& key, uint8_t len) {
+    return QueryStringError("object property count exceed " + std::to_string(len) +
+                            " for " + key);
+}
+
+QueryStringError makeObjectPropertyCountError(uint8_t len) {
+    return QueryStringError("object property count limit exceed " + std::to_string(len));
+}
+
+QueryStringError makeObjectDepthError(std::string const& key, uint8_t len) {
+    return QueryStringError("object depth limit exceed " + std::to_string(len) + " for " +
+                            key);
+}
+
+QueryStringError makeMixedTypesError(std::string const& key,
+                                     std::string const& expected_type,
+                                     std::string const& actual_type) {
+    return QueryStringError("mixed types for " + key + ": " + expected_type + " and " +
+                            actual_type);
+}
+
+void processEmptyKey(Variant& out) {
+    if (out.type() == Variant::TypeTag::null) {
+        out = Variant(VariantVec());
+    } else if (out.isScalar()) {
+        out = Variant(VariantVec{out});
+    }
+}
+
 } // namespace
 
 Variant query_string(std::string const& str) {
     // limits
-    constexpr auto const array_length_limit = 20;
-    constexpr auto const object_depth_limit = 20;
-    constexpr auto const object_property_count_limit = 20;
+    constexpr uint8_t const array_length_limit = 20;
+    constexpr uint8_t const object_depth_limit = 20;
+    constexpr uint8_t const object_property_count_limit = 20;
 
     // parse
     auto const parameters = parseParameters(str);
@@ -217,58 +266,39 @@ Variant query_string(std::string const& str) {
         auto param = &out[p.key.name];
 
         if (out.size() > object_property_count_limit) {
-            throw QueryStringError("object property count limit exceed " +
-                                   std::to_string(object_property_count_limit));
+            throw makeObjectPropertyCountError(object_property_count_limit);
+        } else if (p.key.index_operators.size() > object_depth_limit) {
+            throw makeObjectDepthError(p.key.name, object_depth_limit);
         }
 
-        if (p.key.nested_keys.size() > object_depth_limit) {
-            throw QueryStringError("object depth limit exceed " +
-                                   std::to_string(object_depth_limit) + " for " +
-                                   p.key.name);
-        }
-
-        for (auto key_it = p.key.nested_keys.begin(); key_it != p.key.nested_keys.end();
-             ++key_it) {
+        for (auto key_it = p.key.index_operators.begin();
+             key_it != p.key.index_operators.end(); ++key_it) {
             auto const& key_str = *key_it;
-
-            if (key_str.empty()) {
-                if (std::next(key_it) != p.key.nested_keys.end()) {
-                    throw QueryStringError("empty brackets are not expected in the "
-                                           "middle of a parameter");
-                }
-
-                if (param->type() == Variant::TypeTag::null) {
-                    *param = Variant(VariantVec());
-                } else if (param->type() != Variant::TypeTag::vec &&
-                           param->type() != Variant::TypeTag::map) {
-                    *param = Variant(VariantVec{*param});
-                }
-
-                continue;
-            }
 
             int64_t array_index{-1};
             try {
-                auto const tmp = std::stol(key_str);
-                if (tmp >= 0) { array_index = static_cast<int8_t>(tmp); }
-            } catch (std::exception const&) {}
+                array_index = std::stoul(key_str);
+            } catch (std::invalid_argument const&) {
+                // not int
+            } catch (std::out_of_range const&) {
+                throw makeArrayIndexError(
+                        make_key(p.key.name, p.key.index_operators.begin(), key_it),
+                        array_length_limit);
+            }
+
+            if (array_index < -1 || array_index >= array_length_limit) {
+                throw makeArrayIndexError(
+                        make_key(p.key.name, p.key.index_operators.begin(), key_it),
+                        array_length_limit);
+            }
 
             if (array_index != -1) { // array
-                if (array_index > array_length_limit) {
-                    auto const ptr =
-                            make_key(p.key.name, p.key.nested_keys.begin(), key_it);
-                    throw QueryStringError("array length limit exceed " +
-                                           std::to_string(array_length_limit) + " for " +
-                                           ptr);
-                }
-
                 if (param->type() == Variant::TypeTag::null) {
                     *param = Variant(VariantVec());
                 } else if (param->type() == Variant::TypeTag::map) {
-                    throw QueryStringError(
-                            "mixed types for " +
-                            make_key(p.key.name, p.key.nested_keys.begin(), key_it) +
-                            ": vec and " + toString(param->type()));
+                    throw makeMixedTypesError(
+                            make_key(p.key.name, p.key.index_operators.begin(), key_it),
+                            "vec", "map");
                 } else if (param->type() != Variant::TypeTag::vec) {
                     *param = Variant(VariantVec{*param});
                 }
@@ -281,38 +311,36 @@ Variant query_string(std::string const& str) {
                 if (param->type() == Variant::TypeTag::null) {
                     *param = Variant(VariantMap());
                 } else if (param->type() != Variant::TypeTag::map) {
-                    throw QueryStringError(
-                            "mixed types for " +
-                            make_key(p.key.name, p.key.nested_keys.begin(), key_it) +
-                            ": map and " + toString(param->type()));
+                    throw makeMixedTypesError(
+                            make_key(p.key.name, p.key.index_operators.begin(), key_it),
+                            "map", toString(param->type()));
                 }
                 auto& map = param->modifyMap();
                 param = &map[key_str];
                 if (map.size() > object_property_count_limit) {
-                    auto const ptr =
-                            make_key(p.key.name, p.key.nested_keys.begin(), key_it);
-                    throw QueryStringError("object property count limit exceed " +
-                                           std::to_string(object_property_count_limit) +
-                                           " for " + ptr);
+                    throw makeObjectPropertyCountError(
+                            make_key(p.key.name, p.key.index_operators.begin(), key_it),
+                            object_property_count_limit);
                 }
             }
         }
+
+        if (p.key.empty_index_operator) { processEmptyKey(*param); }
 
         if (param->null()) {
             *param = Variant(p.value);
         } else if (param->type() == Variant::TypeTag::vec) {
             param->modifyVec().push_back(Variant(p.value));
             if (param->vec().size() > array_length_limit) {
-                throw QueryStringError("array length limit exceed " +
-                                       std::to_string(array_length_limit) + " for " +
-                                       make_key(p.key.name, p.key.nested_keys.begin(),
-                                                p.key.nested_keys.end()));
+                throw makeArrayLengthError(make_key(p.key.name,
+                                                    p.key.index_operators.begin(),
+                                                    p.key.index_operators.end()),
+                                           array_length_limit);
             }
         } else if (param->type() == Variant::TypeTag::map) {
-            throw std::runtime_error("mixed types for " +
-                                     make_key(p.key.name, p.key.nested_keys.begin(),
-                                              p.key.nested_keys.end()) +
-                                     ": map and string");
+            throw makeMixedTypesError(make_key(p.key.name, p.key.index_operators.begin(),
+                                               p.key.index_operators.end()),
+                                      "map", "string");
         } else {
             *param = Variant(VariantVec{*param, Variant(p.value)});
         }

@@ -156,9 +156,7 @@ TEST_CASE("Check query_string", "[query]") {
     }
 
     SECTION("array by empty square are not allowed in the middle of a parameter") {
-        REQUIRE_THROWS_WITH(
-                query_string("a[][u]=b"),
-                "empty brackets are not expected in the middle of a parameter");
+        REQUIRE_THROWS_WITH(query_string("a[][u]=b"), R"(expecting "=" here: "[u]=b")");
     }
 
     SECTION("array by index") {
@@ -205,7 +203,7 @@ TEST_CASE("Check query_string", "[query]") {
         REQUIRE_THROWS_WITH(
                 query_string(
                         "a=1&a=2&a=3&a=4&a=5&a=6&a=7&a=8&a=9&a=10&a=11&a=12&a=13&a=14&a=15&a=16&a=17&a=18&a=19&a=20&a=21"_b),
-                "array length limit exceed 20 for a");
+                "array length exceed 20 for a");
     }
 
     SECTION("array in object") {
@@ -231,7 +229,7 @@ TEST_CASE("Check query_string", "[query]") {
         REQUIRE_THROWS_WITH(
                 query_string(
                         "a[a]=1&a[b]=2&a[c]=3&a[d]=4&a[e]=5&a[f]=6&a[g]=7&a[h]=8&a[i]=9&a[j]=10&a[k]=11&a[l]=12&a[m]=13&a[n]=14&a[o]=15&a[p]=16&a[q]=17&a[r]=18&a[s]=19&a[t]=20&a[u]=21"_b),
-                "object property count limit exceed 20 for a");
+                "object property count exceed 20 for a");
     }
 
     SECTION("object property count limit exceed") {
@@ -249,8 +247,8 @@ TEST_CASE("Check query_string", "[query]") {
     }
 
     SECTION("array length limit exceed for, big index") {
-        REQUIRE_THROWS_WITH(query_string("a[21]=1"_b),
-                            "array length limit exceed 20 for a");
+        REQUIRE_THROWS_WITH(query_string("a[20]=1"_b),
+                            "array index out of range [0, 19] for a");
     }
 
     SECTION("mixed types for array") {
@@ -266,5 +264,25 @@ TEST_CASE("Check query_string", "[query]") {
     SECTION("mixed types for map") {
         REQUIRE_THROWS_WITH(query_string("a[a]=1&a=2"_b),
                             "mixed types for a: map and string");
+    }
+
+    SECTION("percent encoded 1") {
+        REQUIRE(query_string("a[%61]=%6d"_b) == R"({"a": {"a": "m"}})"_j);
+        REQUIRE(query_string("a[%61]=%6D"_b) == R"({"a": {"a": "m"}})"_j);
+    }
+
+    SECTION("mix empty brackets with duplicate params") {
+        REQUIRE(query_string("a=1&a[]=2"_b) == R"({"a": ["1", "2"]})"_j);
+    }
+
+    SECTION("out of range index") {
+        REQUIRE_THROWS_WITH(query_string("a[999999999999999999999]=1"_b),
+                            "array index out of range [0, 19] for a");
+    }
+
+    SECTION("out of range index") {
+        REQUIRE_THROWS_WITH(
+                query_string("a[[x]=1"),
+                R"(expecting <alternative><close_bracket><pchar> here: "[x]=1")");
     }
 }

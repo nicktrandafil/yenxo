@@ -39,6 +39,15 @@ public:
           error_pos(error_pos) {
     }
 
+    /// Test if the error is parse error
+    ///
+    /// There can be three types of errors:
+    /// 1. syntax errors (parse errors);
+    /// 2. constraint errors (object_property_count_limit, object_depth_limit,
+    /// array_length_limit);
+    /// 3. range errors (too big integers).
+    ///
+    /// Parse errors can be obtained via `prettyParseerror` (in addition to `what`).
     bool isParseError() const noexcept {
         return error_pos != std::string::npos;
     }
@@ -53,39 +62,43 @@ private:
 
 /// Parse a query string
 ///
-/// Supports deep objects and arrays. The function, with regards to optimization
-/// considerations, limits the resulting object dimension:
+/// Supports deep objects and arrays. The function, for overhead reasons,
+/// limits the resulting object dimensions:
 /// * object_property_count_limit=20;
 /// * object_depth_limit=20;
 /// * array_length_limit=20.
 ///
 /// Examples
 /// --------
-/// Simple scalar parameter:
+/// Scalar parameter:
 /// @snippet test/query_string.cpp simple_value
 /// The `_j` string literal produces `Variant` from a JSON. The literal is introduced just
 /// to shorten examples and is not available in the library interface.
 ///
-/// Make an array parameter just duplicating the parameter name:
+/// Array parameter by duplicating the parameter's name:
 /// @snippet test/query_string.cpp array_by_duplicate
 ///
-/// Make an array parameter using empty square brackets:
+/// Array parameter by using empty square brackets:
 /// @snippet test/query_string.cpp array_by_empty_brackets
 ///
-/// For array parameters indexes can be specified (0 - first index):
+/// For Array parameters indexes can be specified (0 - first index):
 /// @snippet test/query_string.cpp array_by_index
-/// The array is filled with `null`-values until the index, if no
-/// values specified in the query string.
+/// The array have size of max index plus one.
+/// The array have `null`-values for unspecified indexes.
 ///
-/// Make an object parameter:
+/// Object parameter:
 /// @snippet test/query_string.cpp simple_object
 ///
 /// Brackets can be (and recommended to be) percent-encoded:
 /// @snippet test/query_string.cpp simple_object_enc
 ///
-/// Array indexes (`[2]` and object keys `[b]`) can be composed in any way:
+/// Array indexes (`[2]`) and object keys (`[b]`) can be composed in any way:
 /// @snippet test/query_string.cpp array_in_object
-/// @snippet test/query_string.cpp object_in_array 
+/// @snippet test/query_string.cpp object_in_array
+/// Empty brackets can occur only on a key ending.
+///
+/// Error message may refer to <a href="https://www.ietf.org/rfc/rfc3986.txt">ABNF
+/// grammer</a>
 ///
 /// \ingroup group-http
 /// \throw QueryStringError
