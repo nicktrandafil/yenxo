@@ -41,13 +41,12 @@ public:
 
     /// Test if the error is parse error
     ///
-    /// There can be three types of errors:
+    /// There can be two types of errors:
     /// 1. syntax errors (parse errors);
     /// 2. constraint errors (object_property_count_limit, object_depth_limit,
     /// array_length_limit);
-    /// 3. range errors (too big integers).
     ///
-    /// Parse errors can be obtained via `prettyParseerror` (in addition to `what`).
+    /// Parse errors can be obtained via `prettyParseError` (in addition to `what`).
     bool isParseError() const noexcept {
         return error_pos != std::string::npos;
     }

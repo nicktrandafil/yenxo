@@ -44,15 +44,15 @@ Variant operator""_j(char const* str, size_t s) {
 
 TEST_CASE("Check query_string", "[query]") {
     SECTION("empty param") {
-        REQUIRE(query_string("") == Variant::fromJson(R"({"":""})"));
+        REQUIRE(query_string("") == Variant::fromJson(R"({})"));
     }
 
     SECTION("two empty param") {
-        REQUIRE(query_string("&") == Variant::fromJson(R"({"": ["", ""]})"));
+        REQUIRE(query_string("&") == Variant::fromJson(R"({})"));
     }
 
     SECTION("three empty param") {
-        REQUIRE(query_string("&&") == Variant::fromJson(R"({"": ["", "", ""]})"));
+        REQUIRE(query_string("&&") == Variant::fromJson(R"({})"));
     }
 
     SECTION("three empty params, an invalid param") {
@@ -69,8 +69,7 @@ TEST_CASE("Check query_string", "[query]") {
     }
 
     SECTION("three empty params, a key with equal") {
-        REQUIRE(query_string("&&x=&") ==
-                Variant::fromJson(R"({"x": "", "": ["", "", ""]})"));
+        REQUIRE(query_string("&&x=&") == Variant::fromJson(R"({"x": ""})"));
     }
 
     SECTION("three empty params, a value") {
@@ -276,13 +275,17 @@ TEST_CASE("Check query_string", "[query]") {
     }
 
     SECTION("out of range index") {
-        REQUIRE_THROWS_WITH(query_string("a[999999999999999999999]=1"_b),
+        REQUIRE_THROWS_WITH(query_string("a[999999999999999]=1"_b),
                             "array index out of range [0, 19] for a");
     }
 
-    SECTION("out of range index") {
-        REQUIRE_THROWS_WITH(
-                query_string("a[[x]=1"),
-                R"(expecting <alternative><close_bracket><pchar> here: "[x]=1")");
+    SECTION("syntax error") {
+        REQUIRE_THROWS_WITH(query_string("a[[x]=1"),
+                            R"(expecting <close_bracket> here: "[x]=1")");
+    }
+
+    SECTION("mixed empty brackets with map") {
+        REQUIRE_THROWS_WITH(query_string("a[x]=1&a[]=2"),
+                            R"(mixed types for a: vec and map)");
     }
 }

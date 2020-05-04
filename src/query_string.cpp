@@ -33,8 +33,6 @@
 
 namespace qi = boost::spirit::qi;
 namespace phx = boost::phoenix;
-namespace fus = boost::fusion;
-namespace ascii = boost::spirit::qi::ascii;
 
 using namespace std::string_literals;
 
@@ -58,25 +56,41 @@ int8_t byte(char digit1, char digit2) {
     return 16 * digit(digit1) + digit(digit2);
 }
 
-// clang-format off
-BOOST_FUSION_DEFINE_STRUCT_INLINE(Key,
-    (std::string, name)
-    (std::vector<std::string>, index_operators)
-    (bool, empty_index_operator)
-)
+QueryStringError makeObjectPropertyCountError(uint8_t len) {
+    return QueryStringError("object property count limit exceed " + std::to_string(len));
+}
 
-BOOST_FUSION_DEFINE_STRUCT_INLINE(Parameter,
-    (Key, key)
-    (std::string, value)
-)
-// clang-format on
+QueryStringError makeObjectPropertyCountError(std::string const& key, uint8_t len) {
+    return QueryStringError("object property count exceed " + std::to_string(len) +
+                            " for " + key);
+}
+
+QueryStringError makeMixedTypesError(std::string const& key,
+                                     std::string const& expected_type,
+                                     std::string const& actual_type) {
+    return QueryStringError("mixed types for " + key + ": " + expected_type + " and " +
+                            actual_type);
+}
+
+QueryStringError makeArrayIndexError(std::string const& key, uint8_t len) {
+    return QueryStringError("array index out of range [0, " + std::to_string(len - 1) +
+                            "] for " + key);
+}
+
+QueryStringError makeArrayLengthError(std::string const& key, uint8_t len) {
+    return QueryStringError("array length exceed " + std::to_string(len) + " for " + key);
+}
+
+QueryStringError makeObjectDepthError(std::string const& key, uint8_t len) {
+    return QueryStringError("object depth limit exceed " + std::to_string(len) + " for " +
+                            key);
+}
 
 template <class Iterator>
-class Grammar : public qi::grammar<Iterator, std::vector<Parameter>()> {
+class Grammar : public qi::grammar<Iterator> {
 public:
     Grammar() : Grammar::base_type(query_string) {
         using phx::at_c;
-        using phx::construct;
         using qi::alnum;
         using qi::char_;
         using qi::eoi;
@@ -88,34 +102,47 @@ public:
         using qi::omit;
         using qi::on_error;
         using qi::xdigit;
+        using qi::ulong_long;
 
         using namespace qi::labels;
 
-        unreserved %= alnum | char_('-') | char_(".") | char_("_") | char_("~");
+        open_bracket   %= lit("%5b")[_val = '['] | lit("%5B")[_val = '['] | char_("[");
+        close_bracket  %= lit("%5d")[_val = ']'] | lit("%5D")[_val = ']'] | char_("]");
 
-        open_bracket %= lit("%5b")[_val = '['] | lit("%5B")[_val = '['] | char_("[");
-        close_bracket %= lit("%5d")[_val = ']'] | lit("%5D")[_val = ']'] | char_("]");
+        pct_encoded     =   lexeme[lit('%') > xdigit > xdigit]
+                                  [_val = phx::bind(&byte, at_c<0>(_1), at_c<1>(_1))]
+                          - (open_bracket | close_bracket);
 
-        pct_encoded = lexeme[lit('%') > xdigit > xdigit]
-                            [_val = phx::bind(&byte, at_c<0>(_1), at_c<1>(_1))] -
-                      (open_bracket | close_bracket);
+        sub_delims     %=   char_('!') | char_('$') | char_('\'') | char_('(') | char_(')')
+                          | char_('*') | char_('+') | char_(',') | char_(';');
 
-        sub_delims %= char_('!') | char_('$') | char_('\'') | char_('(') | char_(')') |
-                      char_('*') | char_('+') | char_(',') | char_(';');
+        unreserved     %= alnum | char_('-') | char_(".") | char_("_") | char_("~");
+        pchar          %= unreserved | pct_encoded | sub_delims | char_(':') | char_('@');
 
-        pchar %= unreserved | pct_encoded | sub_delims | char_(':') | char_('@');
+        index          %= omit[open_bracket] >> ulong_long > omit[close_bracket];
+        property       %= omit[open_bracket] >> +pchar  > omit[close_bracket];
+        empty_index     = open_bracket > close_bracket;
+        name           %= +pchar;
 
-        index_operator %= omit[open_bracket] >> +pchar > omit[close_bracket];
-        empty_index_operator = open_bracket > (close_bracket | +pchar);
-        key %= +pchar > *index_operator > matches[empty_index_operator];
+        key             =    name       [phx::bind(&Grammar::paramName, this, _1)]
+                          > *(
+                                index   [phx::bind(&Grammar::indexOp, this, _1)]
+                              | property[phx::bind(&Grammar::propertyOp, this, _1)]
+                             )
+                          > -empty_index[phx::bind(&Grammar::emptyIndexOp, this)];
 
-        value %= +(pchar | open_bracket | close_bracket);
-        empty_value = &lit('&') | eoi;
+        empty_value     = &lit('&') | eoi;
+        value          %= +(pchar | open_bracket | close_bracket);
 
-        parameter %= key > lit('=') > (value | empty_value);
         empty_parameter = &lit('&') | eoi;
+        parameter       =   key
+                          > lit('=')
+                          > (
+                               value      [phx::bind(&Grammar::val, this, _1)] 
+                             | empty_value[phx::bind(&Grammar::emptyVal, this)]
+                            );
 
-        query_string %= expect[parameter | empty_parameter] % lit('&');
+        query_string    = expect[parameter | empty_parameter] % lit('&');
 
         unreserved.name("unreserved");
         pct_encoded.name("pct_encoded");
@@ -123,61 +150,175 @@ public:
         sub_delims.name("sub_delims");
         open_bracket.name("open_bracket");
         close_bracket.name("close_bracket");
-        index_operator.name("index_operator");
-        empty_index_operator.name("empty_index_operator");
+        property.name("property_operator");
+        index.name("index_operator");
+        empty_index.name("empty_index_operator");
         key.name("key");
         value.name("value");
         empty_value.name("empty_value");
         parameter.name("parameter");
         empty_parameter.name("empty_parameter");
         query_string.name("query_string");
+        name.name("name");
 
-        on_error<fail>(query_string,
-                       phx::bind(&Grammar::saveError, phx::ref(*this), _4, _1, _3, _2));
+        on_error<fail>(query_string, phx::bind(&Grammar::saveError, this, _4, _1, _3));
     }
 
     std::string const& errorExpectation() const noexcept {
         return error_expectation;
     }
 
-    size_t errorPos() const noexcept {
-        return error_pos;
+    size_t errorExpectationPos() const noexcept {
+        return error_expectation_pos;
+    }
+
+    VariantMap const& result() const noexcept {
+        return out;
     }
 
 private:
-    void saveError(boost::spirit::info const& info, Iterator begin, Iterator error_pos,
-                   Iterator) {
+    void saveError(boost::spirit::info const& info, Iterator begin, Iterator error_pos) {
         std::stringstream s;
         s << info;
         error_expectation = s.str();
-        this->error_pos = static_cast<size_t>(std::distance(begin, error_pos));
+        this->error_expectation_pos =
+                static_cast<size_t>(std::distance(begin, error_pos));
+    }
+
+    void incDepth() {
+        if (++this->depth > object_depth_limit) {
+            throw makeObjectDepthError(this->param_name, object_depth_limit);
+        }
+    }
+
+    void paramName(std::string const& name) {
+        param = &out[name];
+        if (out.size() > object_property_count_limit) {
+            throw makeObjectPropertyCountError(object_property_count_limit);
+        }
+        this->param_key  = name;
+        this->param_name = name;
+        this->depth      = 0;
+    }
+
+    void indexOp(uint64_t i) {
+        if (i >= array_length_limit) {
+            throw makeArrayIndexError(this->param_key, array_length_limit);
+        }
+        switch (param->type()) {
+        case Variant::TypeTag::null:
+            *param = Variant(VariantVec());
+            break;
+        case Variant::TypeTag::vec:
+            break;
+        case Variant::TypeTag::map:
+            throw makeMixedTypesError(this->param_key, "vec", "map");
+            break;
+        default:
+            *param = Variant(VariantVec{std::move(*param)});
+            break;
+        }
+        auto& vec = param->modifyVec();
+        while (i >= vec.size()) { vec.push_back(Variant()); }
+        param = &vec[i];
+        this->param_key += "[" + std::to_string(i) + "]";
+        incDepth();
+    }
+
+    void propertyOp(std::string const& key) {
+        switch (param->type()) {
+        case Variant::TypeTag::null:
+            *param = Variant(VariantMap());
+            break;
+        case Variant::TypeTag::map:
+            break;
+        default:
+            throw makeMixedTypesError(this->param_key, "map", toString(param->type()));
+        }
+        auto& map = param->modifyMap();
+        param = &map[key];
+        if (map.size() > object_property_count_limit) {
+            throw makeObjectPropertyCountError(param_key, object_property_count_limit);
+        }
+        this->param_key += "[" + key + "]";
+        incDepth();
+    }
+
+    void emptyIndexOp() {
+        switch (param->type()) {
+        case Variant::TypeTag::null:
+            *param = Variant(VariantVec());
+            break;
+        case Variant::TypeTag::vec:
+            break;
+        case Variant::TypeTag::map:
+            throw makeMixedTypesError(this->param_key, "vec", "map");
+        default:
+            *param = Variant(VariantVec{*param});
+        }
+    }
+
+    void val(std::string const& x) {
+        valImpl(Variant(x));
+    }
+
+    void emptyVal() {
+        valImpl(Variant(""));
+    }
+
+    void valImpl(Variant x) {
+        switch (param->type()) {
+        case Variant::TypeTag::null:
+            *param = std::move(x);
+            break;
+        case Variant::TypeTag::vec:
+            param->modifyVec().push_back(std::move(x));
+            if (param->vec().size() > array_length_limit) {
+                throw makeArrayLengthError(this->param_key, array_length_limit);
+            }
+            break;
+        case Variant::TypeTag::map:
+            throw makeMixedTypesError(this->param_key, "map", "string");
+        default:
+            *param = Variant(VariantVec{std::move(*param), Variant(std::move(x))});
+            break;
+        }
     }
 
 private:
-    qi::rule<Iterator, char()> unreserved;
-    qi::rule<Iterator, char()> pct_encoded;
-    qi::rule<Iterator, char()> pchar;
-    qi::rule<Iterator, char()> sub_delims;
-    qi::rule<Iterator, char()> open_bracket;
-    qi::rule<Iterator, char()> close_bracket;
-    qi::rule<Iterator, std::string()> index_operator;
-    qi::rule<Iterator, void()> empty_index_operator;
-    qi::rule<Iterator, Key()> key;
+    qi::rule<Iterator, char()       > unreserved;
+    qi::rule<Iterator, char()       > pct_encoded;
+    qi::rule<Iterator, char()       > pchar;
+    qi::rule<Iterator, char()       > sub_delims;
+    qi::rule<Iterator, char()       > open_bracket;
+    qi::rule<Iterator, char()       > close_bracket;
+    qi::rule<Iterator, std::string()> property;
+    qi::rule<Iterator, uint16_t()   > index;
+    qi::rule<Iterator               > empty_index;
+    qi::rule<Iterator, std::string()> name;
+    qi::rule<Iterator               > key;
     qi::rule<Iterator, std::string()> value;
-    qi::rule<Iterator, void()> empty_value;
-    qi::rule<Iterator, Parameter()> parameter;
-    qi::rule<Iterator, void()> empty_parameter;
-    qi::rule<Iterator, std::vector<Parameter>()> query_string;
+    qi::rule<Iterator               > empty_value;
+    qi::rule<Iterator               > parameter;
+    qi::rule<Iterator               > empty_parameter;
+    qi::rule<Iterator               > query_string;
 
+    // expectation error
     std::string error_expectation;
-    size_t error_pos;
-};
+    size_t      error_expectation_pos;
 
-std::string make_key(std::string name, std::vector<std::string>::const_iterator b,
-                     std::vector<std::string>::const_iterator e) {
-    for (auto it = b; it != e; ++it) { name += "[" + *it + "]"; }
-    return name;
-}
+    // out
+    VariantMap  out;
+    Variant    *param{nullptr};
+    std::string param_name;
+    std::string param_key;
+    uint16_t    depth;
+
+    // constraints
+    static constexpr uint8_t const array_length_limit{20};
+    static constexpr uint8_t const object_depth_limit{20};
+    static constexpr uint8_t const object_property_count_limit{20};
+};
 
 } // namespace
 
@@ -197,156 +338,16 @@ std::string QueryStringError::prettyParseError() const {
     return line + "\n" + highlight;
 }
 
-namespace {
-
-std::vector<Parameter> parseParameters(std::string const& str) {
-    std::vector<Parameter> out;
+Variant query_string(std::string const& str) {
     Grammar<std::string::const_iterator> grammar;
-    auto const res = qi::parse(str.begin(), str.end(), grammar, out);
+    auto const res = qi::parse(str.begin(), str.end(), grammar);
     if (!res) {
         throw QueryStringError("expecting " + grammar.errorExpectation() + " here: \"" +
-                                       str.substr(grammar.errorPos()) + "\"",
-                               str, grammar.errorExpectation(), grammar.errorPos());
+                                       str.substr(grammar.errorExpectationPos()) + "\"",
+                               str, grammar.errorExpectation(),
+                               grammar.errorExpectationPos());
     }
-    return out;
-}
-
-QueryStringError makeArrayIndexError(std::string const& key, uint8_t len) {
-    return QueryStringError("array index out of range [0, " + std::to_string(len - 1) +
-                            "] for " + key);
-}
-
-QueryStringError makeArrayLengthError(std::string const& key, uint8_t len) {
-    return QueryStringError("array length exceed " + std::to_string(len) + " for " + key);
-}
-
-QueryStringError makeObjectPropertyCountError(std::string const& key, uint8_t len) {
-    return QueryStringError("object property count exceed " + std::to_string(len) +
-                            " for " + key);
-}
-
-QueryStringError makeObjectPropertyCountError(uint8_t len) {
-    return QueryStringError("object property count limit exceed " + std::to_string(len));
-}
-
-QueryStringError makeObjectDepthError(std::string const& key, uint8_t len) {
-    return QueryStringError("object depth limit exceed " + std::to_string(len) + " for " +
-                            key);
-}
-
-QueryStringError makeMixedTypesError(std::string const& key,
-                                     std::string const& expected_type,
-                                     std::string const& actual_type) {
-    return QueryStringError("mixed types for " + key + ": " + expected_type + " and " +
-                            actual_type);
-}
-
-void processEmptyKey(Variant& out) {
-    if (out.type() == Variant::TypeTag::null) {
-        out = Variant(VariantVec());
-    } else if (out.isScalar()) {
-        out = Variant(VariantVec{out});
-    }
-}
-
-} // namespace
-
-Variant query_string(std::string const& str) {
-    // limits
-    constexpr uint8_t const array_length_limit = 20;
-    constexpr uint8_t const object_depth_limit = 20;
-    constexpr uint8_t const object_property_count_limit = 20;
-
-    // parse
-    auto const parameters = parseParameters(str);
-
-    // construct DOM
-    VariantMap out;
-    for (auto const& p : parameters) {
-        auto param = &out[p.key.name];
-
-        if (out.size() > object_property_count_limit) {
-            throw makeObjectPropertyCountError(object_property_count_limit);
-        } else if (p.key.index_operators.size() > object_depth_limit) {
-            throw makeObjectDepthError(p.key.name, object_depth_limit);
-        }
-
-        for (auto key_it = p.key.index_operators.begin();
-             key_it != p.key.index_operators.end(); ++key_it) {
-            auto const& key_str = *key_it;
-
-            int64_t array_index{-1};
-            try {
-                array_index = std::stoul(key_str);
-            } catch (std::invalid_argument const&) {
-                // not int
-            } catch (std::out_of_range const&) {
-                throw makeArrayIndexError(
-                        make_key(p.key.name, p.key.index_operators.begin(), key_it),
-                        array_length_limit);
-            }
-
-            if (array_index < -1 || array_index >= array_length_limit) {
-                throw makeArrayIndexError(
-                        make_key(p.key.name, p.key.index_operators.begin(), key_it),
-                        array_length_limit);
-            }
-
-            if (array_index != -1) { // array
-                if (param->type() == Variant::TypeTag::null) {
-                    *param = Variant(VariantVec());
-                } else if (param->type() == Variant::TypeTag::map) {
-                    throw makeMixedTypesError(
-                            make_key(p.key.name, p.key.index_operators.begin(), key_it),
-                            "vec", "map");
-                } else if (param->type() != Variant::TypeTag::vec) {
-                    *param = Variant(VariantVec{*param});
-                }
-                auto& vec = param->modifyVec();
-                while (static_cast<size_t>(array_index) >= vec.size()) {
-                    vec.push_back(Variant());
-                }
-                param = &vec[static_cast<size_t>(array_index)];
-            } else { // object
-                if (param->type() == Variant::TypeTag::null) {
-                    *param = Variant(VariantMap());
-                } else if (param->type() != Variant::TypeTag::map) {
-                    throw makeMixedTypesError(
-                            make_key(p.key.name, p.key.index_operators.begin(), key_it),
-                            "map", toString(param->type()));
-                }
-                auto& map = param->modifyMap();
-                param = &map[key_str];
-                if (map.size() > object_property_count_limit) {
-                    throw makeObjectPropertyCountError(
-                            make_key(p.key.name, p.key.index_operators.begin(), key_it),
-                            object_property_count_limit);
-                }
-            }
-        }
-
-        if (p.key.empty_index_operator) { processEmptyKey(*param); }
-
-        if (param->null()) {
-            *param = Variant(p.value);
-        } else if (param->type() == Variant::TypeTag::vec) {
-            param->modifyVec().push_back(Variant(p.value));
-            if (param->vec().size() > array_length_limit) {
-                throw makeArrayLengthError(make_key(p.key.name,
-                                                    p.key.index_operators.begin(),
-                                                    p.key.index_operators.end()),
-                                           array_length_limit);
-            }
-        } else if (param->type() == Variant::TypeTag::map) {
-            throw makeMixedTypesError(make_key(p.key.name, p.key.index_operators.begin(),
-                                               p.key.index_operators.end()),
-                                      "map", "string");
-        } else {
-            *param = Variant(VariantVec{*param, Variant(p.value)});
-        }
-    }
-
-    return Variant(out);
+    return Variant(grammar.result());
 }
 
 } // namespace serialize
