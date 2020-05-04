@@ -73,3 +73,5 @@ Thumbs.db
 
 *.txt.user
 TODO.md
+.vscode
+build/

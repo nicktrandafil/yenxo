@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <serialize/enum_traits.hpp>
 #include <serialize/meta.hpp>
 
 #include <rapidjson/fwd.h>
@@ -252,7 +253,7 @@ public:
     /// \throw VariantBadType, VariantIntegralOverflow
     Map mapOr(Map const& x) const;
 
-    /// Check if Variant contains data
+    /// Check if Variant contains null
     bool null() const noexcept;
 
     bool operator==(Variant const& rhs) const noexcept;
@@ -280,6 +281,11 @@ public:
 
     static constexpr std::string_view typeName() noexcept {
         return "variant";
+    }
+
+    /// Test if the value is a scalar
+    inline bool isScalar() const noexcept {
+        return type_tag_ != TypeTag::map && type_tag_ != TypeTag::vec;
     }
 
     // list of supported types
@@ -370,5 +376,37 @@ template <>
 inline uint64_t Variant::asOr<uint64_t>(uint64_t x) const {
     return uint64Or(x);
 }
+
+template <>
+struct EnumTraits<Variant::TypeTag> {
+    using Enum = Variant::TypeTag;
+    static constexpr size_t const count = 14;
+    static constexpr std::array<Enum, count> const values = {
+            Enum::null,    Enum::boolean, Enum::char_,  Enum::uchar, Enum::int16,
+            Enum::uint16,  Enum::int32,   Enum::uint32, Enum::int64, Enum::uint64,
+            Enum::double_, Enum::string,  Enum::vec,    Enum::map};
+    static char const* toString(Enum e) {
+        switch (e) {
+        case Enum::null: return "null";
+        case Enum::boolean: return "boolean";
+        case Enum::char_: return "char";
+        case Enum::uchar: return "uchar";
+        case Enum::int16: return "int16";
+        case Enum::uint16: return "uint16";
+        case Enum::int32: return "int32";
+        case Enum::uint32: return "uint32";
+        case Enum::int64: return "int64";
+        case Enum::uint64: return "uint64";
+        case Enum::double_: return "double_";
+        case Enum::string: return "string";
+        case Enum::vec: return "vec";
+        case Enum::map: return "map";
+        }
+        throw std::logic_error(
+                "'" + std::to_string(static_cast<std::underlying_type_t<Enum>>(e)) +
+                "' is not handled in "
+                "EnumTraits<Variant::TypeTag>::toString(Variant::TypeTag)");
+    }
+};
 
 } // namespace serialize

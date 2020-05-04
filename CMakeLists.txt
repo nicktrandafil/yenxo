@@ -91,9 +91,12 @@ add_library(
 
     include/${PROJECT_NAME}/exception.hpp
 
+    include/${PROJECT_NAME}/query_string.hpp
+
     include/serialize.hpp
 
     src/variant.cpp
+    src/query_string.cpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -209,6 +212,7 @@ add_executable(
     test/json_struct.cpp
     test/type_safe.cpp
     test/string_conversion.cpp
+    test/query_string.cpp
 
     test/variant_conversion.cpp
 
