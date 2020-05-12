@@ -69,7 +69,7 @@ public:
     }
 };
 
-/// \ingroup goup-exceptions
+/// \ingroup group-exceptions
 /// Bad type error
 class VariantBadType final : public VariantErr {
 public:
