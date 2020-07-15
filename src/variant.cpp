@@ -32,6 +32,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <ostream>
 #include <typeinfo>
 
 namespace serialize {

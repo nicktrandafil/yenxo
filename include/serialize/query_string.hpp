@@ -26,6 +26,8 @@
 
 #include <serialize/variant_fwd.hpp>
 
+#include <stdexcept>
+
 namespace serialize {
 
 /// Query string parse error

@@ -81,7 +81,7 @@ constexpr TypeNameT typeName;
 template <class T, bool condition>
 struct TypeNameImpl<T, When<condition>> {
     [[noreturn]] static std::string_view apply() {
-        static_assert(DependentFalse<T>::value);
+        static_assert(T::has_no_type_name);
         throw 0;
     }
 };
