@@ -371,8 +371,10 @@ struct UpdateFromVar {
                     found = true;
                 }));
 
-            if (!found) {
-                throw std::logic_error("'" + v.first + "'" + " is unknown");
+            if constexpr (!Policy::allow_additional_peroperties) {
+                if (!found) {
+                    throw std::logic_error("'" + v.first + "'" + " is unknown");
+                }
             }
         }
     }
