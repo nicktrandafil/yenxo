@@ -33,6 +33,7 @@
 
 #include <array>
 #include <cassert>
+#include <iostream>
 #include <stdexcept>
 
 namespace serialize {

@@ -95,6 +95,22 @@ struct Person
     Hobby hobby;
 };
 
+struct Pol4 : trait::VarDefPolicy {
+    static auto constexpr allow_additional_properties = false;
+};
+
+struct Person2 : trait::UpdateFromVar<Person2, Pol4>, trait::EqualityComparison<Person2> {
+    Person2() = default;
+    Person2(std::string const& name, int age, Hobby const& hobby)
+        : name(name), age(age), hobby(hobby) {
+    }
+    BOOST_HANA_DEFINE_STRUCT(Person2,
+        (std::string, name),
+        (int        , age),
+        (Hobby      , hobby)
+    );
+};
+
 struct PersonEx
     : trait::Var<PersonEx>,
       trait::EqualityComparison<PersonEx> {
@@ -255,6 +271,16 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
 
         REQUIRE(person_updated == person);
 
+        person_var["no"] = Variant(1);
+        REQUIRE_NOTHROW(person.updateVar(Variant(person_var)));
+    }
+
+    SECTION("Check updateVar with allow_additional_properties=false") {
+        Person2 person{"Name", 25, hobby};
+        Person2 const person_updated{"Name", 26, hobby};
+        Variant::Map person_var{{"age", Variant(26)}};
+        person.updateVar(Variant(person_var));
+        REQUIRE(person_updated == person);
         person_var["no"] = Variant(1);
         REQUIRE_THROWS_WITH(person.updateVar(Variant(person_var)), "'no' is unknown");
     }
@@ -469,10 +495,6 @@ struct AutoCamelCase : trait::VarDef<AutoCamelCase, CamelCasePolicy>,
                        trait::EqualityComparison<AutoCamelCase> {
     BOOST_HANA_DEFINE_STRUCT(AutoCamelCase,
                              (std::string, hello_world_2_boo));
-};
-
-struct Pol4 : trait::VarDefPolicy {
-    static auto constexpr allow_additional_peroperties = false;
 };
 
 struct AdditionalProp : trait::VarDef<AdditionalProp, Pol4>, trait::EqualityComparison<AdditionalProp> {
