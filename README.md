@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.com/nicktrandafil/serialize.svg?branch=master)](https://travis-ci.com/nicktrandafil/serialize)
 [![codecov](https://codecov.io/gh/nicktrandafil/serialize/branch/master/graph/badge.svg)](https://codecov.io/gh/nicktrandafil/serialize)
 
-Some *add-in*'s which enables the traits listed below for user defined types:
+Some *add-in*'s which enable the traits listed below for user defined types:
 * serialization/deserialization;
 * comparison;
 * pushing to `std::ostream`.
@@ -36,4 +36,5 @@ auto const json = R"(
 Person person(Variant::from(rapidjson::Document().Parse(json)));
 ```
 
-For more examples see `examples` dir and tests.
+More snippets can be found in `examples` and `test` directories.
+The documentation can be found [here](https://nicktrandafil.github.io/serialize).
