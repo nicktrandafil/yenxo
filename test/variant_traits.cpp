@@ -698,6 +698,7 @@ struct St5
 
 BOOST_HANA_ADAPT_STRUCT(PersonC, name, age, hobby);
 
+// TODO remove
 TEST_CASE("Check trait::VarDefExplicit", "[variant_traits]") {
     Variant::Map const hobby_var{
         {"id", Variant(1)},
@@ -760,4 +761,37 @@ TEST_CASE("Check trait::Var fails", "[variant_traits]") {
     REQUIRE_THROWS_AS(Car::fromVariant(car_var), VariantBadType);
     REQUIRE_THROWS_WITH(Car::fromVariant(car_var), ".wheels: expected 'int32', actual 'string'");
     REQUIRE(hana::equal(int(1), int(1)));
+}
+
+namespace {
+
+struct TagPolicy : trait::VarDefPolicy {
+    using Tag = decltype("a tag"_s);
+};
+
+struct Tagged : trait::VarDef<Tagged, TagPolicy> {
+    Tagged() = default;
+    explicit Tagged(int x) : value(x) {
+    }
+    BOOST_HANA_DEFINE_STRUCT(Tagged,
+        (int, value)
+    );
+};
+
+} // namespace
+
+TEST_CASE("Check Policy::Tag", "[variant_traits]") {
+    Variant var(VariantMap{{"__tag", Variant("a tag")}, {"value", Variant(10)}});
+
+    SECTION("ok") {
+        Tagged const val(10);
+        REQUIRE(toVariant(Tagged(10)) == var);
+        REQUIRE(val.value == fromVariant<Tagged>(var).value);
+    }
+
+    SECTION("fail") {
+        var.modifyMap().at("__tag") = Variant("foo");
+        REQUIRE_THROWS_WITH(fromVariant<Tagged>(var),
+                            ".__tag: 'foo' is not of type 'a tag literal'");
+    }
 }

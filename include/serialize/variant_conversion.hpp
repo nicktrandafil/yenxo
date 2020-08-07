@@ -99,14 +99,21 @@ constexpr HasFromVariantT hasFromVariant;
 
 /// To `Variant` conversion function object
 /// \ingroup group-function
+///
 /// The function object is enabled for:
 /// * `Variant`;
 /// * all built-in types supported by `Variant`;
 /// * map types (`std::map`, `std::unordered_map`, etc);
 /// * collection types (`std::vector`, etc);
-/// * a user defined type `T` that has static member function `Variant toVariant(T)`;
-/// * an enum type `E` that have `EnumTraits<T>` specialization, or is defined via `DEFINE_ENUM(E, ...)`;
-/// * a non-intrusive way to enable the function object for a user defined type is to specialize `ToVariantImpl`.
+/// * aa user defined type `T` that has static member function `Variant toVariant(T)`;
+/// * an enum type `E` that have `EnumTraits<T>` specialization, or is defined via
+/// `DEFINE_ENUM(E, ...)`;
+/// * `std::integral_constant`;
+/// * `boost::hana::string`;
+/// * `boost::hana::map`.
+///
+/// The non-intrusive way to enable the function object for a user defined type is to
+/// specialize `ToVariantImpl`.
 #ifdef SERIALIZE_DOXYGEN_INVOKED
 auto toVariant = [](auto value) {
     return Variant(serialize(value));
@@ -305,6 +312,14 @@ struct ToVariantImpl<T, When<
     }
 };
 
+// hana string
+template <typename T>
+struct ToVariantImpl<T, When<boost::hana::is_a<boost::hana::string_tag, T>>> {
+    static Variant apply(T const& var) {
+        return Variant(boost::hana::to<char const*>(var));
+    }
+};
+
 template <typename T>
 auto ToVariantT::operator()(T&& val) const {
     return ToVariantImpl<std::decay_t<T>>::apply(std::forward<T>(val));
@@ -313,14 +328,21 @@ auto ToVariantT::operator()(T&& val) const {
 
 /// From `Variant` conversion function object
 /// \ingroup group-function
+///
 /// The function object is enabled for:
 /// * `Variant`;
 /// * all built-in types supported by `Variant`;
 /// * map types (`std::map`, `std::unordered_map`, etc);
 /// * collection types (`std::vector`, etc);
-/// * a user defined type `T` that has static member function `T fromVariant(Variant)`;
-/// * an enum type `E` that has `EnumTraits<T>` specialization, or is defined via `DEFINE_ENUM(E, ...)`;
-/// * a non-intrusive way to enable the function object for a user defined type is to specialize `FromVariantImpl`.
+/// * an user defined type `T` that has static member function `T fromVariant(Variant)`;
+/// * an enum type `E` that has `EnumTraits<T>` specialization, or is defined via
+/// `DEFINE_ENUM(E, ...)`;
+/// * `std::integral_constant`;
+/// * `boost::hana::string`;
+/// * `boost::hana::map`.
+///
+/// The non-intrusive way to enable the function object for a user defined type is to
+/// specialize `FromVariantImpl` for the type.
 #ifdef SERIALIZE_DOXYGEN_INVOKED
 template <class T>
 constexpr auto fromVariant = [](Variant const& var) {
@@ -582,6 +604,19 @@ struct FromVariantImpl<T, When<boost::hana::Constant<T>().value>> {
     static T apply(Variant const& var) {
         auto const tmp = fromVariant<typename T::value_type>(var);
         if (tmp != T::value) {
+            std::ostringstream oss;
+            oss << var;
+            throw VariantBadType(oss.str(), boost::hana::type_c<T>);
+        }
+        return T();
+    }
+};
+
+// Hana string
+template <typename T>
+struct FromVariantImpl<T, When<boost::hana::is_a<boost::hana::string_tag, T>>> {
+    static T apply(Variant const& var) {
+        if (var.str() != boost::hana::to<char const*>(T())) {
             std::ostringstream oss;
             oss << var;
             throw VariantBadType(oss.str(), boost::hana::type_c<T>);

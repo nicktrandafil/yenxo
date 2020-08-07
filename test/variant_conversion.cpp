@@ -30,6 +30,7 @@
 #include <set>
 
 using namespace serialize;
+using namespace boost::hana::literals;
 
 namespace {
 
@@ -130,5 +131,13 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
             boost::hana::make_pair(BOOST_HANA_STRING("b"), E()));
 
         REQUIRE_THROWS_WITH(fromVariant2(tmp, Variant(VariantMap{{"a", Variant("e1")}, {"b", Variant("e3")}})), ".b: 'e3' is not of type 'E'");
+    }
+
+    SECTION("hana string") {
+        using Str = decltype("str"_s);
+        REQUIRE_NOTHROW(fromVariant<Str>(Variant("str")));
+        REQUIRE_THROWS_WITH(fromVariant<Str>(Variant("strr")),
+                            "'strr' is not of type 'str literal'");
+        REQUIRE(toVariant("str"_s) == Variant("str"));
     }
 }

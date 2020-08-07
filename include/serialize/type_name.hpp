@@ -28,6 +28,7 @@
 #include <serialize/meta.hpp>
 #include <serialize/when.hpp>
 
+#include <boost/hana/core/is_a.hpp>
 #include <boost/hana/fold.hpp>
 #include <boost/hana/intersperse.hpp>
 #include <boost/hana/transform.hpp>
@@ -179,6 +180,13 @@ struct TypeNameImpl<std::integral_constant<T, v>> {
             return std::string(typeName(boost::hana::type_c<T>)) + "{" +
                    std::string(std::to_string(v)) + "}";
         }
+    }
+};
+
+template <class T>
+struct TypeNameImpl<T, When<boost::hana::is_a<boost::hana::string_tag, T>>> {
+    static std::string apply() {
+        return boost::hana::to<char const*>(T()) + std::string(" literal");
     }
 };
 

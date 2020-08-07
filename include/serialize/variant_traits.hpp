@@ -161,6 +161,10 @@ struct VarDefPolicy {
 
     /// defaults policy
     using Defaults = detail::Default;
+
+    /// additional property '__tag' with default value `Tag` in serialized data, which is
+    /// not present in the source object
+    using Tag = void;
 };
 
 /// Adds conversion support to and from `Variant`
@@ -173,6 +177,7 @@ struct VarDefPolicy {
 /// The methods does not deal with optional types and default values. Therefore,
 /// for the method `fromVariant` all members must be presented in a variant,
 /// and, for the method `toVariant` all members will be serialized into a variant.
+/// \todo Remove this trait and rename `VarDef` to `Var`.
 template <typename Derived, typename Policy = VarDefPolicy>
 struct Var {
     static Variant toVariant(Derived const& x) {
@@ -279,6 +284,10 @@ struct VarDef {
                 }
             }));
 
+        if constexpr (!std::is_void_v<typename Policy::Tag>) {
+            detail::toVariantWrap(ret["__tag"], typename Policy::Tag{}, Policy::to_variant);
+        }
+
         return Variant(ret);
     }
 
@@ -286,8 +295,18 @@ struct VarDef {
         using namespace std::literals;
         Derived ret;
 
-        using MapT = std::conditional_t<Policy::allow_additional_properties, decltype(x.map()), std::decay_t<decltype(x.map())>>;
+        using MapT =
+                std::conditional_t<Policy::allow_additional_properties, decltype(x.map()),
+                                   std::decay_t<decltype(x.map())>>;
         MapT map = x.map();
+
+        if constexpr (!std::is_void_v<typename Policy::Tag>) {
+            typename Policy::Tag tmp;
+            auto const it = map.find("__tag");
+            if (it == map.end()) { throw std::logic_error("'__tag' is required"s); }
+            detail::fromVariantWrap(tmp, it->second, "__tag", Policy::from_variant);
+            if constexpr (!Policy::allow_additional_properties) { map.erase(it); }
+        }
 
         boost::hana::for_each(
             boost::hana::accessors<Derived>(),
