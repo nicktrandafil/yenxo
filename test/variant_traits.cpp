@@ -179,6 +179,7 @@ TEST_CASE("detail::toVariant", "[variant_trait_helpers]") {
         std::integral_constant<int, 2> c;
         REQUIRE(fromVariant<decltype(c)>(ok) == c);
         REQUIRE_THROWS_AS(fromVariant<decltype(c)>(not_ok), VariantBadType);
+        REQUIRE(toVariant(c) == Variant(2));
     }
 }
 
