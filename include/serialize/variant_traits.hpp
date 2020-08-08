@@ -162,9 +162,9 @@ struct VarDefPolicy {
     /// defaults policy
     using Defaults = detail::Default;
 
-    /// additional property '__tag' with default value `Tag` in serialized data, which is
+    /// additional property '__tag' with value `tag` in serialized data, which is
     /// not present in the source object
-    using Tag = void;
+    static constexpr void* tag{};
 };
 
 /// Adds conversion support to and from `Variant`
@@ -284,8 +284,8 @@ struct VarDef {
                 }
             }));
 
-        if constexpr (!std::is_void_v<typename Policy::Tag>) {
-            detail::toVariantWrap(ret["__tag"], typename Policy::Tag{}, Policy::to_variant);
+        if constexpr (!std::is_void_v<std::remove_pointer_t<decltype(Policy::tag)>>) {
+            detail::toVariantWrap(ret["__tag"], Policy::tag, Policy::to_variant);
         }
 
         return Variant(ret);
@@ -300,8 +300,8 @@ struct VarDef {
                                    std::decay_t<decltype(x.map())>>;
         MapT map = x.map();
 
-        if constexpr (!std::is_void_v<typename Policy::Tag>) {
-            typename Policy::Tag tmp;
+        if constexpr (!std::is_void_v<std::remove_pointer_t<decltype(Policy::tag)>>) {
+            std::remove_cv_t<decltype(Policy::tag)> tmp;
             auto const it = map.find("__tag");
             if (it == map.end()) { throw std::logic_error("'__tag' is required"s); }
             detail::fromVariantWrap(tmp, it->second, "__tag", Policy::from_variant);

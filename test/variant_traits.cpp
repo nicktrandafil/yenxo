@@ -657,7 +657,7 @@ TEST_CASE("Check trait::Var fails", "[variant_traits]") {
 namespace {
 
 struct TagPolicy : trait::VarDefPolicy {
-    using Tag = decltype("a tag"_s);
+    static constexpr auto tag = "a tag"_s;
 };
 
 struct Tagged : trait::VarDef<Tagged, TagPolicy> {
