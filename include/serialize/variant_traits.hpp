@@ -144,10 +144,10 @@ struct VarDefPolicy {
     /// treat missing keys as empty containers
     static auto constexpr empty_container_not_required = false;
 
-    /// serialize a value even if it has it's default value
+    /// serialize a value even if it has default value
     static auto constexpr serialize_default_value = true;
 
-    /// allow extra parameters not described in the struct
+    /// allow extra properties in `Variant`
     static auto constexpr allow_additional_properties = true;
 
     /// from variant conversion functional object
@@ -162,9 +162,9 @@ struct VarDefPolicy {
     /// defaults policy
     using Defaults = detail::Default;
 
-    /// additional property '__tag' with value `tag` in serialized data, which is
-    /// not present in the source object
-    static constexpr void* tag{};
+    struct NoTag {};
+    /// additional property '__tag' with the value `tag` in `Variant`
+    static constexpr NoTag tag{};
 };
 
 /// Adds conversion support to and from `Variant`
@@ -284,7 +284,8 @@ struct VarDef {
                 }
             }));
 
-        if constexpr (!std::is_void_v<std::remove_pointer_t<decltype(Policy::tag)>>) {
+        if constexpr (!std::is_same_v<std::remove_const_t<decltype(Policy::tag)>,
+                                      typename Policy::NoTag>) {
             detail::toVariantWrap(ret["__tag"], Policy::tag, Policy::to_variant);
         }
 
@@ -300,8 +301,9 @@ struct VarDef {
                                    std::decay_t<decltype(x.map())>>;
         MapT map = x.map();
 
-        if constexpr (!std::is_void_v<std::remove_pointer_t<decltype(Policy::tag)>>) {
-            std::remove_cv_t<decltype(Policy::tag)> tmp;
+        if constexpr (!std::is_same_v<std::remove_const_t<decltype(Policy::tag)>,
+                                      typename Policy::NoTag>) {
+            std::remove_const_t<decltype(Policy::tag)> tmp;
             auto const it = map.find("__tag");
             if (it == map.end()) { throw std::logic_error("'__tag' is required"s); }
             detail::fromVariantWrap(tmp, it->second, "__tag", Policy::from_variant);
