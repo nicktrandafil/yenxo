@@ -24,16 +24,16 @@ endif()
 
 include(CMakeDependentOption)
 
-option(${PROJECT_NAME}_enable_type_safe "Enable type_safe support" ON)
-if(${PROJECT_NAME}_enable_type_safe)
-    set(_${PROJECT_NAME}_enable_type_safe 1)
+option(${PROJECT_NAME}_ENABLE_TYPE_SAFE "Enable type_safe support" ON)
+if(${PROJECT_NAME}_ENABLE_TYPE_SAFE)
+    set(_${PROJECT_NAME}_ENABLE_TYPE_SAFE 1)
 else()
-    set(_${PROJECT_NAME}_enable_type_safe 0)
+    set(_${PROJECT_NAME}_ENABLE_TYPE_SAFE 0)
 endif()
 
-option(${PROJECT_NAME}_test_define_struct "Enable testing of DEFINE_STRUCT" OFF)
+option(${PROJECT_NAME}_TEST_DEFINE_STRUCT "Enable testing of DEFINE_STRUCT" OFF)
 
-option(${PROJECT_NAME}_build_snippets "Enable building snippets" OFF)
+option(${PROJECT_NAME}_BUILD_SNIPPETS "Enable building snippets" OFF)
 
 cmake_dependent_option(${PROJECT_NAME}_TESTING
   "Enable testing"
@@ -51,9 +51,16 @@ cmake_dependent_option(${PROJECT_NAME}_COVERAGE
 if(NOT ${PROJECT_NAME}_sub)
   find_package(RapidJSON QUIET REQUIRED)
   find_package(Boost 1.65 QUIET REQUIRED)
+  if(${PROJECT_NAME}_ENABLE_TYPE_SAFE)
+      find_package(type_safe QUIET REQUIRED)
+  endif()
+  if(${PROJECT_NAME}_TESTING)
+      find_package(Catch2 QUIET REQUIRED)
+  endif()
+  if(${PROJECT_NAME}_BUILD_SNIPPETS)
+      find_package(benchmark QUIET REQUIRED)
+  endif()
 endif()
-
-include(external/external.cmake)
 
 
 # Target
@@ -117,10 +124,10 @@ target_include_directories(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC
     BOOST_HANA_CONFIG_ENABLE_STRING_UDL
-    SERIALIZE_ENABLE_TYPE_SAFE=${_${PROJECT_NAME}_enable_type_safe}
+    SERIALIZE_ENABLE_TYPE_SAFE=${_${PROJECT_NAME}_ENABLE_TYPE_SAFE}
 )
 
-if(${PROJECT_NAME}_enable_type_safe)
+if(${PROJECT_NAME}_ENABLE_TYPE_SAFE)
     target_link_libraries(${PROJECT_NAME} PUBLIC type_safe)
 endif()
 
@@ -135,7 +142,7 @@ endif()
 
 install(DIRECTORY include/${PROJECT_NAME} DESTINATION include)
 
-if(NOT ${PROJECT_NAME}_sub AND ${PROJECT_NAME}_all_imported_deps)
+if(NOT ${PROJECT_NAME}_sub)
     include(CMakePackageConfigHelpers)
     set(CONFIG_PACKAGE_INSTALL_DIR lib/cmake/${PROJECT_NAME})
 
@@ -193,8 +200,6 @@ enable_testing()
 # Examples
 add_subdirectory(example)
 
-find_package(Catch2 QUIET REQUIRED)
-
 add_executable(
     test_${PROJECT_NAME}
 
@@ -218,9 +223,9 @@ add_executable(
 
     test/define_enum.cpp
 
-    $<$<BOOL:${${PROJECT_NAME}_test_define_struct}>:test/define_struct.cpp>
-    $<$<BOOL:${${PROJECT_NAME}_test_define_struct}>:test/define_struct_part2.cpp>
-    $<$<BOOL:${${PROJECT_NAME}_test_define_struct}>:test/define_struct_part3.cpp>
+    $<$<BOOL:${${PROJECT_NAME}_TEST_DEFINE_STRUCT}>:test/define_struct.cpp>
+    $<$<BOOL:${${PROJECT_NAME}_TEST_DEFINE_STRUCT}>:test/define_struct_part2.cpp>
+    $<$<BOOL:${${PROJECT_NAME}_TEST_DEFINE_STRUCT}>:test/define_struct_part3.cpp>
 )
 
 set_target_properties(test_${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -239,8 +244,7 @@ add_dependencies(check test_${PROJECT_NAME})
 
 
 # Snippets
-if(${PROJECT_NAME}_build_snippets)
-    find_package(benchmark QUIET REQUIRED)
+if(${PROJECT_NAME}_BUILD_SNIPPETS)
     add_executable(${PROJECT_NAME}_snippets snippets/snippets.cpp)
     set_target_properties(${PROJECT_NAME}_snippets PROPERTIES CXX_STANDARD 17)
     target_link_libraries(${PROJECT_NAME}_snippets benchmark::benchmark ${PROJECT_NAME}_development ${PROJECT_NAME})

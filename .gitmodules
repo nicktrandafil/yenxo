@@ -1,3 +1,0 @@
-[submodule "external/type_safe"]
-	path = external/type_safe
-	url = https://github.com/foonathan/type_safe.git
