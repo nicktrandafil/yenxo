@@ -105,7 +105,7 @@ constexpr HasFromVariantT hasFromVariant;
 /// * all built-in types supported by `Variant`;
 /// * map types (`std::map`, `std::unordered_map`, etc);
 /// * collection types (`std::vector`, etc);
-/// * aa user defined type `T` that has static member function `Variant toVariant(T)`;
+/// * an user defined type `T` that has static member function `Variant toVariant(T)`;
 /// * an enum type `E` that have `EnumTraits<T>` specialization, or is defined via
 /// `DEFINE_ENUM(E, ...)`;
 /// * `std::integral_constant`;
@@ -193,6 +193,7 @@ struct ToVariantImpl<T,
                           !std::is_same_v<T, serialize::VariantVec>>> {
     static Variant apply(T const& vec) {
         VariantVec ret;
+        ret.reserve(std::size(vec));
         for (auto const& x : vec) {
             ret.push_back(toVariant(x));
         }
@@ -257,40 +258,9 @@ struct ToVariantImpl<T, When<boolean(boost::hana::type_c<T>)>> {
 };
 #endif
 
+// `hana::map`
 template <typename T>
-struct HanaMapImpl {
-    template <typename U,
-              typename = std::enable_if_t<
-                  boost::hana::is_a<boost::hana::map_tag, U>>>
-    constexpr static bool isMap() {
-        constexpr auto is_str = [](auto x) {
-            return boost::hana::is_a<boost::hana::string_tag>(x);
-        };
-
-        using All = decltype(boost::hana::all_of(
-            boost::hana::keys(std::declval<U>()), is_str));
-
-        return boost::hana::value<All>();
-    }
-
-    template <typename U, typename = std::enable_if_t<isMap<U>()>>
-    static std::true_type test(U&&);
-    static std::false_type test(...);
-    static constexpr auto value = decltype(test(std::declval<T>()))();
-};
-
-struct HanaMapT {
-    template <typename T>
-    constexpr bool operator()(boost::hana::basic_type<T> const&) const {
-        return HanaMapImpl<T>::value;
-    }
-};
-
-constexpr HanaMapT hanaMap;
-
-// Hana map
-template <typename T>
-struct ToVariantImpl<T, When<hanaMap(boost::hana::type_c<T>)>> {
+struct ToVariantImpl<T, When<boost::hana::is_a<boost::hana::map_tag, T>>> {
     static Variant apply(T const& map) {
         Variant::Map ret;
         boost::hana::for_each(map, boost::hana::fuse([&ret](auto key, auto value) {
@@ -300,7 +270,28 @@ struct ToVariantImpl<T, When<hanaMap(boost::hana::type_c<T>)>> {
     }
 };
 
-// Variant
+// `hana::string`
+template <typename T>
+struct ToVariantImpl<T, When<boost::hana::is_a<boost::hana::string_tag, T>>> {
+    static Variant apply(T const& var) {
+        return Variant(boost::hana::to<char const*>(var));
+    }
+};
+
+// `hana::tuple`
+template <class T>
+struct ToVariantImpl<T, When<boost::hana::is_a<boost::hana::tuple_tag, T>>> {
+    static Variant apply(T const& val) {
+        VariantVec ret;
+        ret.reserve(boost::hana::size(val));
+        boost::hana::for_each(val, [&ret](auto const& x) {
+            ret.push_back(toVariant(x));
+        });
+        return Variant(ret);
+    }
+};
+
+// `std::variant`
 template <typename T>
 struct ToVariantImpl<T, When<
                             serialize::detail::Valid<std::variant_alternative_t<0, T>>::value>> {
@@ -309,14 +300,6 @@ struct ToVariantImpl<T, When<
             Overload{
                 [](auto const& x) { return toVariant(x); }},
             var);
-    }
-};
-
-// hana string
-template <typename T>
-struct ToVariantImpl<T, When<boost::hana::is_a<boost::hana::string_tag, T>>> {
-    static Variant apply(T const& var) {
-        return Variant(boost::hana::to<char const*>(var));
     }
 };
 
@@ -383,7 +366,7 @@ struct FromVariantImpl<T, When<hasFromVariant(boost::hana::type_c<T>)>> {
     static T apply(Variant const& x) { return T::fromVariant(x); }
 };
 
-// Specialization for types for which Variant have conversion
+// Specialization for `Variant` built-in supported types
 template <typename T>
 struct FromVariantImpl<T, When<Variant::Types::anyOf<T>()>> {
     static T apply(Variant const& x) { return static_cast<T>(x); }
@@ -420,6 +403,23 @@ inline void tryCatch(F&& f, S s) {
 }
 
 } // namespace detail
+
+template <typename T, size_t N>
+struct FromVariantImpl<std::array<T, N>> {
+    static std::array<T, N> apply(Variant const& var) {
+        auto const& vec = var.vec();
+        if (vec.size() != N) {
+            throw std::logic_error("expected size of the list is "
+                                   + std::to_string(N) + ", actual "
+                                   + std::to_string(vec.size()));
+        }
+        std::array<T, N> ret;
+        for (size_t i = 0; i < N; ++i) {
+            detail::tryCatch([&] { ret[i] = fromVariant<T>(vec[i]); }, i);
+        }
+        return ret;
+    }
+};
 
 // Specialization for collection types (with push_back)
 template <typename T>
@@ -579,9 +579,9 @@ struct FromVariantImpl<T, When<boolean(boost::hana::type_c<T>)>> {
 };
 #endif
 
-// Hana map
+// `hana::map`
 template <typename T>
-struct FromVariantImpl<T, When<hanaMap(boost::hana::type_c<T>)>> {
+struct FromVariantImpl<T, When<boost::hana::is_a<boost::hana::map_tag, T>>> {
     static T apply(Variant const& var) {
         auto const map = var.map();
         T ret;
@@ -598,7 +598,7 @@ struct FromVariantImpl<T, When<hanaMap(boost::hana::type_c<T>)>> {
     }
 };
 
-// Hana constant
+// `hana::Constant`
 template <typename T>
 struct FromVariantImpl<T, When<boost::hana::Constant<T>().value>> {
     static T apply(Variant const& var) {
@@ -612,7 +612,7 @@ struct FromVariantImpl<T, When<boost::hana::Constant<T>().value>> {
     }
 };
 
-// Hana string
+// `hana::string`
 template <typename T>
 struct FromVariantImpl<T, When<boost::hana::is_a<boost::hana::string_tag, T>>> {
     static T apply(Variant const& var) {
@@ -625,7 +625,29 @@ struct FromVariantImpl<T, When<boost::hana::is_a<boost::hana::string_tag, T>>> {
     }
 };
 
-// Variant
+// `hana::tuple`
+template <typename T>
+struct FromVariantImpl<T, When<boost::hana::is_a<boost::hana::tuple_tag, T>>> {
+    static T apply(Variant const& var) {
+        T ret;
+        constexpr const auto N = boost::hana::size(ret);
+        auto const& vec = var.vec();
+        if (vec.size() != boost::hana::size(ret)) {
+            throw std::logic_error("expected size of the tuple is " + std::to_string(N)
+                                   + ", actual " + std::to_string(vec.size()));
+        }
+        boost::hana::for_each(
+                boost::hana::make_range(boost::hana::size_c<0>, boost::hana::size_c<N>),
+                [&](auto i) {
+                    detail::tryCatch(
+                            [&] { ret[i] = fromVariant<decltype(ret[i])>(vec[i]); },
+                            boost::hana::value(i));
+                });
+        return ret;
+    }
+};
+
+// `std::variant`
 template <typename T>
 struct FromVariantImpl<T, When<
                               serialize::detail::Valid<std::variant_alternative_t<0, T>>::value>> {

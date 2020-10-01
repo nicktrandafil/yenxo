@@ -40,7 +40,19 @@ namespace serialize {
 /// Serialized object representation. Think of it as a DOM object.
 class Variant {
 public:
-    struct NullType {};
+    struct NullType {
+        bool operator==(NullType) const noexcept {
+            return true;
+        }
+        bool operator!=(NullType) const noexcept {
+            return true;
+        }
+
+        static std::string_view typeName() noexcept {
+            return "NullType";
+        }
+    };
+
     using Map = std::unordered_map<std::string, Variant>;
     using Vec = std::vector<Variant>;
 
@@ -48,7 +60,8 @@ public:
         null,
         boolean,
         char_,
-        uchar,
+        int8,
+        uint8,
         int16,
         uint16,
         int32,
@@ -66,26 +79,27 @@ public:
     Variant() noexcept;
 
     Variant(NullType x) noexcept;
-    explicit Variant(bool) noexcept;
-    explicit Variant(char) noexcept;
-    explicit Variant(unsigned char) noexcept;
-    explicit Variant(int16_t) noexcept;
-    explicit Variant(uint16_t) noexcept;
-    explicit Variant(int32_t) noexcept;
-    explicit Variant(uint32_t) noexcept;
-    explicit Variant(int64_t) noexcept;
-    explicit Variant(uint64_t) noexcept;
-    explicit Variant(double) noexcept;
+    Variant(bool) noexcept;
+    Variant(char) noexcept;
+    Variant(int8_t) noexcept;
+    Variant(uint8_t) noexcept;
+    Variant(int16_t) noexcept;
+    Variant(uint16_t) noexcept;
+    Variant(int32_t) noexcept;
+    Variant(uint32_t) noexcept;
+    Variant(int64_t) noexcept;
+    Variant(uint64_t) noexcept;
+    Variant(double) noexcept;
 
-    explicit Variant(char const* const&);
-    explicit Variant(std::string const&);
-    explicit Variant(std::string&&);
+    Variant(char const* const&);
+    Variant(std::string const&);
+    Variant(std::string&&);
 
-    explicit Variant(Vec const&);
-    explicit Variant(Vec&&);
+    Variant(Vec const&);
+    Variant(Vec&&);
 
-    explicit Variant(Map const&);
-    explicit Variant(Map&&);
+    Variant(Map const&);
+    Variant(Map&&);
 
     template <typename T, typename = decltype(T::toVariant(std::declval<T>()))>
     explicit Variant(T const& x) : Variant(T::toVariant(x)) {
@@ -102,7 +116,11 @@ public:
 
     // move
     Variant(Variant&& rhs) noexcept;
-    Variant& operator=(Variant&& rhs) noexcept;
+    Variant& operator=(Variant&& rhs);
+
+    /// Get `NullType`
+    /// \throw VariantBadType
+    explicit operator NullType() const;
 
     /// Get as `T` or `x` if the object is null
     template <typename T>
@@ -121,25 +139,36 @@ public:
 
     /// Get char
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    char char8() const;
+    char character() const;
     explicit operator char() const {
-        return char8();
+        return character();
     }
 
     /// Get char or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    char char8Or(char x) const;
+    char characterOr(char x) const;
 
-    /// Get unsigned char
+    /// Get int8_t
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
-    unsigned char uchar8() const;
-    explicit operator unsigned char() const {
-        return uchar8();
+    int8_t int8() const;
+    explicit operator int8_t() const {
+        return int8();
     }
 
-    /// Get unsigned char or `x` if the object is null
+    /// Get int8_t or `x` if the object is null
     /// \throw VariantBadType, VariantIntegralOverflow
-    unsigned char uchar8Or(unsigned char x) const;
+    int8_t int8Or(int8_t x) const;
+
+    /// Get uint8_t
+    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
+    uint8_t uint8() const;
+    explicit operator uint8_t() const {
+        return uint8();
+    }
+
+    /// Get uint8_t or `x` if the object is null
+    /// \throw VariantBadType, VariantIntegralOverflow
+    uint8_t uint8Or(uint8_t x) const;
 
     /// Get int16
     /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
@@ -208,14 +237,14 @@ public:
     uint64_t uint64Or(uint64_t x) const;
 
     /// Get double
-    /// \throw VariantEmpty, VariantBadType, VariantIntegralOverflow
+    /// \throw VariantEmpty, VariantBadType
     double floating() const;
     explicit operator double() const {
         return floating();
     }
 
     /// Get int or `x` if the object is null
-    /// \throw VariantBadType, VariantIntegralOverflow
+    /// \throw VariantBadType
     double floatingOr(double x) const;
 
     /// Get string
@@ -226,7 +255,7 @@ public:
     }
 
     /// Get string or `x` if the object is null
-    /// \throw VariantBadType, VariantIntegralOverflow
+    /// \throw VariantBadType
     std::string strOr(std::string const& x) const;
 
     /// Get Vec
@@ -259,6 +288,10 @@ public:
     bool operator==(Variant const& rhs) const noexcept;
     bool operator!=(Variant const& rhs) const noexcept;
 
+    /// Check if two `Variant`s are equal
+    /// Unlike `operator==` this function performs conversion of arithmetic types.
+    friend bool equal(Variant const& lhs, Variant const& rhs) noexcept;
+
     /// \ingroup group-json
     /// @{
     static Variant from(rapidjson::Value const& json);
@@ -289,9 +322,21 @@ public:
     }
 
     // list of supported types
-    using Types =
-            S<NullType, bool, char, unsigned char, int64_t, uint64_t, int32_t, uint32_t,
-              int64_t, uint64_t, double, std::string, Variant::Vec, Variant::Map>;
+    using Types = S<NullType,
+                    bool,
+                    char,
+                    int8_t,
+                    uint8_t,
+                    int16_t,
+                    uint16_t,
+                    int32_t,
+                    uint32_t,
+                    int64_t,
+                    uint64_t,
+                    double,
+                    std::string,
+                    Variant::Vec,
+                    Variant::Map>;
 
 private:
     struct Impl;
@@ -304,7 +349,9 @@ private:
         }
         ValueType(char x) noexcept : char_(x) {
         }
-        ValueType(unsigned char x) noexcept : uchar(x) {
+        ValueType(int8_t x) noexcept : int8(x) {
+        }
+        ValueType(uint8_t x) noexcept : uint8(x) {
         }
         ValueType(int16_t x) noexcept : int16(x) {
         }
@@ -325,7 +372,8 @@ private:
         NullType null_;
         bool bool_;
         char char_;
-        unsigned char uchar;
+        int8_t int8;
+        uint8_t uint8;
         int16_t int16;
         uint16_t uint16;
         int32_t int32;
@@ -346,11 +394,15 @@ inline bool Variant::asOr<bool>(bool x) const {
 }
 template <>
 inline char Variant::asOr<char>(char x) const {
-    return char8Or(x);
+    return characterOr(x);
 }
 template <>
-inline unsigned char Variant::asOr<unsigned char>(unsigned char x) const {
-    return uchar8Or(x);
+inline int8_t Variant::asOr<int8_t>(int8_t x) const {
+    return int8Or(x);
+}
+template <>
+inline uint8_t Variant::asOr<uint8_t>(uint8_t x) const {
+    return uint8Or(x);
 }
 template <>
 inline int16_t Variant::asOr<int16_t>(int16_t x) const {
@@ -380,17 +432,18 @@ inline uint64_t Variant::asOr<uint64_t>(uint64_t x) const {
 template <>
 struct EnumTraits<Variant::TypeTag> {
     using Enum = Variant::TypeTag;
-    static constexpr size_t const count = 14;
+    static constexpr size_t const count = 15;
     static constexpr std::array<Enum, count> const values = {
-            Enum::null,    Enum::boolean, Enum::char_,  Enum::uchar, Enum::int16,
-            Enum::uint16,  Enum::int32,   Enum::uint32, Enum::int64, Enum::uint64,
-            Enum::double_, Enum::string,  Enum::vec,    Enum::map};
+            Enum::null,   Enum::boolean, Enum::char_,  Enum::int8,   Enum::uint8,
+            Enum::int16,  Enum::uint16,  Enum::int32,  Enum::uint32, Enum::int64,
+            Enum::uint64, Enum::double_, Enum::string, Enum::vec,    Enum::map};
     static char const* toString(Enum e) {
         switch (e) {
         case Enum::null: return "null";
         case Enum::boolean: return "boolean";
         case Enum::char_: return "char";
-        case Enum::uchar: return "uchar";
+        case Enum::int8: return "int8";
+        case Enum::uint8: return "uint8";
         case Enum::int16: return "int16";
         case Enum::uint16: return "uint16";
         case Enum::int32: return "int32";

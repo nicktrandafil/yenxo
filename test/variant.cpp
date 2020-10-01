@@ -40,8 +40,11 @@ namespace hana = boost::hana;
 using namespace serialize;
 
 TEST_CASE("Check Variant", "[Variant]") {
-    REQUIRE(Variant().null());
-    REQUIRE(!Variant(1).null());
+    SECTION("null") {
+        REQUIRE(Variant().null());
+        REQUIRE(!Variant(1).null());
+        REQUIRE_THROWS_AS(static_cast<Variant::NullType>(Variant(1)), VariantBadType);
+    }
 
     SECTION("boolean") {
         bool const expected{true};
@@ -52,22 +55,31 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(Variant().booleanOr(true) == true);
     }
 
-    SECTION("char8") {
+    SECTION("char") {
         char const expected{-7};
         auto const x = Variant(expected);
-        REQUIRE(expected == x.char8());
-        REQUIRE_THROWS_AS(Variant().char8(), VariantEmpty);
-        REQUIRE_THROWS_AS(Variant("").char8(), VariantBadType);
-        REQUIRE(Variant().char8Or(1) == 1);
+        REQUIRE(expected == x.character());
+        REQUIRE_THROWS_AS(Variant().character(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").character(), VariantBadType);
+        REQUIRE(Variant().characterOr(1) == 1);
     }
 
-    SECTION("uchar8") {
+    SECTION("int8") {
         unsigned char const expected{7};
         auto const x = Variant(expected);
-        REQUIRE(expected == x.char8());
-        REQUIRE_THROWS_AS(Variant().uchar8(), VariantEmpty);
-        REQUIRE_THROWS_AS(Variant("").uchar8(), VariantBadType);
-        REQUIRE(Variant().uchar8Or(1) == 1);
+        REQUIRE(expected == x.int8());
+        REQUIRE_THROWS_AS(Variant().int8(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").int8(), VariantBadType);
+        REQUIRE(Variant().int8Or(1) == 1);
+    }
+
+    SECTION("uint8") {
+        unsigned char const expected{7};
+        auto const x = Variant(expected);
+        REQUIRE(expected == x.uint8());
+        REQUIRE_THROWS_AS(Variant().uint8(), VariantEmpty);
+        REQUIRE_THROWS_AS(Variant("").uint8(), VariantBadType);
+        REQUIRE(Variant().uint8Or(1) == 1);
     }
 
     SECTION("int16") {
@@ -222,14 +234,13 @@ TEST_CASE("Check Variant", "[Variant]") {
         });
     }
 
-    SECTION("allow representable integral type conversions") {
-        auto const types = hana::make_tuple(
-                hana::type_c<bool>, hana::type_c<char>, hana::type_c<unsigned char>,
-                hana::type_c<int16_t>, hana::type_c<uint16_t>, hana::type_c<int32_t>,
-                hana::type_c<uint32_t>);
+    SECTION("representable integral type conversions") {
+        auto const from = hana::tuple_t<bool, char, int8_t, uint8_t, int16_t, uint16_t,
+                                        int32_t, uint32_t>;
+        auto const to = hana::concat(from, hana::tuple_t<int64_t, uint64_t>);
 
-        hana::for_each(types, [&](auto x) {
-            hana::for_each(types, [](auto y) {
+        hana::for_each(from, [&](auto x) {
+                hana::for_each(to, [](auto y) {
                 using X = typename decltype(x)::type;
                 using Y = typename decltype(y)::type;
                 using YLimiets = std::numeric_limits<Y>;
@@ -255,6 +266,7 @@ TEST_CASE("Check Variant", "[Variant]") {
                 }
 
                 REQUIRE(static_cast<Y>(Variant(X(1))) == Y(1));
+                REQUIRE(static_cast<Y>(Variant(X(0))) == Y(0));
 
                 // fails
 
@@ -299,26 +311,28 @@ TEST_CASE("Check Variant", "[Variant]") {
                 }
             });
         });
-
-        REQUIRE_THROWS_AS(Variant(1.1).int32(), VariantBadType);
-        REQUIRE_THROWS_AS(Variant(Variant::Vec()).int32(), VariantBadType);
-        REQUIRE_THROWS_AS(Variant(Variant::Map()).int32(), VariantBadType);
     }
 
-    SECTION("allow integral type to double conversions") {
-        auto const types = hana::tuple_t<bool, char, unsigned char, int16_t, uint16_t,
+    SECTION("integral type to double conversions") {
+        auto const types = hana::tuple_t<bool, char, int8_t, uint8_t, int16_t, uint16_t,
                                          int32_t, uint32_t, int64_t, uint64_t>;
-
         hana::for_each(types, [&](auto x) {
             auto const lhs = Variant(typename decltype(x)::type()).floating();
             auto const rhs = double(typename decltype(x)::type());
             REQUIRE((!(lhs < rhs) &&
                      !(lhs > rhs)) /* the same lhs == rhs, but without warning */);
         });
+    }
 
-        REQUIRE_THROWS_AS(Variant(1.1).int32(), VariantBadType);
-        REQUIRE_THROWS_AS(Variant(Variant::Vec()).int32(), VariantBadType);
-        REQUIRE_THROWS_AS(Variant(Variant::Map()).int32(), VariantBadType);
+    SECTION("double to integral type conversions") {
+        auto const types = hana::tuple_t<bool, char, int8_t, uint8_t, int16_t, uint16_t,
+                                         int32_t, uint32_t, int64_t, uint64_t>;
+        hana::for_each(types, [&](auto x) {
+            auto const one = static_cast<typename decltype(x)::type>(Variant(1.0));
+            REQUIRE(one == 1);
+            REQUIRE_THROWS_AS(static_cast<typename decltype(x)::type>(Variant(1.1)),
+                              VariantIntegralOverflow);
+        });
     }
 
     SECTION("compare") {
@@ -527,5 +541,51 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(Variant("1").typeInfo() == typeid(std::string));
         REQUIRE(Variant(VariantVec()).typeInfo() == typeid(VariantVec));
         REQUIRE(Variant(VariantMap()).typeInfo() == typeid(VariantMap));
+    }
+
+    SECTION("equal") {
+        SECTION("overflow") {
+            REQUIRE(!equal(Variant(int32_t(-1)), Variant(uint32_t(0))));
+        }
+
+        SECTION("bad type") {
+            REQUIRE(!equal(Variant(), Variant(uint32_t(0))));
+            REQUIRE(!equal(Variant(uint32_t(0)), Variant()));
+            REQUIRE(!equal(Variant(uint32_t(0)), Variant()));
+
+            REQUIRE(!equal(Variant(uint32_t(0)), VariantMap()));
+            REQUIRE(!equal(Variant(uint32_t(0)), VariantVec()));
+
+            REQUIRE(!equal(VariantMap(), Variant(uint32_t(0))));
+            REQUIRE(!equal(VariantVec(), Variant(uint32_t(0))));
+
+            REQUIRE(!equal(Variant("0"), Variant(uint32_t(0))));
+            REQUIRE(!equal(Variant(uint32_t(0)), Variant("0")));
+        }
+
+        SECTION("string") {
+            REQUIRE(equal(Variant("0"), Variant("0")));
+        }
+
+        SECTION("allowed conversions of arithmetic types") {
+            auto const types =
+                    hana::tuple_t<bool, char, int8_t, uint8_t, int16_t, uint16_t, int32_t,
+                                  uint32_t, int64_t, uint64_t, double>;
+            hana::for_each(types, [types](auto x) {
+                hana::for_each(types, [](auto y) {
+                        using X = typename decltype(x)::type;
+                        using Y = typename decltype(y)::type;
+                        REQUIRE(equal(Variant(X(0)), Variant(Y(0))));
+                        REQUIRE(equal(Variant(X(1)), Variant(Y(1))));
+                        REQUIRE(!equal(Variant(X(0)), Variant(Y(1))));
+
+                        REQUIRE(equal(VariantVec{X(0), X(1)}, VariantVec{Y(0), Y(1)}));
+                        REQUIRE(!equal(VariantVec{X(1), X(0)}, VariantVec{Y(0), Y(1)}));
+
+                        REQUIRE(equal(VariantMap{{"0", X(0)}, {"1", X(1)}},
+                                      VariantMap{{"0", Y(0)}, {"1", Y(1)}}));
+                    });
+            });
+        }
     }
 }

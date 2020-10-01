@@ -98,13 +98,14 @@ TEST_CASE("Check typeName", "[utilities]") {
     REQUIRE(typeName(boost::hana::type_c<float>) == "float");
     REQUIRE(typeName(boost::hana::type_c<double>) == "double");
     REQUIRE(typeName(boost::hana::type_c<wchar_t>) == "wchar");
-    REQUIRE(typeName(boost::hana::type_c<std::optional<char>>) == "optional char8");
+    REQUIRE(typeName(boost::hana::type_c<std::optional<char>>) == "optional char");
     REQUIRE(typeName(boost::hana::type_c<std::nullptr_t>) == "nullptr");
     REQUIRE(typeName(boost::hana::type_c<std::monostate>) == "null");
-    REQUIRE(typeName(boost::hana::type_c<std::variant<char, bool>>) == "one of [char8, boolean]");
+    REQUIRE(typeName(boost::hana::type_c<std::variant<char, bool>>) == "one of [char, boolean]");
     REQUIRE(typeName(boost::hana::type_c<bool>) == "boolean");
-    REQUIRE(typeName(boost::hana::type_c<char>) == "char8");
-    REQUIRE(typeName(boost::hana::type_c<unsigned char>) == "uchar8");
+    REQUIRE(typeName(boost::hana::type_c<char>) == "char");
+    REQUIRE(typeName(boost::hana::type_c<int8_t>) == "int8");
+    REQUIRE(typeName(boost::hana::type_c<uint8_t>) == "uint8");
     REQUIRE(typeName(boost::hana::type_c<uint16_t>) == "uint16");
     REQUIRE(typeName(boost::hana::type_c<int32_t>) == "int32");
     REQUIRE(typeName(boost::hana::type_c<uint32_t>) == "uint32");

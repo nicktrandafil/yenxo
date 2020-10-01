@@ -148,16 +148,23 @@ struct TypeNameImpl<int64_t> {
 // character
 
 template <>
-struct TypeNameImpl<unsigned char> {
+struct TypeNameImpl<char> {
     static constexpr std::string_view apply() noexcept {
-        return "uchar8";
+        return "char";
     }
 };
 
 template <>
-struct TypeNameImpl<char> {
+struct TypeNameImpl<uint8_t> {
     static constexpr std::string_view apply() noexcept {
-        return "char8";
+        return "uint8";
+    }
+};
+
+template <>
+struct TypeNameImpl<int8_t> {
+    static constexpr std::string_view apply() noexcept {
+        return "int8";
     }
 };
 

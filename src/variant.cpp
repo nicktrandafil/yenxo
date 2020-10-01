@@ -32,6 +32,8 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <algorithm>
+#include <cmath>
 #include <ostream>
 #include <typeinfo>
 
@@ -54,7 +56,9 @@ Variant::Variant(bool x) noexcept : type_tag_(TypeTag::boolean), value_(x) {
 }
 Variant::Variant(char x) noexcept : type_tag_(TypeTag::char_), value_(x) {
 }
-Variant::Variant(unsigned char x) noexcept : type_tag_(TypeTag::uchar), value_(x) {
+Variant::Variant(int8_t x) noexcept : type_tag_(TypeTag::int8), value_(x) {
+}
+Variant::Variant(uint8_t x) noexcept : type_tag_(TypeTag::uint8), value_(x) {
 }
 Variant::Variant(int16_t x) noexcept : type_tag_(TypeTag::int16), value_(x) {
 }
@@ -114,10 +118,8 @@ Variant::Variant(Variant const& rhs)
 }
 
 Variant& Variant::operator=(Variant const& rhs) {
-    auto const value = Impl::copy(rhs.type_tag_, rhs.value_);
-    this->~Variant();
-    type_tag_ = rhs.type_tag_;
-    value_ = value;
+    Variant tmp(rhs);
+    operator=(std::move(tmp));
     return *this;
 }
 
@@ -126,12 +128,9 @@ Variant::Variant(Variant&& rhs) noexcept : type_tag_(rhs.type_tag_), value_(rhs.
     rhs.value_.null_ = {};
 }
 
-Variant& Variant::operator=(Variant&& rhs) noexcept {
-    Variant tmp(std::move(rhs));
+Variant& Variant::operator=(Variant&& rhs) {
     this->~Variant();
-    type_tag_ = tmp.type_tag_;
-    value_ = tmp.value_;
-    tmp.type_tag_ = TypeTag::null;
+    new (this) Variant(std::move(rhs));
     return *this;
 }
 
@@ -142,8 +141,6 @@ struct GetHelper final : GetHelper<T, When<true>> {};
 
 template <typename T, bool condition>
 struct GetHelper<T, When<condition>> {
-    static_assert(!std::is_same_v<Variant::NullType, std::decay_t<T>>);
-
     static T const& apply(T const& x) noexcept {
         return x;
     }
@@ -156,178 +153,236 @@ struct GetHelper<T, When<condition>> {
     }
 };
 
+template <>
+struct GetHelper<Variant::NullType> {
+    static Variant::NullType apply(Variant::NullType) noexcept {
+        return {};
+    }
+    template <typename U>
+    [[noreturn]] static Variant::NullType apply(U const&) {
+        throw VariantBadType(boost::hana::type_c<Variant::NullType>, boost::hana::type_c<U>);
+    }
+};
+
 template <typename A, typename B>
 constexpr auto same_sign_v = std::is_signed_v<A> == std::is_signed_v<B>;
 
-// Casts `U` to `T` if a specific value of `U` is representable in `T` else throws
-// `VariantIntegralOverflow`
-template <typename T, typename U, typename = void>
-struct IntegralCheckedCast : IntegralCheckedCast<T, U, When<true>> {
-    static_assert(std::is_integral_v<T> && std::is_integral_v<U>);
+struct ThrowVariantIntegralOverflow {
+    template <class Type, class Value>
+    [[noreturn]] static typename Type::type apply(Type t, Value const& v) {
+        throw VariantIntegralOverflow(std::string(typeName(t)), std::to_string(v));
+    }
 };
 
-// safe conversion
-template <typename T, typename U>
-struct IntegralCheckedCast<T, U, When<same_sign_v<T, U> && sizeof(T) >= sizeof(U)>> {
+// Casts `U` to `T` if a specific value of `U` is representable in `T` else throws
+// `VariantIntegralOverflow`.
+template <typename T,
+          typename U,
+          typename ThrowPolicy = ThrowVariantIntegralOverflow,
+          typename = void>
+struct ArithmeticCheckedCast final
+        : ArithmeticCheckedCast<T, U, ThrowPolicy, When<true>> {
+    static_assert(std::is_arithmetic_v<T> && std::is_arithmetic_v<U>);
+};
+
+template <typename T, typename U, typename P>
+struct ArithmeticCheckedCast<T, U, P, When<same_sign_v<T, U> && sizeof(T) >= sizeof(U)>> {
     static T apply(U x) noexcept {
         return x;
     }
 };
 
-template <typename T, typename U>
-struct IntegralCheckedCast<
-        T, U,
-        When<same_sign_v<T, U> && sizeof(T) < sizeof(U) && !std::is_same_v<T, bool>>> {
+template <typename T, typename U, typename P>
+struct ArithmeticCheckedCast<T, U, P, When<same_sign_v<T, U> && sizeof(T) < sizeof(U)>> {
     static T apply(U x) {
         if (x < std::numeric_limits<T>::min() || x > std::numeric_limits<T>::max()) {
-            throw VariantIntegralOverflow(std::string(typeName(boost::hana::type_c<T>)),
-                                          std::to_string(x));
+            return P::apply(boost::hana::type_c<T>, x);
         } else {
             return static_cast<T>(x);
         }
     }
 };
 
-// safe conversion
-template <typename T, typename U>
-struct IntegralCheckedCast<
-        T, U,
+template <typename T, typename U, typename P>
+struct ArithmeticCheckedCast<
+        T,
+        U,
+        P,
         When<std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) > sizeof(U))>> {
     static T apply(U x) noexcept {
         return x;
     }
 };
 
-template <typename T, typename U>
-struct IntegralCheckedCast<
-        T, U,
+template <typename T, typename U, typename P>
+struct ArithmeticCheckedCast<
+        T,
+        U,
+        P,
         When<std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) <= sizeof(U))>> {
     static T apply(U x) {
 #if defined(__GNUG__) || defined(__clang__)
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare" // safe comparation
+#pragma GCC diagnostic ignored "-Wsign-compare"
         if (x > std::numeric_limits<T>::max()) {
 #pragma GCC diagnostic pop
 #else
 #error The compiler not supported
 #endif
-            throw VariantIntegralOverflow(std::string(typeName(boost::hana::type_c<T>)),
-                                          std::to_string(x));
+            return P::apply(boost::hana::type_c<T>, x);
         }
         return static_cast<T>(x);
     }
-}; // namespace
+};
 
-template <typename T, typename U>
-struct IntegralCheckedCast<T, U,
-                           When<std::is_unsigned_v<T> && std::is_signed_v<U> &&
-                                sizeof(T) >= sizeof(U) && !std::is_same_v<T, bool>>> {
+template <typename T, typename U, typename P>
+struct ArithmeticCheckedCast<
+        T,
+        U,
+        P,
+        When<std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) >= sizeof(U)>> {
     static T apply(U x) {
         if (x < 0) {
-            throw VariantIntegralOverflow(std::string(typeName(boost::hana::type_c<T>)),
-                                          std::to_string(x));
+            return P::apply(boost::hana::type_c<T>, x);
         } else {
             return static_cast<T>(x);
         }
     }
 };
 
-template <typename T, typename U>
-struct IntegralCheckedCast<T, U,
-                           When<std::is_unsigned_v<T> && std::is_signed_v<U> &&
-                                sizeof(T) < sizeof(U) && !std::is_same_v<T, bool>>> {
+template <typename T, typename U, typename P>
+struct ArithmeticCheckedCast<
+        T,
+        U,
+        P,
+        When<std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) < sizeof(U)>> {
     static T apply(U x) {
 #if defined(__GNUG__) || defined(__clang__)
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare" // safe comparation
+#pragma GCC diagnostic ignored "-Wsign-compare"
         if (x < 0 || x > std::numeric_limits<T>::max()) {
 #pragma GCC diagnostic pop
 #else
 #error The compiler not supported
 #endif
-            throw VariantIntegralOverflow(std::string(typeName(boost::hana::type_c<T>)),
-                                          std::to_string(x));
+            return P::apply(boost::hana::type_c<T>, x);
         }
         return static_cast<T>(x);
-    }
-}; // namespace serialize
-
-template <typename U>
-struct IntegralCheckedCast<bool, U,
-                           When<!std::is_same_v<bool, U> && std::is_unsigned_v<U>>> {
-    static bool apply(U x) {
-        if (x > 1) {
-            throw VariantIntegralOverflow(
-                    std::string(typeName(boost::hana::type_c<bool>)), std::to_string(x));
-        } else {
-            return x;
-        }
     }
 };
 
 template <typename U>
-struct IntegralCheckedCast<bool, U,
-                           When<!std::is_same_v<bool, U> && std::is_signed_v<U>>> {
-    static bool apply(U x) {
-        if (x > 1 || x < 0) {
-            throw VariantIntegralOverflow(
-                    std::string(typeName(boost::hana::type_c<bool>)), std::to_string(x));
+struct ArithmeticCheckedCast<double, U> {
+    static double apply(U x) noexcept {
+        return x;
+    }
+};
+
+template <typename T, typename P>
+struct ArithmeticCheckedCast<T, double, P> {
+    static T apply(double x) {
+        double iptr;
+        if (std::modf(x, &iptr) == 0.0) {
+            return ArithmeticCheckedCast<T, int64_t, P>::apply(static_cast<int64_t>(x));
         } else {
-            return x;
+            return P::apply(boost::hana::type_c<T>, x);
+        }
+    }
+};
+
+template <>
+struct ArithmeticCheckedCast<double, double> {
+    static double apply(double x) noexcept {
+        return x;
+    }
+};
+
+template <typename U, typename P>
+struct ArithmeticCheckedCast<bool, U, P> {
+    static bool apply(U x) {
+        if (x != 0 && x != 1) {
+            return P::apply(boost::hana::type_c<bool>, x);
+        } else {
+            return static_cast<bool>(x);
         }
     }
 };
 
 template <typename T>
-struct IntegralCheckedCast<T, bool> {
+struct ArithmeticCheckedCast<T, bool> {
     static T apply(bool x) noexcept {
         return x;
     }
 };
 
+template <>
+struct ArithmeticCheckedCast<bool, bool> {
+    static bool apply(bool x) noexcept {
+        return x;
+    }
+};
+
+template <>
+struct ArithmeticCheckedCast<double, bool> {
+    static double apply(bool x) noexcept {
+        return x;
+    }
+};
+
+template <typename P>
+struct ArithmeticCheckedCast<bool, double, P> {
+    static bool apply(double x) {
+        if (x != 0.0 && x != 1.0) {
+            return P::apply(boost::hana::type_c<bool>, x);
+        } else {
+            return static_cast<bool>(x);
+        }
+    }
+};
+
 template <typename Dst>
-struct IntegralCheckedCastT {
+struct ArithmeticCheckedCastT {
     template <typename Src>
     Dst operator()(Src x) const
-            noexcept(noexcept(IntegralCheckedCast<Dst, Src>::apply(x))) {
-        return IntegralCheckedCast<Dst, Src>::apply(x);
+            noexcept(noexcept(ArithmeticCheckedCast<Dst, Src>::apply(x))) {
+        return ArithmeticCheckedCast<Dst, Src>::apply(x);
     }
 };
 
 template <typename T>
-constexpr IntegralCheckedCastT<T> integralCheckedCast;
+constexpr ArithmeticCheckedCastT<T> arithmeticCheckedCast;
 
 template <typename T>
-struct GetHelper<T, When<std::is_integral_v<T>>> {
+struct GetHelper<T, When<std::is_arithmetic_v<T>>> {
     [[noreturn]] static T apply(Variant::NullType) {
         throw VariantEmpty(boost::hana::type_c<T>);
     }
-    static T apply(bool x) noexcept(noexcept(integralCheckedCast<T>(x))) {
-        return integralCheckedCast<T>(x);
+    static T apply(bool x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
     }
-    static T apply(char x) noexcept(noexcept(integralCheckedCast<T>(x))) {
-        return integralCheckedCast<T>(x);
+    static T apply(char x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
     }
-    static T apply(int16_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
-        return integralCheckedCast<T>(x);
+    static T apply(int16_t x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
     }
-    static T apply(uint16_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
-        return integralCheckedCast<T>(x);
+    static T apply(uint16_t x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
     }
-    static T apply(int32_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
-        return integralCheckedCast<T>(x);
+    static T apply(int32_t x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
     }
-    static T apply(uint32_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
-        return integralCheckedCast<T>(x);
+    static T apply(uint32_t x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
     }
-    static T apply(int64_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
-        return integralCheckedCast<T>(x);
+    static T apply(int64_t x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
     }
-    static T apply(uint64_t x) noexcept(noexcept(integralCheckedCast<T>(x))) {
-        return integralCheckedCast<T>(x);
+    static T apply(uint64_t x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
     }
-    [[noreturn]] static T apply(double) {
-        throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<double>);
+    static T apply(double x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
     }
     [[noreturn]] static T apply(std::string) {
         throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<std::string>);
@@ -336,49 +391,6 @@ struct GetHelper<T, When<std::is_integral_v<T>>> {
         throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<Variant::Vec>);
     }
     [[noreturn]] static T apply(Variant::Map) {
-        throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<Variant::Map>);
-    }
-};
-
-template <typename T>
-struct GetHelper<T, When<std::is_floating_point_v<T>>> {
-    [[noreturn]] static T apply(Variant::NullType) {
-        throw VariantEmpty(boost::hana::type_c<T>);
-    }
-    static T apply(bool x) noexcept {
-        return x;
-    }
-    static T apply(char x) noexcept {
-        return x;
-    }
-    static T apply(int16_t x) noexcept {
-        return x;
-    }
-    static T apply(uint16_t x) noexcept {
-        return x;
-    }
-    static T apply(int32_t x) noexcept {
-        return x;
-    }
-    static T apply(uint32_t x) noexcept {
-        return x;
-    }
-    static T apply(int64_t x) noexcept {
-        return x;
-    }
-    static T apply(uint64_t x) noexcept {
-        return x;
-    }
-    static T apply(double x) noexcept {
-        return x;
-    }
-    static T apply(std::string) {
-        throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<std::string>);
-    }
-    static T apply(Variant::Vec) {
-        throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<Variant::Vec>);
-    }
-    static T apply(Variant::Map) {
         throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<Variant::Map>);
     }
 };
@@ -408,7 +420,8 @@ decltype(auto) getHelper(Variant::TypeTag tag, U value_) {
     case TypeTag::null: return GetHelper<T>::apply(value_.null_);
     case TypeTag::boolean: return GetHelper<T>::apply(value_.bool_);
     case TypeTag::char_: return GetHelper<T>::apply(value_.char_);
-    case TypeTag::uchar: return GetHelper<T>::apply(value_.uchar);
+    case TypeTag::int8: return GetHelper<T>::apply(value_.int8);
+    case TypeTag::uint8: return GetHelper<T>::apply(value_.uint8);
     case TypeTag::int16: return GetHelper<T>::apply(value_.int16);
     case TypeTag::uint16: return GetHelper<T>::apply(value_.uint16);
     case TypeTag::int32: return GetHelper<T>::apply(value_.int32);
@@ -439,20 +452,32 @@ decltype(auto) getHelper(Variant::TypeTag tag, U value_) {
     }                                                                                    \
     (void)x
 
-char Variant::char8() const {
+Variant::operator Variant::NullType() const {
+    return getHelper<NullType>(type_tag_, value_);
+}
+
+char Variant::character() const {
     return getHelper<char>(type_tag_, value_);
 }
 
-char Variant::char8Or(char x) const {
+char Variant::characterOr(char x) const {
     GET_HELPER(char, type_tag_, value_, x);
 }
 
-unsigned char Variant::uchar8() const {
-    return getHelper<unsigned char>(type_tag_, value_);
+int8_t Variant::int8() const {
+    return getHelper<int8_t>(type_tag_, value_);
 }
 
-unsigned char Variant::uchar8Or(unsigned char x) const {
-    GET_HELPER(unsigned char, type_tag_, value_, x);
+int8_t Variant::int8Or(int8_t x) const {
+    GET_HELPER(int8_t, type_tag_, value_, x);
+}
+
+uint8_t Variant::uint8() const {
+    return getHelper<uint8_t>(type_tag_, value_);
+}
+
+uint8_t Variant::uint8Or(uint8_t x) const {
+    GET_HELPER(uint8_t, type_tag_, value_, x);
 }
 
 int16_t Variant::int16() const {
@@ -551,6 +576,9 @@ Variant::Map& Variant::modifyMap() {
     return getHelper<Map&>(type_tag_, value_);
 }
 
+#if defined(__GNUG__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal" // safe comparation
 bool Variant::operator==(Variant const& rhs) const noexcept {
     if (type_tag_ != rhs.type_tag_) {
         return false;
@@ -559,7 +587,8 @@ bool Variant::operator==(Variant const& rhs) const noexcept {
         case TypeTag::null: return true;
         case TypeTag::boolean: return value_.bool_ == rhs.value_.bool_;
         case TypeTag::char_: return value_.char_ == rhs.value_.char_;
-        case TypeTag::uchar: return value_.uchar == rhs.value_.uchar;
+        case TypeTag::int8: return value_.int8 == rhs.value_.int8;
+        case TypeTag::uint8: return value_.uint8 == rhs.value_.uint8;
         case TypeTag::int16: return value_.int16 == rhs.value_.int16;
         case TypeTag::uint16: return value_.uint16 == rhs.value_.uint16;
         case TypeTag::int32: return value_.int32 == rhs.value_.int32;
@@ -579,6 +608,203 @@ bool Variant::operator==(Variant const& rhs) const noexcept {
         }
         return false;
     }
+}
+#pragma GCC diagnostic pop
+#else
+#error The compiler not supported
+#endif
+
+namespace {
+
+struct ArithmeticCheckedEqT {
+    template <typename Lhs, typename Rhs>
+    bool operator()(Lhs lhs, Rhs rhs) const noexcept;
+};
+
+constexpr ArithmeticCheckedEqT arithmeticCheckedEq;
+
+template <typename T, typename U, typename = void>
+struct ArithmeticCheckedEq final : ArithmeticCheckedEq<T, U, When<true>> {
+    static_assert(std::is_arithmetic_v<T> && std::is_arithmetic_v<U>);
+};
+
+#if defined(__GNUG__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+template <typename U>
+struct ArithmeticCheckedEq<double, U> {
+    static bool apply(double lhs, U rhs) noexcept {
+        return lhs == rhs;
+    }
+};
+
+template <typename T>
+struct ArithmeticCheckedEq<T, double> {
+    static bool apply(T lhs, double rhs) noexcept {
+        return lhs == rhs;
+    }
+};
+
+template <>
+struct ArithmeticCheckedEq<double, double> {
+    static bool apply(double lhs, double rhs) noexcept {
+        return lhs == rhs;
+    }
+};
+#pragma GCC diagnostic pop
+#else
+#error The compiler not supported
+#endif
+
+template <typename T, typename U>
+struct ArithmeticCheckedEq<T, U, When<same_sign_v<T, U> && sizeof(T) >= sizeof(U)>> {
+    static bool apply(T lhs, U rhs) noexcept {
+        return lhs == rhs;
+    }
+};
+
+template <typename T, typename U>
+struct ArithmeticCheckedEq<T, U, When<same_sign_v<T, U> && sizeof(T) < sizeof(U)>> {
+    static bool apply(T lhs, U rhs) {
+        return lhs == rhs;
+    }
+};
+
+template <typename T, typename U>
+struct ArithmeticCheckedEq<
+        T,
+        U,
+        When<std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) > sizeof(U))>> {
+    static bool apply(T lhs, U rhs) noexcept {
+        return lhs == rhs;
+    }
+};
+
+template <typename T, typename U>
+struct ArithmeticCheckedEq<
+        T,
+        U,
+        When<std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) <= sizeof(U))>> {
+    static bool apply(T lhs, U rhs) {
+        if (lhs < 0) {
+            return false;
+        } else {
+            return static_cast<U>(lhs) == rhs;
+        }
+    }
+};
+
+template <typename T, typename U>
+struct ArithmeticCheckedEq<
+        T,
+        U,
+        When<std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) >= sizeof(U)>> {
+    static bool apply(T lhs, U rhs) {
+        return arithmeticCheckedEq(rhs, lhs);
+    }
+};
+
+template <typename T, typename U>
+struct ArithmeticCheckedEq<
+        T,
+        U,
+        When<std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) < sizeof(U)>> {
+    static bool apply(T lhs, U rhs) {
+        return lhs == rhs;
+    }
+};
+
+template <typename Lhs, typename Rhs>
+bool ArithmeticCheckedEqT::operator()(Lhs lhs, Rhs rhs) const noexcept {
+    return ArithmeticCheckedEq<Lhs, Rhs>::apply(lhs, rhs);
+}
+
+template <class T, class U>
+bool equalArithmetic(T lhs, Variant::TypeTag tag, U const& rhs) {
+    using TypeTag = Variant::TypeTag;
+    static_assert(std::is_arithmetic_v<T>);
+    switch (tag) {
+    case TypeTag::null: return false;
+    case TypeTag::boolean: return arithmeticCheckedEq(lhs, rhs.bool_);
+    case TypeTag::char_: return arithmeticCheckedEq(lhs, rhs.char_);
+    case TypeTag::int8: return arithmeticCheckedEq(lhs, rhs.int8);
+    case TypeTag::uint8: return arithmeticCheckedEq(lhs, rhs.uint8);
+    case TypeTag::int16: return arithmeticCheckedEq(lhs, rhs.int16);
+    case TypeTag::uint16: return arithmeticCheckedEq(lhs, rhs.uint16);
+    case TypeTag::int32: return arithmeticCheckedEq(lhs, rhs.int32);
+    case TypeTag::uint32: return arithmeticCheckedEq(lhs, rhs.uint32);
+    case TypeTag::int64: return arithmeticCheckedEq(lhs, rhs.int64);
+    case TypeTag::uint64: return arithmeticCheckedEq(lhs, rhs.uint64);
+    case TypeTag::double_: return arithmeticCheckedEq(lhs, rhs.double_);
+    case TypeTag::string: return false;
+    case TypeTag::vec: return false;
+    case TypeTag::map: return false;
+    }
+    assert(false);
+    return false;
+}
+
+} // namespace
+
+bool equal(Variant const& lhs, Variant const& rhs) noexcept {
+    using TypeTag = Variant::TypeTag;
+    using Map = Variant::Map;
+
+    switch (lhs.type_tag_) {
+    case TypeTag::null: return rhs.null();
+
+    case TypeTag::boolean:
+        return equalArithmetic(lhs.value_.bool_, rhs.type_tag_, rhs.value_);
+    case TypeTag::char_:
+        return equalArithmetic(lhs.value_.char_, rhs.type_tag_, rhs.value_);
+    case TypeTag::int8:
+        return equalArithmetic(lhs.value_.int8, rhs.type_tag_, rhs.value_);
+    case TypeTag::uint8:
+        return equalArithmetic(lhs.value_.uint8, rhs.type_tag_, rhs.value_);
+    case TypeTag::int16:
+        return equalArithmetic(lhs.value_.int16, rhs.type_tag_, rhs.value_);
+    case TypeTag::uint16:
+        return equalArithmetic(lhs.value_.uint16, rhs.type_tag_, rhs.value_);
+    case TypeTag::int32:
+        return equalArithmetic(lhs.value_.int32, rhs.type_tag_, rhs.value_);
+    case TypeTag::uint32:
+        return equalArithmetic(lhs.value_.uint32, rhs.type_tag_, rhs.value_);
+    case TypeTag::int64:
+        return equalArithmetic(lhs.value_.int64, rhs.type_tag_, rhs.value_);
+    case TypeTag::uint64:
+        return equalArithmetic(lhs.value_.uint64, rhs.type_tag_, rhs.value_);
+    case TypeTag::double_:
+        return equalArithmetic(lhs.value_.double_, rhs.type_tag_, rhs.value_);
+
+    case TypeTag::string: return lhs == rhs;
+    case TypeTag::vec: {
+        if (TypeTag::vec != rhs.type()) { return false; }
+        auto const& lhs_vec = lhs.vec();
+        auto const& rhs_vec = rhs.vec();
+        return lhs_vec.size() == rhs_vec.size()
+               && std::equal(lhs_vec.begin(), lhs_vec.end(), rhs_vec.begin(), &equal);
+    }
+    case TypeTag::map: {
+        if (TypeTag::map != rhs.type()) { return false; }
+        auto const& lhs_map = lhs.map();
+        auto const& rhs_map = rhs.map();
+        if (lhs_map.size() != rhs_map.size()) { return false; }
+        std::vector<Map::const_pointer> lhs(lhs_map.size());
+        std::vector<Map::const_pointer> rhs(rhs_map.size());
+        std::transform(lhs_map.begin(), lhs_map.end(), lhs.begin(),
+                       [](auto const& x) { return std::addressof(x); });
+        std::transform(rhs_map.begin(), rhs_map.end(), rhs.begin(),
+                       [](auto const& x) { return std::addressof(x); });
+        std::sort(lhs.begin(), lhs.end(),
+                  [](auto lhs, auto rhs) { return lhs->first < rhs->first; });
+        std::sort(rhs.begin(), rhs.end(),
+                  [](auto lhs, auto rhs) { return lhs->first < rhs->first; });
+        return std::equal(lhs.begin(), lhs.end(), rhs.begin(), [](auto lhs, auto rhs) {
+            return lhs->first == rhs->first && equal(lhs->second, rhs->second);
+        });
+    }
+    }
+    return false;
 }
 
 bool Variant::operator!=(Variant const& rhs) const noexcept {
@@ -721,7 +947,8 @@ struct Variant::Impl::ToJson {
         case TypeTag::null: dst.Null(); break;
         case TypeTag::boolean: dst.Bool(var.value_.bool_); break;
         case TypeTag::char_: dst.Int(var.value_.char_); break;
-        case TypeTag::uchar: dst.Uint(var.value_.uchar); break;
+        case TypeTag::int8: dst.Int(var.value_.int8); break;
+        case TypeTag::uint8: dst.Uint(var.value_.uint8); break;
         case TypeTag::int16: dst.Int(var.value_.int16); break;
         case TypeTag::uint16: dst.Uint(var.value_.uint16); break;
         case TypeTag::int32: dst.Int(var.value_.int32); break;
@@ -774,7 +1001,8 @@ std::ostream& operator<<(std::ostream& os, Variant const& var) {
     case TypeTag::null: os << "Null"; break;
     case TypeTag::boolean: os << var.value_.bool_; break;
     case TypeTag::char_: os << var.value_.char_; break;
-    case TypeTag::uchar: os << var.value_.uchar; break;
+    case TypeTag::int8: os << var.value_.int8; break;
+    case TypeTag::uint8: os << var.value_.uint8; break;
     case TypeTag::int16: os << var.value_.int16; break;
     case TypeTag::uint16: os << var.value_.uint16; break;
     case TypeTag::int32: os << var.value_.int32; break;
@@ -811,7 +1039,8 @@ std::type_info const& Variant::typeInfo() const noexcept {
     case TypeTag::null: return typeid(NullType);
     case TypeTag::boolean: return typeid(bool);
     case TypeTag::char_: return typeid(char);
-    case TypeTag::uchar: return typeid(unsigned char);
+    case TypeTag::int8: return typeid(int8_t);
+    case TypeTag::uint8: return typeid(uint8_t);
     case TypeTag::int16: return typeid(int16_t);
     case TypeTag::uint16: return typeid(uint16_t);
     case TypeTag::int32: return typeid(int32_t);

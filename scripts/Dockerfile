@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 RUN apt-get -y update && apt-get -y install \
     libgl1-mesa-glx libglib2.0-0 libfontconfig1 libdbus-1-3 libxrender1 \
     bash-completion \
-    build-essential git cmake wget tar sudo \
+    build-essential git cmake wget tar sudo gdb \
     doxygen \
     lcov
 

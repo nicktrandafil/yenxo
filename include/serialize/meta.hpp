@@ -147,7 +147,7 @@ struct IsIterableImpl<
     T,
     When<detail::Valid<decltype(
         // begin/end and operator !=
-        begin(std::declval<T&>()) != end(std::declval<T&>()),
+        static_cast<void>(begin(std::declval<T&>()) != end(std::declval<T&>())),
 
         // operator ++
         ++std::declval<decltype(begin(std::declval<T&>()))&>(),
