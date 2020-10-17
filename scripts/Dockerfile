@@ -30,6 +30,7 @@ RUN git clone --recurse-submodules https://github.com/Tencent/rapidjson.git \
 WORKDIR /tmp
 RUN git clone --recurse-submodules https://github.com/catchorg/Catch2.git \
  && cd Catch2 \
+ && git checkout master \
  && mkdir build/ && cd build/ \
  && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCATCH_BUILD_TESTING=OFF -DCATCH_INSTALL_DOCS=OFF .. \
  && cmake --build . \
