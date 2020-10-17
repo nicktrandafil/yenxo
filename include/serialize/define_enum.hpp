@@ -2979,6 +2979,9 @@ auto DEFINE_ENUM(...) = ;
             assert(false);                                                               \
             throw serialize::BadEnumValue(x);                                            \
         }                                                                                \
+        [[maybe_unused]] static constexpr std::string_view typeName() noexcept {         \
+            return BOOST_HANA_PP_STRINGIZE(Type);                                        \
+        }                                                                                \
     };                                                                                   \
     [[maybe_unused]] inline Type##Traits traits(Type) {                                  \
         return {};                                                                       \
