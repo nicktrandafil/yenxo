@@ -2,13 +2,17 @@ FROM ubuntu:18.04
 
 RUN apt-get -y update && apt-get -y install \
     libgl1-mesa-glx libglib2.0-0 libfontconfig1 libdbus-1-3 libxrender1 \
+    \
     bash-completion \
-    build-essential git cmake wget tar sudo gdb \
+    build-essential git cmake wget tar sudo gdb ninja-build clang-format \
+    \
     doxygen \
+    \
     lcov
 
 ARG BOOST_VERSION
 ARG BOOST_URL
+ARG BUILD_TYPE
 
 ENV BOOST_ROOT=/usr/local/include/boost-${BOOST_VERSION}
 
@@ -30,7 +34,7 @@ RUN git clone --recurse-submodules https://github.com/Tencent/rapidjson.git \
 WORKDIR /tmp
 RUN git clone --recurse-submodules https://github.com/catchorg/Catch2.git \
  && cd Catch2 \
- && git checkout master \
+ && git checkout v2.13.2 \
  && mkdir build/ && cd build/ \
  && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCATCH_BUILD_TESTING=OFF -DCATCH_INSTALL_DOCS=OFF .. \
  && cmake --build . \
@@ -50,7 +54,7 @@ WORKDIR /tmp
 RUN git clone --recurse-submodules https://github.com/foonathan/type_safe.git \
  && cd type_safe \
  && mkdir build/ && cd build/ \
- && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTYPE_SAFE_BUILD_TEST_EXAMPLE=OFF .. \
+ && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. \
  && cmake --build . \
  && cmake --build . --target install
 

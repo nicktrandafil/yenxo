@@ -4,8 +4,7 @@ IMG=$1
 shift
 
 if [ -z "$IMG" ]; then
-    docker images
-    exit 0
+    IMG=serialize
 fi
 
 CONTAINER=$(docker run --rm -d -P -it \
