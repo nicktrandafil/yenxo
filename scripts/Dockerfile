@@ -51,8 +51,10 @@ RUN git clone --recurse-submodules https://github.com/foonathan/debug_assert.git
 
 # type_safe
 WORKDIR /tmp
+ADD patch/type_safe.diff .
 RUN git clone --recurse-submodules https://github.com/foonathan/type_safe.git \
  && cd type_safe \
+ && git apply /tmp/type_safe.diff \
  && mkdir build/ && cd build/ \
  && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. \
  && cmake --build . \
