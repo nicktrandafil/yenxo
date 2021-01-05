@@ -1,14 +1,20 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -y update && apt-get -y install \
     libgl1-mesa-glx libglib2.0-0 libfontconfig1 libdbus-1-3 libxrender1 \
+    libxcb-icccm4 libxcb-image0 libxkbcommon-x11-0 libxcb-xkb1 libxcb-xinerama0 \
+    libxcb-xfixes0 libxcb-shape0 libxcb-render-util0 libxcb-keysyms1 libtinfo5 xterm\
     \
     bash-completion \
     build-essential git cmake wget tar sudo gdb ninja-build clang-format \
     \
-    doxygen \
+    doxygen libboost-dev \
     \
-    lcov
+    lcov \
+    \
+    vim
 
 ARG BOOST_VERSION
 ARG BOOST_URL
