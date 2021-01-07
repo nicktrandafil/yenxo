@@ -8,7 +8,7 @@ RUN apt-get -y update && apt-get -y install \
     libxcb-xfixes0 libxcb-shape0 libxcb-render-util0 libxcb-keysyms1 libtinfo5 xterm\
     \
     bash-completion \
-    build-essential git cmake wget tar sudo gdb ninja-build clang-format \
+    build-essential git cmake wget tar sudo gdb ninja-build clang clang-format \
     \
     doxygen libboost-dev \
     \

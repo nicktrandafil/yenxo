@@ -78,7 +78,7 @@ public:
 
     Variant() noexcept;
 
-    Variant(NullType x) noexcept;
+    Variant(NullType) noexcept;
     Variant(bool) noexcept;
     Variant(char) noexcept;
     Variant(int8_t) noexcept;

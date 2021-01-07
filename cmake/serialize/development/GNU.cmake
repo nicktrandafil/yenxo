@@ -1,19 +1,22 @@
-set(serialize_GNU_base_flags -Wall -Wextra -Wpedantic -Werror -ftemplate-backtrace-limit=0)
-set(serialize_GNU_debug_flags -g -O0)
-set(serialize_GNU_coverage_flags --coverage)
-set(serialize_GNU_release_flags -O2 -DNDEBUG -Wno-unused-parameter)
+set(GNU_base_flags -Wall -Wextra -Wpedantic -Werror -ftemplate-backtrace-limit=0
+    -Wno-error=maybe-uninitialized)
+set(GNU_debug_flags -g -O0)
+set(GNU_coverage_flags --coverage)
+set(GNU_release_flags -O2 -DNDEBUG -Wno-unused-parameter)
 
-string(CONCAT generator
-  "${serialize_GNU_base_flags};"
-  "$<$<OR:$<CONFIG:DEBUG>,"
-         "$<CONFIG:RELWITHDEBINFO>>:${serialize_GNU_debug_flags};>"
-  "$<$<OR:$<CONFIG:RELEASE>,"
-         "$<CONFIG:RELWITHDEBINFO>,"
-         "$<CONFIG:MINSIZEREL>>:${serialize_GNU_release_flags};>"
-  "$<$<BOOL:${PROJECT_NAME}_COVERAGE>:${serialize_GNU_coverage_flags};>")
+string(CONCAT compile_options
+  "${GNU_base_flags};"
+  "$<$<CONFIG:DEBUG>:${GNU_debug_flags};>"
+  "$<$<CONFIG:RELWITHDEBINFO>:${GNU_release_flags};>"
+  "$<$<CONFIG:MINSIZEREL>:${GNU_release_flags};>"
+  "$<$<CONFIG:RELEASE>:${GNU_release_flags};>"
+  "$<$<BOOL:${${PROJECT_NAME}_COVERAGE}>:${GNU_coverage_flags};>")
+
+string(CONCAT link_options
+  "$<$<BOOL:${${PROJECT_NAME}_COVERAGE}>:${GNU_coverage_flags};>")
 
 target_compile_options(${PROJECT_NAME}_development INTERFACE
-  $<$<CXX_COMPILER_ID:GNU>:${generator}>)
+  $<$<CXX_COMPILER_ID:GNU>:${compile_options}>)
 
-target_link_libraries(${PROJECT_NAME}_development INTERFACE
-  $<$<CXX_COMPILER_ID:GNU>:${generator}>)
+target_link_options(${PROJECT_NAME}_development INTERFACE
+  $<$<CXX_COMPILER_ID:GNU>:${link_options}>)
