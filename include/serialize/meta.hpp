@@ -79,6 +79,7 @@ namespace detail {
 
 /// A helper in SFINAE context
 /// \ingroup group-details
+///
 /// Evaluates to `std::true_type` if `Args` are valid in SFINAE context.
 template <typename... Args>
 struct Valid : std::true_type {};
@@ -87,7 +88,8 @@ struct Valid : std::true_type {};
 
 /// `std::variant` visitor function objects overload
 /// \ingroup group-meta
-/// In the cobe below
+///
+/// In the code below
 /// \code
 ///     Overload{[](int) {}, [](double) {}};
 /// \endcode
@@ -103,6 +105,7 @@ Overload(Args...)->Overload<Args...>;
 
 /// A helper in `static_assert` context
 /// \ingroup group-meta
+///
 /// Always Evaluates to `std::false_type`. The type is
 /// templated in order to delay the `static_assert` until
 /// the function is actually instantiated by providing a type
@@ -112,6 +115,7 @@ struct DependentFalse : std::false_type {};
 
 /// A helper in `static_assert` context
 /// \ingroup group-meta
+///
 /// Same as DependentFalse but just for value template arguments.
 template <auto...>
 struct DependentFalseV : std::false_type {};
@@ -178,11 +182,12 @@ struct IsStringImpl<T, When<condition>> : std::false_type {};
 
 template <typename T>
 struct IsStringImpl<
-    T,
-    When<std::is_convertible_v<T,
-                               std::basic_string<typename T::value_type,
-                                                 typename T::traits_type,
-                                                 typename T::allocator_type>>>> : std::true_type {};
+        T,
+        When<std::is_convertible_v<T,
+                                   std::basic_string<typename T::value_type,
+                                                     typename T::traits_type,
+                                                     typename T::allocator_type>>>>
+        : std::true_type {};
 
 } // namespace detail
 #endif
@@ -230,14 +235,15 @@ constexpr auto isKeyValue(boost::hana::basic_type<T> const&) {
 /// Test if `type` is has `push_back` method
 /// \ingroup group-meta
 constexpr auto hasPushBack = boost::hana::is_valid(
-    [](auto type) -> decltype((void)boost::hana::traits::declval(type)
-                                  .push_back(std::declval<typename decltype(type)::type::value_type>())) {});
+        [](auto type)
+                -> decltype((void)boost::hana::traits::declval(type).push_back(
+                        std::declval<typename decltype(type)::type::value_type>())) {});
 
 /// Test if `type` is has `emplace` method
 /// \ingroup group-meta
 constexpr auto hasEmplace = boost::hana::is_valid(
-    [](auto x) -> decltype((void)boost::hana::traits::declval(x)
-                               .emplace(std::declval<typename decltype(x)::type::value_type>())) {});
+        [](auto x) -> decltype((void)boost::hana::traits::declval(x).emplace(
+                           std::declval<typename decltype(x)::type::value_type>())) {});
 
 #if SERIALIZE_ENABLE_TYPE_SAFE
 /// Tests if type is `type_safe::strong_typedef`

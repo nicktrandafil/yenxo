@@ -41,45 +41,40 @@ struct OStream {
     friend std::ostream& operator<<(std::ostream& os, Derived const& x) {
         os << typeName(boost::hana::type_c<Derived>) << " { ";
 
-        boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
-                                  if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
-                                      if (value.has_value()) {
-                                          os << boost::hana::to<char const*>(name)
-                                             << ": "
-                                             << *value
-                                             << "; ";
-                                      }
-                                  } else if constexpr (isContainer(boost::hana::type_c<decltype(value)>)) {
-                                      os << boost::hana::to<char const*>(name);
-                                      if constexpr (isPair(boost::hana::type_c<typename decltype(value)::value_type>)) {
-                                          os << ": { ";
-                                          for (auto const& x : value) {
-                                              os << x.first
-                                                 << ": "
-                                                 << x.second
-                                                 << "; ";
-                                          }
-                                          os << "}; ";
-                                      } else {
-                                          auto const s = value.size();
-                                          std::size_t i = 0;
-                                          os << ": [";
-                                          for (auto const& x : value) {
-                                              os << x << ((i++ == s - 1) ? "" : ", ");
-                                          }
-                                          os << "]; ";
-                                      }
+        boost::hana::for_each(
+                x, boost::hana::fuse([&](auto name, auto value) {
+                    if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
+                        if (value.has_value()) {
+                            os << boost::hana::to<char const*>(name) << ": " << *value
+                               << "; ";
+                        }
+                    } else if constexpr (isContainer(
+                                                 boost::hana::type_c<decltype(value)>)) {
+                        os << boost::hana::to<char const*>(name);
+                        if constexpr (isPair(boost::hana::type_c<typename decltype(
+                                                     value)::value_type>)) {
+                            os << ": { ";
+                            for (auto const& x : value) {
+                                os << x.first << ": " << x.second << "; ";
+                            }
+                            os << "}; ";
+                        } else {
+                            auto const s = value.size();
+                            std::size_t i = 0;
+                            os << ": [";
+                            for (auto const& x : value) {
+                                os << x << ((i++ == s - 1) ? "" : ", ");
+                            }
+                            os << "]; ";
+                        }
 #if SERIALIZE_ENABLE_TYPE_SAFE
-                                  } else if constexpr (strongTypeDef(boost::hana::type_c<Derived>)) {
-                                      os << static_cast<type_safe::underlying_type<Derived>>(x);
+                    } else if constexpr (strongTypeDef(boost::hana::type_c<Derived>)) {
+                        os << static_cast<type_safe::underlying_type<Derived>>(x);
 #endif
-                                  } else {
-                                      os << boost::hana::to<char const*>(name)
-                                         << ": "
-                                         << value
-                                         << "; ";
-                                  }
-                              }));
+                    } else {
+                        os << boost::hana::to<char const*>(name) << ": " << value << "; ";
+                    }
+                }));
 
         os << "}";
 

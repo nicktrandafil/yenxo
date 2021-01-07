@@ -60,8 +60,8 @@
 //! Implementation details. Do not rely on anything here, even if it is
 //! documented.
 
-//! @defgroup group-http Http utility
-//! Http utilities.
+//! @defgroup group-http HTTP utility
+//! HTTP utilities.
 
 #include <serialize/comparison_traits.hpp>
 #include <serialize/define_enum.hpp>

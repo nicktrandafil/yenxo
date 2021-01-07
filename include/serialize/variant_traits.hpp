@@ -32,27 +32,82 @@
 
 #include <type_traits>
 
+namespace serialize {
+
 /// \defgroup group-traits-auto-variant Variant conversion
 /// \ingroup group-traits
 /// `Variant` conversion for user defined types
 
-/// \defgroup group-traits-auto-variant-policy Policies
+/// \defgroup group-traits-auto-variant-policy Policy
 /// \ingroup group-traits-auto-variant
 /// The traits' settings
 
-namespace serialize::trait {
+/// \defgroup group-traits-auto-variant-meta Meta
+/// \ingroup group-traits-auto-variant
+/// Metadata that might be used by the traits.
+
+/// Provide names for members in the traits that support renaming.
+/// \ingroup group-traits-auto-variant-meta
+///
+/// Given:
+/// * \code
+/// struct T {
+///     // meta
+///     static auto names() {
+///         return hana::make_map(
+///                 hana::make_pair("x"_s, "y")
+///         );
+///     }
+///     // member
+///     int x;
+/// };
+/// \endcode
+/// * trait `X`;
+///
+/// If `T` supports trait `X`, and trait `X` supports `names()`, then trait `X`
+/// should use name "y" for member `x` in serialized Variant representation.
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+constexpr auto names = [] { ... };
+#endif
+
+/// Provide default values for members in the traits that support defaulting.
+/// \ingroup group-traits-auto-variant-meta
+///
+/// Given:
+/// * \code
+/// struct T {
+///     // meta
+///     static auto defaults() {
+///         return hana::make_map(
+///                 hana::make_pair("x"_s, 1)
+///         );
+///     }
+///     // member
+///     int x;
+/// };
+/// \endcode
+/// * trait `X`;
+///
+/// If `T` supports trait `X`, and trait `X` supports `defaults()`, then trait `X`
+/// should specify value `1` for member `x` during `Variant` to `T` conversion in case
+/// if input Variant have no value for `x`.
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+constexpr auto defaults = [] { ... };
+#endif
+
+namespace trait {
 namespace detail {
 
 /// Has member `updateVar(serialize::Variant const&)`
 /// \ingroup group-details
 constexpr auto const hasUpdateVar = boost::hana::is_valid(
-    [](auto t) -> decltype((void)std::declval<typename decltype(t)::type>().updateVar(std::declval<Variant>())) {
-    });
+        [](auto t) -> decltype((void)std::declval<typename decltype(t)::type>().updateVar(
+                           std::declval<Variant>())) {});
 
-/// A policy to deal with default values of a struct
+/// %Default implementation of `VarPolicy::Defaults` policy parameter
 /// \ingroup group-traits-auto-variant-policy
 struct Default {
-    /// Does a type has a static member function `defaults()`
+    /// Does a type has a member function `static auto defaults()`
     static constexpr auto const has = boost::hana::is_valid(
         [](auto t) -> decltype((void)decltype(t)::type::defaults()) {
         });
@@ -65,22 +120,22 @@ struct Default {
         return boost::hana::value<Found>();
     }
 
-    /// Default value for `name`
+    /// %Default value for `name`
     template <class T, class S>
     static auto value(boost::hana::basic_type<T>, S name) {
         return T::defaults()[name];
     }
 };
 
-/// A policy to deal with member names of a struct
+/// Default implementation of `VarPolicy::rename()` policy parameter
 /// \ingroup group-traits-auto-variant-policy
 struct Rename {
-    /// Does a type has a static member function `names()`
+    // Does a type has a static member function `names()`
     static constexpr auto const hasNames = boost::hana::is_valid(
         [](auto t) -> decltype((void)decltype(t)::type::names()) {
         });
 
-    /// Is `name` is present in `names()` of `T`
+    // Is `name` is present in `names()` of `T`
     template <typename T, typename S>
     static constexpr bool presentInNames(S name) {
         using Found = decltype(
@@ -88,7 +143,7 @@ struct Rename {
         return boost::hana::value<Found>();
     }
 
-    /// Does the member `name` has a name value in the class `C`
+    // Does the member `name` has a name value in the class `C`
     template <typename T, typename S>
     static constexpr bool hasNameValue(S name) {
         if constexpr (hasNames(boost::hana::type_c<T>)) {
@@ -99,8 +154,6 @@ struct Rename {
         }
     }
 
-    /// \return name from map returned by `T::names()` static member function,
-    /// if present, else identity
     template <typename T, typename S>
     static char const* rename(S name) {
         if constexpr (hasNameValue<T>(name)) {
@@ -110,7 +163,8 @@ struct Rename {
         }
     }
 
-    /// \see rename
+    /// \return name from map returned by `T::names()` static member function,
+    /// if present, else identity
     template <class T, class S>
     char const* operator()(boost::hana::basic_type<T>, S name) const noexcept {
         return rename<T>(name);
@@ -123,7 +177,10 @@ void toVariantWrap(Variant& var, T&& val, F const& to_variant = toVariant2) {
 }
 
 template <typename T, typename S, typename F = decltype(fromVariant2)>
-void fromVariantWrap(T& val, Variant const& var, S const& name, F const& from_variant = fromVariant2) {
+void fromVariantWrap(T& val,
+                     Variant const& var,
+                     S const& name,
+                     F const& from_variant = fromVariant2) {
     try {
         return from_variant(val, var);
     } catch (serialize::VariantErr& e) {
@@ -138,9 +195,9 @@ void fromVariantWrap(T& val, Variant const& var, S const& name, F const& from_va
 
 } // namespace detail
 
-/// Configuaratoin for `VarDef`
+/// Configuration for `Var`
 /// \ingroup group-traits-auto-variant-policy
-struct VarDefPolicy {
+struct VarPolicy {
     /// treat missing keys as empty containers
     static auto constexpr empty_container_not_required = false;
 
@@ -167,122 +224,70 @@ struct VarDefPolicy {
     static constexpr NoTag tag{};
 };
 
-/// Adds conversion support to and from `Variant`
-/// \ingroup group-traits-auto-variant
-///
-/// Specifically, adds methods:
-/// * `static Variant toVariant(Derived)`
-/// * `static Derived fromVariant(Variant)`
-///
-/// The methods does not deal with optional types and default values. Therefore,
-/// for the method `fromVariant` all members must be presented in a variant,
-/// and, for the method `toVariant` all members will be serialized into a variant.
-/// \todo Remove this trait and rename `VarDef` to `Var`.
-template <typename Derived, typename Policy = VarDefPolicy>
-struct Var {
-    static Variant toVariant(Derived const& x) {
-        Variant::Map ret;
-
-        boost::hana::for_each(
-            x, boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = Policy::rename(boost::hana::type_c<Derived>, name);
-                if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
-                    if (value.has_value()) {
-                        detail::toVariantWrap(ret[renamed], *value);
-                    } else {
-                        ret[renamed] = Variant();
-                    }
-                } else {
-                    detail::toVariantWrap(ret[renamed], value);
-                }
-            }));
-
-        return Variant(ret);
-    }
-
-    static Derived fromVariant(Variant const& x) {
-        using namespace std::literals;
-        Derived ret;
-        auto const& map = x.map();
-
-        boost::hana::for_each(
-            boost::hana::accessors<Derived>(),
-            boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = Policy::rename(boost::hana::type_c<Derived>, name);
-                auto& tmp = value(ret);
-                auto const it = map.find(renamed);
-                if (map.end() == it) {
-                    throw std::logic_error("'"s + renamed + "' is required"s);
-                } else {
-                    if constexpr (isOptional(boost::hana::type_c<decltype(tmp)>)) {
-                        std::remove_reference_t<decltype(*tmp)> under;
-                        detail::fromVariantWrap(under, it->second, renamed);
-                        tmp = std::move(under);
-                    } else {
-                        detail::fromVariantWrap(tmp, it->second, renamed);
-                    }
-                }
-            }));
-
-        return ret;
-    }
-
-protected:
-    ~Var() = default;
-};
+using VarDefPolicy [[deprecated("Use serialize::trait::VarPolicy.")]] = VarPolicy;
 
 /// Adds conversion support to and from `Variant`
 /// \ingroup group-traits-auto-variant
 ///
 /// Specifically adds members:
-/// * `static Variant toVariant(Derived)`
-/// * `static Derived fromVariant(Variant)`
+/// * `static Variant toVariant(Derived const&)`
+/// * `static Derived fromVariant(Variant const&)`
 ///
-/// Unlike `Var` supports 'default values' and 'member renaming' concepts.
+/// Supports
+/// * `names()`;
+/// * `defaults()`.
 ///
-/// A static member function `auto defaults()` can be presented in `Derived`.
-/// The method returns hana map, keys in the which are member names and values are convertible
-/// to the corresponding members field that denotes to default value for the class member.
-///
-/// A static member function `auto names()` can be presented in `Derived`.
-/// The method returns hana tuple of pairs where the first element is member name as hana string
-/// and the second element is a string that denotes a different name for the class member.
-template <typename Derived, class Policy = VarDefPolicy>
-struct VarDef {
+/// \pre `Derived` should be a Boost.Hana.Struct.
+template <typename Derived, class Policy = VarPolicy>
+struct Var {
     static Variant toVariant(Derived const& x) {
         Variant::Map ret;
 
         boost::hana::for_each(
-            x, boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = Policy::rename(boost::hana::type_c<Derived>, name);
-                if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
-                    if (value.has_value()) {
-                        detail::toVariantWrap(ret[renamed], *value, Policy::to_variant);
-                    }
-                } else {
-                    if constexpr (Policy::Defaults::has(boost::hana::type_c<Derived>)) {
-                        if constexpr (!Policy::serialize_default_value && Policy::Defaults::hasValue(boost::hana::type_c<Derived>, name)) {
-                            static_assert(std::is_convertible_v<
-                                              decltype(Policy::Defaults::value(boost::hana::type_c<Derived>, name)),
-                                              std::remove_reference_t<decltype(value)>>,
-                                          "Default value should be convertible to field type");
-                            if (Policy::Defaults::value(boost::hana::type_c<Derived>, name) == value) {
-                                return;
-                            }
-                        }
-                    }
-
-                    if constexpr (isContainer(boost::hana::type_c<decltype(value)>)) {
-                        if constexpr (!Policy::empty_container_not_required) {
-                            detail::toVariantWrap(ret[renamed], value, Policy::to_variant);
-                        } else if (begin(value) != end(value)) {
-                            detail::toVariantWrap(ret[renamed], value, Policy::to_variant);
+                x, boost::hana::fuse([&](auto name, auto value) {
+                    auto const renamed =
+                            Policy::rename(boost::hana::type_c<Derived>, name);
+                    if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
+                        if (value.has_value()) {
+                            detail::toVariantWrap(ret[renamed], *value,
+                                                  Policy::to_variant);
                         }
                     } else {
-                        detail::toVariantWrap(ret[renamed], value, Policy::to_variant);
+                        if constexpr (Policy::Defaults::has(
+                                              boost::hana::type_c<Derived>)) {
+                            if constexpr (!Policy::serialize_default_value
+                                          && Policy::Defaults::hasValue(
+                                                  boost::hana::type_c<Derived>, name)) {
+                                static_assert(
+                                        std::is_convertible_v<
+                                                decltype(Policy::Defaults::value(
+                                                        boost::hana::type_c<Derived>,
+                                                        name)),
+                                                std::remove_reference_t<decltype(value)>>,
+                                        "Default value should be convertible to field "
+                                        "type");
+                                if (Policy::Defaults::value(boost::hana::type_c<Derived>,
+                                                            name)
+                                    == value) {
+                                    return;
+                                }
+                            }
+                        }
+
+                        if constexpr (isContainer(boost::hana::type_c<decltype(value)>)) {
+                            if constexpr (!Policy::empty_container_not_required) {
+                                detail::toVariantWrap(ret[renamed], value,
+                                                      Policy::to_variant);
+                            } else if (begin(value) != end(value)) {
+                                detail::toVariantWrap(ret[renamed], value,
+                                                      Policy::to_variant);
+                            }
+                        } else {
+                            detail::toVariantWrap(ret[renamed], value,
+                                                  Policy::to_variant);
+                        }
                     }
-                }
-            }));
+                }));
 
         if constexpr (!std::is_same_v<std::remove_const_t<decltype(Policy::tag)>,
                                       typename Policy::NoTag>) {
@@ -311,46 +316,57 @@ struct VarDef {
         }
 
         boost::hana::for_each(
-            boost::hana::accessors<Derived>(),
-            boost::hana::fuse([&](auto name, auto value) {
-                auto const renamed = Policy::rename(boost::hana::type_c<Derived>, name);
-                auto& tmp = value(ret);
-                auto const it = map.find(renamed);
+                boost::hana::accessors<Derived>(),
+                boost::hana::fuse([&](auto name, auto value) {
+                    auto const renamed =
+                            Policy::rename(boost::hana::type_c<Derived>, name);
+                    auto& tmp = value(ret);
+                    auto const it = map.find(renamed);
 
-                if (map.end() == it) {
-                    if constexpr (Policy::Defaults::has(boost::hana::type_c<Derived>)) {
-                        if constexpr (Policy::Defaults::hasValue(boost::hana::type_c<Derived>, name)) {
-                            static_assert(std::is_convertible_v<
-                                              decltype(Policy::Defaults::value(boost::hana::type_c<Derived>, name)),
-                                              std::remove_reference_t<decltype(value(std::declval<Derived>()))>>,
-                                          "Default value should be convertible to field type");
-                            tmp = Policy::Defaults::value(boost::hana::type_c<Derived>, name);
-                            return;
+                    if (map.end() == it) {
+                        if constexpr (Policy::Defaults::has(
+                                              boost::hana::type_c<Derived>)) {
+                            if constexpr (Policy::Defaults::hasValue(
+                                                  boost::hana::type_c<Derived>, name)) {
+                                static_assert(
+                                        std::is_convertible_v<
+                                                decltype(Policy::Defaults::value(
+                                                        boost::hana::type_c<Derived>,
+                                                        name)),
+                                                std::remove_reference_t<decltype(
+                                                        value(std::declval<Derived>()))>>,
+                                        "Default value should be convertible to field "
+                                        "type");
+                                tmp = Policy::Defaults::value(
+                                        boost::hana::type_c<Derived>, name);
+                                return;
+                            }
+                        }
+
+                        if constexpr (!isOptional(boost::hana::type_c<decltype(tmp)>)
+                                      && ((isContainer(boost::hana::type_c<decltype(tmp)>)
+                                           && !Policy::empty_container_not_required)
+                                          || !isContainer(
+                                                  boost::hana::type_c<decltype(tmp)>))) {
+                            throw std::logic_error("'"s + renamed + "' is required"s);
+                        }
+
+                    } else {
+                        if constexpr (isOptional(boost::hana::type_c<decltype(tmp)>)) {
+                            std::remove_reference_t<decltype(*tmp)> under;
+                            detail::fromVariantWrap(under, it->second, renamed,
+                                                    Policy::from_variant);
+                            tmp = std::move(under);
+                        } else {
+                            detail::fromVariantWrap(tmp, it->second, renamed,
+                                                    Policy::from_variant);
+                        }
+
+                        if constexpr (!Policy::allow_additional_properties) {
+                            map.erase(it);
                         }
                     }
-
-                    if constexpr (
-                        !isOptional(boost::hana::type_c<decltype(tmp)>) &&
-                        ((isContainer(boost::hana::type_c<decltype(tmp)>) &&
-                          !Policy::empty_container_not_required) ||
-                         !isContainer(boost::hana::type_c<decltype(tmp)>))) {
-                        throw std::logic_error("'"s + renamed + "' is required"s);
-                    }
-
-                } else {
-                    if constexpr (isOptional(boost::hana::type_c<decltype(tmp)>)) {
-                        std::remove_reference_t<decltype(*tmp)> under;
-                        detail::fromVariantWrap(under, it->second, renamed, Policy::from_variant);
-                        tmp = std::move(under);
-                    } else {
-                        detail::fromVariantWrap(tmp, it->second, renamed, Policy::from_variant);
-                    }
-
-                    if constexpr (!Policy::allow_additional_properties) {
-                        map.erase(it);
-                    }
-                }
-            }));
+                }));
 
         if constexpr (!Policy::allow_additional_properties) {
             if (!map.empty()) {
@@ -362,14 +378,22 @@ struct VarDef {
     }
 
 protected:
-    ~VarDef() = default;
+    ~Var() = default;
 };
 
-/// Adds member `void update(Variant)`
+template <typename Derived, typename Policy = VarPolicy>
+using VarDef [[deprecated("Use serialize::trait::Var.")]] = Var<Derived, Policy>;
+
+/// Adds member `void updateVar(Variant const&)`
 /// \ingroup group-traits-auto-variant
 ///
-/// Updates the specified fields. Supports 'renaming concept'.
-template <typename Derived, typename Policy = VarDefPolicy>
+/// Updates the specified fields.
+///
+/// Supports
+/// * names().
+///
+/// \pre `Derived` should be a Boost.Hana.Struct.
+template <typename Derived, typename Policy = VarPolicy>
 struct UpdateFromVar {
     void updateVar(Variant const& x) {
         Derived& self = static_cast<Derived&>(*this);
@@ -377,20 +401,22 @@ struct UpdateFromVar {
         for (auto const& v : map) {
             bool found{false};
             boost::hana::for_each(
-                boost::hana::accessors<Derived>(),
-                boost::hana::fuse([&](auto name, auto value) {
-                    auto const renamed = Policy::rename(boost::hana::type_c<Derived>, name);
-                    if (renamed != v.first) {
-                        return;
-                    }
-                    auto& tmp = value(self);
-                    if constexpr (detail::hasUpdateVar(boost::hana::type_c<std::remove_reference_t<decltype(tmp)>>)) {
-                        tmp.updateVar(v.second);
-                    } else {
-                        detail::fromVariantWrap<decltype(tmp)>(tmp, v.second, renamed);
-                    }
-                    found = true;
-                }));
+                    boost::hana::accessors<Derived>(),
+                    boost::hana::fuse([&](auto name, auto value) {
+                        auto const renamed =
+                                Policy::rename(boost::hana::type_c<Derived>, name);
+                        if (renamed != v.first) { return; }
+                        auto& tmp = value(self);
+                        if constexpr (detail::hasUpdateVar(
+                                              boost::hana::type_c<std::remove_reference_t<
+                                                      decltype(tmp)>>)) {
+                            tmp.updateVar(v.second);
+                        } else {
+                            detail::fromVariantWrap<decltype(tmp)>(tmp, v.second,
+                                                                   renamed);
+                        }
+                        found = true;
+                    }));
 
             if constexpr (!Policy::allow_additional_properties) {
                 if (!found) {
@@ -404,10 +430,12 @@ protected:
     ~UpdateFromVar() = default;
 };
 
-/// Adds member `void update(Opt const&)`
+/// Adds member `void updateOpt(Opt const&)`
 /// \ingroup group-traits-auto-variant
 ///
 /// Updates the specified fields.
+///
+/// \pre `Derived` should be a Boost.Hana.Struct.
 template <typename Derived, typename Opt>
 struct UpdateFromOpt {
     void updateOpt(Opt const& x) {
@@ -430,4 +458,5 @@ protected:
     ~UpdateFromOpt() = default;
 };
 
-} // namespace serialize::trait
+} // namespace trait
+} // namespace serialize

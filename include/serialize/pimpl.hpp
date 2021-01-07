@@ -30,9 +30,11 @@
 
 namespace serialize {
 
-/// \ingroup group-utility
 /// Generic 'Pimpl' idiom implementation
-/// Throwing member functions do throw if and only if `T` or allocation throws
+/// \ingroup group-utility
+///
+/// Member functions not marked noexcept do throw if and only if `T` or allocation throws.
+/// Respects const correctness.
 ///
 /// Example
 /// -------
@@ -53,7 +55,7 @@ public:
     Pimpl(Pimpl&&) noexcept;
     Pimpl& operator=(Pimpl&&) noexcept;
 
-    // Agregation initialization
+    // Aggregate initialization
     // SFINAE trick to not confuse with copy constructor
 
     template <typename U,

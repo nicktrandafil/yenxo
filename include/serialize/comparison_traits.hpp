@@ -29,9 +29,10 @@
 
 namespace serialize::trait {
 
-/// \ingroup group-traits
 /// Enables equality comparison for `Derived`
+/// \ingroup group-traits
 /// \pre `Derived` should be a Boost.Hana.Struct.
+///
 /// Example
 /// -------
 /// @include example/equality_comparison.cpp

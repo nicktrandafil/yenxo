@@ -93,7 +93,7 @@ struct Person
     Hobby hobby;
 };
 
-struct AllowAdditionalPropertiesPolicy : trait::VarDefPolicy {
+struct AllowAdditionalPropertiesPolicy : trait::VarPolicy {
     static auto constexpr allow_additional_properties = false;
 };
 
@@ -376,8 +376,8 @@ TEST_CASE("Check trait::Var and trait::UpdateFromVar", "[variant_traits]") {
 namespace {
 
 struct PersonD
-    : trait::VarDef<PersonD>,
-      trait::EqualityComparison<PersonD> {
+        : trait::Var<PersonD>
+        , trait::EqualityComparison<PersonD> {
     PersonD() {}
 
     PersonD(std::string const& name, int age, Hobby const& hobby)
@@ -396,23 +396,21 @@ struct PersonD
     Hobby hobby;
 };
 
-struct Pol : trait::VarDefPolicy {
+struct Pol : trait::VarPolicy {
     static auto constexpr serialize_default_value = false;
     static auto constexpr empty_container_not_required = true;
 };
 
-struct Pol2 : trait::VarDefPolicy {
+struct Pol2 : trait::VarPolicy {
     static auto constexpr empty_container_not_required = true;
 };
 
-struct Pol3 : trait::VarDefPolicy {
+struct Pol3 : trait::VarPolicy {
     static auto constexpr from_variant = [](auto& x, Variant const& var) { x = serialize::fromString<std::remove_reference_t<decltype(x)>>(var.str()); };
     static auto constexpr to_variant = [](Variant& var, auto&& x) { var = Variant(serialize::toString(std::forward<std::remove_reference_t<decltype(x)>>(x))); };
 };
 
-struct PersonE
-    : trait::VarDef<PersonE, Pol> {
-
+struct PersonE : trait::Var<PersonE, Pol> {
     static constexpr auto defaults() {
         return hana::make_map(hana::make_pair("i"_s, 2));
     }
@@ -422,9 +420,7 @@ struct PersonE
     int i{0};
 };
 
-struct PersonE2
-    : trait::VarDef<PersonE2, Pol2> {
-
+struct PersonE2 : trait::Var<PersonE2, Pol2> {
     static constexpr auto defaults() {
         return hana::make_map(hana::make_pair("i"_s, 2));
     }
@@ -438,7 +434,7 @@ struct PersonE2
                              (std::string, s));
 };
 
-struct St3 : trait::VarDef<St3>, trait::EqualityComparison<St3> {
+struct St3 : trait::Var<St3>, trait::EqualityComparison<St3> {
     St3() = default;
     St3(int x)
         : x(x) {}
@@ -462,8 +458,8 @@ struct S1 {
 };
 
 struct StrStruct
-    : trait::VarDef<StrStruct, Pol3>,
-      trait::EqualityComparison<StrStruct> {
+        : trait::Var<StrStruct, Pol3>
+        , trait::EqualityComparison<StrStruct> {
     StrStruct() = default;
     explicit StrStruct(std::string const& str)
         : str(str) {}
@@ -489,18 +485,19 @@ struct CamelCase {
     }
 };
 
-struct CamelCasePolicy : trait::VarDefPolicy {
+struct CamelCasePolicy : trait::VarPolicy {
     static constexpr CamelCase rename{};
 };
 
-struct AutoCamelCase : trait::VarDef<AutoCamelCase, CamelCasePolicy>,
-                       trait::EqualityComparison<AutoCamelCase> {
+struct AutoCamelCase
+        : trait::Var<AutoCamelCase, CamelCasePolicy>
+        , trait::EqualityComparison<AutoCamelCase> {
     BOOST_HANA_DEFINE_STRUCT(AutoCamelCase,
                              (std::string, hello_world_2_boo));
 };
 
 struct AdditionalProp
-        : trait::VarDef<AdditionalProp, AllowAdditionalPropertiesPolicy>
+        : trait::Var<AdditionalProp, AllowAdditionalPropertiesPolicy>
         , trait::EqualityComparison<AdditionalProp> {
     constexpr static auto names() {
         return hana::make_map(
@@ -516,7 +513,7 @@ struct AdditionalProp
 BOOST_HANA_ADAPT_STRUCT(PersonD, name, age, hobby);
 BOOST_HANA_ADAPT_STRUCT(PersonE, cont, i);
 
-TEST_CASE("Check trait::VarDef", "[variant_traits]") {
+TEST_CASE("Check trait::Var", "[variant_traits]") {
     Variant::Map const hobby_var{
         {"id", Variant(1)},
         {"description", Variant("Hack")}};
@@ -656,11 +653,11 @@ TEST_CASE("Check trait::Var fails", "[variant_traits]") {
 
 namespace {
 
-struct TagPolicy : trait::VarDefPolicy {
+struct TagPolicy : trait::VarPolicy {
     static constexpr auto tag = "a tag"_s;
 };
 
-struct Tagged : trait::VarDef<Tagged, TagPolicy> {
+struct Tagged : trait::Var<Tagged, TagPolicy> {
     Tagged() = default;
     explicit Tagged(int x) : value(x) {
     }

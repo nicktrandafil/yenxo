@@ -126,7 +126,7 @@ struct ToVariantT {
 
 constexpr ToVariantT toVariant;
 
-// Unified converstion of T to Variant
+// Unified conversion of T to Variant
 template <typename T, typename = void>
 struct ToVariantImpl : ToVariantImpl<T, When<true>> {};
 
@@ -214,8 +214,9 @@ struct ToVariantImpl<T,
 #if SERIALIZE_ENABLE_TYPE_SAFE
 // Specialization for `type_safe::strong_typedef`
 template <typename T>
-struct ToVariantImpl<T, When<
-                            !hasToVariant(boost::hana::type_c<T>) && strongTypeDef(boost::hana::type_c<T>)>> {
+struct ToVariantImpl<T,
+                     When<!hasToVariant(boost::hana::type_c<T>)
+                          && strongTypeDef(boost::hana::type_c<T>)>> {
     static Variant apply(T const& st) {
         using U = type_safe::underlying_type<T>;
         return ToVariantImpl<U>::apply(static_cast<U const&>(st));
@@ -293,8 +294,9 @@ struct ToVariantImpl<T, When<boost::hana::is_a<boost::hana::tuple_tag, T>>> {
 
 // `std::variant`
 template <typename T>
-struct ToVariantImpl<T, When<
-                            serialize::detail::Valid<std::variant_alternative_t<0, T>>::value>> {
+struct ToVariantImpl<
+        T,
+        When<serialize::detail::Valid<std::variant_alternative_t<0, T>>::value>> {
     static Variant apply(T const& var) {
         return std::visit(
             Overload{
@@ -337,11 +339,11 @@ struct FromVariantT {
     auto operator()(Variant const& x) const;
 };
 
-// Convinient shortcut function
+// Convenient shortcut function
 template <typename T>
 constexpr FromVariantT<T> fromVariant;
 
-// Unified converstion of Variant to T
+// Unified conversion of Variant to T
 template <typename T, typename = void>
 struct FromVariantImpl : FromVariantImpl<T, When<true>> {};
 
@@ -432,7 +434,8 @@ struct FromVariantImpl<T, When<
         T ret;
         size_t i = 0;
         for (auto const& x : var.vec()) {
-            detail::tryCatch([&] { ret.push_back(fromVariant<typename T::value_type>(x)); }, i++);
+            detail::tryCatch(
+                    [&] { ret.push_back(fromVariant<typename T::value_type>(x)); }, i++);
         }
         return ret;
     }
@@ -450,7 +453,8 @@ struct FromVariantImpl<T, When<
         T ret;
         size_t i = 0;
         for (auto const& x : var.vec()) {
-            detail::tryCatch([&] { ret.emplace(fromVariant<typename T::value_type>(x)); }, i++);
+            detail::tryCatch([&] { ret.emplace(fromVariant<typename T::value_type>(x)); },
+                             i++);
         }
         return ret;
     }
@@ -538,8 +542,9 @@ struct FromVariantImpl<T, When<
 #if SERIALIZE_ENABLE_TYPE_SAFE
 // Specialization for `type_safe::strong_typedef`
 template <typename T>
-struct FromVariantImpl<T, When<
-                              !hasFromVariant(boost::hana::type_c<T>) && strongTypeDef(boost::hana::type_c<T>)>> {
+struct FromVariantImpl<T,
+                       When<!hasFromVariant(boost::hana::type_c<T>)
+                            && strongTypeDef(boost::hana::type_c<T>)>> {
     static T apply(Variant const& var) {
         using U = type_safe::underlying_type<T>;
         return static_cast<T>(FromVariantImpl<U>::apply(var));
@@ -585,15 +590,18 @@ struct FromVariantImpl<T, When<boost::hana::is_a<boost::hana::map_tag, T>>> {
     static T apply(Variant const& var) {
         auto const map = var.map();
         T ret;
-        boost::hana::for_each(ret,
-                              boost::hana::fuse([&](auto key, auto& value) {
-                                  using namespace std::string_literals;
-                                  auto const it = map.find(boost::hana::to<char const*>(key));
-                                  if (map.end() == it) {
-                                      throw std::logic_error(boost::hana::to<char const*>(key) + " is required"s);
-                                  }
-                                  detail::tryCatch([&] { value = fromVariant<decltype(value)>(it->second); }, key);
-                              }));
+        boost::hana::for_each(
+                ret, boost::hana::fuse([&](auto key, auto& value) {
+                    using namespace std::string_literals;
+                    auto const it = map.find(boost::hana::to<char const*>(key));
+                    if (map.end() == it) {
+                        throw std::logic_error(boost::hana::to<char const*>(key)
+                                               + " is required"s);
+                    }
+                    detail::tryCatch(
+                            [&] { value = fromVariant<decltype(value)>(it->second); },
+                            key);
+                }));
         return ret;
     }
 };
@@ -649,8 +657,9 @@ struct FromVariantImpl<T, When<boost::hana::is_a<boost::hana::tuple_tag, T>>> {
 
 // `std::variant`
 template <typename T>
-struct FromVariantImpl<T, When<
-                              serialize::detail::Valid<std::variant_alternative_t<0, T>>::value>> {
+struct FromVariantImpl<
+        T,
+        When<serialize::detail::Valid<std::variant_alternative_t<0, T>>::value>> {
     template <size_t I>
     static T applyImpl(boost::hana::size_t<I>, Variant const& var) {
         try {
