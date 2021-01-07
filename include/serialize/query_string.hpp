@@ -62,6 +62,7 @@ private:
 };
 
 /// Parse a query string
+/// \ingroup group-http
 ///
 /// Supports deep objects and arrays. The function, for overhead reasons,
 /// limits the resulting object dimensions:
@@ -99,9 +100,8 @@ private:
 /// Empty brackets can occur only on a key ending.
 ///
 /// Error message may refer to <a href="https://www.ietf.org/rfc/rfc3986.txt">ABNF
-/// grammer</a>
+/// grammar</a>
 ///
-/// \ingroup group-http
 /// \throw QueryStringError
 /// \return VariantMap
 Variant query_string(std::string const& str);

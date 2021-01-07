@@ -36,8 +36,8 @@
 
 namespace serialize {
 
-/// \ingroup group-datatypes
 /// Serialized object representation. Think of it as a DOM object.
+/// \ingroup group-datatypes
 class Variant {
 public:
     struct NullType {
@@ -289,6 +289,7 @@ public:
     bool operator!=(Variant const& rhs) const noexcept;
 
     /// Check if two `Variant`s are equal
+    ///
     /// Unlike `operator==` this function performs conversion of arithmetic types.
     friend bool equal(Variant const& lhs, Variant const& rhs) noexcept;
 

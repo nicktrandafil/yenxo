@@ -33,8 +33,8 @@
 
 namespace serialize {
 
-/// \ingroup group-exceptions
 /// An error identifying `Variant` error
+/// \ingroup group-exceptions
 class VariantErr : public std::exception {
 public:
     explicit VariantErr(std::string const& msg) : what_(msg) {
@@ -59,8 +59,8 @@ private:
     std::string path_;
 };
 
-/// \ingroup group-exceptions
 /// Empty Variant error
+/// \ingroup group-exceptions
 class VariantEmpty final : public VariantErr {
 public:
     template <class T>
@@ -69,8 +69,8 @@ public:
     }
 };
 
-/// \ingroup group-exceptions
 /// Bad type error
+/// \ingroup group-exceptions
 class VariantBadType final : public VariantErr {
 public:
     template <class E, class A>
@@ -89,8 +89,8 @@ public:
     }
 };
 
-/// \ingroup group-exceptions
 /// User tried to get a type which is not able to hold the actual value
+/// \ingroup group-exceptions
 class VariantIntegralOverflow final : public VariantErr {
 public:
     VariantIntegralOverflow(std::string const& type_name, std::string const& value)

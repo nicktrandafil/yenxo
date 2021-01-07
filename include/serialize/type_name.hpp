@@ -52,7 +52,7 @@ namespace serialize {
 /// Test,
 /// @snippet test/type_name.cpp sn_enum_checks
 /// * `std::integral_constant`. The function object should be enabled for underlying type;
-/// * `std::optional`. The functio object should be enabled for underlying type;
+/// * `std::optional`. The function object should be enabled for underlying type;
 ///
 /// There are few ways to enable the function object for user defined types:
 /// * specialize the `TypeNameImpl`;

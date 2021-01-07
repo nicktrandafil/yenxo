@@ -38,8 +38,9 @@
 
 namespace serialize {
 
-/// \ingroup group-exceptions
 /// Enum value is not handled or the value is not of the enum at all
+///
+/// \ingroup group-exceptions
 class BadEnumValue : public std::runtime_error {
 public:
     template <class E>

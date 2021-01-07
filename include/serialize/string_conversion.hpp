@@ -39,6 +39,7 @@ namespace serialize {
 
 /// String conversion error
 /// \ingroup group-exceptions
+///
 /// An error during `toString`/`fromString` conversion
 struct StringConversionError : public std::logic_error {
     template <typename T>
@@ -50,20 +51,13 @@ struct StringConversionError : public std::logic_error {
               "'") {}
 };
 
-#ifdef SERIALIZE_DOXYGEN_INVOKED
 /// To string conversion
+///
 /// \ingroup group-function
 /// Converts the `type` to string
+#ifdef SERIALIZE_DOXYGEN_INVOKED
 constexpr auto toString = [](auto&& type) {
-    return tag - dispatched;
-};
-
-/// From string conversion
-/// \ingroup group-function
-/// Converts the `string` to type
-template <class T>
-constexpr auto fromString = [](std::string const&) {
-    return tag - dispatched;
+    return type - dispatched;
 };
 #else
 // To string conversion implementation
@@ -117,6 +111,18 @@ struct ToStringT {
 
 constexpr ToStringT const toString{};
 
+#endif
+
+/// From string conversion
+///
+/// \ingroup group-function
+/// Converts the `string` to type
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+template <class T>
+constexpr auto fromString = [](std::string const&) {
+    return type - dispatched;
+};
+#else
 // From string conversion implementation
 template <typename T, typename = void>
 struct FromStringImpl : FromStringImpl<T, When<true>> {};

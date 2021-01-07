@@ -49,9 +49,10 @@ struct Hobby : trait::Var<Hobby>,
     std::string description;
 };
 
-struct Person : trait::VarDef<Person>,
-                trait::UpdateFromVar<Person>,
-                trait::EqualityComparison<Person> {
+struct Person
+        : trait::Var<Person>
+        , trait::UpdateFromVar<Person>
+        , trait::EqualityComparison<Person> {
 
     Person() : age(0) {
     }

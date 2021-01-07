@@ -41,11 +41,12 @@ namespace serialize {
 
 /// \defgroup group-directives Directives
 /// \ingroup group-struct
-/// Directives to change default serialization and deserialization
-/// behaviour. The directives can have any order.
+/// Directives to change default serialization and deserialization behavior.
+/// The directives can have any order.
 
 /// A default value tag
 /// \ingroup group-directives
+///
 /// This directive can be used to provide a default value for a struct member.
 /// Providing a default value the member implicitly becomes optional.
 ///
@@ -74,6 +75,7 @@ Default(T)->Default<T>;
 
 /// A name tag
 /// \ingroup group-directives
+///
 /// This directive can be used to provide different name for a struct member.
 ///
 /// \code
