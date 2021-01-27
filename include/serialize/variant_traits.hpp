@@ -35,8 +35,8 @@
 namespace serialize {
 
 /// \defgroup group-traits-auto-variant Variant conversion
-/// \ingroup group-traits
-/// `Variant` conversion for user defined types
+/// \ingroup group-traits-opt-in
+/// `Variant` conversion for user defined struct-like types
 
 /// \defgroup group-traits-auto-variant-policy Policy
 /// \ingroup group-traits-auto-variant
@@ -98,8 +98,8 @@ constexpr auto defaults = [] { ... };
 namespace trait {
 namespace detail {
 
-/// Has member `updateVar(serialize::Variant const&)`
 /// \ingroup group-details
+/// Has member `updateVar(serialize::Variant const&)`.
 constexpr auto const hasUpdateVar = boost::hana::is_valid(
         [](auto t) -> decltype((void)std::declval<typename decltype(t)::type>().updateVar(
                            std::declval<Variant>())) {});

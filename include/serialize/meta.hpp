@@ -171,6 +171,9 @@ constexpr auto isIterable(boost::hana::basic_type<T> const&) {
     return detail::IsIterableImpl<T>::value;
 }
 
+template <class T>
+using IsIterable = detail::IsIterableImpl<T>;
+
 #ifndef SERIALIZE_DOXYGEN_INVOKED
 namespace detail {
 
@@ -197,6 +200,9 @@ constexpr auto isString(boost::hana::basic_type<T> const&) {
     return detail::IsStringImpl<T>::value;
 }
 
+template <class T>
+using IsString = detail::IsStringImpl<T>;
+
 namespace detail {
 
 template <typename T>
@@ -214,12 +220,18 @@ constexpr auto isPair(boost::hana::basic_type<T> const&) {
     return detail::IsPair<T>::value;
 }
 
+template <class T>
+using IsPair = detail::IsPair<T>;
+
 /// Test if `T` is a container
 /// \ingroup group-meta
 template <typename T>
 constexpr auto isContainer(boost::hana::basic_type<T> const& x) {
     return isIterable(x) && !isString(x);
 }
+
+template <class T>
+using IsContainer = std::conjunction<IsIterable<T>, std::negation<IsString<T>>>;
 
 /// Test if `T` is a `std::pair` with `std::string` key
 /// \ingroup group-meta
@@ -231,6 +243,9 @@ constexpr auto isKeyValue(boost::hana::basic_type<T> const&) {
         return false;
     }
 }
+
+template <class T>
+using IsKeyValue = std::conjunction<IsPair<T>, IsString<typename T::first_type>>;
 
 /// Test if `type` is has `push_back` method
 /// \ingroup group-meta
@@ -349,6 +364,9 @@ constexpr FloatingPointTypeT floatingPoint;
 /// Tests if type is `type_safe::boolean`
 /// \ingroup group-meta
 #ifdef SERIALIZE_DOXYGEN_INVOKED
+constexpr auto boolean = [](auto type) {
+    return isBoolean(type);
+};
 #else
 template <typename T>
 struct BooleanTypeImpl : std::false_type {};
@@ -389,4 +407,21 @@ constexpr auto cToString(boost::hana::int_<I>) noexcept {
 }
 #endif
 
+namespace detail {
+
+template <typename T>
+struct IsStdArrayImpl : std::false_type {};
+
+template <typename T, size_t N>
+struct IsStdArrayImpl<std::array<T, N>> : std::true_type {};
+
+template <typename T>
+struct StdArraySizeImpl;
+
+template <typename T, size_t N>
+struct StdArraySizeImpl<std::array<T, N>> {
+    static constexpr auto value = N;
+};
+
+} // namespace detail
 } // namespace serialize

@@ -30,7 +30,7 @@
 namespace serialize::trait {
 
 /// Enables equality comparison for `Derived`
-/// \ingroup group-traits
+/// \ingroup group-traits-opt-in
 /// \pre `Derived` should be a Boost.Hana.Struct.
 ///
 /// Example

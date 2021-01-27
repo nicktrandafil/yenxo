@@ -24,13 +24,18 @@
 
 #pragma ocne
 
+namespace serialize {
+
 //! @defgroup group-datatypes Data types
 //! Data types provided by the library.
 
 //! @defgroup group-exceptions Exceptions
 //! Exceptions provided by the library.
 
-//! @defgroup group-traits Opt-in traits
+//! @defgroup group-traits Type traits
+//! The type traits this library is concerned about.
+
+//! @defgroup group-traits-opt-in Opt-in type traits
 //! Opt-in traits provided by the library.
 
 //! @defgroup group-function Function objects
@@ -62,6 +67,8 @@
 
 //! @defgroup group-http HTTP utility
 //! HTTP utilities.
+
+} // namespace serialize
 
 #include <serialize/comparison_traits.hpp>
 #include <serialize/define_enum.hpp>

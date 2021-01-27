@@ -35,6 +35,8 @@ option(${PROJECT_NAME}_TEST_DEFINE_STRUCT "Enable testing of DEFINE_STRUCT" OFF)
 
 option(${PROJECT_NAME}_BUILD_SNIPPETS "Enable building snippets" OFF)
 
+option(${PROJECT_NAME}_BUILD_DOC "Enable building documentation" OFF)
+
 cmake_dependent_option(${PROJECT_NAME}_TESTING
   "Enable testing"
   ON "NOT ${PROJECT_NAME}_sub" OFF
@@ -181,7 +183,9 @@ else()
 endif()
 
 # Doc
-add_subdirectory(doc)
+if(${PROJECT_NAME}_BUILD_DOC)
+    add_subdirectory(doc)
+endif()
 
 # Testing
 

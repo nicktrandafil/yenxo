@@ -99,4 +99,22 @@ public:
     }
 };
 
+/// String conversion error
+/// \ingroup group-exceptions
+///
+/// An error during `toString`/`fromString` conversion
+struct StringConversionError : public std::logic_error {
+    template <typename T>
+    explicit StringConversionError(std::string value, boost::hana::basic_type<T> const&)
+        : std::logic_error(
+              "'" + value + "'" +
+              " is not of type '" +
+              std::string(typeName(boost::hana::type_c<T>)) +
+              "'") {}
+
+    explicit StringConversionError(std::string const& msg)
+            : std::logic_error(msg) {
+    }
+};
+
 } // namespace serialize
