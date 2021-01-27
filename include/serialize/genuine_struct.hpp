@@ -31,7 +31,7 @@
 namespace serialize {
 
 /// Genuine struct
-/// \ingroup group-traits
+/// \ingroup group-traits-opt-in
 ///
 /// Opts-in `trait::Var`, `trait::EqualityComparison`, `trait::OStream`.
 template <class T, class Policy = trait::VarPolicy>

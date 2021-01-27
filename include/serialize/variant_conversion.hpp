@@ -43,6 +43,13 @@
 
 namespace serialize {
 
+/// \ingroup group-details
+/// Tests if type `T` has `static Variant T::toVariant(T)`.
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+constexpr auto hasToVariant = [](auto type) {
+    return exists(static Variant type::toVariant(type));
+};
+#else
 template <typename T>
 struct HasToVariantImpl {
     static void var(Variant const&);
@@ -60,16 +67,16 @@ struct HasToVariantT {
     }
 };
 
-/// Tests if type has Variant T::toVariant(T)
-/// \ingroup group-details
-#ifdef SERIALIZE_DOXYGEN_INVOKED
-constexpr auto hasToVariant = [](auto type) {
-    return SFINAE;
-};
-#else
 constexpr HasToVariantT hasToVariant;
 #endif
 
+/// \ingroup group-details
+/// Tests if type `T` has `static T T::fromVariant(Variant)`.
+#ifdef SERIALIZE_DOXYGEN_INVOKED
+inline constexpr auto hasFromVariant = [](auto type) {
+    return exists(static type type::fromVariant(Variant));
+};
+#else
 template <typename T>
 struct HasFromVariantImpl {
     static void var(T const&);
@@ -87,33 +94,116 @@ struct HasFromVariantT {
     }
 };
 
-/// Tests if type has T T::fromVariant(Variant)
-/// \ingroup group-details
-#ifdef SERIALIZE_DOXYGEN_INVOKED
-constexpr auto hasFromVariant = [](auto type) {
-    return SFINAE;
-};
-#else
 constexpr HasFromVariantT hasFromVariant;
 #endif
+
+/// \ingroup group-details
+/// Is `type` a `Variant`.
+inline constexpr auto isVariant = [](auto type) {
+    using T = typename decltype(type)::type;
+    return std::is_same_v<serialize::Variant, T>;
+};
+
+/// \ingroup group-details
+/// Is `type` convertible to any to build-in type supported by Variant.
+inline constexpr auto isConvertibleToVariantBuildIn = [](auto type) {
+    using T = typename decltype(type)::type;
+    return !std::is_enum_v<T> && Variant::Types::convertible<T>();
+};
+
+/// \ingroup group-details
+/// Is `type` any build-in type supported by Variant.
+inline constexpr auto isVariantBuildIn = [](auto type) {
+    using T = typename decltype(type)::type;
+    return !std::is_enum_v<T> && Variant::Types::anyOf<T>();
+};
+
+/// \ingroup group-details
+/// Is `type` a map-like type.
+inline constexpr auto isMapType = [](auto type) {
+    using T = typename decltype(type)::type;
+    if constexpr (isContainer(type)) {
+        return isKeyValue(boost::hana::type_c<typename T::value_type>)
+               && !std::is_same_v<T, serialize::VariantMap>;
+    } else {
+        return false;
+    }
+};
+
+/// \ingroup group-details
+/// Is `type` a collection-like type.
+inline constexpr auto isCollectionType = [](auto type) {
+    using T = typename decltype(type)::type;
+    if constexpr (isContainer(boost::hana::type_c<T>)) {
+        return !isKeyValue(boost::hana::type_c<typename T::value_type>)
+               && !std::is_same_v<T, serialize::VariantVec>;
+    } else {
+        return false;
+    }
+};
+
+/// \ingroup group-details
+/// Is `type` an enum type with specialized `EnumTraits`.
+inline constexpr auto isReflectiveEnum = boost::hana::is_valid(
+        [](auto type) -> decltype(
+                              (void)EnumTraits<typename decltype(type)::type>::toString(
+                                      std::declval<typename decltype(type)::type>())) {});
+
+/// \ingroup group-details
+/// Check if `type` is an enum type with specialized `EnumTraits`, and the specialization
+/// does not define `static auto strings()`.
+inline constexpr auto isReflectiveEnumWithSingleStringRepresentation = [](auto type) {
+    return isReflectiveEnum(type)
+        && !hasStrings(boost::hana::type_c<EnumTraits<typename decltype(type)::type>>);
+};
+
+/// \ingroup group-details
+/// Check if `type` is an enum type with specialized `EnumTraits`, the specialization does
+/// define `static auto strings()`
+inline constexpr auto isReflectiveEnumWithMultiStringRepresentation = [](auto type) {
+    return isReflectiveEnum(type)
+        && hasStrings(boost::hana::type_c<EnumTraits<typename decltype(type)::type>>);
+};
+
+/// \ingroup group-details
+/// Is `type` a `std::variant`-like type.
+inline constexpr auto isStdVariant = boost::hana::is_valid(
+        [](auto type) -> decltype(
+                              (void)serialize::detail::Valid<std::variant_alternative_t<
+                                      0,
+                                      typename decltype(type)::type>>::value) {});
+
+/// \ingroup group-details
+/// Is `type` a collection-like type with `push_back` method.
+inline constexpr auto isCollectionTypeWithPushBack = [](auto type) {
+    using T = typename decltype(type)::type;
+    if constexpr (isContainer(type)) {
+        return !isKeyValue(boost::hana::type_c<typename T::value_type>)
+        && hasPushBack(type)
+        && !std::is_same_v<T, serialize::VariantVec>;
+    } else {
+        return false;
+    }
+};
+
+/// \ingroup group-details
+/// Is `type` a collection-like type with `emplace` method.
+inline constexpr auto isCollectionTypeWithEmplace = [](auto type) {
+    using T = typename decltype(type)::type;
+    if constexpr (isContainer(type)) {
+        return !isKeyValue(boost::hana::type_c<typename T::value_type>)
+            && !hasPushBack(type) && hasEmplace(type)
+            && !std::is_same_v<T, serialize::VariantVec>;
+    } else {
+        return false;
+    }
+};
 
 /// To `Variant` conversion function object
 /// \ingroup group-function
 ///
-/// The function object is enabled for:
-/// * `Variant`;
-/// * all built-in types supported by `Variant`;
-/// * map types (`std::map`, `std::unordered_map`, etc);
-/// * collection types (`std::vector`, etc);
-/// * an user defined type `T` that has static member function `Variant toVariant(T)`;
-/// * an enum type `E` that have `EnumTraits<T>` specialization, or is defined via
-/// `DEFINE_ENUM(E, ...)`;
-/// * `std::integral_constant`;
-/// * `boost::hana::string`;
-/// * `boost::hana::map`.
-///
-/// The non-intrusive way to enable the function object for a user defined type is to
-/// specialize `ToVariantImpl`.
+/// The function object is enabled for any type `T` for which
+/// `toVariantConvertible(boost::hana::type_c<T>)` returns `true`.
 #ifdef SERIALIZE_DOXYGEN_INVOKED
 auto toVariant = [](auto value) {
     return Variant(serialize(value));
@@ -139,9 +229,8 @@ struct ToVariantImpl<T, When<condition>> {
     }
 };
 
-// Identity
 template <typename T>
-struct ToVariantImpl<T, When<std::is_same_v<serialize::Variant, T>>> {
+struct ToVariantImpl<T, When<isVariant(boost::hana::type_c<T>)>> {
     static Variant apply(T const& x) { return x; }
 };
 
@@ -153,16 +242,13 @@ struct ToVariantImpl<T, When<hasToVariant(boost::hana::type_c<T>)>> {
 
 // Specialization for `Variant` built-in supported types
 template <typename T>
-struct ToVariantImpl<T, When<!std::is_enum_v<T> && Variant::Types::convertible<T>()>> {
+struct ToVariantImpl<T, When<isConvertibleToVariantBuildIn(boost::hana::type_c<T>)>> {
     static Variant apply(T x) { return Variant(x); }
 };
 
 // Specialization for map types
 template <typename T>
-struct ToVariantImpl<T,
-                     When<isContainer(boost::hana::type_c<T>) &&
-                          isKeyValue(boost::hana::type_c<typename T::value_type>) &&
-                          !std::is_same_v<T, serialize::VariantMap>>> {
+struct ToVariantImpl<T, When<isMapType(boost::hana::type_c<T>)>> {
     static Variant apply(T const& map) {
         VariantMap ret;
         for (auto const& x : map) {
@@ -187,10 +273,7 @@ struct ToVariantImpl<T, When<isPair(boost::hana::type_c<T>)>> {
 
 // Specialization for collection types
 template <typename T>
-struct ToVariantImpl<T,
-                     When<isContainer(boost::hana::type_c<T>) &&
-                          !isKeyValue(boost::hana::type_c<typename T::value_type>) &&
-                          !std::is_same_v<T, serialize::VariantVec>>> {
+struct ToVariantImpl<T, When<isCollectionType(boost::hana::type_c<T>)>> {
     static Variant apply(T const& vec) {
         VariantVec ret;
         ret.reserve(std::size(vec));
@@ -203,9 +286,7 @@ struct ToVariantImpl<T,
 
 // Specialization for types with specialized EnumTraits
 template <class T>
-struct ToVariantImpl<T,
-                     When<detail::Valid<decltype(
-                         EnumTraits<T>::toString(std::declval<T>()))>::value>> {
+struct ToVariantImpl<T, When<isReflectiveEnum(boost::hana::type_c<T>)>> {
     static Variant apply(T e) {
         return Variant(EnumTraits<T>::toString(e));
     }
@@ -294,9 +375,7 @@ struct ToVariantImpl<T, When<boost::hana::is_a<boost::hana::tuple_tag, T>>> {
 
 // `std::variant`
 template <typename T>
-struct ToVariantImpl<
-        T,
-        When<serialize::detail::Valid<std::variant_alternative_t<0, T>>::value>> {
+struct ToVariantImpl<T, When<isStdVariant(boost::hana::type_c<T>)>> {
     static Variant apply(T const& var) {
         return std::visit(
             Overload{
@@ -314,20 +393,8 @@ auto ToVariantT::operator()(T&& val) const {
 /// From `Variant` conversion function object
 /// \ingroup group-function
 ///
-/// The function object is enabled for:
-/// * `Variant`;
-/// * all built-in types supported by `Variant`;
-/// * map types (`std::map`, `std::unordered_map`, etc);
-/// * collection types (`std::vector`, etc);
-/// * an user defined type `T` that has static member function `T fromVariant(Variant)`;
-/// * an enum type `E` that has `EnumTraits<T>` specialization, or is defined via
-/// `DEFINE_ENUM(E, ...)`;
-/// * `std::integral_constant`;
-/// * `boost::hana::string`;
-/// * `boost::hana::map`.
-///
-/// The non-intrusive way to enable the function object for a user defined type is to
-/// specialize `FromVariantImpl` for the type.
+/// The function object is enabled for any type `T` for which
+/// `toVariantConvertible(boost::hana::type_c<T>)` returns `true`.
 #ifdef SERIALIZE_DOXYGEN_INVOKED
 template <class T>
 constexpr auto fromVariant = [](Variant const& var) {
@@ -370,7 +437,7 @@ struct FromVariantImpl<T, When<hasFromVariant(boost::hana::type_c<T>)>> {
 
 // Specialization for `Variant` built-in supported types
 template <typename T>
-struct FromVariantImpl<T, When<Variant::Types::anyOf<T>()>> {
+struct FromVariantImpl<T, When<isVariantBuildIn(boost::hana::type_c<T>)>> {
     static T apply(Variant const& x) { return static_cast<T>(x); }
 };
 
@@ -406,18 +473,20 @@ inline void tryCatch(F&& f, S s) {
 
 } // namespace detail
 
-template <typename T, size_t N>
-struct FromVariantImpl<std::array<T, N>> {
-    static std::array<T, N> apply(Variant const& var) {
+template <typename T>
+struct FromVariantImpl<T, When<detail::IsStdArrayImpl<T>::value>> {
+    static T apply(Variant const& var) {
         auto const& vec = var.vec();
+        constexpr auto N = detail::StdArraySizeImpl<T>::value;
         if (vec.size() != N) {
             throw std::logic_error("expected size of the list is "
                                    + std::to_string(N) + ", actual "
                                    + std::to_string(vec.size()));
         }
-        std::array<T, N> ret;
+        T ret;
         for (size_t i = 0; i < N; ++i) {
-            detail::tryCatch([&] { ret[i] = fromVariant<T>(vec[i]); }, i);
+            detail::tryCatch(
+                    [&] { ret[i] = fromVariant<typename T::value_type>(vec[i]); }, i);
         }
         return ret;
     }
@@ -425,11 +494,7 @@ struct FromVariantImpl<std::array<T, N>> {
 
 // Specialization for collection types (with push_back)
 template <typename T>
-struct FromVariantImpl<T, When<
-                              isContainer(boost::hana::type_c<T>) &&
-                              !isKeyValue(boost::hana::type_c<typename T::value_type>) &&
-                              hasPushBack(boost::hana::type_c<T>) &&
-                              !std::is_same_v<T, serialize::VariantVec>>> {
+struct FromVariantImpl<T, When<isCollectionTypeWithPushBack(boost::hana::type_c<T>)>> {
     static T apply(Variant const& var) {
         T ret;
         size_t i = 0;
@@ -443,12 +508,7 @@ struct FromVariantImpl<T, When<
 
 // Specialization for collection types (with emplace)
 template <typename T>
-struct FromVariantImpl<T, When<
-                              isContainer(boost::hana::type_c<T>) &&
-                              !isKeyValue(boost::hana::type_c<typename T::value_type>) &&
-                              !hasPushBack(boost::hana::type_c<T>) &&
-                              hasEmplace(boost::hana::type_c<T>) &&
-                              !std::is_same_v<T, serialize::VariantVec>>> {
+struct FromVariantImpl<T, When<isCollectionTypeWithEmplace(boost::hana::type_c<T>)>> {
     static T apply(Variant const& var) {
         T ret;
         size_t i = 0;
@@ -462,9 +522,7 @@ struct FromVariantImpl<T, When<
 
 // Specialization for map types
 template <typename T>
-struct FromVariantImpl<T, When<isContainer(boost::hana::type_c<T>) &&
-                               isKeyValue(boost::hana::type_c<typename T::value_type>) &&
-                               !std::is_same_v<T, serialize::VariantMap>>> {
+struct FromVariantImpl<T, When<isMapType(boost::hana::type_c<T>)>> {
     static T apply(Variant const& var) {
         T ret;
         for (auto const& x : var.map()) {
@@ -488,10 +546,9 @@ struct FromVariantImpl<T, When<isPair(boost::hana::type_c<T>)>> {
 
 // Specialization for types with specialized EnumTraits
 template <class T>
-struct FromVariantImpl<T, When<
-                              detail::Valid<decltype(
-                                  EnumTraits<T>::toString(std::declval<T>()))>::value &&
-                              !hasStrings(boost::hana::type_c<EnumTraits<T>>)>> {
+struct FromVariantImpl<
+        T,
+        When<isReflectiveEnumWithSingleStringRepresentation(boost::hana::type_c<T>)>> {
     static T apply(Variant const& var) {
         auto const& s = var.str();
         for (auto e : EnumTraits<T>::values) {
@@ -505,11 +562,12 @@ struct FromVariantImpl<T, When<
 
 // Specialization for types with specialized EnumTraits
 template <class T>
-struct FromVariantImpl<T, When<
-                              detail::Valid<decltype(EnumTraits<T>::strings())>::value>> {
+struct FromVariantImpl<
+        T,
+        When<isReflectiveEnumWithMultiStringRepresentation(boost::hana::type_c<T>)>> {
     template <size_t I>
-    static typename EnumTraits<T>::Enum applyImpl(
-        boost::hana::size_t<I>, std::string const& x) {
+    static typename EnumTraits<T>::Enum applyImpl(boost::hana::size_t<I>,
+                                                  std::string const& x) {
         bool found{false};
         boost::hana::for_each(boost::hana::at_c<I>(EnumTraits<T>::strings()),
                               [&](auto s) {
@@ -606,20 +664,6 @@ struct FromVariantImpl<T, When<boost::hana::is_a<boost::hana::map_tag, T>>> {
     }
 };
 
-// `hana::Constant`
-template <typename T>
-struct FromVariantImpl<T, When<boost::hana::Constant<T>().value>> {
-    static T apply(Variant const& var) {
-        auto const tmp = fromVariant<typename T::value_type>(var);
-        if (tmp != T::value) {
-            std::ostringstream oss;
-            oss << var;
-            throw VariantBadType(oss.str(), boost::hana::type_c<T>);
-        }
-        return T();
-    }
-};
-
 // `hana::string`
 template <typename T>
 struct FromVariantImpl<T, When<boost::hana::is_a<boost::hana::string_tag, T>>> {
@@ -652,6 +696,20 @@ struct FromVariantImpl<T, When<boost::hana::is_a<boost::hana::tuple_tag, T>>> {
                             boost::hana::value(i));
                 });
         return ret;
+    }
+};
+
+// `hana::Constant`
+template <typename T>
+struct FromVariantImpl<T, When<boost::hana::Constant<T>().value>> {
+    static T apply(Variant const& var) {
+        auto const tmp = fromVariant<typename T::value_type>(var);
+        if (tmp != T::value) {
+            std::ostringstream oss;
+            oss << var;
+            throw VariantBadType(oss.str(), boost::hana::type_c<T>);
+        }
+        return T();
     }
 };
 
@@ -722,5 +780,86 @@ struct FromVariantT2 {
 
 constexpr FromVariantT2 fromVariant2;
 #endif
+
+/// Whether `T` can be converted to Variant
+/// \ingroup group-traits
+///
+/// The intrusive way to enable the trait for user defined type `T` is to
+/// implement `Variant toVariant(T const&)` static member for `T`.
+///
+/// The non-intrusive way to enable the trait for user defined type `T` is to
+/// provide specialization
+/// \code
+/// namespace serialize {
+/// template <>
+/// struct ToVariantImpl<T> {
+///     Variant apply(T const&) {
+/// 		// implementation
+/// 	}
+/// };
+/// }
+/// \endcode
+inline constexpr auto toVariantConvertible = [](auto type) {
+    return    isVariant(type)
+           || hasToVariant(type)
+           || isConvertibleToVariantBuildIn(type)
+           || isMapType(type)
+           || isCollectionType(type)
+           || isReflectiveEnum(type)
+#if SERIALIZE_ENABLE_TYPE_SAFE
+           || (!hasToVariant(type) && strongTypeDef(type))
+           || constrainedType(type)
+           || integerType(type)
+           || floatingPoint(type)
+           || boolean(type)
+#endif
+           || boost::hana::is_a<boost::hana::map_tag, typename decltype(type)::type>
+           || boost::hana::is_a<boost::hana::string_tag, typename decltype(type)::type>
+           || boost::hana::is_a<boost::hana::tuple_tag, typename decltype(type)::type>
+           || isStdVariant(type);
+};
+
+/// Whether `T` can be constructed from Variant
+/// \ingroup group-traits
+///
+/// The intrusive way to enable the trait for user defined type `T` is to
+/// implement `T fromVariant(Variant const&)` static member for `T`
+///
+/// The non-intrusive way to enable the trait for user defined type `T` is to
+/// provide specialization
+/// \code
+/// namespace serialize {
+/// template <>
+/// struct FromVariantImpl<T> {
+///     T apply(Variant const&) {
+/// 		// implementation
+/// 	}
+/// };
+/// }
+/// \endcode
+inline constexpr auto fromVariantConvertible = [](auto type) {
+    return    isVariant(type)
+           || hasFromVariant(type)
+           || isVariantBuildIn(type)
+           || boost::hana::template_<detail::IsStdArrayImpl>(type)
+           || isCollectionTypeWithPushBack(type)
+           || isCollectionTypeWithEmplace(type)
+           || isMapType(type)
+           || isPair(type)
+           || isReflectiveEnumWithSingleStringRepresentation(type)
+           || isReflectiveEnumWithMultiStringRepresentation(type)
+#if SERIALIZE_ENABLE_TYPE_SAFE
+           || (!hasToVariant(type) && strongTypeDef(type))
+           || constrainedType(type)
+           || integerType(type)
+           || floatingPoint(type)
+           || boolean(type)
+#endif
+           || boost::hana::is_a<boost::hana::map_tag, typename decltype(type)::type>
+           || boost::hana::is_a<boost::hana::string_tag, typename decltype(type)::type>
+           || boost::hana::is_a<boost::hana::tuple_tag, typename decltype(type)::type>
+           || boost::hana::Constant<typename decltype(type)::type>().value
+           || isStdVariant(type);
+};
 
 } // namespace serialize

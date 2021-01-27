@@ -35,7 +35,7 @@
 namespace serialize::trait {
 
 /// Enables `std::ostream& operator<<(std::ostream&, Derived)` for `Derived`
-/// \ingroup group-traits
+/// \ingroup group-traits-opt-in
 template <typename Derived>
 struct OStream {
     friend std::ostream& operator<<(std::ostream& os, Derived const& x) {

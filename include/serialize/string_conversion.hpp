@@ -25,6 +25,7 @@
 #pragma once
 
 #include <serialize/enum_traits.hpp>
+#include <serialize/exception.hpp>
 #include <serialize/meta.hpp>
 #include <serialize/type_name.hpp>
 
@@ -36,20 +37,6 @@
 #include <type_traits>
 
 namespace serialize {
-
-/// String conversion error
-/// \ingroup group-exceptions
-///
-/// An error during `toString`/`fromString` conversion
-struct StringConversionError : public std::logic_error {
-    template <typename T>
-    explicit StringConversionError(std::string value, boost::hana::basic_type<T> const&)
-        : std::logic_error(
-              "'" + value + "'" +
-              " is not of type '" +
-              std::string(typeName(boost::hana::type_c<T>)) +
-              "'") {}
-};
 
 /// To string conversion
 ///

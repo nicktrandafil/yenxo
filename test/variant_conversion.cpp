@@ -201,6 +201,11 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
         REQUIRE(toVariant(tuple) == VariantVec{1, "2"});
     }
 
+    SECTION("hana::Constant") {
+        REQUIRE_NOTHROW(serialize::fromVariant<std::integral_constant<int, 2>>(2));
+        REQUIRE_THROWS(serialize::fromVariant<std::integral_constant<int, 2>>(1));
+    }
+
     SECTION("Variant supported types") {
         SECTION("auto") {
             boost::hana::for_each(
