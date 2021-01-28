@@ -8,7 +8,7 @@ RUN apt-get -y update && apt-get -y install \
     libxcb-xfixes0 libxcb-shape0 libxcb-render-util0 libxcb-keysyms1 libtinfo5 xterm\
     \
     bash-completion \
-    build-essential git cmake wget tar sudo gdb ninja-build clang clang-format-11 \
+    build-essential git cmake wget tar sudo gdb ninja-build clang-11 clang-format-11 \
     \
     doxygen libboost-dev \
     \
@@ -16,16 +16,7 @@ RUN apt-get -y update && apt-get -y install \
     \
     vim
 
-ARG BOOST_VERSION
-ARG BOOST_URL
 ARG BUILD_TYPE
-
-ENV BOOST_ROOT=/usr/local/include/boost-${BOOST_VERSION}
-
-# boost
-WORKDIR /tmp
-RUN mkdir -p ${BOOST_ROOT} \
- && wget -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ${BOOST_ROOT}
 
 # RapidJSON
 WORKDIR /tmp
