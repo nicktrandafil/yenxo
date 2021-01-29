@@ -39,7 +39,7 @@ the Variant value can be converted to the desired text-based data interchange fo
 Variant natively supports JSON format, but one can traverse Variant value and serialize it
 to any desired text-based data interchange format.
 
-\warning The fact that serialization process has an intermediate value (Variant) implies
+@warning The fact that serialization process has an intermediate value (Variant) implies
 some overhead.
 
 Having an intermediate value in serialization process has also a benefit - code reusing.
@@ -69,6 +69,50 @@ documentation you'll find what types support the traits and how to enable the tr
 for user defined types.
 
 @section tutorial-reducing-boilerplate-code Reducing boilerplate code
+
+@subsection tutorial-opt-in-var Opt-in trait::Var
+
+You can automatically enable `toVariantConvertible()` and `fromVariantConvertible()`
+for your struct using opt-in `trait::Var`. The opt-in trait implements static methods
+`Variant toVariant(T)` and `T fromVariant(Variant)` inside your type if:
+1. every member of the struct already supports `toVariantConvertible()` and
+`fromVariantConvertible()`;
+2. the struct is
+[Boost.Hana.Struct](https://www.boost.org/doc/libs/1_71_0/libs/hana/doc/html/group__group-Struct.html).
+
+Define a struct,
+
+@code{cpp}
+struct Person : trait::Var<Person> {
+    BOOST_HANA_DEFINE_STRUCT(Person
+        , (std::string, first_name)
+        , (std::string, last_name )
+        , (uint8_t    , age       )
+    )
+};
+@endcode
+
+not having any boilerplate code, enjoy serializing
+
+@code{cpp}
+Person p;
+p.first_name = "First name";
+p.last_name = "Last name";
+p.age = 0;
+Variant const var = toVariant(p);
+@endcode
+
+@note Aggregate initialization is unavailable because Person inherits something.
+
+and deserializing
+@code{cpp}
+VariantMap const var{
+    {"first_name", "First name"},
+    {"last_name" , "Last name" },
+    {"age"       , 0           },
+};
+auto const p = fromVariant<Person>(var);
+@endcode
 
 */
 }
