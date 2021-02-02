@@ -8,21 +8,18 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(serialize)
 
 
-# if inside subdirectory
+# If inside subdirectory.
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(${PROJECT_NAME}_sub OFF)
 else()
     set(${PROJECT_NAME}_sub ON)
 endif()
 
-
-# Options
+# Options.
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
 endif()
-
-include(CMakeDependentOption)
 
 option(${PROJECT_NAME}_ENABLE_TYPE_SAFE "Enable type_safe support" ON)
 if(${PROJECT_NAME}_ENABLE_TYPE_SAFE)
@@ -33,79 +30,86 @@ endif()
 
 option(${PROJECT_NAME}_TEST_DEFINE_STRUCT "Enable testing of DEFINE_STRUCT" OFF)
 
-option(${PROJECT_NAME}_BUILD_SNIPPETS "Enable building snippets" OFF)
-
 option(${PROJECT_NAME}_BUILD_DOC "Enable building documentation" OFF)
 
+option(${PROJECT_NAME}_BUILD_SNIPPETS "Enable building snippets" OFF)
+
+include(CMakeDependentOption)
+
 cmake_dependent_option(${PROJECT_NAME}_TESTING
-  "Enable testing"
-  ON "NOT ${PROJECT_NAME}_sub" OFF
+    "Enable testing"
+    ON "NOT ${PROJECT_NAME}_sub" OFF
 )
+if(${PROJECT_NAME}_TESTING)
+    enable_testing()
+endif()
 
 cmake_dependent_option(${PROJECT_NAME}_COVERAGE
-  "Enable binary instrumentation to collect test coverage information in the DEBUG configuration"
-  ON "NOT ${PROJECT_NAME}_sub AND ${PROJECT_NAME}_TESTING AND ${CMAKE_BUILD_TYPE} STREQUAL Debug" OFF
+    "Enable binary instrumentation to collect test coverage information in the DEBUG configuration"
+    ON "NOT ${PROJECT_NAME}_sub AND ${PROJECT_NAME}_TESTING AND ${CMAKE_BUILD_TYPE} STREQUAL Debug" OFF
 )
+
+
+# CCache
+if(NOT ${PROJECT_NAME}_sub)
+    option(${PROJECT_NAME}_CCACHE "Enable CCache" ON)
+    if(${PROJECT_NAME}_CCACHE)
+        find_program(CCACHE_FOUND ccache)
+        if(CCACHE_FOUND)
+            message(STATUS "CCache enabled.")
+            set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+            set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+        else()
+            message(STATUS "CCache program not found, disabled.")
+        endif()
+    endif()
+endif()
 
 
 # 3rd party
-
 if(NOT ${PROJECT_NAME}_sub)
-  find_package(RapidJSON QUIET REQUIRED)
-  find_package(Boost 1.65 QUIET REQUIRED)
-  if(${PROJECT_NAME}_ENABLE_TYPE_SAFE)
-      find_package(type_safe QUIET REQUIRED)
-  endif()
-  if(${PROJECT_NAME}_TESTING)
-      find_package(Catch2 QUIET REQUIRED)
-  endif()
-  if(${PROJECT_NAME}_BUILD_SNIPPETS)
-      find_package(benchmark QUIET REQUIRED)
-  endif()
+    find_package(RapidJSON QUIET REQUIRED)
+    find_package(Boost 1.65 QUIET REQUIRED)
+    if(${PROJECT_NAME}_ENABLE_TYPE_SAFE)
+        find_package(type_safe QUIET REQUIRED)
+    endif()
+    if(${PROJECT_NAME}_TESTING)
+        find_package(Catch2 QUIET REQUIRED)
+    endif()
+    if(${PROJECT_NAME}_BUILD_SNIPPETS)
+        find_package(benchmark QUIET REQUIRED)
+    endif()
 endif()
-
 
 # Target
 
 add_library(
     ${PROJECT_NAME} STATIC
 
+    include/${PROJECT_NAME}/comparison_traits.hpp
+    include/${PROJECT_NAME}/config.hpp
+    include/${PROJECT_NAME}/define_enum.hpp
+    include/${PROJECT_NAME}/define_struct.hpp
+    include/${PROJECT_NAME}/enum_traits.hpp
+    include/${PROJECT_NAME}/exception.hpp
+    include/${PROJECT_NAME}/genuine_struct.hpp
     include/${PROJECT_NAME}/meta.hpp
-    include/${PROJECT_NAME}/preprocessor.hpp
-
+    include/${PROJECT_NAME}/ostream_traits.hpp
     include/${PROJECT_NAME}/pimpl.hpp
     include/${PROJECT_NAME}/pimpl_impl.hpp
-
-    include/${PROJECT_NAME}/variant.hpp
-    include/${PROJECT_NAME}/variant_fwd.hpp
-
-    include/${PROJECT_NAME}/variant_traits.hpp
-    include/${PROJECT_NAME}/variant_conversion.hpp
-    include/${PROJECT_NAME}/ostream_traits.hpp
-    include/${PROJECT_NAME}/comparison_traits.hpp
-
-    include/${PROJECT_NAME}/type_name.hpp
-
-    include/${PROJECT_NAME}/string_conversion.hpp
-
-    include/${PROJECT_NAME}/config.hpp
-
-    include/${PROJECT_NAME}/enum_traits.hpp
-    include/${PROJECT_NAME}/define_enum.hpp
-
-    include/${PROJECT_NAME}/define_struct.hpp
-    include/${PROJECT_NAME}/value_tag.hpp
-
-    include/${PROJECT_NAME}/genuine_struct.hpp
-
-    include/${PROJECT_NAME}/exception.hpp
-
+    include/${PROJECT_NAME}/preprocessor.hpp
     include/${PROJECT_NAME}/query_string.hpp
-
+    include/${PROJECT_NAME}/string_conversion.hpp
+    include/${PROJECT_NAME}/type_name.hpp
+    include/${PROJECT_NAME}/value_tag.hpp
+    include/${PROJECT_NAME}/variant.hpp
+    include/${PROJECT_NAME}/variant_conversion.hpp
+    include/${PROJECT_NAME}/variant_fwd.hpp
+    include/${PROJECT_NAME}/variant_traits.hpp
     include/serialize.hpp
 
-    src/variant.cpp
     src/query_string.cpp
+    src/variant.cpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
@@ -182,70 +186,69 @@ else()
     install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 endif()
 
+
 # Doc
 if(${PROJECT_NAME}_BUILD_DOC)
     add_subdirectory(doc)
 endif()
 
+
 # Testing
+if(${PROJECT_NAME}_TESTING)
+    add_custom_target(check
+        COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMENT "Build and then run all the tests and examples."
+        USES_TERMINAL)
 
-if(NOT ${PROJECT_NAME}_TESTING)
-    return()
+    # Examples
+    add_subdirectory(example)
+
+    add_executable(
+        test_${PROJECT_NAME}
+
+        test/meta.cpp
+        test/variant.cpp
+
+        test/main.cpp
+
+        test/variant_traits.cpp
+        test/variant_traits_macros.cpp
+        test/variant_traits_non_intrusive.cpp
+        test/ostream_traits.cpp
+        test/ostream_traits_macros.cpp
+        test/comparison_traits.cpp
+        test/comparison_traits_macros.cpp
+
+        test/type_name.cpp
+        test/json_struct.cpp
+        test/type_safe.cpp
+        test/string_conversion.cpp
+        test/query_string.cpp
+
+        test/variant_conversion.cpp
+
+        test/define_enum.cpp
+
+        $<$<BOOL:${${PROJECT_NAME}_TEST_DEFINE_STRUCT}>:test/define_struct.cpp>
+        $<$<BOOL:${${PROJECT_NAME}_TEST_DEFINE_STRUCT}>:test/define_struct_part2.cpp>
+        $<$<BOOL:${${PROJECT_NAME}_TEST_DEFINE_STRUCT}>:test/define_struct_part3.cpp>
+    )
+
+    set_target_properties(test_${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+
+    target_link_libraries(
+        test_${PROJECT_NAME}
+        PRIVATE
+
+        Catch2::Catch2
+        ${PROJECT_NAME}
+        ${PROJECT_NAME}_development
+    )
+
+    add_test(test_serialize test_${PROJECT_NAME})
+    add_dependencies(check test_${PROJECT_NAME})
 endif()
-
-add_custom_target(check
-    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Build and then run all the tests and examples."
-    USES_TERMINAL)
-
-enable_testing()
-
-# Examples
-add_subdirectory(example)
-
-add_executable(
-    test_${PROJECT_NAME}
-
-    test/meta.cpp
-    test/variant.cpp
-
-    test/main.cpp
-
-    test/variant_traits.cpp
-    test/variant_traits_non_intrusive.cpp
-    test/ostream_traits.cpp
-    test/comparison_traits.cpp
-
-    test/type_name.cpp
-    test/json_struct.cpp
-    test/type_safe.cpp
-    test/string_conversion.cpp
-    test/query_string.cpp
-
-    test/variant_conversion.cpp
-
-    test/define_enum.cpp
-
-    $<$<BOOL:${${PROJECT_NAME}_TEST_DEFINE_STRUCT}>:test/define_struct.cpp>
-    $<$<BOOL:${${PROJECT_NAME}_TEST_DEFINE_STRUCT}>:test/define_struct_part2.cpp>
-    $<$<BOOL:${${PROJECT_NAME}_TEST_DEFINE_STRUCT}>:test/define_struct_part3.cpp>
-)
-
-set_target_properties(test_${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
-
-target_link_libraries(
-    test_${PROJECT_NAME}
-    PRIVATE
-
-    Catch2::Catch2
-    ${PROJECT_NAME}
-    ${PROJECT_NAME}_development
-)
-
-add_test(test_serialize test_${PROJECT_NAME})
-add_dependencies(check test_${PROJECT_NAME})
-
 
 # Snippets
 if(${PROJECT_NAME}_BUILD_SNIPPETS)
@@ -254,9 +257,7 @@ if(${PROJECT_NAME}_BUILD_SNIPPETS)
     target_link_libraries(${PROJECT_NAME}_snippets benchmark::benchmark ${PROJECT_NAME}_development ${PROJECT_NAME})
 endif()
 
-
 # Coverage
-
 if(${PROJECT_NAME}_COVERAGE)
     add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/cov.sh
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/scripts/cov.sh ${CMAKE_BINARY_DIR}

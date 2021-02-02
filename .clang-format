@@ -1,5 +1,5 @@
-Language:        Cpp
 # BasedOnStyle:  LLVM
+Language:        Cpp
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: false
@@ -59,16 +59,21 @@ ForEachMacros:
   - BOOST_FOREACH
 IncludeBlocks:   Regroup
 IncludeCategories:
-  - Regex:           '^<rapidjson/'
-    Priority:        5
-  - Regex:           '^<boost/'
-    Priority:        4
+# local
+  - Regex:           '".+'
+    Priority:        1
+  - Regex:           '^<serialize/.*hpp>$'
+    Priority:        2
+# 3rd
   - Regex:           '^<catch2/'
     Priority:        3
-  - Regex:           '^<serialize/pimpl_impl.hpp>$'
-    Priority:        2
-  - Regex:           '^<serialize/.*hpp>$'
-    Priority:        1
+  - Regex:           '^<rapidjson/'
+    Priority:        4
+  - Regex:           '^<boost/'
+    Priority:        5
+# std
+  - Regex:           '^<.+'
+    Priority:        6
 IncludeIsMainRegex: '(Test)?$'
 IndentCaseLabels: false
 IndentPPDirectives: None
@@ -112,7 +117,7 @@ SpacesInContainerLiterals: true
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard:        Cpp11
+Standard:        c++20
 StatementMacros:
   - Q_UNUSED
   - QT_REQUIRE_VERSION
