@@ -32,54 +32,72 @@
 #include <iomanip>
 #include <ostream>
 
-namespace serialize::trait {
+namespace serialize {
+
+/// \pre `T` should be a Boost.Hana.Struct.
+template <class T>
+void ostreamImpl(std::ostream& os, T const& x) {
+    os << typeName(boost::hana::type_c<T>) << " { ";
+
+    boost::hana::for_each(
+            x, boost::hana::fuse([&](auto name, auto value) {
+                if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
+                    if (value.has_value()) {
+                        os << boost::hana::to<char const*>(name) << ": " << *value
+                           << "; ";
+                    }
+                } else if constexpr (isContainer(boost::hana::type_c<decltype(value)>)) {
+                    os << boost::hana::to<char const*>(name);
+                    if constexpr (isPair(boost::hana::type_c<typename decltype(
+                                                 value)::value_type>)) {
+                        os << ": { ";
+                        for (auto const& x : value) {
+                            os << x.first << ": " << x.second << "; ";
+                        }
+                        os << "}; ";
+                    } else {
+                        auto const s = value.size();
+                        std::size_t i = 0;
+                        os << ": [";
+                        for (auto const& x : value) {
+                            os << x << ((i++ == s - 1) ? "" : ", ");
+                        }
+                        os << "]; ";
+                    }
+#if SERIALIZE_ENABLE_TYPE_SAFE
+                } else if constexpr (strongTypeDef(boost::hana::type_c<T>)) {
+                    os << static_cast<type_safe::underlying_type<T>>(x);
+#endif
+                } else {
+                    os << boost::hana::to<char const*>(name) << ": " << value << "; ";
+                }
+            }));
+
+    os << "}";
+}
+
+namespace trait {
 
 /// Enables `std::ostream& operator<<(std::ostream&, Derived)` for `Derived`
 /// \ingroup group-traits-opt-in
+/// \pre `T` should be a Boost.Hana.Struct.
 template <typename Derived>
 struct OStream {
     friend std::ostream& operator<<(std::ostream& os, Derived const& x) {
-        os << typeName(boost::hana::type_c<Derived>) << " { ";
-
-        boost::hana::for_each(
-                x, boost::hana::fuse([&](auto name, auto value) {
-                    if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
-                        if (value.has_value()) {
-                            os << boost::hana::to<char const*>(name) << ": " << *value
-                               << "; ";
-                        }
-                    } else if constexpr (isContainer(
-                                                 boost::hana::type_c<decltype(value)>)) {
-                        os << boost::hana::to<char const*>(name);
-                        if constexpr (isPair(boost::hana::type_c<typename decltype(
-                                                     value)::value_type>)) {
-                            os << ": { ";
-                            for (auto const& x : value) {
-                                os << x.first << ": " << x.second << "; ";
-                            }
-                            os << "}; ";
-                        } else {
-                            auto const s = value.size();
-                            std::size_t i = 0;
-                            os << ": [";
-                            for (auto const& x : value) {
-                                os << x << ((i++ == s - 1) ? "" : ", ");
-                            }
-                            os << "]; ";
-                        }
-#if SERIALIZE_ENABLE_TYPE_SAFE
-                    } else if constexpr (strongTypeDef(boost::hana::type_c<Derived>)) {
-                        os << static_cast<type_safe::underlying_type<Derived>>(x);
-#endif
-                    } else {
-                        os << boost::hana::to<char const*>(name) << ": " << value << "; ";
-                    }
-                }));
-
-        os << "}";
-
+        ostreamImpl(os, x);
         return os;
     }
 };
 
-} // namespace serialize::trait
+} // namespace trait
+} // namespace serialize
+
+/// Enables `std::ostream& operator<<(std::ostream&, T)` for `T`
+/// \ingroup group-traits-opt-in
+/// \pre `T` should be a Boost.Hana.Struct.
+/// \see serialize::trait::OStream.
+#define SERIALIZE_OSTREAM_OPERATOR(T)                                                    \
+    friend std::ostream& operator<<(std::ostream& os, T const& x) {                      \
+        serialize::ostreamImpl(os, x);                                                   \
+        return os;                                                                       \
+    }

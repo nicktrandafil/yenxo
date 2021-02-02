@@ -24,10 +24,31 @@
 
 #pragma once
 
-// boost
 #include <boost/hana.hpp>
 
-namespace serialize::trait {
+namespace serialize {
+
+/// \pre `T` should be a Boost.Hana.Struct.
+template <class T>
+bool operatorEqual(T const& lhs, T const& rhs) {
+    auto mems = boost::hana::zip(boost::hana::members(lhs), boost::hana::members(rhs));
+    return boost::hana::all_of(mems,
+                               boost::hana::fuse([](auto const& lhs, auto const& rhs) {
+                                   return lhs == rhs;
+                               }));
+}
+
+/// \pre `T` should be a Boost.Hana.Struct.
+template <class T>
+bool operatorNotEqual(T const& lhs, T const& rhs) {
+    auto mems = boost::hana::zip(boost::hana::members(lhs), boost::hana::members(rhs));
+    return boost::hana::any_of(mems,
+                               boost::hana::fuse([](auto const& lhs, auto const& rhs) {
+                                   return lhs != rhs;
+                               }));
+}
+
+namespace trait {
 
 /// Enables equality comparison for `Derived`
 /// \ingroup group-traits-opt-in
@@ -39,29 +60,28 @@ namespace serialize::trait {
 template <typename Derived>
 struct EqualityComparison {
     friend bool operator==(Derived const& lhs, Derived const& rhs) {
-        auto mems = boost::hana::zip(boost::hana::members(lhs),
-                                     boost::hana::members(rhs));
-
-        return boost::hana::all_of(
-            mems,
-            boost::hana::fuse([](auto const& lhs, auto const& rhs) {
-                return lhs == rhs;
-            }));
+        return operatorEqual(lhs, rhs);
     }
 
     friend bool operator!=(Derived const& lhs, Derived const& rhs) {
-        auto mems = boost::hana::zip(boost::hana::members(lhs),
-                                     boost::hana::members(rhs));
-
-        return boost::hana::any_of(
-            mems,
-            boost::hana::fuse([](auto const& lhs, auto const& rhs) {
-                return lhs != rhs;
-            }));
+        return operatorNotEqual(lhs, rhs);
     }
 
 protected:
     ~EqualityComparison() = default;
 };
 
-} // namespace serialize::trait
+} // namespace trait
+} // namespace serialize
+
+/// Enables equality comparison for `T`
+/// \ingroup group-traits-opt-in
+/// \pre `T` should be a Boost.Hana.Struct.
+/// \see serialize::trait::EqualityComparison.
+#define SERIALIZE_EQUALITY_COMPARISON_OPERATORS(T)                                       \
+    friend bool operator==(T const& lhs, T const& rhs) {                                 \
+        return serialize::operatorEqual(lhs, rhs);                                       \
+    }                                                                                    \
+    friend bool operator!=(T const& lhs, T const& rhs) {                                 \
+        return serialize::operatorNotEqual(lhs, rhs);                                    \
+    }

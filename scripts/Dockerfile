@@ -10,13 +10,22 @@ RUN apt-get -y update && apt-get -y install \
     bash-completion \
     build-essential git cmake wget tar sudo gdb ninja-build clang-11 clang-format-11 \
     \
-    doxygen libboost-dev \
+    doxygen ccache \
     \
     lcov \
     \
     vim
 
+ARG BOOST_VERSION
+ARG BOOST_URL
 ARG BUILD_TYPE
+
+ENV BOOST_ROOT=/usr/local/include/boost-${BOOST_VERSION}
+
+# Boost
+WORKDIR /tmp
+RUN mkdir -p ${BOOST_ROOT} \
+ && wget -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ${BOOST_ROOT}
 
 # RapidJSON
 WORKDIR /tmp
@@ -48,14 +57,14 @@ RUN git clone --recurse-submodules https://github.com/foonathan/debug_assert.git
 
 # type_safe
 WORKDIR /tmp
-ADD patch/type_safe.diff .
 RUN git clone --recurse-submodules https://github.com/foonathan/type_safe.git \
  && cd type_safe \
- && git apply /tmp/type_safe.diff \
  && mkdir build/ && cd build/ \
  && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. \
  && cmake --build . \
  && cmake --build . --target install
+
+RUN sed -i '/messagebus/d' /var/lib/dpkg/statoverride
 
 RUN echo "if [ -f /home/$USER/.bashrc ]; then . /home/$USER/.bashrc ; fi" >> /root/.bashrc
 

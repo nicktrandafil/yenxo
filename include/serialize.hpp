@@ -22,7 +22,7 @@
   SOFTWARE.
 */
 
-#pragma ocne
+#pragma once
 
 namespace serialize {
 
