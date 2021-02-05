@@ -234,3 +234,8 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
         }
     }
 }
+
+static_assert(toVariantConvertible(boost::hana::type_c<Variant>));
+static_assert(toVariantConvertible(boost::hana::type_c<int>));
+static_assert(toVariantConvertible(boost::hana::type_c<std::unordered_map<std::string, int>>));
+static_assert(toVariantConvertible(boost::hana::type_c<E>));
