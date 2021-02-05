@@ -4,6 +4,7 @@ set -e
 
 cmake --build . --target doc
 cd doc/YES
+git config --global init.defaultBranch main
 git init .
 git remote add origin https://${GH_REPO_TOKEN}@github.com/${TRAVIS_REPO_SLUG}
 git add ./*
