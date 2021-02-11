@@ -35,11 +35,12 @@
 
 #include <boost/hana/any_of.hpp>
 #include <boost/hana/contains.hpp>
+#include <boost/hana/string.hpp>
 #include <boost/hana/traits.hpp>
 #include <boost/hana/tuple.hpp>
 #include <boost/hana/type.hpp>
-#include <boost/hana/string.hpp>
 
+#include <array>
 #include <optional>
 #include <type_traits>
 #include <utility>
