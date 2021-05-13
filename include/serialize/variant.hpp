@@ -303,6 +303,7 @@ public:
     rapidjson::Document& to(rapidjson::Document& json) const;
 
     std::string toJson() const;
+    std::string toPrettyJson() const;
     /// @}
 
     friend std::ostream& operator<<(std::ostream& os, Variant const& var);

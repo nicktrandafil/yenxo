@@ -29,6 +29,7 @@
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
+#include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
@@ -991,6 +992,13 @@ rapidjson::Document& Variant::to(rapidjson::Document& json) const {
 std::string Variant::toJson() const {
     rapidjson::StringBuffer sb;
     rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+    Impl::ToJson (*this)(writer);
+    return sb.GetString();
+}
+
+std::string Variant::toPrettyJson() const {
+    rapidjson::StringBuffer sb;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
     Impl::ToJson (*this)(writer);
     return sb.GetString();
 }
