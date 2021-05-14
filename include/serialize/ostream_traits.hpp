@@ -26,6 +26,7 @@
 
 #include <serialize/meta.hpp>
 #include <serialize/type_name.hpp>
+#include <serialize/variant_conversion.hpp>
 
 #include <boost/hana.hpp>
 
@@ -100,4 +101,14 @@ struct OStream {
     friend std::ostream& operator<<(std::ostream& os, T const& x) {                      \
         serialize::ostreamImpl(os, x);                                                   \
         return os;                                                                       \
+    }
+
+/// Enables `std::ostream& operator<<(std::ostream&, T)` for `T`
+/// \ingroup group-traits-opt-in
+/// \pre `T` should be `toVariantConvertible()`.
+///
+/// The ostream operator dumps the JSON of the value.
+#define SERIALIZE_JSON_OSTREAM_OPERATOR(T)                                               \
+    friend std::ostream& operator<<(std::ostream& os, T const& x) {                      \
+        return os << serialize::toVariant(x).toPrettyJson();                             \
     }

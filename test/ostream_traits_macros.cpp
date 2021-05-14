@@ -23,6 +23,7 @@
 */
 
 #include <serialize/ostream_traits.hpp>
+#include <serialize/variant_traits.hpp>
 
 #include <catch2/catch.hpp>
 
@@ -39,6 +40,13 @@ struct Person {
     int y;
 };
 
+struct Person2 {
+    SERIALIZE_TO_VARIANT(Person2)
+    SERIALIZE_JSON_OSTREAM_OPERATOR(Person2)
+    std::string x;
+    int y;
+};
+
 } // namespace
 
 TEST_CASE("Check SERIALIZE_OSTREAM_OPERATOR", "[ostream_traits]") {
@@ -48,4 +56,15 @@ TEST_CASE("Check SERIALIZE_OSTREAM_OPERATOR", "[ostream_traits]") {
     REQUIRE(os.str() == "Person { x: 1; y: 1; }");
 }
 
+TEST_CASE("Check SERIALIZE_JSON_OSTREAM_OPERATOR", "[ostream_traits]") {
+    Person2 const x{"1", 1};
+    std::ostringstream os;
+    os << x;
+    REQUIRE(os.str() == R"({
+    "y": 1,
+    "x": "1"
+})");
+}
+
 BOOST_HANA_ADAPT_STRUCT(Person, x, y);
+BOOST_HANA_ADAPT_STRUCT(Person2, x, y);
