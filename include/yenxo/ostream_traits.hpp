@@ -24,16 +24,16 @@
 
 #pragma once
 
-#include <serialize/meta.hpp>
-#include <serialize/type_name.hpp>
-#include <serialize/variant_conversion.hpp>
+#include <yenxo/meta.hpp>
+#include <yenxo/type_name.hpp>
+#include <yenxo/variant_conversion.hpp>
 
 #include <boost/hana.hpp>
 
 #include <iomanip>
 #include <ostream>
 
-namespace serialize {
+namespace yenxo {
 
 /// \pre `T` should be a Boost.Hana.Struct.
 template <class T>
@@ -65,7 +65,7 @@ void ostreamImpl(std::ostream& os, T const& x) {
                         }
                         os << "]; ";
                     }
-#if SERIALIZE_ENABLE_TYPE_SAFE
+#if YENXO_ENABLE_TYPE_SAFE
                 } else if constexpr (strongTypeDef(boost::hana::type_c<T>)) {
                     os << static_cast<type_safe::underlying_type<T>>(x);
 #endif
@@ -91,15 +91,15 @@ struct OStream {
 };
 
 } // namespace trait
-} // namespace serialize
+} // namespace yenxo
 
 /// Enables `std::ostream& operator<<(std::ostream&, T)` for `T`
 /// \ingroup group-traits-opt-in
 /// \pre `T` should be a Boost.Hana.Struct.
-/// \see serialize::trait::OStream.
-#define SERIALIZE_OSTREAM_OPERATOR(T)                                                    \
+/// \see yenxo::trait::OStream.
+#define YENXO_OSTREAM_OPERATOR(T)                                                        \
     friend std::ostream& operator<<(std::ostream& os, T const& x) {                      \
-        serialize::ostreamImpl(os, x);                                                   \
+        yenxo::ostreamImpl(os, x);                                                       \
         return os;                                                                       \
     }
 
@@ -108,7 +108,7 @@ struct OStream {
 /// \pre `T` should be `toVariantConvertible()`.
 ///
 /// The ostream operator dumps the JSON of the value.
-#define SERIALIZE_JSON_OSTREAM_OPERATOR(T)                                               \
+#define YENXO_JSON_OSTREAM_OPERATOR(T)                                                   \
     friend std::ostream& operator<<(std::ostream& os, T const& x) {                      \
-        return os << serialize::toVariant(x).toPrettyJson();                             \
+        return os << yenxo::toVariant(x).toPrettyJson();                                 \
     }

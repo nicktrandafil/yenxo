@@ -24,21 +24,24 @@
 
 #pragma once
 
-#include <serialize/variant_fwd.hpp>
+#include <yenxo/variant_fwd.hpp>
 
 #include <stdexcept>
 
-namespace serialize {
+namespace yenxo {
 
 /// Query string parse error
 /// \ingroup group-exceptions
 class QueryStringError : public std::runtime_error {
 public:
-    explicit QueryStringError(std::string const& error, std::string const& input = {},
+    explicit QueryStringError(std::string const& error,
+                              std::string const& input = {},
                               std::string const& expected = {},
                               std::size_t error_pos = std::string::npos)
-        : std::runtime_error(error), input(input), expected(expected),
-          error_pos(error_pos) {
+            : std::runtime_error(error)
+            , input(input)
+            , expected(expected)
+            , error_pos(error_pos) {
     }
 
     /// Test if the error is parse error
@@ -106,4 +109,4 @@ private:
 /// \return VariantMap
 Variant query_string(std::string const& str);
 
-} // namespace serialize
+} // namespace yenxo

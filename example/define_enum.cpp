@@ -1,18 +1,17 @@
-#include <serialize/define_enum.hpp>
-#include <serialize/string_conversion.hpp>
+#include <yenxo/define_enum.hpp>
+#include <yenxo/string_conversion.hpp>
 
 #include <boost/hana/assert.hpp>
 
-using namespace serialize;
+using namespace yenxo;
 
 DEFINE_ENUM(MyEnum,
-    val0,
-    (val1),
-    (val2, 4),
-    (val3,, "string_repr"),
-    (val4, 9, "string_repr2"),
-    (val5,, "s5", "s6")
-);
+            val0,
+            (val1),
+            (val2, 4),
+            (val3, , "string_repr"),
+            (val4, 9, "string_repr2"),
+            (val5, , "s5", "s6"));
 
 int main() {
     // to string conversion

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -d dcov ]; then mkdir dcov; fi
-./test_serialize
+./test_yenxo
 lcov --directory . --capture --output-file dcov/coverage.info # capture coverage info
 lcov --remove dcov/coverage.info '/usr/*' --output-file dcov/coverage.info # filter out system
 genhtml dcov/coverage.info -o dcov

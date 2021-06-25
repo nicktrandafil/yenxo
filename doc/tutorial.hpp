@@ -22,7 +22,7 @@
   SOFTWARE.
 */
 
-namespace serialize {
+namespace yenxo {
 /*!
 
 @mainpage User Manual
@@ -31,10 +31,10 @@ namespace serialize {
 
 @section tutorial-description Description
 
-Serialize tries to reduce your application's boilerplate code when it comes to serializing
+Yenxo tries to reduce your application's boilerplate code when it comes to serializing
 and deserializing C++ values into text-based data interchange formats, like JSON.
 
-The central type of Serialize is Variant. A value first gets converted into Variant, then
+The central type of Yenxo is Variant. A value first gets converted into Variant, then
 the Variant value can be converted to the desired text-based data interchange format.
 Variant natively supports JSON format, but one can traverse Variant value and serialize it
 to any desired text-based data interchange format.
@@ -47,7 +47,7 @@ One can use the same code to convert a value into YAML and JSON.
 
 But the main reason for having an intermediate value is to decouple the library from a
 specific data interchange format and the format implementation library and to build
-Serialize around its own type for internal representation of data interchange format.
+Yenxo around its own type for internal representation of data interchange format.
 
 <div style="text-align: center; margin: 50px auto;">
     <img src="serialize_stages.png">
@@ -112,6 +112,36 @@ VariantMap const var{
     {"age"       , 0           },
 };
 auto const p = fromVariant<Person>(var);
+@endcode
+
+You will save aggregate initialization if you prefer macro opt-ins `YENXO_TO_VARIANT()`
+and `YENXO_FROM_VARIANT()` to `trait::Var`:
+@code{cpp}
+struct Person {
+    YENXO_TO_VARIANT(Person)
+    YENXO_FROM_VARIANT(Person)
+
+    BOOST_HANA_DEFINE_STRUCT(Person
+        , (std::string, first_name)
+        , (std::string, last_name )
+        , (uint8_t    , age       )
+    )
+};
+@endcode
+
+[Boost.Hana.Struct](https://www.boost.org/doc/libs/1_71_0/libs/hana/doc/html/group__group-Struct.html)
+can be defined in a non-intrusive way:
+@code{cpp}
+struct Person {
+    YENXO_TO_VARIANT(Person)
+    YENXO_FROM_VARIANT(Person)
+
+    std::string first_name;
+    std::string last_name;
+    uint8_t age;
+};
+
+BOOST_HANA_ADAPT_STRUCT(Person, first_name, last_name, age);
 @endcode
 
 */

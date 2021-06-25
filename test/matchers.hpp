@@ -24,15 +24,15 @@
 
 #pragma once
 
-#include <serialize/exception.hpp>
+#include <yenxo/exception.hpp>
 
 #include <catch2/catch.hpp>
 
 namespace Catch {
 
 template <>
-struct StringMaker<serialize::VariantBadType> {
-    static std::string convert(serialize::VariantBadType const& value) {
+struct StringMaker<yenxo::VariantBadType> {
+    static std::string convert(yenxo::VariantBadType const& value) {
         return std::string("{ what: \"") + value.what() + "\"; path: \"" + value.path()
              + "\" }";
     }

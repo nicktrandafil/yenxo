@@ -22,21 +22,21 @@
   SOFTWARE.
 */
 
-#include <serialize/comparison_traits.hpp>
+#include <yenxo/comparison_traits.hpp>
 
 #include <catch2/catch.hpp>
 
 namespace {
 
 struct Person {
-    SERIALIZE_EQUALITY_COMPARISON_OPERATORS(Person)
+    YENXO_EQUALITY_COMPARISON_OPERATORS(Person)
     std::string x;
     int y;
 };
 
 } // namespace
 
-TEST_CASE("Check SERIALIZE_EQUALITY_COMPARISON_OPERATORS", "[comparison_traits]") {
+TEST_CASE("Check YENXO_EQUALITY_COMPARISON_OPERATORS", "[comparison_traits]") {
     Person const x{"1", 1};
     Person const y{"1", 1};
     Person const z{"1", 2};

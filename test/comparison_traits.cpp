@@ -22,64 +22,50 @@
   SOFTWARE.
 */
 
-
 // tested
-#include <serialize/comparison_traits.hpp>
+#include <yenxo/comparison_traits.hpp>
 
 // local
-#include <serialize/ostream_traits.hpp>
+#include <yenxo/ostream_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
 
-
-using namespace serialize;
-
+using namespace yenxo;
 
 namespace {
 
-
-struct Hobby
-        : trait::EqualityComparison<Hobby> {
+struct Hobby : trait::EqualityComparison<Hobby> {
     Hobby(int id, std::string const& description)
-        : id(id), description(description)
-    {}
+            : id(id)
+            , description(description) {
+    }
 
     int id;
     std::string description;
 };
 
-
-struct Person
-        : trait::EqualityComparison<Person> {
+struct Person : trait::EqualityComparison<Person> {
     Person(std::string const& name, int age, Hobby const& hobby)
-        : name(name), age(age), hobby(hobby)
-    {}
+            : name(name)
+            , age(age)
+            , hobby(hobby) {
+    }
 
     std::string name;
     std::optional<int> age;
     Hobby hobby;
 };
 
-
 } // namespace
-
 
 BOOST_HANA_ADAPT_STRUCT(Hobby, id, description);
 BOOST_HANA_ADAPT_STRUCT(Person, name, age, hobby);
 
-
 TEST_CASE("Check trait::EqualityComparison", "[comparison_traits]") {
-    Hobby const hobby{
-        1,
-        std::string("Hack")
-    };
+    Hobby const hobby{1, std::string("Hack")};
 
-    Person person{
-        "Efendi",
-        18,
-        hobby
-    };
+    Person person{"Efendi", 18, hobby};
 
     Person person2(person);
     REQUIRE(person == person2);

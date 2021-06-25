@@ -24,11 +24,11 @@
 
 #pragma once
 
-#include <serialize/comparison_traits.hpp>
-#include <serialize/ostream_traits.hpp>
-#include <serialize/variant_traits.hpp>
+#include <yenxo/comparison_traits.hpp>
+#include <yenxo/ostream_traits.hpp>
+#include <yenxo/variant_traits.hpp>
 
-namespace serialize {
+namespace yenxo {
 
 /// Genuine struct
 /// \ingroup group-traits-opt-in
@@ -36,8 +36,8 @@ namespace serialize {
 /// Opts-in `trait::Var`, `trait::EqualityComparison`, `trait::OStream`.
 template <class T, class Policy = trait::VarPolicy>
 struct GenuineStruct
-        : serialize::trait::Var<T, Policy>
-        , serialize::trait::EqualityComparison<T>
-        , serialize::trait::OStream<T> {};
+        : yenxo::trait::Var<T, Policy>
+        , yenxo::trait::EqualityComparison<T>
+        , yenxo::trait::OStream<T> {};
 
-} // namespace serialize
+} // namespace yenxo

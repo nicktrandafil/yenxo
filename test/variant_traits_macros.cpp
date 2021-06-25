@@ -22,7 +22,7 @@
   SOFTWARE.
 */
 
-#include <serialize/variant_traits.hpp>
+#include <yenxo/variant_traits.hpp>
 
 #include <catch2/catch.hpp>
 
@@ -34,63 +34,61 @@ struct PersonOpt {
 };
 
 struct Person {
-    SERIALIZE_TO_VARIANT(Person)
-    SERIALIZE_FROM_VARIANT(Person)
-    SERIALIZE_UPDATE_FROM_VARIANT(Person)
-    SERIALIZE_UPDATE_FROM_OPT(Person, PersonOpt)
+    YENXO_TO_VARIANT(Person)
+    YENXO_FROM_VARIANT(Person)
+    YENXO_UPDATE_FROM_VARIANT(Person)
+    YENXO_UPDATE_FROM_OPT(Person, PersonOpt)
     std::string x;
     int y;
 };
 
 struct Person2 {
-    SERIALIZE_TO_VARIANT_P(Person2, serialize::trait::VarPolicy)
-    SERIALIZE_FROM_VARIANT_P(Person2, serialize::trait::VarPolicy)
-    SERIALIZE_UPDATE_FROM_VARIANT_P(Person2, serialize::trait::VarPolicy)
+    YENXO_TO_VARIANT_P(Person2, yenxo::trait::VarPolicy)
+    YENXO_FROM_VARIANT_P(Person2, yenxo::trait::VarPolicy)
+    YENXO_UPDATE_FROM_VARIANT_P(Person2, yenxo::trait::VarPolicy)
     std::string x;
     int y;
 };
 
 } // namespace
 
-TEST_CASE("Check SERIALIZE_TO_VARIANT", "[variant_traits]") {
-    REQUIRE(serialize::toVariant(Person{"1", 1})
-            == serialize::VariantMap{{"x", "1"}, {"y", 1}});
+TEST_CASE("Check YENXO_TO_VARIANT", "[variant_traits]") {
+    REQUIRE(yenxo::toVariant(Person{"1", 1}) == yenxo::VariantMap{{"x", "1"}, {"y", 1}});
 }
 
-TEST_CASE("Check SERIALIZE_TO_VARIANT_P", "[variant_traits]") {
-    REQUIRE(serialize::toVariant(Person2{"1", 1})
-            == serialize::VariantMap{{"x", "1"}, {"y", 1}});
+TEST_CASE("Check YENXO_TO_VARIANT_P", "[variant_traits]") {
+    REQUIRE(yenxo::toVariant(Person2{"1", 1}) == yenxo::VariantMap{{"x", "1"}, {"y", 1}});
 }
 
-TEST_CASE("Check SERIALIZE_FROM_VARIANT", "[variant_traits]") {
+TEST_CASE("Check YENXO_FROM_VARIANT", "[variant_traits]") {
     auto const actual =
-            serialize::fromVariant<Person>(serialize::VariantMap{{"x", "1"}, {"y", 1}});
+            yenxo::fromVariant<Person>(yenxo::VariantMap{{"x", "1"}, {"y", 1}});
     REQUIRE(actual.x == "1");
     REQUIRE(actual.y == 1);
 }
 
-TEST_CASE("Check SERIALIZE_FROM_VARIANT_P", "[variant_traits]") {
+TEST_CASE("Check YENXO_FROM_VARIANT_P", "[variant_traits]") {
     auto const actual =
-            serialize::fromVariant<Person2>(serialize::VariantMap{{"x", "1"}, {"y", 1}});
+            yenxo::fromVariant<Person2>(yenxo::VariantMap{{"x", "1"}, {"y", 1}});
     REQUIRE(actual.x == "1");
     REQUIRE(actual.y == 1);
 }
 
-TEST_CASE("Check SERIALIZE_UPDATE_FROM_VARIANT", "[variant_traits]") {
+TEST_CASE("Check YENXO_UPDATE_FROM_VARIANT", "[variant_traits]") {
     Person p{"1", 1};
-    p.updateVar(serialize::VariantMap{{"x", "2"}, {"y", 2}});
+    p.updateVar(yenxo::VariantMap{{"x", "2"}, {"y", 2}});
     REQUIRE(p.x == "2");
     REQUIRE(p.y == 2);
 }
 
-TEST_CASE("Check SERIALIZE_UPDATE_FROM_VARIANT_P", "[variant_traits]") {
+TEST_CASE("Check YENXO_UPDATE_FROM_VARIANT_P", "[variant_traits]") {
     Person2 p{"1", 1};
-    p.updateVar(serialize::VariantMap{{"x", "2"}, {"y", 2}});
+    p.updateVar(yenxo::VariantMap{{"x", "2"}, {"y", 2}});
     REQUIRE(p.x == "2");
     REQUIRE(p.y == 2);
 }
 
-TEST_CASE("Check SERIALIZE_UPDATE_FROM_OPT", "[variant_traits]") {
+TEST_CASE("Check YENXO_UPDATE_FROM_OPT", "[variant_traits]") {
     Person p{"1", 1};
     p.updateOpt(PersonOpt{"2", 2});
     REQUIRE(p.x == "2");

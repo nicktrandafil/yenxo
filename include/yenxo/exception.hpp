@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <serialize/type_name.hpp>
+#include <yenxo/type_name.hpp>
 
 #include <boost/hana/type.hpp>
 
@@ -32,7 +32,7 @@
 #include <string>
 #include <string_view>
 
-namespace serialize {
+namespace yenxo {
 
 /// An error identifying `Variant` error
 /// \ingroup group-exceptions
@@ -123,4 +123,4 @@ struct StringConversionError : public std::logic_error {
     }
 };
 
-} // namespace serialize
+} // namespace yenxo

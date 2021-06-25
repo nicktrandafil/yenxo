@@ -28,10 +28,10 @@
 #include <unordered_map>
 #include <vector>
 
-namespace serialize {
+namespace yenxo {
 
 class Variant;
 using VariantMap = std::unordered_map<std::string, Variant>;
 using VariantVec = std::vector<Variant>;
 
-} // namespace serialize
+} // namespace yenxo

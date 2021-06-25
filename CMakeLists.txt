@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.9.2)
 cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0022 NEW)
 
-project(serialize VERSION 0.1)
+project(yenxo VERSION 0.1)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-include(serialize)
+include(yenxo)
 
 
 # If inside subdirectory.
@@ -106,7 +106,7 @@ add_library(
     include/${PROJECT_NAME}/variant_conversion.hpp
     include/${PROJECT_NAME}/variant_fwd.hpp
     include/${PROJECT_NAME}/variant_traits.hpp
-    include/serialize.hpp
+    include/yenxo.hpp
 
     src/query_string.cpp
     src/variant.cpp
@@ -130,7 +130,7 @@ target_include_directories(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC
     BOOST_HANA_CONFIG_ENABLE_STRING_UDL
-    SERIALIZE_ENABLE_TYPE_SAFE=${_${PROJECT_NAME}_ENABLE_TYPE_SAFE}
+    YENXO_ENABLE_TYPE_SAFE=${_${PROJECT_NAME}_ENABLE_TYPE_SAFE}
 )
 
 if(${PROJECT_NAME}_ENABLE_TYPE_SAFE)
@@ -146,9 +146,9 @@ endif()
 
 # Setup package config
 
-install(DIRECTORY include/${PROJECT_NAME} DESTINATION include)
-
 if(NOT ${PROJECT_NAME}_sub)
+    install(DIRECTORY include/${PROJECT_NAME} DESTINATION include)
+
     include(CMakePackageConfigHelpers)
     set(CONFIG_PACKAGE_INSTALL_DIR lib/cmake/${PROJECT_NAME})
 
@@ -182,8 +182,6 @@ if(NOT ${PROJECT_NAME}_sub)
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
         DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
     )
-else()
-    install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 endif()
 
 
@@ -246,7 +244,7 @@ if(${PROJECT_NAME}_TESTING)
         ${PROJECT_NAME}_development
     )
 
-    add_test(test_serialize test_${PROJECT_NAME})
+    add_test(test_${PROJECT_NAME} test_${PROJECT_NAME})
     add_dependencies(check test_${PROJECT_NAME})
 endif()
 

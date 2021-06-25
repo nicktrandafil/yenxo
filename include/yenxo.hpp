@@ -24,7 +24,7 @@
 
 #pragma once
 
-namespace serialize {
+namespace yenxo {
 
 //! @defgroup group-datatypes Data types
 //! Data types provided by the library.
@@ -68,9 +68,9 @@ namespace serialize {
 //! @defgroup group-http HTTP utility
 //! HTTP utilities.
 
-} // namespace serialize
+} // namespace yenxo
 
-#include <serialize/comparison_traits.hpp>
-#include <serialize/define_enum.hpp>
-#include <serialize/exception.hpp>
-#include <serialize/string_conversion.hpp>
+#include <yenxo/comparison_traits.hpp>
+#include <yenxo/define_enum.hpp>
+#include <yenxo/exception.hpp>
+#include <yenxo/string_conversion.hpp>

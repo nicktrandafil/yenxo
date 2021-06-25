@@ -31,7 +31,7 @@ jobs:
       addons:
         apt:
           packages: ["libboost-dev", "cmake", "lcov", "doxygen"]
-      env: TOOLSET=g++ TOOLSET_C=gcc BUILD_TYPE='Debug' options='-Dserialize_COVERAGE=ON -Dserialize_BUILD_DOC=ON'
+      env: TOOLSET=g++ TOOLSET_C=gcc BUILD_TYPE='Debug' options='-Dyenxo_COVERAGE=ON -Dyenxo_BUILD_DOC=ON'
       after_success:
         - bash <(curl -s https://codecov.io/bash) -X fix
         - if [ "${TRAVIS_BRANCH}" == "master" ]; then ../scripts/deploy_doc.sh; fi
@@ -81,10 +81,10 @@ install:
   - sudo cmake --build . --target install
   - cd ../../
 
-  - cd serialize
+  - cd yenxo
 
 script:
   - mkdir build/ && cd build/
   - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE $options ..
   - cmake --build .
-  - ./test_serialize
+  - ./test_yenxo

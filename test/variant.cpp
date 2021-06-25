@@ -22,22 +22,22 @@
   SOFTWARE.
 */
 
-#include <serialize/exception.hpp>
-#include <serialize/type_name.hpp>
-#include <serialize/variant.hpp>
+#include <yenxo/exception.hpp>
+#include <yenxo/type_name.hpp>
+#include <yenxo/variant.hpp>
 
 #include <catch2/catch.hpp>
 
-#include <boost/hana.hpp>
-
 #include <rapidjson/document.h>
+
+#include <boost/hana.hpp>
 
 #include <limits.h>
 #include <sstream>
 
 namespace hana = boost::hana;
 
-using namespace serialize;
+using namespace yenxo;
 
 TEST_CASE("Check Variant", "[Variant]") {
     SECTION("null") {
@@ -160,8 +160,8 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(expected == x.vec());
         REQUIRE_THROWS_AS(Variant().vec(), VariantEmpty);
         REQUIRE_THROWS_AS(Variant(5).vec(), VariantBadType);
-        REQUIRE(Variant().vecOr(Variant::Vec{Variant("abc")}) ==
-                Variant::Vec{Variant("abc")});
+        REQUIRE(Variant().vecOr(Variant::Vec{Variant("abc")})
+                == Variant::Vec{Variant("abc")});
     }
 
     SECTION("Variant::Map") {
@@ -170,14 +170,24 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(expected == x.map());
         REQUIRE_THROWS_AS(Variant().map(), VariantEmpty);
         REQUIRE_THROWS_AS(Variant(5).map(), VariantBadType);
-        REQUIRE(Variant().mapOr(Variant::Map{std::pair("1", Variant(1))}) ==
-                Variant::Map{std::pair("1", Variant(1))});
+        REQUIRE(Variant().mapOr(Variant::Map{std::pair("1", Variant(1))})
+                == Variant::Map{std::pair("1", Variant(1))});
     }
 
     SECTION("empty variant") {
-        auto const types = hana::tuple_t<bool, char, unsigned char, int16_t, uint16_t,
-                                         int32_t, uint32_t, int64_t, uint64_t, double,
-                                         std::string, VariantMap, VariantVec>;
+        auto const types = hana::tuple_t<bool,
+                                         char,
+                                         unsigned char,
+                                         int16_t,
+                                         uint16_t,
+                                         int32_t,
+                                         uint32_t,
+                                         int64_t,
+                                         uint64_t,
+                                         double,
+                                         std::string,
+                                         VariantMap,
+                                         VariantVec>;
 
         hana::for_each(types, [&](auto x) {
             REQUIRE_THROWS_AS(static_cast<typename decltype(x)::type>(Variant()),
@@ -186,8 +196,16 @@ TEST_CASE("Check Variant", "[Variant]") {
     }
 
     SECTION("string, Vec, Map is not convertible to anything") {
-        auto const types = hana::tuple_t<bool, char, unsigned char, int16_t, uint16_t,
-                                         int32_t, uint32_t, int64_t, uint64_t, double>;
+        auto const types = hana::tuple_t<bool,
+                                         char,
+                                         unsigned char,
+                                         int16_t,
+                                         uint16_t,
+                                         int32_t,
+                                         uint32_t,
+                                         int64_t,
+                                         uint64_t,
+                                         double>;
 
         hana::for_each(types, [&](auto x) {
             REQUIRE_THROWS_AS(static_cast<typename decltype(x)::type>(Variant("")),
@@ -208,8 +226,16 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(v == expected);
 
         REQUIRE_THROWS_AS(Variant().modifyVec(), VariantEmpty);
-        auto const types = hana::tuple_t<bool, char, unsigned char, int16_t, uint16_t,
-                                         int32_t, uint32_t, int64_t, uint64_t, double>;
+        auto const types = hana::tuple_t<bool,
+                                         char,
+                                         unsigned char,
+                                         int16_t,
+                                         uint16_t,
+                                         int32_t,
+                                         uint32_t,
+                                         int64_t,
+                                         uint64_t,
+                                         double>;
 
         hana::for_each(types, [&](auto x) {
             REQUIRE_THROWS_AS(Variant(typename decltype(x)::type()).modifyVec(),
@@ -223,10 +249,17 @@ TEST_CASE("Check Variant", "[Variant]") {
         Variant expected(VariantMap{{"a", Variant(2)}});
         REQUIRE(v == expected);
 
-
         REQUIRE_THROWS_AS(Variant().modifyMap(), VariantEmpty);
-        auto const types = hana::tuple_t<bool, char, unsigned char, int16_t, uint16_t,
-                                         int32_t, uint32_t, int64_t, uint64_t, double>;
+        auto const types = hana::tuple_t<bool,
+                                         char,
+                                         unsigned char,
+                                         int16_t,
+                                         uint16_t,
+                                         int32_t,
+                                         uint32_t,
+                                         int64_t,
+                                         uint64_t,
+                                         double>;
 
         hana::for_each(types, [&](auto x) {
             REQUIRE_THROWS_AS(Variant(typename decltype(x)::type()).modifyMap(),
@@ -235,12 +268,18 @@ TEST_CASE("Check Variant", "[Variant]") {
     }
 
     SECTION("representable integral type conversions") {
-        auto const from = hana::tuple_t<bool, char, int8_t, uint8_t, int16_t, uint16_t,
-                                        int32_t, uint32_t>;
+        auto const from = hana::tuple_t<bool,
+                                        char,
+                                        int8_t,
+                                        uint8_t,
+                                        int16_t,
+                                        uint16_t,
+                                        int32_t,
+                                        uint32_t>;
         auto const to = hana::concat(from, hana::tuple_t<int64_t, uint64_t>);
 
         hana::for_each(from, [&](auto x) {
-                hana::for_each(to, [](auto y) {
+            hana::for_each(to, [](auto y) {
                 using X = typename decltype(x)::type;
                 using Y = typename decltype(y)::type;
                 using YLimiets = std::numeric_limits<Y>;
@@ -272,61 +311,77 @@ TEST_CASE("Check Variant", "[Variant]") {
 
                 // min - 1 out of range
                 auto const y_min_in_x_1 = static_cast<X>(static_cast<double>(y_min) - 1);
-                if (std::to_string(static_cast<double>(y_min) - 1) ==
-                    std::to_string(static_cast<double>(y_min_in_x_1))) {
+                if (std::to_string(static_cast<double>(y_min) - 1)
+                    == std::to_string(static_cast<double>(y_min_in_x_1))) {
                     REQUIRE_THROWS_AS(static_cast<Y>(Variant(y_min_in_x_1)),
                                       VariantIntegralOverflow);
                     REQUIRE_THROWS_AS(Variant(y_min_in_x_1).asOr<Y>(1),
                                       VariantIntegralOverflow);
                     REQUIRE_THROWS_WITH(
                             static_cast<Y>(Variant(y_min_in_x_1)),
-                            "The type '" + std::string(typeName(boost::hana::type_c<Y>)) +
-                                    "' can not hold the value '" +
-                                    std::to_string(y_min_in_x_1) + "'");
+                            "The type '" + std::string(typeName(boost::hana::type_c<Y>))
+                                    + "' can not hold the value '"
+                                    + std::to_string(y_min_in_x_1) + "'");
                     REQUIRE_THROWS_WITH(
                             Variant(y_min_in_x_1).asOr<Y>(1),
-                            "The type '" + std::string(typeName(boost::hana::type_c<Y>)) +
-                                    "' can not hold the value '" +
-                                    std::to_string(y_min_in_x_1) + "'");
+                            "The type '" + std::string(typeName(boost::hana::type_c<Y>))
+                                    + "' can not hold the value '"
+                                    + std::to_string(y_min_in_x_1) + "'");
                 }
 
                 // max + 1 out of range
                 auto const y_max_in_x_1 = static_cast<X>(static_cast<double>(y_max) + 1);
-                if (std::to_string(static_cast<double>(y_max) + 1) ==
-                    std::to_string(static_cast<double>(y_max_in_x_1))) {
+                if (std::to_string(static_cast<double>(y_max) + 1)
+                    == std::to_string(static_cast<double>(y_max_in_x_1))) {
                     REQUIRE_THROWS_AS(static_cast<Y>(Variant(y_max_in_x_1)),
                                       VariantIntegralOverflow);
                     REQUIRE_THROWS_AS(Variant(y_max_in_x_1).asOr<Y>(1),
                                       VariantIntegralOverflow);
                     REQUIRE_THROWS_WITH(
                             static_cast<Y>(Variant(y_max_in_x_1)),
-                            "The type '" + std::string(typeName(boost::hana::type_c<Y>)) +
-                                    "' can not hold the value '" +
-                                    std::to_string(y_max_in_x_1) + "'");
+                            "The type '" + std::string(typeName(boost::hana::type_c<Y>))
+                                    + "' can not hold the value '"
+                                    + std::to_string(y_max_in_x_1) + "'");
                     REQUIRE_THROWS_WITH(
                             Variant(y_max_in_x_1).asOr<Y>(1),
-                            "The type '" + std::string(typeName(boost::hana::type_c<Y>)) +
-                                    "' can not hold the value '" +
-                                    std::to_string(y_max_in_x_1) + "'");
+                            "The type '" + std::string(typeName(boost::hana::type_c<Y>))
+                                    + "' can not hold the value '"
+                                    + std::to_string(y_max_in_x_1) + "'");
                 }
             });
         });
     }
 
     SECTION("integral type to double conversions") {
-        auto const types = hana::tuple_t<bool, char, int8_t, uint8_t, int16_t, uint16_t,
-                                         int32_t, uint32_t, int64_t, uint64_t>;
+        auto const types = hana::tuple_t<bool,
+                                         char,
+                                         int8_t,
+                                         uint8_t,
+                                         int16_t,
+                                         uint16_t,
+                                         int32_t,
+                                         uint32_t,
+                                         int64_t,
+                                         uint64_t>;
         hana::for_each(types, [&](auto x) {
             auto const lhs = Variant(typename decltype(x)::type()).floating();
             auto const rhs = double(typename decltype(x)::type());
-            REQUIRE((!(lhs < rhs) &&
-                     !(lhs > rhs)) /* the same lhs == rhs, but without warning */);
+            REQUIRE((!(lhs < rhs)
+                     && !(lhs > rhs)) /* the same lhs == rhs, but without warning */);
         });
     }
 
     SECTION("double to integral type conversions") {
-        auto const types = hana::tuple_t<bool, char, int8_t, uint8_t, int16_t, uint16_t,
-                                         int32_t, uint32_t, int64_t, uint64_t>;
+        auto const types = hana::tuple_t<bool,
+                                         char,
+                                         int8_t,
+                                         uint8_t,
+                                         int16_t,
+                                         uint16_t,
+                                         int32_t,
+                                         uint32_t,
+                                         int64_t,
+                                         uint64_t>;
         hana::for_each(types, [&](auto x) {
             auto const one = static_cast<typename decltype(x)::type>(Variant(1.0));
             REQUIRE(one == 1);
@@ -375,9 +430,10 @@ TEST_CASE("Check Variant", "[Variant]") {
             Variant expected{Variant::Map{
                     std::make_pair("x", Variant(6)),
                     std::make_pair("y", Variant(Variant::Vec{Variant(1), Variant(2)})),
-                    std::make_pair("z", Variant(Variant::Map{
-                                                std::make_pair("a", Variant("a")),
-                                                std::make_pair("b", Variant("b"))})),
+                    std::make_pair(
+                            "z",
+                            Variant(Variant::Map{std::make_pair("a", Variant("a")),
+                                                 std::make_pair("b", Variant("b"))})),
                     std::make_pair("a", Variant())}};
             REQUIRE(expected == Variant::from(rapidjson::Document().Parse(raw)));
         }
@@ -521,8 +577,8 @@ TEST_CASE("Check Variant", "[Variant]") {
             [{"abc": 1}]
         )";
 
-        REQUIRE(Variant::from(rapidjson::Document().Parse(json)) ==
-                Variant(Variant::Vec{Variant(Variant::Map{{"abc", Variant(1)}})}));
+        REQUIRE(Variant::from(rapidjson::Document().Parse(json))
+                == Variant(Variant::Vec{Variant(Variant::Map{{"abc", Variant(1)}})}));
     }
 
     SECTION("typeInfo") {
@@ -568,23 +624,31 @@ TEST_CASE("Check Variant", "[Variant]") {
         }
 
         SECTION("allowed conversions of arithmetic types") {
-            auto const types =
-                    hana::tuple_t<bool, char, int8_t, uint8_t, int16_t, uint16_t, int32_t,
-                                  uint32_t, int64_t, uint64_t, double>;
+            auto const types = hana::tuple_t<bool,
+                                             char,
+                                             int8_t,
+                                             uint8_t,
+                                             int16_t,
+                                             uint16_t,
+                                             int32_t,
+                                             uint32_t,
+                                             int64_t,
+                                             uint64_t,
+                                             double>;
             hana::for_each(types, [types](auto x) {
                 hana::for_each(types, [](auto y) {
-                        using X = typename decltype(x)::type;
-                        using Y = typename decltype(y)::type;
-                        REQUIRE(equal(Variant(X(0)), Variant(Y(0))));
-                        REQUIRE(equal(Variant(X(1)), Variant(Y(1))));
-                        REQUIRE(!equal(Variant(X(0)), Variant(Y(1))));
+                    using X = typename decltype(x)::type;
+                    using Y = typename decltype(y)::type;
+                    REQUIRE(equal(Variant(X(0)), Variant(Y(0))));
+                    REQUIRE(equal(Variant(X(1)), Variant(Y(1))));
+                    REQUIRE(!equal(Variant(X(0)), Variant(Y(1))));
 
-                        REQUIRE(equal(VariantVec{X(0), X(1)}, VariantVec{Y(0), Y(1)}));
-                        REQUIRE(!equal(VariantVec{X(1), X(0)}, VariantVec{Y(0), Y(1)}));
+                    REQUIRE(equal(VariantVec{X(0), X(1)}, VariantVec{Y(0), Y(1)}));
+                    REQUIRE(!equal(VariantVec{X(1), X(0)}, VariantVec{Y(0), Y(1)}));
 
-                        REQUIRE(equal(VariantMap{{"0", X(0)}, {"1", X(1)}},
-                                      VariantMap{{"0", Y(0)}, {"1", Y(1)}}));
-                    });
+                    REQUIRE(equal(VariantMap{{"0", X(0)}, {"1", X(1)}},
+                                  VariantMap{{"0", Y(0)}, {"1", Y(1)}}));
+                });
             });
         }
     }

@@ -1,8 +1,8 @@
-# serialize
+# yenxo
 
-[![Build Status](https://travis-ci.com/nicktrandafil/serialize.svg?branch=master)](https://travis-ci.com/nicktrandafil/serialize)
-[![codecov](https://codecov.io/gh/nicktrandafil/serialize/branch/master/graph/badge.svg)](https://codecov.io/gh/nicktrandafil/serialize)
-[![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](https://nicktrandafil.github.io/serialize)
+[![Build Status](https://travis-ci.com/nicktrandafil/yenxo.svg?branch=master)](https://travis-ci.com/nicktrandafil/yenxo)
+[![codecov](https://codecov.io/gh/nicktrandafil/yenxo/branch/master/graph/badge.svg)](https://codecov.io/gh/nicktrandafil/yenxo)
+[![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](https://nicktrandafil.github.io/yenxo)
 
 Some *add-in*'s which enable the traits listed below for user defined types:
 * serialization/deserialization;
@@ -10,7 +10,7 @@ Some *add-in*'s which enable the traits listed below for user defined types:
 * pushing to `std::ostream`.
 
 Uses `boost::hana` in order to obtain reflection in C++.
-Uses `rapidjson` in order to parse and serialize JSON.
+Uses `rapidjson` to serialize to and deserialize form JSON.
 
 ## Examples
 
@@ -38,4 +38,4 @@ Person person(Variant::from(rapidjson::Document().Parse(json)));
 ```
 
 More snippets can be found in `examples` and `test` directories.
-The documentation can be found [here](https://nicktrandafil.github.io/serialize).
+The documentation can be found [here](https://nicktrandafil.github.io/yenxo).

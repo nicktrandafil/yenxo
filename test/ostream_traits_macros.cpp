@@ -22,8 +22,8 @@
   SOFTWARE.
 */
 
-#include <serialize/ostream_traits.hpp>
-#include <serialize/variant_traits.hpp>
+#include <yenxo/ostream_traits.hpp>
+#include <yenxo/variant_traits.hpp>
 
 #include <catch2/catch.hpp>
 
@@ -32,7 +32,7 @@
 namespace {
 
 struct Person {
-    SERIALIZE_OSTREAM_OPERATOR(Person)
+    YENXO_OSTREAM_OPERATOR(Person)
     static std::string_view typeName() noexcept {
         return "Person";
     }
@@ -41,22 +41,22 @@ struct Person {
 };
 
 struct Person2 {
-    SERIALIZE_TO_VARIANT(Person2)
-    SERIALIZE_JSON_OSTREAM_OPERATOR(Person2)
+    YENXO_TO_VARIANT(Person2)
+    YENXO_JSON_OSTREAM_OPERATOR(Person2)
     std::string x;
     int y;
 };
 
 } // namespace
 
-TEST_CASE("Check SERIALIZE_OSTREAM_OPERATOR", "[ostream_traits]") {
+TEST_CASE("Check YENXO_OSTREAM_OPERATOR", "[ostream_traits]") {
     Person const x{"1", 1};
     std::ostringstream os;
     os << x;
     REQUIRE(os.str() == "Person { x: 1; y: 1; }");
 }
 
-TEST_CASE("Check SERIALIZE_JSON_OSTREAM_OPERATOR", "[ostream_traits]") {
+TEST_CASE("Check YENXO_JSON_OSTREAM_OPERATOR", "[ostream_traits]") {
     Person2 const x{"1", 1};
     std::ostringstream os;
     os << x;

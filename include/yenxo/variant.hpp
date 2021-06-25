@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <serialize/enum_traits.hpp>
-#include <serialize/meta.hpp>
+#include <yenxo/enum_traits.hpp>
+#include <yenxo/meta.hpp>
 
 #include <rapidjson/fwd.h>
 
@@ -34,7 +34,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace serialize {
+namespace yenxo {
 
 /// Serialized object representation. Think of it as a DOM object.
 /// \ingroup group-datatypes
@@ -102,7 +102,8 @@ public:
     Variant(Map&&);
 
     template <typename T, typename = decltype(T::toVariant(std::declval<T>()))>
-    explicit Variant(T const& x) : Variant(T::toVariant(x)) {
+    explicit Variant(T const& x)
+            : Variant(T::toVariant(x)) {
     }
 
     template <typename T, typename = decltype(T::fromVariant(std::declval<Variant>()))>
@@ -250,7 +251,7 @@ public:
     /// Get string
     /// \throw VariantEmpty, VariantBadType
     std::string const& str() const;
-    explicit operator std::string const&() const {
+    explicit operator std::string const &() const {
         return str();
     }
 
@@ -261,7 +262,7 @@ public:
     /// Get Vec
     /// \throw VariantEmpty, VariantBadType
     Vec const& vec() const;
-    explicit operator Vec const&() const {
+    explicit operator Vec const &() const {
         return vec();
     }
     Vec& modifyVec();
@@ -273,7 +274,7 @@ public:
     /// Get Map
     /// \throw VariantEmpty, VariantBadType
     Map const& map() const;
-    explicit operator Map const&() const {
+    explicit operator Map const &() const {
         return map();
     }
     Map& modifyMap();
@@ -345,31 +346,44 @@ private:
     TypeTag type_tag_;
     union ValueType {
         ValueType() = default;
-        ValueType(NullType x) noexcept : null_(x) {
+        ValueType(NullType x) noexcept
+                : null_(x) {
         }
-        ValueType(bool x) noexcept : bool_(x) {
+        ValueType(bool x) noexcept
+                : bool_(x) {
         }
-        ValueType(char x) noexcept : char_(x) {
+        ValueType(char x) noexcept
+                : char_(x) {
         }
-        ValueType(int8_t x) noexcept : int8(x) {
+        ValueType(int8_t x) noexcept
+                : int8(x) {
         }
-        ValueType(uint8_t x) noexcept : uint8(x) {
+        ValueType(uint8_t x) noexcept
+                : uint8(x) {
         }
-        ValueType(int16_t x) noexcept : int16(x) {
+        ValueType(int16_t x) noexcept
+                : int16(x) {
         }
-        ValueType(uint16_t x) noexcept : uint16(x) {
+        ValueType(uint16_t x) noexcept
+                : uint16(x) {
         }
-        ValueType(int32_t x) noexcept : int32(x) {
+        ValueType(int32_t x) noexcept
+                : int32(x) {
         }
-        ValueType(uint32_t x) noexcept : uint32(x) {
+        ValueType(uint32_t x) noexcept
+                : uint32(x) {
         }
-        ValueType(int64_t x) noexcept : int64(x) {
+        ValueType(int64_t x) noexcept
+                : int64(x) {
         }
-        ValueType(uint64_t x) noexcept : uint64(x) {
+        ValueType(uint64_t x) noexcept
+                : uint64(x) {
         }
-        ValueType(double x) noexcept : double_(x) {
+        ValueType(double x) noexcept
+                : double_(x) {
         }
-        ValueType(void* x) noexcept : ptr(x) {
+        ValueType(void* x) noexcept
+                : ptr(x) {
         }
         NullType null_;
         bool bool_;
@@ -435,27 +449,53 @@ template <>
 struct EnumTraits<Variant::TypeTag> {
     using Enum = Variant::TypeTag;
     static constexpr size_t const count = 15;
-    static constexpr std::array<Enum, count> const values = {
-            Enum::null,   Enum::boolean, Enum::char_,  Enum::int8,   Enum::uint8,
-            Enum::int16,  Enum::uint16,  Enum::int32,  Enum::uint32, Enum::int64,
-            Enum::uint64, Enum::double_, Enum::string, Enum::vec,    Enum::map};
+    static constexpr std::array<Enum, count> const values = {Enum::null,
+                                                             Enum::boolean,
+                                                             Enum::char_,
+                                                             Enum::int8,
+                                                             Enum::uint8,
+                                                             Enum::int16,
+                                                             Enum::uint16,
+                                                             Enum::int32,
+                                                             Enum::uint32,
+                                                             Enum::int64,
+                                                             Enum::uint64,
+                                                             Enum::double_,
+                                                             Enum::string,
+                                                             Enum::vec,
+                                                             Enum::map};
     static char const* toString(Enum e) {
         switch (e) {
-        case Enum::null: return "null";
-        case Enum::boolean: return "boolean";
-        case Enum::char_: return "char";
-        case Enum::int8: return "int8";
-        case Enum::uint8: return "uint8";
-        case Enum::int16: return "int16";
-        case Enum::uint16: return "uint16";
-        case Enum::int32: return "int32";
-        case Enum::uint32: return "uint32";
-        case Enum::int64: return "int64";
-        case Enum::uint64: return "uint64";
-        case Enum::double_: return "double_";
-        case Enum::string: return "string";
-        case Enum::vec: return "vec";
-        case Enum::map: return "map";
+        case Enum::null:
+            return "null";
+        case Enum::boolean:
+            return "boolean";
+        case Enum::char_:
+            return "char";
+        case Enum::int8:
+            return "int8";
+        case Enum::uint8:
+            return "uint8";
+        case Enum::int16:
+            return "int16";
+        case Enum::uint16:
+            return "uint16";
+        case Enum::int32:
+            return "int32";
+        case Enum::uint32:
+            return "uint32";
+        case Enum::int64:
+            return "int64";
+        case Enum::uint64:
+            return "uint64";
+        case Enum::double_:
+            return "double_";
+        case Enum::string:
+            return "string";
+        case Enum::vec:
+            return "vec";
+        case Enum::map:
+            return "map";
         }
         throw std::logic_error(
                 "'" + std::to_string(static_cast<std::underlying_type_t<Enum>>(e)) +
@@ -464,4 +504,4 @@ struct EnumTraits<Variant::TypeTag> {
     }
 };
 
-} // namespace serialize
+} // namespace yenxo

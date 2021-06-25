@@ -24,15 +24,15 @@
 
 #pragma once
 
-#include <serialize/meta.hpp>
-#include <serialize/variant.hpp>
-#include <serialize/variant_conversion.hpp>
+#include <yenxo/meta.hpp>
+#include <yenxo/variant.hpp>
+#include <yenxo/variant_conversion.hpp>
 
 #include <boost/hana.hpp>
 
 #include <type_traits>
 
-namespace serialize {
+namespace yenxo {
 
 /// \defgroup group-traits-auto-variant Variant conversion
 /// \ingroup group-traits-opt-in
@@ -66,7 +66,7 @@ namespace serialize {
 ///
 /// If `T` supports trait `X`, and trait `X` supports `names()`, then trait `X`
 /// should use name "y" for member `x` in serialized Variant representation.
-#ifdef SERIALIZE_DOXYGEN_INVOKED
+#ifdef YENXO_DOXYGEN_INVOKED
 constexpr auto names = [] { ... };
 #endif
 
@@ -91,7 +91,7 @@ constexpr auto names = [] { ... };
 /// If `T` supports trait `X`, and trait `X` supports `defaults()`, then trait `X`
 /// should specify value `1` for member `x` during `Variant` to `T` conversion in case
 /// if input Variant have no value for `x`.
-#ifdef SERIALIZE_DOXYGEN_INVOKED
+#ifdef YENXO_DOXYGEN_INVOKED
 constexpr auto defaults = [] { ... };
 #endif
 
@@ -99,7 +99,7 @@ namespace trait {
 namespace detail {
 
 /// \ingroup group-details
-/// Has member `updateVar(serialize::Variant const&)`.
+/// Has member `updateVar(yenxo::Variant const&)`.
 constexpr auto const hasUpdateVar = boost::hana::is_valid(
         [](auto t) -> decltype((void)std::declval<typename decltype(t)::type>().updateVar(
                            std::declval<Variant>())) {});
@@ -109,14 +109,12 @@ constexpr auto const hasUpdateVar = boost::hana::is_valid(
 struct Default {
     /// Does a type has a member function `static auto defaults()`
     static constexpr auto const has = boost::hana::is_valid(
-        [](auto t) -> decltype((void)decltype(t)::type::defaults()) {
-        });
+            [](auto t) -> decltype((void)decltype(t)::type::defaults()) {});
 
     /// Does the member `name` has a default value in the class `C`
     template <typename T, typename S>
     static constexpr bool hasValue(boost::hana::basic_type<T>, S name) {
-        using Found = decltype(
-            name ^ boost::hana::in ^ boost::hana::keys(T::defaults()));
+        using Found = decltype(name ^ boost::hana::in ^ boost::hana::keys(T::defaults()));
         return boost::hana::value<Found>();
     }
 
@@ -132,14 +130,12 @@ struct Default {
 struct Rename {
     // Does a type has a static member function `names()`
     static constexpr auto const hasNames = boost::hana::is_valid(
-        [](auto t) -> decltype((void)decltype(t)::type::names()) {
-        });
+            [](auto t) -> decltype((void)decltype(t)::type::names()) {});
 
     // Is `name` is present in `names()` of `T`
     template <typename T, typename S>
     static constexpr bool presentInNames(S name) {
-        using Found = decltype(
-            name ^ boost::hana::in ^ boost::hana::keys(T::names()));
+        using Found = decltype(name ^ boost::hana::in ^ boost::hana::keys(T::names()));
         return boost::hana::value<Found>();
     }
 
@@ -183,7 +179,7 @@ void fromVariantWrap(T& val,
                      F const& from_variant = fromVariant2) {
     try {
         return from_variant(val, var);
-    } catch (serialize::VariantErr& e) {
+    } catch (yenxo::VariantErr& e) {
         e.prependPath(name);
         throw;
     } catch (std::exception const& e) {
@@ -224,7 +220,7 @@ struct VarPolicy {
     static constexpr NoTag tag{};
 };
 
-using VarDefPolicy [[deprecated("Use serialize::trait::VarPolicy.")]] = VarPolicy;
+using VarDefPolicy [[deprecated("Use yenxo::trait::VarPolicy.")]] = VarPolicy;
 
 /// Convert `x` to `Variant`
 /// \ingroup group-traits-auto-variant
@@ -299,7 +295,7 @@ Variant toVariantImpl(T const& x) {
 ///
 /// \pre `T` should be a Boost.Hana.Struct.
 template <class T, class Policy = VarPolicy>
-T fromVariantImpl(serialize::Variant const& x) {
+T fromVariantImpl(yenxo::Variant const& x) {
     using namespace std::literals;
     T ret;
 
@@ -404,7 +400,7 @@ protected:
 };
 
 template <typename Derived, typename Policy = VarPolicy>
-using VarDef [[deprecated("Use serialize::trait::Var.")]] = Var<Derived, Policy>;
+using VarDef [[deprecated("Use yenxo::trait::Var.")]] = Var<Derived, Policy>;
 
 /// Updates the specified fields
 /// \ingroup group-traits-auto-variant
@@ -500,9 +496,9 @@ protected:
 };
 
 } // namespace trait
-} // namespace serialize
+} // namespace yenxo
 
-/// Enables to `serialize::Variant` conversion for `T`
+/// Enables to `yenxo::Variant` conversion for `T`
 /// \ingroup group-traits-auto-variant
 ///
 /// `T` can provide
@@ -510,40 +506,12 @@ protected:
 /// * `defaults()`.
 ///
 /// \pre `T` should be a Boost.Hana.Struct.
-#define SERIALIZE_TO_VARIANT(T)                                                          \
-    static serialize::Variant toVariant(T const& x) {                                    \
-        return serialize::trait::toVariantImpl<T>(x);                                    \
+#define YENXO_TO_VARIANT(T)                                                              \
+    static yenxo::Variant toVariant(T const& x) {                                        \
+        return yenxo::trait::toVariantImpl<T>(x);                                        \
     }
 
-/// Enables to `serialize::Variant` conversion for `T`
-/// \ingroup group-traits-auto-variant
-///
-/// Conversion can be customized via `Policy`.
-///
-/// `T` can provide
-/// * `names()`;
-/// * `defaults()`.
-///
-/// \pre `T` should be a Boost.Hana.Struct.
-#define SERIALIZE_TO_VARIANT_P(T, Policy)                                                \
-    static serialize::Variant toVariant(T const& x) {                                    \
-        return serialize::trait::toVariantImpl<T, Policy>(x);                            \
-    }
-
-/// Enables from `serialize::Variant` conversion for `T`
-/// \ingroup group-traits-auto-variant
-///
-/// `T` can provide
-/// * `names()`;
-/// * `defaults()`.
-///
-/// \pre `T` should be a Boost.Hana.Struct.
-#define SERIALIZE_FROM_VARIANT(T)                                                        \
-    static T fromVariant(serialize::Variant const& x) {                                  \
-        return serialize::trait::fromVariantImpl<T>(x);                                  \
-    }
-
-/// Enables from `serialize::Variant` conversion for `T`
+/// Enables to `yenxo::Variant` conversion for `T`
 /// \ingroup group-traits-auto-variant
 ///
 /// Conversion can be customized via `Policy`.
@@ -553,24 +521,52 @@ protected:
 /// * `defaults()`.
 ///
 /// \pre `T` should be a Boost.Hana.Struct.
-#define SERIALIZE_FROM_VARIANT_P(T, Policy)                                              \
-    static T fromVariant(serialize::Variant const& x) {                                  \
-        return serialize::trait::fromVariantImpl<T, Policy>(x);                          \
+#define YENXO_TO_VARIANT_P(T, Policy)                                                    \
+    static yenxo::Variant toVariant(T const& x) {                                        \
+        return yenxo::trait::toVariantImpl<T, Policy>(x);                                \
     }
 
-/// Enables from `serialize::Variant` update for `T`
+/// Enables from `yenxo::Variant` conversion for `T`
+/// \ingroup group-traits-auto-variant
+///
+/// `T` can provide
+/// * `names()`;
+/// * `defaults()`.
+///
+/// \pre `T` should be a Boost.Hana.Struct.
+#define YENXO_FROM_VARIANT(T)                                                            \
+    static T fromVariant(yenxo::Variant const& x) {                                      \
+        return yenxo::trait::fromVariantImpl<T>(x);                                      \
+    }
+
+/// Enables from `yenxo::Variant` conversion for `T`
+/// \ingroup group-traits-auto-variant
+///
+/// Conversion can be customized via `Policy`.
+///
+/// `T` can provide
+/// * `names()`;
+/// * `defaults()`.
+///
+/// \pre `T` should be a Boost.Hana.Struct.
+#define YENXO_FROM_VARIANT_P(T, Policy)                                                  \
+    static T fromVariant(yenxo::Variant const& x) {                                      \
+        return yenxo::trait::fromVariantImpl<T, Policy>(x);                              \
+    }
+
+/// Enables from `yenxo::Variant` update for `T`
 /// \ingroup group-traits-auto-variant
 ///
 /// `T` can provide
 /// * `names()`.
 ///
 /// \pre `T` should be a Boost.Hana.Struct.
-#define SERIALIZE_UPDATE_FROM_VARIANT(T)                                                 \
-    void updateVar(serialize::Variant const& x) {                                        \
-        serialize::trait::updateVarImpl<T>(*this, x);                                    \
+#define YENXO_UPDATE_FROM_VARIANT(T)                                                     \
+    void updateVar(yenxo::Variant const& x) {                                            \
+        yenxo::trait::updateVarImpl<T>(*this, x);                                        \
     }
 
-/// Enables from `serialize::Variant` update for `T`
+/// Enables from `yenxo::Variant` update for `T`
 /// \ingroup group-traits-auto-variant
 ///
 /// Updating can be customized via `Policy`.
@@ -579,15 +575,15 @@ protected:
 /// * `names()`.
 ///
 /// \pre `T` should be a Boost.Hana.Struct.
-#define SERIALIZE_UPDATE_FROM_VARIANT_P(T, Policy)                                       \
-    void updateVar(serialize::Variant const& x) {                                        \
-        serialize::trait::updateVarImpl<T, Policy>(*this, x);                            \
+#define YENXO_UPDATE_FROM_VARIANT_P(T, Policy)                                           \
+    void updateVar(yenxo::Variant const& x) {                                            \
+        yenxo::trait::updateVarImpl<T, Policy>(*this, x);                                \
     }
 
 /// Enables from `Opt` update for `T`
 /// \ingroup group-traits-auto-variant
 /// \pre `T` should be a Boost.Hana.Struct.
-#define SERIALIZE_UPDATE_FROM_OPT(T, Opt)                                                \
+#define YENXO_UPDATE_FROM_OPT(T, Opt)                                                    \
     void updateOpt(Opt const& x) {                                                       \
-        serialize::trait::updateOptImpl(*this, x);                                       \
+        yenxo::trait::updateOptImpl(*this, x);                                           \
     }

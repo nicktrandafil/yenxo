@@ -23,30 +23,31 @@
 */
 
 // tested
-#include <serialize/variant_traits.hpp>
+#include <yenxo/variant_traits.hpp>
 
 // local
-#include <serialize/comparison_traits.hpp>
-#include <serialize/ostream_traits.hpp>
+#include <yenxo/comparison_traits.hpp>
+#include <yenxo/ostream_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
 
-using namespace serialize;
+using namespace yenxo;
 
 namespace {
 
 struct UserDefinedStr : private std::string {
     UserDefinedStr() = default;
-    UserDefinedStr(std::string const& x) : std::string(x) {
+    UserDefinedStr(std::string const& x)
+            : std::string(x) {
     }
     std::string str() const {
         return static_cast<std::string>(*this);
     }
 
     bool operator==(UserDefinedStr const& rhs) const {
-        return static_cast<std::string const&>(*this) ==
-               static_cast<std::string const&>(rhs);
+        return static_cast<std::string const&>(*this)
+            == static_cast<std::string const&>(rhs);
     }
 
     friend std::ostream& operator<<(std::ostream& out, UserDefinedStr const& x) {
@@ -56,7 +57,7 @@ struct UserDefinedStr : private std::string {
 
 } // namespace
 
-namespace serialize {
+namespace yenxo {
 
 template <>
 struct FromVariantImpl<UserDefinedStr> {
@@ -72,15 +73,18 @@ struct ToVariantImpl<UserDefinedStr> {
     }
 };
 
-} // namespace serialize
+} // namespace yenxo
 
 namespace {
 
-struct Hobby : trait::Var<Hobby>,
-               trait::EqualityComparison<Hobby>,
-               trait::OStream<Hobby> {
+struct Hobby
+        : trait::Var<Hobby>
+        , trait::EqualityComparison<Hobby>
+        , trait::OStream<Hobby> {
     Hobby() = default;
-    Hobby(int id, std::string const& description) : id(id), description(description) {
+    Hobby(int id, std::string const& description)
+            : id(id)
+            , description(description) {
     }
 
     friend constexpr std::string_view typeNameImpl(Hobby const*) {

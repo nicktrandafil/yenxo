@@ -1,24 +1,34 @@
-#include <serialize/variant.hpp>
-#include <serialize/variant_traits.hpp>
+#include <yenxo/variant.hpp>
+#include <yenxo/variant_traits.hpp>
+
 #include <rapidjson/document.h>
 
-using namespace serialize;
+using namespace yenxo;
 
 struct Hobby : trait::Var<Hobby> { // enables serialization/deserialization
-    Hobby() : id(0) {}
+    Hobby()
+            : id(0) {
+    }
 
     Hobby(int id, std::string const& description)
-        : id(id), description(description) {}
+            : id(id)
+            , description(description) {
+    }
 
     int id;
     std::string description;
 };
 
 struct Person : trait::Var<Person> {
-    Person() : age(0) {}
+    Person()
+            : age(0) {
+    }
 
     Person(std::string const& name, int age, Hobby const& hobby)
-        : name(name), age(age), hobby(hobby) {}
+            : name(name)
+            , age(age)
+            , hobby(hobby) {
+    }
 
     std::string name;
     int age;
@@ -37,7 +47,8 @@ int main() {
         }
     )";
 
-    Person const p = Person::fromVariant(Variant::from(rapidjson::Document().Parse(json)));
+    Person const p =
+            Person::fromVariant(Variant::from(rapidjson::Document().Parse(json)));
 }
 
 // add reflection

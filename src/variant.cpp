@@ -22,10 +22,10 @@
   SOFTWARE.
 */
 
-#include <serialize/exception.hpp>
-#include <serialize/meta.hpp>
-#include <serialize/type_name.hpp>
-#include <serialize/variant.hpp>
+#include <yenxo/exception.hpp>
+#include <yenxo/meta.hpp>
+#include <yenxo/type_name.hpp>
+#include <yenxo/variant.hpp>
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
@@ -38,63 +38,107 @@
 #include <ostream>
 #include <typeinfo>
 
-namespace serialize {
+namespace yenxo {
 
 Variant::~Variant() noexcept {
     switch (type_tag_) {
-    case TypeTag::string: delete reinterpret_cast<std::string*>(value_.ptr); break;
-    case TypeTag::vec: delete reinterpret_cast<Vec*>(value_.ptr); break;
-    case TypeTag::map: delete reinterpret_cast<Map*>(value_.ptr); break;
-    default: break;
+    case TypeTag::string:
+        delete reinterpret_cast<std::string*>(value_.ptr);
+        break;
+    case TypeTag::vec:
+        delete reinterpret_cast<Vec*>(value_.ptr);
+        break;
+    case TypeTag::map:
+        delete reinterpret_cast<Map*>(value_.ptr);
+        break;
+    default:
+        break;
     }
 }
 
-Variant::Variant() noexcept : type_tag_(TypeTag::null), value_(NullType{}) {
+Variant::Variant() noexcept
+        : type_tag_(TypeTag::null)
+        , value_(NullType{}) {
 }
-Variant::Variant(NullType x) noexcept : type_tag_(TypeTag::null), value_(x) {
+Variant::Variant(NullType x) noexcept
+        : type_tag_(TypeTag::null)
+        , value_(x) {
 }
-Variant::Variant(bool x) noexcept : type_tag_(TypeTag::boolean), value_(x) {
+Variant::Variant(bool x) noexcept
+        : type_tag_(TypeTag::boolean)
+        , value_(x) {
 }
-Variant::Variant(char x) noexcept : type_tag_(TypeTag::char_), value_(x) {
+Variant::Variant(char x) noexcept
+        : type_tag_(TypeTag::char_)
+        , value_(x) {
 }
-Variant::Variant(int8_t x) noexcept : type_tag_(TypeTag::int8), value_(x) {
+Variant::Variant(int8_t x) noexcept
+        : type_tag_(TypeTag::int8)
+        , value_(x) {
 }
-Variant::Variant(uint8_t x) noexcept : type_tag_(TypeTag::uint8), value_(x) {
+Variant::Variant(uint8_t x) noexcept
+        : type_tag_(TypeTag::uint8)
+        , value_(x) {
 }
-Variant::Variant(int16_t x) noexcept : type_tag_(TypeTag::int16), value_(x) {
+Variant::Variant(int16_t x) noexcept
+        : type_tag_(TypeTag::int16)
+        , value_(x) {
 }
-Variant::Variant(uint16_t x) noexcept : type_tag_(TypeTag::uint16), value_(x) {
+Variant::Variant(uint16_t x) noexcept
+        : type_tag_(TypeTag::uint16)
+        , value_(x) {
 }
-Variant::Variant(int32_t x) noexcept : type_tag_(TypeTag::int32), value_(x) {
+Variant::Variant(int32_t x) noexcept
+        : type_tag_(TypeTag::int32)
+        , value_(x) {
 }
-Variant::Variant(uint32_t x) noexcept : type_tag_(TypeTag::uint32), value_(x) {
+Variant::Variant(uint32_t x) noexcept
+        : type_tag_(TypeTag::uint32)
+        , value_(x) {
 }
-Variant::Variant(int64_t x) noexcept : type_tag_(TypeTag::int64), value_(x) {
+Variant::Variant(int64_t x) noexcept
+        : type_tag_(TypeTag::int64)
+        , value_(x) {
 }
-Variant::Variant(uint64_t x) noexcept : type_tag_(TypeTag::uint64), value_(x) {
+Variant::Variant(uint64_t x) noexcept
+        : type_tag_(TypeTag::uint64)
+        , value_(x) {
 }
-Variant::Variant(double x) noexcept : type_tag_(TypeTag::double_), value_(x) {
+Variant::Variant(double x) noexcept
+        : type_tag_(TypeTag::double_)
+        , value_(x) {
 }
 
 Variant::Variant(char const* const& x)
-    : type_tag_(TypeTag::string), value_(new std::string(x)) {
+        : type_tag_(TypeTag::string)
+        , value_(new std::string(x)) {
 }
 
 Variant::Variant(std::string const& x)
-    : type_tag_(TypeTag::string), value_(new std::string(x)) {
+        : type_tag_(TypeTag::string)
+        , value_(new std::string(x)) {
 }
 Variant::Variant(std::string&& x)
-    : type_tag_(TypeTag::string), value_(new std::string(std::move(x))) {
+        : type_tag_(TypeTag::string)
+        , value_(new std::string(std::move(x))) {
 }
 
-Variant::Variant(Vec const& x) : type_tag_(TypeTag::vec), value_(new Vec(x)) {
+Variant::Variant(Vec const& x)
+        : type_tag_(TypeTag::vec)
+        , value_(new Vec(x)) {
 }
-Variant::Variant(Vec&& x) : type_tag_(TypeTag::vec), value_(new Vec(std::move(x))) {
+Variant::Variant(Vec&& x)
+        : type_tag_(TypeTag::vec)
+        , value_(new Vec(std::move(x))) {
 }
 
-Variant::Variant(Map const& x) : type_tag_(TypeTag::map), value_(new Map(x)) {
+Variant::Variant(Map const& x)
+        : type_tag_(TypeTag::map)
+        , value_(new Map(x)) {
 }
-Variant::Variant(Map&& x) : type_tag_(TypeTag::map), value_(new Map(std::move(x))) {
+Variant::Variant(Map&& x)
+        : type_tag_(TypeTag::map)
+        , value_(new Map(std::move(x))) {
 }
 
 struct Variant::Impl {
@@ -104,9 +148,15 @@ struct Variant::Impl {
         case TypeTag::string:
             ret = new std::string(*reinterpret_cast<std::string*>(x.ptr));
             break;
-        case TypeTag::vec: ret = new Vec(*reinterpret_cast<Vec*>(x.ptr)); break;
-        case TypeTag::map: ret = new Map(*reinterpret_cast<Map*>(x.ptr)); break;
-        default: ret = x; break;
+        case TypeTag::vec:
+            ret = new Vec(*reinterpret_cast<Vec*>(x.ptr));
+            break;
+        case TypeTag::map:
+            ret = new Map(*reinterpret_cast<Map*>(x.ptr));
+            break;
+        default:
+            ret = x;
+            break;
         }
         return ret;
     }
@@ -115,7 +165,8 @@ struct Variant::Impl {
 };
 
 Variant::Variant(Variant const& rhs)
-    : type_tag_(rhs.type_tag_), value_(Impl::copy(type_tag_, rhs.value_)) {
+        : type_tag_(rhs.type_tag_)
+        , value_(Impl::copy(type_tag_, rhs.value_)) {
 }
 
 Variant& Variant::operator=(Variant const& rhs) {
@@ -124,7 +175,9 @@ Variant& Variant::operator=(Variant const& rhs) {
     return *this;
 }
 
-Variant::Variant(Variant&& rhs) noexcept : type_tag_(rhs.type_tag_), value_(rhs.value_) {
+Variant::Variant(Variant&& rhs) noexcept
+        : type_tag_(rhs.type_tag_)
+        , value_(rhs.value_) {
     rhs.type_tag_ = TypeTag::null;
     rhs.value_.null_ = {};
 }
@@ -161,7 +214,8 @@ struct GetHelper<Variant::NullType> {
     }
     template <typename U>
     [[noreturn]] static Variant::NullType apply(U const&) {
-        throw VariantBadType(boost::hana::type_c<Variant::NullType>, boost::hana::type_c<U>);
+        throw VariantBadType(boost::hana::type_c<Variant::NullType>,
+                             boost::hana::type_c<U>);
     }
 };
 
@@ -418,18 +472,30 @@ template <class T, class U>
 decltype(auto) getHelper(Variant::TypeTag tag, U value_) {
     using TypeTag = Variant::TypeTag;
     switch (tag) {
-    case TypeTag::null: return GetHelper<T>::apply(value_.null_);
-    case TypeTag::boolean: return GetHelper<T>::apply(value_.bool_);
-    case TypeTag::char_: return GetHelper<T>::apply(value_.char_);
-    case TypeTag::int8: return GetHelper<T>::apply(value_.int8);
-    case TypeTag::uint8: return GetHelper<T>::apply(value_.uint8);
-    case TypeTag::int16: return GetHelper<T>::apply(value_.int16);
-    case TypeTag::uint16: return GetHelper<T>::apply(value_.uint16);
-    case TypeTag::int32: return GetHelper<T>::apply(value_.int32);
-    case TypeTag::uint32: return GetHelper<T>::apply(value_.uint32);
-    case TypeTag::int64: return GetHelper<T>::apply(value_.int64);
-    case TypeTag::uint64: return GetHelper<T>::apply(value_.uint64);
-    case TypeTag::double_: return GetHelper<T>::apply(value_.double_);
+    case TypeTag::null:
+        return GetHelper<T>::apply(value_.null_);
+    case TypeTag::boolean:
+        return GetHelper<T>::apply(value_.bool_);
+    case TypeTag::char_:
+        return GetHelper<T>::apply(value_.char_);
+    case TypeTag::int8:
+        return GetHelper<T>::apply(value_.int8);
+    case TypeTag::uint8:
+        return GetHelper<T>::apply(value_.uint8);
+    case TypeTag::int16:
+        return GetHelper<T>::apply(value_.int16);
+    case TypeTag::uint16:
+        return GetHelper<T>::apply(value_.uint16);
+    case TypeTag::int32:
+        return GetHelper<T>::apply(value_.int32);
+    case TypeTag::uint32:
+        return GetHelper<T>::apply(value_.uint32);
+    case TypeTag::int64:
+        return GetHelper<T>::apply(value_.int64);
+    case TypeTag::uint64:
+        return GetHelper<T>::apply(value_.uint64);
+    case TypeTag::double_:
+        return GetHelper<T>::apply(value_.double_);
     case TypeTag::string:
         return GetHelper<T>::apply(*reinterpret_cast<std::string*>(value_.ptr));
     case TypeTag::vec:
@@ -585,27 +651,39 @@ bool Variant::operator==(Variant const& rhs) const noexcept {
         return false;
     } else {
         switch (type_tag_) {
-        case TypeTag::null: return true;
-        case TypeTag::boolean: return value_.bool_ == rhs.value_.bool_;
-        case TypeTag::char_: return value_.char_ == rhs.value_.char_;
-        case TypeTag::int8: return value_.int8 == rhs.value_.int8;
-        case TypeTag::uint8: return value_.uint8 == rhs.value_.uint8;
-        case TypeTag::int16: return value_.int16 == rhs.value_.int16;
-        case TypeTag::uint16: return value_.uint16 == rhs.value_.uint16;
-        case TypeTag::int32: return value_.int32 == rhs.value_.int32;
-        case TypeTag::uint32: return value_.uint32 == rhs.value_.uint32;
-        case TypeTag::int64: return value_.int64 == rhs.value_.int64;
-        case TypeTag::uint64: return value_.uint64 == rhs.value_.uint64;
-        case TypeTag::double_: return value_.double_ == rhs.value_.double_;
+        case TypeTag::null:
+            return true;
+        case TypeTag::boolean:
+            return value_.bool_ == rhs.value_.bool_;
+        case TypeTag::char_:
+            return value_.char_ == rhs.value_.char_;
+        case TypeTag::int8:
+            return value_.int8 == rhs.value_.int8;
+        case TypeTag::uint8:
+            return value_.uint8 == rhs.value_.uint8;
+        case TypeTag::int16:
+            return value_.int16 == rhs.value_.int16;
+        case TypeTag::uint16:
+            return value_.uint16 == rhs.value_.uint16;
+        case TypeTag::int32:
+            return value_.int32 == rhs.value_.int32;
+        case TypeTag::uint32:
+            return value_.uint32 == rhs.value_.uint32;
+        case TypeTag::int64:
+            return value_.int64 == rhs.value_.int64;
+        case TypeTag::uint64:
+            return value_.uint64 == rhs.value_.uint64;
+        case TypeTag::double_:
+            return value_.double_ == rhs.value_.double_;
         case TypeTag::string:
-            return *reinterpret_cast<std::string*>(value_.ptr) ==
-                   *reinterpret_cast<std::string*>(rhs.value_.ptr);
+            return *reinterpret_cast<std::string*>(value_.ptr)
+                == *reinterpret_cast<std::string*>(rhs.value_.ptr);
         case TypeTag::vec:
-            return *reinterpret_cast<Variant::Vec*>(value_.ptr) ==
-                   *reinterpret_cast<Variant::Vec*>(rhs.value_.ptr);
+            return *reinterpret_cast<Variant::Vec*>(value_.ptr)
+                == *reinterpret_cast<Variant::Vec*>(rhs.value_.ptr);
         case TypeTag::map:
-            return *reinterpret_cast<Variant::Map*>(value_.ptr) ==
-                   *reinterpret_cast<Variant::Map*>(rhs.value_.ptr);
+            return *reinterpret_cast<Variant::Map*>(value_.ptr)
+                == *reinterpret_cast<Variant::Map*>(rhs.value_.ptr);
         }
         return false;
     }
@@ -725,21 +803,36 @@ bool equalArithmetic(T lhs, Variant::TypeTag tag, U const& rhs) {
     using TypeTag = Variant::TypeTag;
     static_assert(std::is_arithmetic_v<T>);
     switch (tag) {
-    case TypeTag::null: return false;
-    case TypeTag::boolean: return arithmeticCheckedEq(lhs, rhs.bool_);
-    case TypeTag::char_: return arithmeticCheckedEq(lhs, rhs.char_);
-    case TypeTag::int8: return arithmeticCheckedEq(lhs, rhs.int8);
-    case TypeTag::uint8: return arithmeticCheckedEq(lhs, rhs.uint8);
-    case TypeTag::int16: return arithmeticCheckedEq(lhs, rhs.int16);
-    case TypeTag::uint16: return arithmeticCheckedEq(lhs, rhs.uint16);
-    case TypeTag::int32: return arithmeticCheckedEq(lhs, rhs.int32);
-    case TypeTag::uint32: return arithmeticCheckedEq(lhs, rhs.uint32);
-    case TypeTag::int64: return arithmeticCheckedEq(lhs, rhs.int64);
-    case TypeTag::uint64: return arithmeticCheckedEq(lhs, rhs.uint64);
-    case TypeTag::double_: return arithmeticCheckedEq(lhs, rhs.double_);
-    case TypeTag::string: return false;
-    case TypeTag::vec: return false;
-    case TypeTag::map: return false;
+    case TypeTag::null:
+        return false;
+    case TypeTag::boolean:
+        return arithmeticCheckedEq(lhs, rhs.bool_);
+    case TypeTag::char_:
+        return arithmeticCheckedEq(lhs, rhs.char_);
+    case TypeTag::int8:
+        return arithmeticCheckedEq(lhs, rhs.int8);
+    case TypeTag::uint8:
+        return arithmeticCheckedEq(lhs, rhs.uint8);
+    case TypeTag::int16:
+        return arithmeticCheckedEq(lhs, rhs.int16);
+    case TypeTag::uint16:
+        return arithmeticCheckedEq(lhs, rhs.uint16);
+    case TypeTag::int32:
+        return arithmeticCheckedEq(lhs, rhs.int32);
+    case TypeTag::uint32:
+        return arithmeticCheckedEq(lhs, rhs.uint32);
+    case TypeTag::int64:
+        return arithmeticCheckedEq(lhs, rhs.int64);
+    case TypeTag::uint64:
+        return arithmeticCheckedEq(lhs, rhs.uint64);
+    case TypeTag::double_:
+        return arithmeticCheckedEq(lhs, rhs.double_);
+    case TypeTag::string:
+        return false;
+    case TypeTag::vec:
+        return false;
+    case TypeTag::map:
+        return false;
     }
     assert(false);
     return false;
@@ -752,7 +845,8 @@ bool equal(Variant const& lhs, Variant const& rhs) noexcept {
     using Map = Variant::Map;
 
     switch (lhs.type_tag_) {
-    case TypeTag::null: return rhs.null();
+    case TypeTag::null:
+        return rhs.null();
 
     case TypeTag::boolean:
         return equalArithmetic(lhs.value_.bool_, rhs.type_tag_, rhs.value_);
@@ -777,29 +871,40 @@ bool equal(Variant const& lhs, Variant const& rhs) noexcept {
     case TypeTag::double_:
         return equalArithmetic(lhs.value_.double_, rhs.type_tag_, rhs.value_);
 
-    case TypeTag::string: return lhs == rhs;
+    case TypeTag::string:
+        return lhs == rhs;
     case TypeTag::vec: {
-        if (TypeTag::vec != rhs.type()) { return false; }
+        if (TypeTag::vec != rhs.type()) {
+            return false;
+        }
         auto const& lhs_vec = lhs.vec();
         auto const& rhs_vec = rhs.vec();
         return lhs_vec.size() == rhs_vec.size()
-               && std::equal(lhs_vec.begin(), lhs_vec.end(), rhs_vec.begin(), &equal);
+            && std::equal(lhs_vec.begin(), lhs_vec.end(), rhs_vec.begin(), &equal);
     }
     case TypeTag::map: {
-        if (TypeTag::map != rhs.type()) { return false; }
+        if (TypeTag::map != rhs.type()) {
+            return false;
+        }
         auto const& lhs_map = lhs.map();
         auto const& rhs_map = rhs.map();
-        if (lhs_map.size() != rhs_map.size()) { return false; }
+        if (lhs_map.size() != rhs_map.size()) {
+            return false;
+        }
         std::vector<Map::const_pointer> lhs(lhs_map.size());
         std::vector<Map::const_pointer> rhs(rhs_map.size());
-        std::transform(lhs_map.begin(), lhs_map.end(), lhs.begin(),
-                       [](auto const& x) { return std::addressof(x); });
-        std::transform(rhs_map.begin(), rhs_map.end(), rhs.begin(),
-                       [](auto const& x) { return std::addressof(x); });
-        std::sort(lhs.begin(), lhs.end(),
-                  [](auto lhs, auto rhs) { return lhs->first < rhs->first; });
-        std::sort(rhs.begin(), rhs.end(),
-                  [](auto lhs, auto rhs) { return lhs->first < rhs->first; });
+        std::transform(lhs_map.begin(), lhs_map.end(), lhs.begin(), [](auto const& x) {
+            return std::addressof(x);
+        });
+        std::transform(rhs_map.begin(), rhs_map.end(), rhs.begin(), [](auto const& x) {
+            return std::addressof(x);
+        });
+        std::sort(lhs.begin(), lhs.end(), [](auto lhs, auto rhs) {
+            return lhs->first < rhs->first;
+        });
+        std::sort(rhs.begin(), rhs.end(), [](auto lhs, auto rhs) {
+            return lhs->first < rhs->first;
+        });
         return std::equal(lhs.begin(), lhs.end(), rhs.begin(), [](auto lhs, auto rhs) {
             return lhs->first == rhs->first && equal(lhs->second, rhs->second);
         });
@@ -828,7 +933,8 @@ struct FromJson : rapidjson::BaseReaderHandler<Encoding, FromJson<Encoding>> {
         case Variant::TypeTag::vec:
             ptrs.back()->modifyVec().push_back(Variant(std::move(x)));
             break;
-        default: *ptrs.back() = Variant(std::move(x));
+        default:
+            *ptrs.back() = Variant(std::move(x));
         }
     }
 
@@ -840,7 +946,8 @@ struct FromJson : rapidjson::BaseReaderHandler<Encoding, FromJson<Encoding>> {
         case Variant::TypeTag::vec:
             ptrs.back()->modifyVec().push_back(Variant(std::move(x)));
             return &ptrs.back()->modifyVec().back();
-        default: return &(*ptrs.back() = Variant(std::move(x)));
+        default:
+            return &(*ptrs.back() = Variant(std::move(x)));
         }
     }
 
@@ -932,7 +1039,8 @@ Variant Variant::fromJson(std::string const& json) {
 struct Variant::Impl::ToJson {
     Variant const& var;
 
-    explicit ToJson(Variant const& var) : var(var) {
+    explicit ToJson(Variant const& var)
+            : var(var) {
     }
 
     template <class Handler>
@@ -945,18 +1053,42 @@ struct Variant::Impl::ToJson {
     static void apply(Handler& dst, Variant const& var) {
         Document d;
         switch (var.type_tag_) {
-        case TypeTag::null: dst.Null(); break;
-        case TypeTag::boolean: dst.Bool(var.value_.bool_); break;
-        case TypeTag::char_: dst.Int(var.value_.char_); break;
-        case TypeTag::int8: dst.Int(var.value_.int8); break;
-        case TypeTag::uint8: dst.Uint(var.value_.uint8); break;
-        case TypeTag::int16: dst.Int(var.value_.int16); break;
-        case TypeTag::uint16: dst.Uint(var.value_.uint16); break;
-        case TypeTag::int32: dst.Int(var.value_.int32); break;
-        case TypeTag::uint32: dst.Uint(var.value_.uint32); break;
-        case TypeTag::int64: dst.Int64(var.value_.int64); break;
-        case TypeTag::uint64: dst.Uint64(var.value_.uint64); break;
-        case TypeTag::double_: dst.Double(var.value_.double_); break;
+        case TypeTag::null:
+            dst.Null();
+            break;
+        case TypeTag::boolean:
+            dst.Bool(var.value_.bool_);
+            break;
+        case TypeTag::char_:
+            dst.Int(var.value_.char_);
+            break;
+        case TypeTag::int8:
+            dst.Int(var.value_.int8);
+            break;
+        case TypeTag::uint8:
+            dst.Uint(var.value_.uint8);
+            break;
+        case TypeTag::int16:
+            dst.Int(var.value_.int16);
+            break;
+        case TypeTag::uint16:
+            dst.Uint(var.value_.uint16);
+            break;
+        case TypeTag::int32:
+            dst.Int(var.value_.int32);
+            break;
+        case TypeTag::uint32:
+            dst.Uint(var.value_.uint32);
+            break;
+        case TypeTag::int64:
+            dst.Int64(var.value_.int64);
+            break;
+        case TypeTag::uint64:
+            dst.Uint64(var.value_.uint64);
+            break;
+        case TypeTag::double_:
+            dst.Double(var.value_.double_);
+            break;
         case TypeTag::string: {
             auto const str = reinterpret_cast<std::string*>(var.value_.ptr);
             dst.String(str->c_str(), static_cast<unsigned int>(str->size()), true);
@@ -965,7 +1097,9 @@ struct Variant::Impl::ToJson {
         case TypeTag::vec: {
             dst.StartArray();
             auto const vec = reinterpret_cast<Variant::Vec*>(var.value_.ptr);
-            for (auto const& var : *vec) { apply(dst, var); }
+            for (auto const& var : *vec) {
+                apply(dst, var);
+            }
             dst.EndArray(static_cast<unsigned int>(vec->size()));
             break;
         }
@@ -1006,32 +1140,62 @@ std::string Variant::toPrettyJson() const {
 std::ostream& operator<<(std::ostream& os, Variant const& var) {
     using TypeTag = Variant::TypeTag;
     switch (var.type_tag_) {
-    case TypeTag::null: os << "Null"; break;
-    case TypeTag::boolean: os << var.value_.bool_; break;
-    case TypeTag::char_: os << var.value_.char_; break;
-    case TypeTag::int8: os << var.value_.int8; break;
-    case TypeTag::uint8: os << var.value_.uint8; break;
-    case TypeTag::int16: os << var.value_.int16; break;
-    case TypeTag::uint16: os << var.value_.uint16; break;
-    case TypeTag::int32: os << var.value_.int32; break;
-    case TypeTag::uint32: os << var.value_.uint32; break;
-    case TypeTag::int64: os << var.value_.int64; break;
-    case TypeTag::uint64: os << var.value_.uint64; break;
-    case TypeTag::double_: os << var.value_.double_; break;
-    case TypeTag::string: os << *reinterpret_cast<std::string*>(var.value_.ptr); break;
+    case TypeTag::null:
+        os << "Null";
+        break;
+    case TypeTag::boolean:
+        os << var.value_.bool_;
+        break;
+    case TypeTag::char_:
+        os << var.value_.char_;
+        break;
+    case TypeTag::int8:
+        os << var.value_.int8;
+        break;
+    case TypeTag::uint8:
+        os << var.value_.uint8;
+        break;
+    case TypeTag::int16:
+        os << var.value_.int16;
+        break;
+    case TypeTag::uint16:
+        os << var.value_.uint16;
+        break;
+    case TypeTag::int32:
+        os << var.value_.int32;
+        break;
+    case TypeTag::uint32:
+        os << var.value_.uint32;
+        break;
+    case TypeTag::int64:
+        os << var.value_.int64;
+        break;
+    case TypeTag::uint64:
+        os << var.value_.uint64;
+        break;
+    case TypeTag::double_:
+        os << var.value_.double_;
+        break;
+    case TypeTag::string:
+        os << *reinterpret_cast<std::string*>(var.value_.ptr);
+        break;
     case TypeTag::vec: {
         auto const vec = reinterpret_cast<Variant::Vec*>(var.value_.ptr);
         auto const l = vec->size() - 1;
         std::size_t i = 0;
         os << "[ ";
-        for (auto const& x : *vec) { os << x << ((i++ == l) ? " " : ", "); }
+        for (auto const& x : *vec) {
+            os << x << ((i++ == l) ? " " : ", ");
+        }
         os << "]";
         break;
     }
     case TypeTag::map: {
         auto const map = reinterpret_cast<Variant::Map*>(var.value_.ptr);
         os << "{ ";
-        for (auto const& [key, x] : *map) { os << key << ": " << x << "; "; }
+        for (auto const& [key, x] : *map) {
+            os << key << ": " << x << "; ";
+        }
         os << "}";
         break;
     }
@@ -1044,21 +1208,36 @@ std::ostream& operator<<(std::ostream& os, Variant const& var) {
 #pragma GCC diagnostic ignored "-Wreturn-type" // safe comparation
 std::type_info const& Variant::typeInfo() const noexcept {
     switch (type_tag_) {
-    case TypeTag::null: return typeid(NullType);
-    case TypeTag::boolean: return typeid(bool);
-    case TypeTag::char_: return typeid(char);
-    case TypeTag::int8: return typeid(int8_t);
-    case TypeTag::uint8: return typeid(uint8_t);
-    case TypeTag::int16: return typeid(int16_t);
-    case TypeTag::uint16: return typeid(uint16_t);
-    case TypeTag::int32: return typeid(int32_t);
-    case TypeTag::uint32: return typeid(uint32_t);
-    case TypeTag::int64: return typeid(int64_t);
-    case TypeTag::uint64: return typeid(uint64_t);
-    case TypeTag::double_: return typeid(double);
-    case TypeTag::string: return typeid(std::string);
-    case TypeTag::vec: return typeid(Vec);
-    case TypeTag::map: return typeid(Map);
+    case TypeTag::null:
+        return typeid(NullType);
+    case TypeTag::boolean:
+        return typeid(bool);
+    case TypeTag::char_:
+        return typeid(char);
+    case TypeTag::int8:
+        return typeid(int8_t);
+    case TypeTag::uint8:
+        return typeid(uint8_t);
+    case TypeTag::int16:
+        return typeid(int16_t);
+    case TypeTag::uint16:
+        return typeid(uint16_t);
+    case TypeTag::int32:
+        return typeid(int32_t);
+    case TypeTag::uint32:
+        return typeid(uint32_t);
+    case TypeTag::int64:
+        return typeid(int64_t);
+    case TypeTag::uint64:
+        return typeid(uint64_t);
+    case TypeTag::double_:
+        return typeid(double);
+    case TypeTag::string:
+        return typeid(std::string);
+    case TypeTag::vec:
+        return typeid(Vec);
+    case TypeTag::map:
+        return typeid(Map);
     }
 }
 #pragma GCC diagnostic pop
@@ -1070,4 +1249,4 @@ bool Variant::null() const noexcept {
     return type_tag_ == TypeTag::null;
 }
 
-} // namespace serialize
+} // namespace yenxo

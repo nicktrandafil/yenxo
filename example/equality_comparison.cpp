@@ -1,17 +1,18 @@
-#include <serialize/comparison_traits.hpp>
-#include <string>
+#include <yenxo/comparison_traits.hpp>
 
 #include <boost/hana/assert.hpp>
 
-using namespace serialize;
+#include <string>
+
 using namespace std;
+using namespace yenxo;
 
 struct Foo : trait::EqualityComparison<Foo> {
-    Foo(int a, string b) : a(a), b(b) {}
-    BOOST_HANA_DEFINE_STRUCT(Foo,
-        (int, a),
-        (string, b)
-    );
+    Foo(int a, string b)
+            : a(a)
+            , b(b) {
+    }
+    BOOST_HANA_DEFINE_STRUCT(Foo, (int, a), (string, b));
 };
 
 int main() {
