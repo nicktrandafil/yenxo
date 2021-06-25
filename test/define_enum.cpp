@@ -22,22 +22,23 @@
   SOFTWARE.
 */
 
-#include <serialize/define_enum.hpp>
-#include <serialize/string_conversion.hpp>
-#include <serialize/variant_conversion.hpp>
-#include <sstream>
+#include <yenxo/define_enum.hpp>
+#include <yenxo/string_conversion.hpp>
+#include <yenxo/variant_conversion.hpp>
 
 #include <catch2/catch.hpp>
 
-using namespace serialize;
+#include <sstream>
+
+using namespace yenxo;
 
 namespace {
 
-DEFINE_ENUM(E1_1,
-            (e1, , "e_1", "e_2", "e_3", "e_4", "e_5", "e_6", "e_7", "e_8", "e_9", "e_10"));
+DEFINE_ENUM(
+        E1_1,
+        (e1, , "e_1", "e_2", "e_3", "e_4", "e_5", "e_6", "e_7", "e_8", "e_9", "e_10"));
 
-DEFINE_ENUM(E1,
-            e1);
+DEFINE_ENUM(E1, e1);
 
 DEFINE_ENUM(E,
             e1,
@@ -102,7 +103,8 @@ TEST_CASE("Check DEFINE_ENUM", "[define_enum]") {
     REQUIRE(fromVariant<E1_1>(Variant("e_10")) == E1_1::e1);
 
     REQUIRE_THROWS_AS(fromVariant<E1_1>(Variant("e_11")), VariantBadType);
-    REQUIRE_THROWS_WITH(fromVariant<E1_1>(Variant("e_11")), "'e_11' is not of type 'E1_1'");
+    REQUIRE_THROWS_WITH(fromVariant<E1_1>(Variant("e_11")),
+                        "'e_11' is not of type 'E1_1'");
 
     //
 

@@ -1,24 +1,24 @@
-PROJECT_NAME            = "serialize"
+PROJECT_NAME            = "yenxo"
 PROJECT_BRIEF           = "Serialization library"
-PROJECT_NUMBER          = "@serialize_VERSION@"
+PROJECT_NUMBER          = "@yenxo_VERSION@"
 
-STRIP_FROM_PATH         = @serialize_SOURCE_DIR@/include
+STRIP_FROM_PATH         = @yenxo_SOURCE_DIR@/include
 BUILTIN_STL_SUPPORT     = YES
-STRIP_FROM_INC_PATH     = @serialize_SOURCE_DIR@/include
+STRIP_FROM_INC_PATH     = @yenxo_SOURCE_DIR@/include
 ALIASES                 =
 ENABLED_SECTIONS        =
 QUIET                   = YES
 
 # Resources
 OUTPUT_DIRECTORY        = @CMAKE_CURRENT_BINARY_DIR@
-INPUT                   = @serialize_SOURCE_DIR@/include \
-                          @serialize_SOURCE_DIR@/doc/tutorial.hpp
+INPUT                   = @yenxo_SOURCE_DIR@/include \
+                          @yenxo_SOURCE_DIR@/doc/tutorial.hpp
 FILE_PATTERNS           = *.hpp
 RECURSIVE               = YES
 EXCLUDE                 =
 EXCLUDE_PATTERNS        =
-EXAMPLE_PATH            = @serialize_SOURCE_DIR@/example \
-                          @serialize_SOURCE_DIR@/test
+EXAMPLE_PATH            = @yenxo_SOURCE_DIR@/example \
+                          @yenxo_SOURCE_DIR@/test
 EXAMPLE_RECURSIVE       = YES
 WARN_IF_UNDOCUMENTED    = NO
 
@@ -51,7 +51,7 @@ GENERATE_DEPRECATEDLIST = YES
 SHOW_USED_FILES         = NO
 SHOW_FILES              = YES
 SHOW_NAMESPACES         = YES
-LAYOUT_FILE             = @serialize_SOURCE_DIR@/doc/layout.xml
+LAYOUT_FILE             = @yenxo_SOURCE_DIR@/doc/layout.xml
 
 
 CLASS_DIAGRAMS          = YES
@@ -82,9 +82,9 @@ ENABLE_PREPROCESSING    = YES
 MACRO_EXPANSION         = YES
 EXPAND_ONLY_PREDEF      = NO
 SEARCH_INCLUDES         = YES
-INCLUDE_PATH            = @serialize_SOURCE_DIR@/include
+INCLUDE_PATH            = @yenxo_SOURCE_DIR@/include
 INCLUDE_FILE_PATTERNS   =
-PREDEFINED              = SERIALIZE_DOXYGEN_INVOKED
+PREDEFINED              = YENXO_DOXYGEN_INVOKED
 SKIP_FUNCTION_MACROS    = NO
 
 # Source browsing
@@ -102,10 +102,10 @@ VERBATIM_HEADERS        = NO
 # HTML output
 HTML_OUTPUT             = YES
 HTML_FILE_EXTENSION     = .html
-HTML_HEADER             = @serialize_SOURCE_DIR@/doc/header.html
-HTML_FOOTER             = @serialize_SOURCE_DIR@/doc/footer.html
+HTML_HEADER             = @yenxo_SOURCE_DIR@/doc/header.html
+HTML_FOOTER             = @yenxo_SOURCE_DIR@/doc/footer.html
 HTML_EXTRA_STYLESHEET   =
-HTML_EXTRA_FILES        = @serialize_SOURCE_DIR@/doc/serialize_stages.png
+HTML_EXTRA_FILES        = @yenxo_SOURCE_DIR@/doc/serialize_stages.png
 HTML_COLORSTYLE_HUE     = 220  # 0 - 359
 HTML_COLORSTYLE_SAT     = 100 # 0 - 255
 HTML_COLORSTYLE_GAMMA   = 80

@@ -14,18 +14,10 @@ RUN apt-get -y update && apt-get -y install \
     \
     lcov \
     \
-    vim
+    vim \
+    libboost-dev
 
-ARG BOOST_VERSION
-ARG BOOST_URL
 ARG BUILD_TYPE
-
-ENV BOOST_ROOT=/usr/local/include/boost-${BOOST_VERSION}
-
-# Boost
-WORKDIR /tmp
-RUN mkdir -p ${BOOST_ROOT} \
- && wget -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ${BOOST_ROOT}
 
 # RapidJSON
 WORKDIR /tmp
@@ -63,6 +55,14 @@ RUN git clone --recurse-submodules https://github.com/foonathan/type_safe.git \
  && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. \
  && cmake --build . \
  && cmake --build . --target install
+
+# benchmark
+RUN git clone https://github.com/google/benchmark.git \
+  && cd benchmark \
+  && mkdir build && cd build \
+  && cmake -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_GTEST_TESTS=OFF ../ \
+  && cmake --build . \
+  && cmake --build . --target install
 
 RUN sed -i '/messagebus/d' /var/lib/dpkg/statoverride
 

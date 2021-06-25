@@ -1,6 +1,6 @@
 #pragma once
 
-#include <serialize/pimpl.hpp>
+#include <yenxo/pimpl.hpp>
 
 class X {
 public:
@@ -15,5 +15,5 @@ public:
 
 private:
     struct Impl;
-    serialize::Pimpl<Impl> impl;
+    yenxo::Pimpl<Impl> impl;
 };

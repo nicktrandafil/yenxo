@@ -22,11 +22,11 @@
   SOFTWARE.
 */
 
-#include <serialize/meta.hpp>
+#include <yenxo/meta.hpp>
 
 using namespace boost::hana;
 
-using namespace serialize;
+using namespace yenxo;
 
 #if __GNUG__
 #pragma GCC diagnostic push

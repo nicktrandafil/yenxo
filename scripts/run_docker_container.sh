@@ -4,7 +4,7 @@ IMG=$1
 shift
 
 if [ -z "$IMG" ]; then
-    IMG=serialize
+    IMG=yenxo
 fi
 
 CONTAINER=$(docker run --rm -d -P -it \

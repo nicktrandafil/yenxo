@@ -22,27 +22,31 @@
   SOFTWARE.
 */
 
-#include <serialize/comparison_traits.hpp>
-#include <serialize/ostream_traits.hpp>
-#include <serialize/variant.hpp>
-#include <serialize/variant_traits.hpp>
+#include <yenxo/comparison_traits.hpp>
+#include <yenxo/ostream_traits.hpp>
+#include <yenxo/variant.hpp>
+#include <yenxo/variant_traits.hpp>
 
 #include <catch2/catch.hpp>
 
 #include <rapidjson/document.h>
 
-using namespace serialize;
+using namespace yenxo;
 
 namespace {
 
-struct Hobby : trait::Var<Hobby>,
-               trait::UpdateFromVar<Hobby>,
-               trait::EqualityComparison<Hobby> {
+struct Hobby
+        : trait::Var<Hobby>
+        , trait::UpdateFromVar<Hobby>
+        , trait::EqualityComparison<Hobby> {
 
-    Hobby() : id(0) {
+    Hobby()
+            : id(0) {
     }
 
-    Hobby(int id, std::string const& description) : id(id), description(description) {
+    Hobby(int id, std::string const& description)
+            : id(id)
+            , description(description) {
     }
 
     int id;
@@ -54,13 +58,28 @@ struct Person
         , trait::UpdateFromVar<Person>
         , trait::EqualityComparison<Person> {
 
-    Person() : age(0) {
+    Person()
+            : age(0) {
     }
 
-    Person(std::string const& name, int age, Hobby const& hobby, bool b, unsigned u,
-           long l, unsigned long ul, double f, std::vector<int>&& v)
-        : name(name), age(age), hobby(hobby), b(b), u(u), l(l), ul(ul), f(f),
-          v(std::move(v)) {
+    Person(std::string const& name,
+           int age,
+           Hobby const& hobby,
+           bool b,
+           unsigned u,
+           long l,
+           unsigned long ul,
+           double f,
+           std::vector<int>&& v)
+            : name(name)
+            , age(age)
+            , hobby(hobby)
+            , b(b)
+            , u(u)
+            , l(l)
+            , ul(ul)
+            , f(f)
+            , v(std::move(v)) {
     }
 
     std::string name;

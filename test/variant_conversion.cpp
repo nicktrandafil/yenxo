@@ -22,7 +22,7 @@
   SOFTWARE.
 */
 
-#include <serialize/variant_conversion.hpp>
+#include <yenxo/variant_conversion.hpp>
 
 #include <catch2/catch.hpp>
 
@@ -31,15 +31,12 @@
 #include <map>
 #include <set>
 
-using namespace serialize;
+using namespace yenxo;
 using namespace boost::hana::literals;
 
 namespace {
 
-enum class E {
-    e1,
-    e2
-};
+enum class E { e1, e2 };
 
 struct ETraits {
     using Enum [[maybe_unused]] = E;
@@ -47,41 +44,55 @@ struct ETraits {
     [[maybe_unused]] static constexpr std::array<Enum, count> values{Enum::e1, Enum::e2};
     [[maybe_unused]] static char const* toString(Enum x) {
         switch (x) {
-        case Enum::e1: return "e1";
-        case Enum::e2: return "e2";
+        case Enum::e1:
+            return "e1";
+        case Enum::e2:
+            return "e2";
         }
         throw 1;
     }
-    static constexpr std::string_view typeName() noexcept { return "E"; }
+    static constexpr std::string_view typeName() noexcept {
+        return "E";
+    }
 };
 
-[[maybe_unused]] ETraits traits(E) { return {}; }
+[[maybe_unused]] ETraits traits(E) {
+    return {};
+}
 
 struct Test {
-    static Variant toVariant(Test) { return {}; }
-    static Test fromVariant(Variant const&) { return {}; }
-    bool operator==(Test const&) const { return true; }
+    static Variant toVariant(Test) {
+        return {};
+    }
+    static Test fromVariant(Variant const&) {
+        return {};
+    }
+    bool operator==(Test const&) const {
+        return true;
+    }
 };
 
-enum E2 {
-    val1,
-    val2
-};
+enum E2 { val1, val2 };
 
 struct E2Traits {
     using Enum = E2;
     static constexpr auto count = 2;
-    [[maybe_unused]] static constexpr std::array<Enum, count> values{Enum::val1, Enum::val2};
+    [[maybe_unused]] static constexpr std::array<Enum, count> values{Enum::val1,
+                                                                     Enum::val2};
     static char const* toString(Enum x) {
         switch (x) {
-        case Enum::val1: return "val1";
-        case Enum::val2: return "val2";
+        case Enum::val1:
+            return "val1";
+        case Enum::val2:
+            return "val2";
         }
         throw 1;
     }
 };
 
-[[maybe_unused]] E2Traits traits(E2) { return {}; }
+[[maybe_unused]] E2Traits traits(E2) {
+    return {};
+}
 
 } // namespace
 
@@ -162,10 +173,13 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
 
     SECTION("hana::map") {
         auto tmp = boost::hana::make_map(
-            boost::hana::make_pair(BOOST_HANA_STRING("a"), E()),
-            boost::hana::make_pair(BOOST_HANA_STRING("b"), E()));
+                boost::hana::make_pair(BOOST_HANA_STRING("a"), E()),
+                boost::hana::make_pair(BOOST_HANA_STRING("b"), E()));
 
-        REQUIRE_THROWS_WITH(fromVariant2(tmp, Variant(VariantMap{{"a", Variant("e1")}, {"b", Variant("e3")}})), ".b: 'e3' is not of type 'E'");
+        REQUIRE_THROWS_WITH(fromVariant2(tmp,
+                                         Variant(VariantMap{{"a", Variant("e1")},
+                                                            {"b", Variant("e3")}})),
+                            ".b: 'e3' is not of type 'E'");
     }
 
     SECTION("hana::string") {
@@ -202,8 +216,8 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
     }
 
     SECTION("hana::Constant") {
-        REQUIRE_NOTHROW(serialize::fromVariant<std::integral_constant<int, 2>>(2));
-        REQUIRE_THROWS(serialize::fromVariant<std::integral_constant<int, 2>>(1));
+        REQUIRE_NOTHROW(yenxo::fromVariant<std::integral_constant<int, 2>>(2));
+        REQUIRE_THROWS(yenxo::fromVariant<std::integral_constant<int, 2>>(1));
     }
 
     SECTION("Variant supported types") {
@@ -237,5 +251,6 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
 
 static_assert(toVariantConvertible(boost::hana::type_c<Variant>));
 static_assert(toVariantConvertible(boost::hana::type_c<int>));
-static_assert(toVariantConvertible(boost::hana::type_c<std::unordered_map<std::string, int>>));
+static_assert(
+        toVariantConvertible(boost::hana::type_c<std::unordered_map<std::string, int>>));
 static_assert(toVariantConvertible(boost::hana::type_c<E>));

@@ -22,14 +22,14 @@
   SOFTWARE.
 */
 
-#include <serialize/define_enum.hpp>
-#include <serialize/type_name.hpp>
+#include <yenxo/define_enum.hpp>
+#include <yenxo/type_name.hpp>
 
 #include <catch2/catch.hpp>
 
 #include <map>
 
-using namespace serialize;
+using namespace yenxo;
 
 namespace {
 
@@ -56,7 +56,7 @@ namespace {
 struct Def3 {};
 } // namespace
 
-namespace serialize {
+namespace yenxo {
 template <>
 struct TypeNameImpl<Def3> {
     static constexpr std::string_view apply() noexcept {
@@ -65,7 +65,7 @@ struct TypeNameImpl<Def3> {
 };
 /// [sn_spec]
 
-} // namespace serialize
+} // namespace yenxo
 
 namespace {
 
@@ -93,7 +93,8 @@ TEST_CASE("Check typeName", "[utilities]") {
     REQUIRE(typeName(boost::hana::type_c<std::integral_constant<E1, E1::e1>>) == "E1{0}");
 
     REQUIRE(typeName(boost::hana::type_c<std::vector<int>>) == "list of int32");
-    REQUIRE(typeName(boost::hana::type_c<std::map<int, std::string>>) == "map of int32-string");
+    REQUIRE(typeName(boost::hana::type_c<std::map<int, std::string>>)
+            == "map of int32-string");
 
     REQUIRE(typeName(boost::hana::type_c<float>) == "float");
     REQUIRE(typeName(boost::hana::type_c<double>) == "double");
@@ -101,7 +102,8 @@ TEST_CASE("Check typeName", "[utilities]") {
     REQUIRE(typeName(boost::hana::type_c<std::optional<char>>) == "optional char");
     REQUIRE(typeName(boost::hana::type_c<std::nullptr_t>) == "nullptr");
     REQUIRE(typeName(boost::hana::type_c<std::monostate>) == "null");
-    REQUIRE(typeName(boost::hana::type_c<std::variant<char, bool>>) == "one of [char, boolean]");
+    REQUIRE(typeName(boost::hana::type_c<std::variant<char, bool>>)
+            == "one of [char, boolean]");
     REQUIRE(typeName(boost::hana::type_c<bool>) == "boolean");
     REQUIRE(typeName(boost::hana::type_c<char>) == "char");
     REQUIRE(typeName(boost::hana::type_c<int8_t>) == "int8");

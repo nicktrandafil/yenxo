@@ -23,17 +23,19 @@
 */
 
 // tested
-#include <serialize/ostream_traits.hpp>
+#include <yenxo/ostream_traits.hpp>
 
 // 3rd
 #include <catch2/catch.hpp>
 
-using namespace serialize;
+using namespace yenxo;
 
 namespace {
 
 struct Hobby : trait::OStream<Hobby> {
-    Hobby(int id, std::string const& description) : id(id), description(description) {
+    Hobby(int id, std::string const& description)
+            : id(id)
+            , description(description) {
     }
 
     friend constexpr std::string_view typeNameImpl(Hobby const*) {
@@ -47,7 +49,9 @@ struct Hobby : trait::OStream<Hobby> {
 struct Person : trait::OStream<Person> {
 
     Person(std::string const& name, int age, Hobby const& hobby)
-        : name(name), age(age), hobby(hobby) {
+            : name(name)
+            , age(age)
+            , hobby(hobby) {
     }
 
     friend constexpr std::string_view typeNameImpl(Person const*) {
@@ -60,7 +64,9 @@ struct Person : trait::OStream<Person> {
 };
 
 struct Dict : trait::OStream<Dict> {
-    Dict(int x, std::unordered_map<std::string, int> const& map) : x(x), map(map) {
+    Dict(int x, std::unordered_map<std::string, int> const& map)
+            : x(x)
+            , map(map) {
     }
 
     friend constexpr std::string_view typeNameImpl(Dict const*) {
@@ -72,7 +78,9 @@ struct Dict : trait::OStream<Dict> {
 };
 
 struct Vec : trait::OStream<Vec> {
-    Vec(int x, std::vector<int> const& vec) : x(x), vec(vec) {
+    Vec(int x, std::vector<int> const& vec)
+            : x(x)
+            , vec(vec) {
     }
 
     friend constexpr std::string_view typeNameImpl(Vec const*) {

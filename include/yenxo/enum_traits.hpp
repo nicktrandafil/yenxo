@@ -24,12 +24,12 @@
 
 #pragma once
 
-#include <serialize/meta.hpp>
-#include <serialize/when.hpp>
+#include <yenxo/meta.hpp>
+#include <yenxo/when.hpp>
 
 #include <array>
 
-namespace serialize {
+namespace yenxo {
 
 /// Enum traits
 /// \ingroup group-enum
@@ -40,8 +40,10 @@ namespace serialize {
 /// * `static constexpr size_t count` member;
 /// * `static constexpr std::array<Enum, count> values` member collection;
 /// * `static char const* toString(Enum)` member function;
-/// * `static constexpr auto strings()` member function that returns `boost::hana::tuple` of `boost::hana::tuple` of `char const*`s (optional);
-/// * `static constexpr std::string_view typeName() noexcept` member function (required to enable `fromString`).
+/// * `static constexpr auto strings()` member function that returns `boost::hana::tuple`
+/// of `boost::hana::tuple` of `char const*`s (optional);
+/// * `static constexpr std::string_view typeName() noexcept` member function (required to
+/// enable `fromString`).
 ///
 /// The `EnumTraits` is used by `toString`, `fromString`, `toVariant` and `fromVariant`
 /// function objects to do the job.
@@ -52,12 +54,12 @@ namespace serialize {
 /// specialize the EnumTraits,
 /// @snippet test/string_conversion.cpp enum1_traits
 ///
-/// use `serialize::toString` and `fromString`.
+/// use `yenxo::toString` and `fromString`.
 /// @snippet test/string_conversion.cpp enum1_string
 ///
-/// Another way to describe properties of an enum (say `E`) is to define a struct (say `ETraits`)
-/// with the properties mentioned above and declare a function in the same namespace
-/// as the enum `ETraits traits(E)`.
+/// Another way to describe properties of an enum (say `E`) is to define a struct (say
+/// `ETraits`) with the properties mentioned above and declare a function in the same
+/// namespace as the enum `ETraits traits(E)`.
 ///
 /// Define enum,
 /// @snippet test/string_conversion.cpp enum2
@@ -70,7 +72,7 @@ namespace serialize {
 ///
 /// use `toString` and `fromString`.
 /// @snippet test/string_conversion.cpp enum2_string
-#ifdef SERIALIZE_DOXYGEN_INVOKED
+#ifdef YENXO_DOXYGEN_INVOKED
 template <class Enum>
 struct EnumTraits;
 #else
@@ -79,9 +81,10 @@ struct EnumTraits;
 #endif
 
 template <class T>
-struct EnumTraits<T,
-                  When<std::is_enum_v<T> &&
-                       detail::Valid<decltype(traits(std::declval<T>()))>::value>>
-    : decltype(traits(std::declval<T>())) {};
+struct EnumTraits<
+        T,
+        When<std::is_enum_v<
+                     T> && detail::Valid<decltype(traits(std::declval<T>()))>::value>>
+        : decltype(traits(std::declval<T>())) {};
 
-} // namespace serialize
+} // namespace yenxo

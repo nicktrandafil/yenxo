@@ -22,9 +22,9 @@
   SOFTWARE.
 */
 
-#include <serialize/query_string.hpp>
-#include <serialize/string_conversion.hpp>
-#include <serialize/variant.hpp>
+#include <yenxo/query_string.hpp>
+#include <yenxo/string_conversion.hpp>
+#include <yenxo/variant.hpp>
 
 #include <boost/fusion/adapted/struct/define_struct_inline.hpp>
 #include <boost/fusion/include/define_struct_inline.hpp>
@@ -36,7 +36,7 @@ namespace phx = boost::phoenix;
 
 using namespace std::string_literals;
 
-namespace serialize {
+namespace yenxo {
 namespace {
 
 int8_t digit(char digit) {
@@ -61,20 +61,20 @@ QueryStringError makeObjectPropertyCountError(uint8_t len) {
 }
 
 QueryStringError makeObjectPropertyCountError(std::string const& key, uint8_t len) {
-    return QueryStringError("object property count exceed " + std::to_string(len) +
-                            " for " + key);
+    return QueryStringError("object property count exceed " + std::to_string(len)
+                            + " for " + key);
 }
 
 QueryStringError makeMixedTypesError(std::string const& key,
                                      std::string const& expected_type,
                                      std::string const& actual_type) {
-    return QueryStringError("mixed types for " + key + ": " + expected_type + " and " +
-                            actual_type);
+    return QueryStringError("mixed types for " + key + ": " + expected_type + " and "
+                            + actual_type);
 }
 
 QueryStringError makeArrayIndexError(std::string const& key, uint8_t len) {
-    return QueryStringError("array index out of range [0, " + std::to_string(len - 1) +
-                            "] for " + key);
+    return QueryStringError("array index out of range [0, " + std::to_string(len - 1)
+                            + "] for " + key);
 }
 
 QueryStringError makeArrayLengthError(std::string const& key, uint8_t len) {
@@ -82,14 +82,15 @@ QueryStringError makeArrayLengthError(std::string const& key, uint8_t len) {
 }
 
 QueryStringError makeObjectDepthError(std::string const& key, uint8_t len) {
-    return QueryStringError("object depth limit exceed " + std::to_string(len) + " for " +
-                            key);
+    return QueryStringError("object depth limit exceed " + std::to_string(len) + " for "
+                            + key);
 }
 
 template <class Iterator>
 class Grammar : public qi::grammar<Iterator> {
 public:
-    Grammar() : Grammar::base_type(query_string) {
+    Grammar()
+            : Grammar::base_type(query_string) {
         using phx::at_c;
         using qi::alnum;
         using qi::char_;
@@ -101,48 +102,42 @@ public:
         using qi::matches;
         using qi::omit;
         using qi::on_error;
-        using qi::xdigit;
         using qi::ulong_long;
+        using qi::xdigit;
 
         using namespace qi::labels;
 
-        open_bracket   %= lit("%5b")[_val = '['] | lit("%5B")[_val = '['] | char_("[");
-        close_bracket  %= lit("%5d")[_val = ']'] | lit("%5D")[_val = ']'] | char_("]");
+        open_bracket %= lit("%5b")[_val = '['] | lit("%5B")[_val = '['] | char_("[");
+        close_bracket %= lit("%5d")[_val = ']'] | lit("%5D")[_val = ']'] | char_("]");
 
-        pct_encoded     =   lexeme[lit('%') > xdigit > xdigit]
-                                  [_val = phx::bind(&byte, at_c<0>(_1), at_c<1>(_1))]
-                          - (open_bracket | close_bracket);
+        pct_encoded = lexeme[lit('%') > xdigit > xdigit]
+                            [_val = phx::bind(&byte, at_c<0>(_1), at_c<1>(_1))]
+                    - (open_bracket | close_bracket);
 
-        sub_delims     %=   char_('!') | char_('$') | char_('\'') | char_('(') | char_(')')
-                          | char_('*') | char_('+') | char_(',') | char_(';');
+        sub_delims %= char_('!') | char_('$') | char_('\'') | char_('(') | char_(')')
+                    | char_('*') | char_('+') | char_(',') | char_(';');
 
-        unreserved     %= alnum | char_('-') | char_(".") | char_("_") | char_("~");
-        pchar          %= unreserved | pct_encoded | sub_delims | char_(':') | char_('@');
+        unreserved %= alnum | char_('-') | char_(".") | char_("_") | char_("~");
+        pchar %= unreserved | pct_encoded | sub_delims | char_(':') | char_('@');
 
-        index          %= omit[open_bracket] >> ulong_long > omit[close_bracket];
-        property       %= omit[open_bracket] >> +pchar  > omit[close_bracket];
-        empty_index     = open_bracket > close_bracket;
-        name           %= +pchar;
+        index %= omit[open_bracket] >> ulong_long > omit[close_bracket];
+        property %= omit[open_bracket] >> +pchar > omit[close_bracket];
+        empty_index = open_bracket > close_bracket;
+        name %= +pchar;
 
-        key             =    name       [phx::bind(&Grammar::paramName, this, _1)]
-                          > *(
-                                index   [phx::bind(&Grammar::indexOp, this, _1)]
-                              | property[phx::bind(&Grammar::propertyOp, this, _1)]
-                             )
-                          > -empty_index[phx::bind(&Grammar::emptyIndexOp, this)];
+        key = name[phx::bind(&Grammar::paramName, this, _1)]
+            > *(index[phx::bind(&Grammar::indexOp, this, _1)]
+                | property[phx::bind(&Grammar::propertyOp, this, _1)])
+            > -empty_index[phx::bind(&Grammar::emptyIndexOp, this)];
 
-        empty_value     = &lit('&') | eoi;
-        value          %= +(pchar | open_bracket | close_bracket);
+        empty_value = &lit('&') | eoi;
+        value %= +(pchar | open_bracket | close_bracket);
 
         empty_parameter = &lit('&') | eoi;
-        parameter       =   key
-                          > lit('=')
-                          > (
-                               value      [phx::bind(&Grammar::val, this, _1)] 
-                             | empty_value[phx::bind(&Grammar::emptyVal, this)]
-                            );
+        parameter = key > lit('=') > (value[phx::bind(&Grammar::val, this, _1)]
+                                      | empty_value[phx::bind(&Grammar::emptyVal, this)]);
 
-        query_string    = expect[parameter | empty_parameter] % lit('&');
+        query_string = expect[parameter | empty_parameter] % lit('&');
 
         unreserved.name("unreserved");
         pct_encoded.name("pct_encoded");
@@ -196,9 +191,9 @@ private:
         if (out.size() > object_property_count_limit) {
             throw makeObjectPropertyCountError(object_property_count_limit);
         }
-        this->param_key  = name;
+        this->param_key = name;
         this->param_name = name;
-        this->depth      = 0;
+        this->depth = 0;
     }
 
     void indexOp(uint64_t i) {
@@ -219,7 +214,9 @@ private:
             break;
         }
         auto& vec = param->modifyVec();
-        while (i >= vec.size()) { vec.push_back(Variant()); }
+        while (i >= vec.size()) {
+            vec.push_back(Variant());
+        }
         param = &vec[i];
         this->param_key += "[" + std::to_string(i) + "]";
         incDepth();
@@ -286,33 +283,33 @@ private:
     }
 
 private:
-    qi::rule<Iterator, char()       > unreserved;
-    qi::rule<Iterator, char()       > pct_encoded;
-    qi::rule<Iterator, char()       > pchar;
-    qi::rule<Iterator, char()       > sub_delims;
-    qi::rule<Iterator, char()       > open_bracket;
-    qi::rule<Iterator, char()       > close_bracket;
+    qi::rule<Iterator, char()> unreserved;
+    qi::rule<Iterator, char()> pct_encoded;
+    qi::rule<Iterator, char()> pchar;
+    qi::rule<Iterator, char()> sub_delims;
+    qi::rule<Iterator, char()> open_bracket;
+    qi::rule<Iterator, char()> close_bracket;
     qi::rule<Iterator, std::string()> property;
-    qi::rule<Iterator, uint16_t()   > index;
-    qi::rule<Iterator               > empty_index;
+    qi::rule<Iterator, uint16_t()> index;
+    qi::rule<Iterator> empty_index;
     qi::rule<Iterator, std::string()> name;
-    qi::rule<Iterator               > key;
+    qi::rule<Iterator> key;
     qi::rule<Iterator, std::string()> value;
-    qi::rule<Iterator               > empty_value;
-    qi::rule<Iterator               > parameter;
-    qi::rule<Iterator               > empty_parameter;
-    qi::rule<Iterator               > query_string;
+    qi::rule<Iterator> empty_value;
+    qi::rule<Iterator> parameter;
+    qi::rule<Iterator> empty_parameter;
+    qi::rule<Iterator> query_string;
 
     // expectation error
     std::string error_expectation;
-    size_t      error_expectation_pos;
+    size_t error_expectation_pos;
 
     // out
-    VariantMap  out;
-    Variant    *param{nullptr};
+    VariantMap out;
+    Variant* param{nullptr};
     std::string param_name;
     std::string param_key;
-    uint16_t    depth;
+    uint16_t depth;
 
     // constraints
     static constexpr uint8_t const array_length_limit{20};
@@ -342,12 +339,13 @@ Variant query_string(std::string const& str) {
     Grammar<std::string::const_iterator> grammar;
     auto const res = qi::parse(str.begin(), str.end(), grammar);
     if (!res) {
-        throw QueryStringError("expecting " + grammar.errorExpectation() + " here: \"" +
-                                       str.substr(grammar.errorExpectationPos()) + "\"",
-                               str, grammar.errorExpectation(),
+        throw QueryStringError("expecting " + grammar.errorExpectation() + " here: \""
+                                       + str.substr(grammar.errorExpectationPos()) + "\"",
+                               str,
+                               grammar.errorExpectation(),
                                grammar.errorExpectationPos());
     }
     return Variant(grammar.result());
 }
 
-} // namespace serialize
+} // namespace yenxo

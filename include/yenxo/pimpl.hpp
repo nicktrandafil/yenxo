@@ -28,7 +28,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace serialize {
+namespace yenxo {
 
 /// Generic 'Pimpl' idiom implementation
 /// \ingroup group-utility
@@ -60,8 +60,7 @@ public:
 
     template <typename U,
               typename =
-                  typename std::enable_if<
-                      !std::is_same<Pimpl, U>::value, void>::type>
+                      typename std::enable_if<!std::is_same<Pimpl, U>::value, void>::type>
     explicit Pimpl(U&& u);
 
     template <typename T1, typename T2, typename... Args>
@@ -79,4 +78,4 @@ private:
     std::unique_ptr<T> m;
 };
 
-} // namespace serialize
+} // namespace yenxo

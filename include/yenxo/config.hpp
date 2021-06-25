@@ -24,12 +24,12 @@
 
 #pragma once
 
-#ifdef SERIALIZE_DOXYGEN_INVOKED
+#ifdef YENXO_DOXYGEN_INVOKED
 /// \ingroup group-config
 /// Enables `toVariant` and `fromVariant` for `type_safe` types.
-#define SERIALIZE_ENABLE_TYPE_SAFE 1
+#define YENXO_ENABLE_TYPE_SAFE 1
 #else
-#ifndef SERIALIZE_ENABLE_TYPE_SAFE
-#define SERIALIZE_ENABLE_TYPE_SAFE 1
+#ifndef YENXO_ENABLE_TYPE_SAFE
+#define YENXO_ENABLE_TYPE_SAFE 1
 #endif
 #endif

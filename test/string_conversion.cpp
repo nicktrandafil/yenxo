@@ -22,26 +22,29 @@
   SOFTWARE.
 */
 
-#include <serialize/string_conversion.hpp>
+#include <yenxo/string_conversion.hpp>
 
 #include <catch2/catch.hpp>
 
-using namespace serialize;
+using namespace yenxo;
 
 namespace test_string_conversion {
 
 struct Hobby {
-    explicit Hobby(std::string const& str) : str(str) {}
-    [[maybe_unused]] explicit operator std::string() const { return str; }
-    bool operator==(Hobby const& rhs) const { return str == rhs.str; }
+    explicit Hobby(std::string const& str)
+            : str(str) {
+    }
+    [[maybe_unused]] explicit operator std::string() const {
+        return str;
+    }
+    bool operator==(Hobby const& rhs) const {
+        return str == rhs.str;
+    }
     std::string str;
 };
 
 /// [enum2]
-enum class E {
-    e1,
-    e2
-};
+enum class E { e1, e2 };
 /// [enum2]
 
 /// [enum2_traits]
@@ -51,12 +54,16 @@ struct ETraits {
     static constexpr std::array<Enum, count> values{Enum::e1, Enum::e2};
     static char const* toString(Enum x) {
         switch (x) {
-        case Enum::e1: return "e1";
-        case Enum::e2: return "e2";
+        case Enum::e1:
+            return "e1";
+        case Enum::e2:
+            return "e2";
         }
         throw 1;
     }
-    static constexpr std::string_view typeName() noexcept { return "E"; }
+    static constexpr std::string_view typeName() noexcept {
+        return "E";
+    }
 };
 /// [enum2_traits]
 
@@ -65,10 +72,7 @@ ETraits traits(E);
 /// [enum2_traits_adl]
 
 /// [enum1]
-enum class E2 {
-    v3,
-    v4
-};
+enum class E2 { v3, v4 };
 /// [enum1]
 
 } // namespace test_string_conversion
@@ -76,7 +80,7 @@ enum class E2 {
 using namespace test_string_conversion;
 
 /// [enum1_traits]
-namespace serialize {
+namespace yenxo {
 template <>
 struct EnumTraits<E2> {
     using Enum = E2;
@@ -84,22 +88,23 @@ struct EnumTraits<E2> {
     static constexpr std::array<Enum, count> values = {Enum::v3, Enum::v4};
     static char const* toString(Enum e) {
         switch (e) {
-        case Enum::v3: return "v3";
-        case Enum::v4: return "v4";
+        case Enum::v3:
+            return "v3";
+        case Enum::v4:
+            return "v4";
         }
         throw 0;
     }
     static constexpr auto strings() {
-        return boost::hana::make_tuple(
-            boost::hana::make_tuple("v3", "3"),
-            boost::hana::make_tuple("v4", "4"));
+        return boost::hana::make_tuple(boost::hana::make_tuple("v3", "3"),
+                                       boost::hana::make_tuple("v4", "4"));
     }
 
     static constexpr std::string_view typeName() noexcept {
         return "E2";
     }
 };
-} // namespace serialize
+} // namespace yenxo
 /// [enum1_traits]
 
 TEST_CASE("Check toString/fromString", "[string_conversion]") {

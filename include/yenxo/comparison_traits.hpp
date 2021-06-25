@@ -26,7 +26,7 @@
 
 #include <boost/hana.hpp>
 
-namespace serialize {
+namespace yenxo {
 
 /// \pre `T` should be a Boost.Hana.Struct.
 template <class T>
@@ -72,16 +72,16 @@ protected:
 };
 
 } // namespace trait
-} // namespace serialize
+} // namespace yenxo
 
 /// Enables equality comparison for `T`
 /// \ingroup group-traits-opt-in
 /// \pre `T` should be a Boost.Hana.Struct.
-/// \see serialize::trait::EqualityComparison.
-#define SERIALIZE_EQUALITY_COMPARISON_OPERATORS(T)                                       \
+/// \see yenxo::trait::EqualityComparison.
+#define YENXO_EQUALITY_COMPARISON_OPERATORS(T)                                           \
     friend bool operator==(T const& lhs, T const& rhs) {                                 \
-        return serialize::operatorEqual(lhs, rhs);                                       \
+        return yenxo::operatorEqual(lhs, rhs);                                           \
     }                                                                                    \
     friend bool operator!=(T const& lhs, T const& rhs) {                                 \
-        return serialize::operatorNotEqual(lhs, rhs);                                    \
+        return yenxo::operatorNotEqual(lhs, rhs);                                        \
     }

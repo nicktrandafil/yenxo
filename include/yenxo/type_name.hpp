@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include <serialize/enum_traits.hpp>
-#include <serialize/meta.hpp>
-#include <serialize/when.hpp>
+#include <yenxo/enum_traits.hpp>
+#include <yenxo/meta.hpp>
+#include <yenxo/when.hpp>
 
 #include <boost/hana/core/is_a.hpp>
 #include <boost/hana/fold.hpp>
@@ -39,7 +39,7 @@
 #include <string_view>
 #include <variant>
 
-namespace serialize {
+namespace yenxo {
 
 /// Get the name of a type
 ///
@@ -66,7 +66,7 @@ namespace serialize {
 /// @snippet test/type_name.cpp sn_udt_checks
 ///
 /// \ingroup group-utility
-#ifdef SERIALIZE_DOXYGEN_INVOKED
+#ifdef YENXO_DOXYGEN_INVOKED
 constexpr auto typeName = [](type) { return TypeNameImpl<type>::apply(); };
 #else
 template <class T, class = void>
@@ -179,13 +179,12 @@ template <class T, T v>
 struct TypeNameImpl<std::integral_constant<T, v>> {
     static std::string apply() {
         if constexpr (std::is_enum_v<T>) {
-            return std::string(typeName(boost::hana::type_c<T>)) + "{" +
-                   std::string(
-                           std::to_string(static_cast<std::underlying_type_t<T>>(v))) +
-                   "}";
+            return std::string(typeName(boost::hana::type_c<T>)) + "{"
+                 + std::string(std::to_string(static_cast<std::underlying_type_t<T>>(v)))
+                 + "}";
         } else {
-            return std::string(typeName(boost::hana::type_c<T>)) + "{" +
-                   std::string(std::to_string(v)) + "}";
+            return std::string(typeName(boost::hana::type_c<T>)) + "{"
+                 + std::string(std::to_string(v)) + "}";
         }
     }
 };
@@ -232,21 +231,23 @@ struct TypeNameImpl<std::string> {
 // collections
 
 template <class T>
-struct TypeNameImpl<T, When<isContainer(boost::hana::type_c<T>) &&
-                            isPair(boost::hana::type_c<typename T::value_type>)>> {
+struct TypeNameImpl<T,
+                    When<isContainer(boost::hana::type_c<T>)
+                         && isPair(boost::hana::type_c<typename T::value_type>)>> {
     static std::string apply() {
-        return "map of " +
-               std::string(typeName(boost::hana::type_c<typename T::key_type>)) + "-" +
-               std::string(typeName(boost::hana::type_c<typename T::mapped_type>));
+        return "map of "
+             + std::string(typeName(boost::hana::type_c<typename T::key_type>)) + "-"
+             + std::string(typeName(boost::hana::type_c<typename T::mapped_type>));
     }
 };
 
 template <class T>
-struct TypeNameImpl<T, When<isContainer(boost::hana::type_c<T>) &&
-                            !isPair(boost::hana::type_c<typename T::value_type>)>> {
+struct TypeNameImpl<T,
+                    When<isContainer(boost::hana::type_c<T>)
+                         && !isPair(boost::hana::type_c<typename T::value_type>)>> {
     static std::string apply() {
-        return "list of " +
-               std::string(typeName(boost::hana::type_c<typename T::value_type>));
+        return "list of "
+             + std::string(typeName(boost::hana::type_c<typename T::value_type>));
     }
 };
 
@@ -255,8 +256,9 @@ struct TypeNameImpl<T, When<isContainer(boost::hana::type_c<T>) &&
 template <class T>
 struct TypeNameImpl<T, When<isOptional(boost::hana::type_c<T>)>> {
     static std::string apply() {
-        return "optional " + static_cast<std::string>(typeName(
-                                     boost::hana::type_c<typename T::value_type>));
+        return "optional "
+             + static_cast<std::string>(
+                       typeName(boost::hana::type_c<typename T::value_type>));
     }
 };
 
@@ -278,8 +280,8 @@ private:
 
 public:
     static std::string apply() {
-        return "one of [" +
-               boost::hana::fold(boost::hana::intersperse(
+        return "one of ["
+             + boost::hana::fold(boost::hana::intersperse(
                                          boost::hana::transform(
                                                  decltype(types(std::declval<T>()))(),
                                                  [](auto type) {
@@ -287,8 +289,9 @@ public:
                                                              typeName(type));
                                                  }),
                                          ", "),
-                                 "", boost::hana::_ + boost::hana::_) +
-               "]";
+                                 "",
+                                 boost::hana::_ + boost::hana::_)
+             + "]";
     }
 };
 
@@ -296,7 +299,8 @@ public:
 
 template <class T>
 struct TypeNameImpl<
-        T, When<detail::Valid<decltype(typeNameImpl(std::declval<T const*>()))>::value>> {
+        T,
+        When<detail::Valid<decltype(typeNameImpl(std::declval<T const*>()))>::value>> {
     static constexpr std::string_view apply() noexcept(
             noexcept(typeNameImpl(std::declval<T const*>()))) {
         return typeNameImpl(static_cast<T const*>(nullptr));
@@ -323,4 +327,4 @@ constexpr auto TypeNameT::operator()(boost::hana::basic_type<T>) const {
 }
 #endif
 
-} // namespace serialize
+} // namespace yenxo

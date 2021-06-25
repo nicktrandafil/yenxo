@@ -24,14 +24,14 @@
 
 #pragma once
 
-#include <serialize/config.hpp>
-#include <serialize/enum_traits.hpp>
-#include <serialize/exception.hpp>
-#include <serialize/meta.hpp>
-#include <serialize/variant.hpp>
-#include <serialize/when.hpp>
+#include <yenxo/config.hpp>
+#include <yenxo/enum_traits.hpp>
+#include <yenxo/exception.hpp>
+#include <yenxo/meta.hpp>
+#include <yenxo/variant.hpp>
+#include <yenxo/when.hpp>
 
-#if SERIALIZE_ENABLE_TYPE_SAFE
+#if YENXO_ENABLE_TYPE_SAFE
 #include <type_safe/strong_typedef.hpp>
 #endif
 
@@ -41,11 +41,11 @@
 #include <type_traits>
 #include <variant>
 
-namespace serialize {
+namespace yenxo {
 
 /// \ingroup group-details
 /// Tests if type `T` has `static Variant T::toVariant(T)`.
-#ifdef SERIALIZE_DOXYGEN_INVOKED
+#ifdef YENXO_DOXYGEN_INVOKED
 constexpr auto hasToVariant = [](auto type) {
     return exists(static Variant type::toVariant(type));
 };
@@ -53,8 +53,7 @@ constexpr auto hasToVariant = [](auto type) {
 template <typename T>
 struct HasToVariantImpl {
     static void var(Variant const&);
-    template <typename U, typename = decltype(
-                              var(U::toVariant(std::declval<U>())))>
+    template <typename U, typename = decltype(var(U::toVariant(std::declval<U>())))>
     static std::true_type test(boost::hana::basic_type<U> const&);
     static std::false_type test(...);
     static constexpr auto const value = decltype(test(boost::hana::type_c<T>))();
@@ -72,7 +71,7 @@ constexpr HasToVariantT hasToVariant;
 
 /// \ingroup group-details
 /// Tests if type `T` has `static T T::fromVariant(Variant)`.
-#ifdef SERIALIZE_DOXYGEN_INVOKED
+#ifdef YENXO_DOXYGEN_INVOKED
 inline constexpr auto hasFromVariant = [](auto type) {
     return exists(static type type::fromVariant(Variant));
 };
@@ -80,8 +79,8 @@ inline constexpr auto hasFromVariant = [](auto type) {
 template <typename T>
 struct HasFromVariantImpl {
     static void var(T const&);
-    template <typename U, typename = decltype(
-                              var(U::fromVariant(std::declval<Variant>())))>
+    template <typename U,
+              typename = decltype(var(U::fromVariant(std::declval<Variant>())))>
     static std::true_type test(boost::hana::basic_type<U> const&);
     static std::false_type test(...);
     static constexpr auto const value = decltype(test(boost::hana::type_c<T>))();
@@ -101,7 +100,7 @@ constexpr HasFromVariantT hasFromVariant;
 /// Is `type` a `Variant`.
 inline constexpr auto isVariant = [](auto type) {
     using T = typename decltype(type)::type;
-    return std::is_same_v<serialize::Variant, T>;
+    return std::is_same_v<yenxo::Variant, T>;
 };
 
 /// \ingroup group-details
@@ -124,7 +123,7 @@ inline constexpr auto isMapType = [](auto type) {
     using T = typename decltype(type)::type;
     if constexpr (isContainer(type)) {
         return isKeyValue(boost::hana::type_c<typename T::value_type>)
-               && !std::is_same_v<T, serialize::VariantMap>;
+            && !std::is_same_v<T, yenxo::VariantMap>;
     } else {
         return false;
     }
@@ -136,7 +135,7 @@ inline constexpr auto isCollectionType = [](auto type) {
     using T = typename decltype(type)::type;
     if constexpr (isContainer(boost::hana::type_c<T>)) {
         return !isKeyValue(boost::hana::type_c<typename T::value_type>)
-               && !std::is_same_v<T, serialize::VariantVec>;
+            && !std::is_same_v<T, yenxo::VariantVec>;
     } else {
         return false;
     }
@@ -168,10 +167,9 @@ inline constexpr auto isReflectiveEnumWithMultiStringRepresentation = [](auto ty
 /// \ingroup group-details
 /// Is `type` a `std::variant`-like type.
 inline constexpr auto isStdVariant = boost::hana::is_valid(
-        [](auto type) -> decltype(
-                              (void)serialize::detail::Valid<std::variant_alternative_t<
-                                      0,
-                                      typename decltype(type)::type>>::value) {});
+        [](auto type) -> decltype((void)yenxo::detail::Valid<std::variant_alternative_t<
+                                          0,
+                                          typename decltype(type)::type>>::value) {});
 
 /// \ingroup group-details
 /// Is `type` a collection-like type with `push_back` method.
@@ -179,8 +177,7 @@ inline constexpr auto isCollectionTypeWithPushBack = [](auto type) {
     using T = typename decltype(type)::type;
     if constexpr (isContainer(type)) {
         return !isKeyValue(boost::hana::type_c<typename T::value_type>)
-        && hasPushBack(type)
-        && !std::is_same_v<T, serialize::VariantVec>;
+            && hasPushBack(type) && !std::is_same_v<T, yenxo::VariantVec>;
     } else {
         return false;
     }
@@ -193,7 +190,7 @@ inline constexpr auto isCollectionTypeWithEmplace = [](auto type) {
     if constexpr (isContainer(type)) {
         return !isKeyValue(boost::hana::type_c<typename T::value_type>)
             && !hasPushBack(type) && hasEmplace(type)
-            && !std::is_same_v<T, serialize::VariantVec>;
+            && !std::is_same_v<T, yenxo::VariantVec>;
     } else {
         return false;
     }
@@ -204,10 +201,8 @@ inline constexpr auto isCollectionTypeWithEmplace = [](auto type) {
 ///
 /// The function object is enabled for any type `T` for which
 /// `toVariantConvertible(boost::hana::type_c<T>)` returns `true`.
-#ifdef SERIALIZE_DOXYGEN_INVOKED
-auto toVariant = [](auto value) {
-    return Variant(serialize(value));
-};
+#ifdef YENXO_DOXYGEN_INVOKED
+auto toVariant = [](auto value) { return Variant(yenxo(value)); };
 #else
 struct ToVariantT {
     template <typename T>
@@ -231,19 +226,25 @@ struct ToVariantImpl<T, When<condition>> {
 
 template <typename T>
 struct ToVariantImpl<T, When<isVariant(boost::hana::type_c<T>)>> {
-    static Variant apply(T const& x) { return x; }
+    static Variant apply(T const& x) {
+        return x;
+    }
 };
 
 // Specialization for types with `static Variant T::toVariant(T)`
 template <typename T>
 struct ToVariantImpl<T, When<hasToVariant(boost::hana::type_c<T>)>> {
-    static Variant apply(T const& x) { return T::toVariant(x); }
+    static Variant apply(T const& x) {
+        return T::toVariant(x);
+    }
 };
 
 // Specialization for `Variant` built-in supported types
 template <typename T>
 struct ToVariantImpl<T, When<isConvertibleToVariantBuildIn(boost::hana::type_c<T>)>> {
-    static Variant apply(T x) { return Variant(x); }
+    static Variant apply(T x) {
+        return Variant(x);
+    }
 };
 
 // Specialization for map types
@@ -252,9 +253,8 @@ struct ToVariantImpl<T, When<isMapType(boost::hana::type_c<T>)>> {
     static Variant apply(T const& map) {
         VariantMap ret;
         for (auto const& x : map) {
-            ret.emplace(
-                ToVariantImpl<typename T::key_type>::apply(x.first),
-                ToVariantImpl<typename T::mapped_type>::apply(x.second));
+            ret.emplace(ToVariantImpl<typename T::key_type>::apply(x.first),
+                        ToVariantImpl<typename T::mapped_type>::apply(x.second));
         }
         return Variant(ret);
     }
@@ -292,7 +292,7 @@ struct ToVariantImpl<T, When<isReflectiveEnum(boost::hana::type_c<T>)>> {
     }
 };
 
-#if SERIALIZE_ENABLE_TYPE_SAFE
+#if YENXO_ENABLE_TYPE_SAFE
 // Specialization for `type_safe::strong_typedef`
 template <typename T>
 struct ToVariantImpl<T,
@@ -346,7 +346,8 @@ struct ToVariantImpl<T, When<boost::hana::is_a<boost::hana::map_tag, T>>> {
     static Variant apply(T const& map) {
         Variant::Map ret;
         boost::hana::for_each(map, boost::hana::fuse([&ret](auto key, auto value) {
-                                  ret[boost::hana::to<char const*>(key)] = toVariant(value);
+                                  ret[boost::hana::to<char const*>(key)] =
+                                          toVariant(value);
                               }));
         return Variant(ret);
     }
@@ -366,9 +367,8 @@ struct ToVariantImpl<T, When<boost::hana::is_a<boost::hana::tuple_tag, T>>> {
     static Variant apply(T const& val) {
         VariantVec ret;
         ret.reserve(boost::hana::size(val));
-        boost::hana::for_each(val, [&ret](auto const& x) {
-            ret.push_back(toVariant(x));
-        });
+        boost::hana::for_each(val,
+                              [&ret](auto const& x) { ret.push_back(toVariant(x)); });
         return Variant(ret);
     }
 };
@@ -377,10 +377,7 @@ struct ToVariantImpl<T, When<boost::hana::is_a<boost::hana::tuple_tag, T>>> {
 template <typename T>
 struct ToVariantImpl<T, When<isStdVariant(boost::hana::type_c<T>)>> {
     static Variant apply(T const& var) {
-        return std::visit(
-            Overload{
-                [](auto const& x) { return toVariant(x); }},
-            var);
+        return std::visit(Overload{[](auto const& x) { return toVariant(x); }}, var);
     }
 };
 
@@ -395,11 +392,9 @@ auto ToVariantT::operator()(T&& val) const {
 ///
 /// The function object is enabled for any type `T` for which
 /// `toVariantConvertible(boost::hana::type_c<T>)` returns `true`.
-#ifdef SERIALIZE_DOXYGEN_INVOKED
+#ifdef YENXO_DOXYGEN_INVOKED
 template <class T>
-constexpr auto fromVariant = [](Variant const& var) {
-    return T(deserialize(var));
-};
+constexpr auto fromVariant = [](Variant const& var) { return T(deserialize(var)); };
 #else
 template <typename T>
 struct FromVariantT {
@@ -425,20 +420,26 @@ struct FromVariantImpl<T, When<condition>> {
 
 // Identity
 template <typename T>
-struct FromVariantImpl<T, When<std::is_same_v<serialize::Variant, T>>> {
-    static Variant apply(T const& x) { return x; }
+struct FromVariantImpl<T, When<std::is_same_v<yenxo::Variant, T>>> {
+    static Variant apply(T const& x) {
+        return x;
+    }
 };
 
 // Specialization for types with `static T T::fromVariant(Variant)`
 template <typename T>
 struct FromVariantImpl<T, When<hasFromVariant(boost::hana::type_c<T>)>> {
-    static T apply(Variant const& x) { return T::fromVariant(x); }
+    static T apply(Variant const& x) {
+        return T::fromVariant(x);
+    }
 };
 
 // Specialization for `Variant` built-in supported types
 template <typename T>
 struct FromVariantImpl<T, When<isVariantBuildIn(boost::hana::type_c<T>)>> {
-    static T apply(Variant const& x) { return static_cast<T>(x); }
+    static T apply(Variant const& x) {
+        return static_cast<T>(x);
+    }
 };
 
 namespace detail {
@@ -447,7 +448,7 @@ template <class F>
 inline void tryCatch(F&& f, size_t i) {
     try {
         f();
-    } catch (serialize::VariantErr& e) {
+    } catch (yenxo::VariantErr& e) {
         e.prependPath(std::to_string(i));
         throw;
     } catch (std::exception const& e) {
@@ -461,7 +462,7 @@ template <class F, class S>
 inline void tryCatch(F&& f, S s) {
     try {
         f();
-    } catch (serialize::VariantErr& e) {
+    } catch (yenxo::VariantErr& e) {
         e.prependPath(boost::hana::to<char const*>(s));
         throw;
     } catch (std::exception const& e) {
@@ -479,9 +480,8 @@ struct FromVariantImpl<T, When<detail::IsStdArrayImpl<T>::value>> {
         auto const& vec = var.vec();
         constexpr auto N = detail::StdArraySizeImpl<T>::value;
         if (vec.size() != N) {
-            throw std::logic_error("expected size of the list is "
-                                   + std::to_string(N) + ", actual "
-                                   + std::to_string(vec.size()));
+            throw std::logic_error("expected size of the list is " + std::to_string(N)
+                                   + ", actual " + std::to_string(vec.size()));
         }
         T ret;
         for (size_t i = 0; i < N; ++i) {
@@ -526,9 +526,8 @@ struct FromVariantImpl<T, When<isMapType(boost::hana::type_c<T>)>> {
     static T apply(Variant const& var) {
         T ret;
         for (auto const& x : var.map()) {
-            ret.emplace(
-                FromVariantImpl<typename T::key_type>::apply(Variant(x.first)),
-                FromVariantImpl<typename T::mapped_type>::apply(x.second));
+            ret.emplace(FromVariantImpl<typename T::key_type>::apply(Variant(x.first)),
+                        FromVariantImpl<typename T::mapped_type>::apply(x.second));
         }
         return ret;
     }
@@ -538,9 +537,8 @@ struct FromVariantImpl<T, When<isMapType(boost::hana::type_c<T>)>> {
 template <typename T>
 struct FromVariantImpl<T, When<isPair(boost::hana::type_c<T>)>> {
     static T apply(Variant const& var) {
-        return T(
-            serialize::fromVariant<typename T::first_type>(var.map().at("first")),
-            serialize::fromVariant<typename T::second_type>(var.map().at("second")));
+        return T(yenxo::fromVariant<typename T::first_type>(var.map().at("first")),
+                 yenxo::fromVariant<typename T::second_type>(var.map().at("second")));
     }
 };
 
@@ -570,9 +568,7 @@ struct FromVariantImpl<
                                                   std::string const& x) {
         bool found{false};
         boost::hana::for_each(boost::hana::at_c<I>(EnumTraits<T>::strings()),
-                              [&](auto s) {
-                                  found |= strcmp(s, x.c_str()) == 0;
-                              });
+                              [&](auto s) { found |= strcmp(s, x.c_str()) == 0; });
         if (found) {
             return EnumTraits<T>::values[I];
         } else {
@@ -583,7 +579,8 @@ struct FromVariantImpl<
     }
 
     static typename EnumTraits<T>::Enum applyImpl(
-        boost::hana::size_t<EnumTraits<T>::count>, std::string const& x) {
+            boost::hana::size_t<EnumTraits<T>::count>,
+            std::string const& x) {
         throw VariantBadType(x, boost::hana::type_c<T>);
     }
 
@@ -597,7 +594,7 @@ struct FromVariantImpl<
     }
 };
 
-#if SERIALIZE_ENABLE_TYPE_SAFE
+#if YENXO_ENABLE_TYPE_SAFE
 // Specialization for `type_safe::strong_typedef`
 template <typename T>
 struct FromVariantImpl<T,
@@ -717,7 +714,7 @@ struct FromVariantImpl<T, When<boost::hana::Constant<T>().value>> {
 template <typename T>
 struct FromVariantImpl<
         T,
-        When<serialize::detail::Valid<std::variant_alternative_t<0, T>>::value>> {
+        When<yenxo::detail::Valid<std::variant_alternative_t<0, T>>::value>> {
     template <size_t I>
     static T applyImpl(boost::hana::size_t<I>, Variant const& var) {
         try {
@@ -727,8 +724,8 @@ struct FromVariantImpl<
         }
     }
 
-    [[noreturn]] static T applyImpl(
-        boost::hana::size_t<std::variant_size_v<T>>, Variant const& var) {
+    [[noreturn]] static T applyImpl(boost::hana::size_t<std::variant_size_v<T>>,
+                                    Variant const& var) {
         std::ostringstream os;
         os << var;
         throw VariantBadType(os.str(), boost::hana::type_c<T>);
@@ -748,10 +745,8 @@ auto FromVariantT<T>::operator()(Variant const& x) const {
 /// To `Variant` conversion function object
 /// \ingroup group-function
 /// \see toVariant
-#ifdef SERIALIZE_DOXYGEN_INVOKED
-constexpr auto toVariant2 = [](Variant& out, auto value) {
-    out = toVariant(value);
-};
+#ifdef YENXO_DOXYGEN_INVOKED
+constexpr auto toVariant2 = [](Variant& out, auto value) { out = toVariant(value); };
 #else
 struct ToVariantT2 {
     template <class T>
@@ -766,7 +761,7 @@ constexpr ToVariantT2 toVariant2;
 /// From `Variant` conversion function object
 /// \ingroup group-function
 /// \see fromVariant
-#ifdef SERIALIZE_DOXYGEN_INVOKED
+#ifdef YENXO_DOXYGEN_INVOKED
 constexpr auto fromVariant2 = [](auto& value, Variant const& var) {
     value = fromVariant<decltype(type)>(var);
 };
@@ -790,7 +785,7 @@ constexpr FromVariantT2 fromVariant2;
 /// The non-intrusive way to enable the trait for user defined type `T` is to
 /// provide specialization
 /// \code
-/// namespace serialize {
+/// namespace yenxo {
 /// template <>
 /// struct ToVariantImpl<T> {
 ///     Variant apply(T const&) {
@@ -800,23 +795,16 @@ constexpr FromVariantT2 fromVariant2;
 /// }
 /// \endcode
 inline constexpr auto toVariantConvertible = [](auto type) {
-    return    isVariant(type)
-           || hasToVariant(type)
-           || isConvertibleToVariantBuildIn(type)
-           || isMapType(type)
-           || isCollectionType(type)
-           || isReflectiveEnum(type)
-#if SERIALIZE_ENABLE_TYPE_SAFE
-           || (!hasToVariant(type) && strongTypeDef(type))
-           || constrainedType(type)
-           || integerType(type)
-           || floatingPoint(type)
-           || boolean(type)
+    return isVariant(type) || hasToVariant(type) || isConvertibleToVariantBuildIn(type)
+        || isMapType(type) || isCollectionType(type) || isReflectiveEnum(type)
+#if YENXO_ENABLE_TYPE_SAFE
+        || (!hasToVariant(type) && strongTypeDef(type)) || constrainedType(type)
+        || integerType(type) || floatingPoint(type) || boolean(type)
 #endif
-           || boost::hana::is_a<boost::hana::map_tag, typename decltype(type)::type>
-           || boost::hana::is_a<boost::hana::string_tag, typename decltype(type)::type>
-           || boost::hana::is_a<boost::hana::tuple_tag, typename decltype(type)::type>
-           || isStdVariant(type);
+        || boost::hana::is_a<
+                   boost::hana::map_tag,
+                   typename decltype(type)::
+                           type> || boost::hana::is_a<boost::hana::string_tag, typename decltype(type)::type> || boost::hana::is_a<boost::hana::tuple_tag, typename decltype(type)::type> || isStdVariant(type);
 };
 
 /// Whether `T` can be constructed from Variant
@@ -828,7 +816,7 @@ inline constexpr auto toVariantConvertible = [](auto type) {
 /// The non-intrusive way to enable the trait for user defined type `T` is to
 /// provide specialization
 /// \code
-/// namespace serialize {
+/// namespace yenxo {
 /// template <>
 /// struct FromVariantImpl<T> {
 ///     T apply(Variant const&) {
@@ -848,7 +836,7 @@ inline constexpr auto fromVariantConvertible = [](auto type) {
            || isPair(type)
            || isReflectiveEnumWithSingleStringRepresentation(type)
            || isReflectiveEnumWithMultiStringRepresentation(type)
-#if SERIALIZE_ENABLE_TYPE_SAFE
+#if YENXO_ENABLE_TYPE_SAFE
            || (!hasToVariant(type) && strongTypeDef(type))
            || constrainedType(type)
            || integerType(type)
@@ -862,4 +850,4 @@ inline constexpr auto fromVariantConvertible = [](auto type) {
            || isStdVariant(type);
 };
 
-} // namespace serialize
+} // namespace yenxo

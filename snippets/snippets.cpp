@@ -22,14 +22,14 @@
   SOFTWARE.
 */
 
-#include <serialize/variant.hpp>
+#include <yenxo/variant.hpp>
 
 #include <rapidjson/document.h>
 
 #include <benchmark/benchmark.h>
 #include <variant>
 
-using namespace serialize;
+using namespace yenxo;
 
 struct Var {
     std::variant<int, double, long, void*> val;
@@ -49,11 +49,20 @@ int work(Var var) {
 int work2(Var var) {
     static int state = 0;
     switch (var.val.index()) {
-    case 0: state += std::get<0>(var.val); break;
-    case 1: state += static_cast<int>(std::get<1>(var.val)); break;
-    case 2: state += static_cast<int>(std::get<2>(var.val)); break;
-    case 3: state += reinterpret_cast<uint64_t>(std::get<3>(var.val)); break;
-    case std::variant_npos: break;
+    case 0:
+        state += std::get<0>(var.val);
+        break;
+    case 1:
+        state += static_cast<int>(std::get<1>(var.val));
+        break;
+    case 2:
+        state += static_cast<int>(std::get<2>(var.val));
+        break;
+    case 3:
+        state += reinterpret_cast<uint64_t>(std::get<3>(var.val));
+        break;
+    case std::variant_npos:
+        break;
     }
     return state;
 }
@@ -63,10 +72,18 @@ static void bm_set_var(benchmark::State& state) {
     size_t i = 0;
     for (auto s : state) {
         switch ((i++) % 4) {
-        case 0: var.val = int(i); break;
-        case 1: var.val = double(i); break;
-        case 2: var.val = long(i); break;
-        case 3: var.val = reinterpret_cast<void*>(i); break;
+        case 0:
+            var.val = int(i);
+            break;
+        case 1:
+            var.val = double(i);
+            break;
+        case 2:
+            var.val = long(i);
+            break;
+        case 3:
+            var.val = reinterpret_cast<void*>(i);
+            break;
         }
         benchmark::DoNotOptimize(work(var));
     }
@@ -78,10 +95,18 @@ static void bm_set_var2(benchmark::State& state) {
     size_t i = 0;
     for (auto s : state) {
         switch ((i++) % 4) {
-        case 0: var.val = int(i); break;
-        case 1: var.val = double(i); break;
-        case 2: var.val = long(i); break;
-        case 3: var.val = reinterpret_cast<void*>(i); break;
+        case 0:
+            var.val = int(i);
+            break;
+        case 1:
+            var.val = double(i);
+            break;
+        case 2:
+            var.val = long(i);
+            break;
+        case 3:
+            var.val = reinterpret_cast<void*>(i);
+            break;
         }
         benchmark::DoNotOptimize(work2(var));
     }
@@ -103,11 +128,20 @@ static_assert(sizeof(Union) == 16);
 int work(Union var) {
     static int state = 0;
     switch (var.type) {
-    case 0: break;
-    case 1: state += var.val.int_v; break;
-    case 2: state += static_cast<int>(var.val.double_v); break;
-    case 3: state += static_cast<int>(var.val.long_v); break;
-    case 4: state += reinterpret_cast<uint64_t>(var.val.ptr_v); break;
+    case 0:
+        break;
+    case 1:
+        state += var.val.int_v;
+        break;
+    case 2:
+        state += static_cast<int>(var.val.double_v);
+        break;
+    case 3:
+        state += static_cast<int>(var.val.long_v);
+        break;
+    case 4:
+        state += reinterpret_cast<uint64_t>(var.val.ptr_v);
+        break;
     }
     return state;
 }
@@ -164,14 +198,18 @@ struct X2 {
 static void bm_not_equal_using_equal(benchmark::State& state) {
     X x{5, 6};
     X y{6, 7};
-    for (auto _ : state) { benchmark::DoNotOptimize(x != y); }
+    for (auto _ : state) {
+        benchmark::DoNotOptimize(x != y);
+    }
 }
 BENCHMARK(bm_not_equal_using_equal);
 
 static void bm_not_equal(benchmark::State& state) {
     X2 x{5, 6};
     X2 y{6, 7};
-    for (auto _ : state) { benchmark::DoNotOptimize(x != y); }
+    for (auto _ : state) {
+        benchmark::DoNotOptimize(x != y);
+    }
 }
 BENCHMARK(bm_not_equal);
 
@@ -215,7 +253,7 @@ static void bm_var_from_json(benchmark::State& state) {
     })";
 
     for (auto _ : state) {
-        auto var = serialize::Variant::fromJson(raw);
+        auto var = yenxo::Variant::fromJson(raw);
         benchmark::DoNotOptimize(var);
     }
 }

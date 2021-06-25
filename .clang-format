@@ -62,7 +62,7 @@ IncludeCategories:
 # local
   - Regex:           '".+'
     Priority:        1
-  - Regex:           '^<serialize/.*hpp>$'
+  - Regex:           '^<yenxo/.*hpp>$'
     Priority:        2
 # 3rd
   - Regex:           '^<catch2/'

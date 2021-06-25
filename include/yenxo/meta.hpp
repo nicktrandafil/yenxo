@@ -24,10 +24,10 @@
 
 #pragma once
 
-#include <serialize/config.hpp>
-#include <serialize/when.hpp>
+#include <yenxo/config.hpp>
+#include <yenxo/when.hpp>
 
-#if SERIALIZE_ENABLE_TYPE_SAFE
+#if YENXO_ENABLE_TYPE_SAFE
 #include <type_safe/constrained_type.hpp>
 #include <type_safe/strong_typedef.hpp>
 #include <type_safe/types.hpp>
@@ -46,7 +46,7 @@
 #include <utility>
 #include <vector>
 
-namespace serialize {
+namespace yenxo {
 
 /// Sequence of types
 /// \ingroup group-meta
@@ -63,11 +63,9 @@ struct S {
 
     template <typename Key>
     constexpr static bool convertible() {
-        return boost::hana::any_of(
-            boost::hana::tuple_t<Args...>,
-            [](auto x) {
-                return std::is_convertible_v<Key, typename decltype(x)::type>;
-            });
+        return boost::hana::any_of(boost::hana::tuple_t<Args...>, [](auto x) {
+            return std::is_convertible_v<Key, typename decltype(x)::type>;
+        });
     }
 
     template <typename Key>
@@ -102,7 +100,7 @@ struct Overload : public Args... {
 };
 
 template <typename... Args>
-Overload(Args...)->Overload<Args...>;
+Overload(Args...) -> Overload<Args...>;
 
 /// A helper in `static_assert` context
 /// \ingroup group-meta
@@ -138,7 +136,7 @@ constexpr auto isOptional(boost::hana::basic_type<T>) {
     return detail::IsOptionalImpl<std::remove_cv_t<std::remove_reference_t<T>>>::value;
 }
 
-#ifndef SERIALIZE_DOXYGEN_INVOKED
+#ifndef YENXO_DOXYGEN_INVOKED
 namespace detail {
 
 template <typename T, typename = void>
@@ -149,16 +147,17 @@ struct IsIterableImpl<T, When<condition>> : std::false_type {};
 
 template <typename T>
 struct IsIterableImpl<
-    T,
-    When<detail::Valid<decltype(
-        // begin/end and operator !=
-        static_cast<void>(begin(std::declval<T&>()) != end(std::declval<T&>())),
+        T,
+        When<detail::Valid<decltype(
+                // begin/end and operator !=
+                static_cast<void>(begin(std::declval<T&>()) != end(std::declval<T&>())),
 
-        // operator ++
-        ++std::declval<decltype(begin(std::declval<T&>()))&>(),
+                // operator ++
+                ++std::declval<decltype(begin(std::declval<T&>()))&>(),
 
-        // operator*
-        *begin(std::declval<T&>()))>::value>> : std::true_type
+                // operator*
+                *begin(std::declval<T&>()))>::value>>
+        : std::true_type
 
 {};
 
@@ -175,7 +174,7 @@ constexpr auto isIterable(boost::hana::basic_type<T> const&) {
 template <class T>
 using IsIterable = detail::IsIterableImpl<T>;
 
-#ifndef SERIALIZE_DOXYGEN_INVOKED
+#ifndef YENXO_DOXYGEN_INVOKED
 namespace detail {
 
 template <typename T, typename = void>
@@ -261,13 +260,11 @@ constexpr auto hasEmplace = boost::hana::is_valid(
         [](auto x) -> decltype((void)boost::hana::traits::declval(x).emplace(
                            std::declval<typename decltype(x)::type::value_type>())) {});
 
-#if SERIALIZE_ENABLE_TYPE_SAFE
+#if YENXO_ENABLE_TYPE_SAFE
 /// Tests if type is `type_safe::strong_typedef`
 /// \ingroup group-meta
-#ifdef SERIALIZE_DOXYGEN_INVOKED
-constexpr auto strongTypeDef = [](auto type) {
-    return isStrongTypeDef(type);
-};
+#ifdef YENXO_DOXYGEN_INVOKED
+constexpr auto strongTypeDef = [](auto type) { return isStrongTypeDef(type); };
 #else
 template <typename T>
 struct StrongTypeDefImpl {
@@ -289,10 +286,8 @@ constexpr StrongTypedefT strongTypeDef;
 
 /// Tests if type is `type_safe::constrained_type`
 /// \ingroup group-meta
-#ifdef SERIALIZE_DOXYGEN_INVOKED
-constexpr auto constrainedType = [](auto type) {
-    return isConstrainedType(type);
-};
+#ifdef YENXO_DOXYGEN_INVOKED
+constexpr auto constrainedType = [](auto type) { return isConstrainedType(type); };
 #else
 template <typename T>
 struct ConstrainedTypeImpl {
@@ -314,10 +309,8 @@ constexpr ConstrainedTypeT constrainedType;
 
 /// Tests if type is `type_safe::integer`
 /// \ingroup group-meta
-#ifdef SERIALIZE_DOXYGEN_INVOKED
-constexpr auto integerType = [](auto type) {
-    return isIntegerType(type);
-};
+#ifdef YENXO_DOXYGEN_INVOKED
+constexpr auto integerType = [](auto type) { return isIntegerType(type); };
 #else
 template <typename T>
 struct IntegerTypeImpl {
@@ -339,10 +332,8 @@ constexpr IntegerTypeT integerType;
 
 /// Tests if type is `type_safe::floating_point`
 /// \ingroup group-meta
-#ifdef SERIALIZE_DOXYGEN_INVOKED
-constexpr auto floatingPoint = [](auto type) {
-    return isFloatingPoint(type);
-};
+#ifdef YENXO_DOXYGEN_INVOKED
+constexpr auto floatingPoint = [](auto type) { return isFloatingPoint(type); };
 #else
 template <typename T>
 struct FloatingPointTypeImpl {
@@ -364,10 +355,8 @@ constexpr FloatingPointTypeT floatingPoint;
 
 /// Tests if type is `type_safe::boolean`
 /// \ingroup group-meta
-#ifdef SERIALIZE_DOXYGEN_INVOKED
-constexpr auto boolean = [](auto type) {
-    return isBoolean(type);
-};
+#ifdef YENXO_DOXYGEN_INVOKED
+constexpr auto boolean = [](auto type) { return isBoolean(type); };
 #else
 template <typename T>
 struct BooleanTypeImpl : std::false_type {};
@@ -389,13 +378,14 @@ constexpr BooleanTypeT boolean;
 /// Test if `T` has `T::strings()` static member
 /// \ingroup group-meta
 constexpr auto const hasStrings = boost::hana::is_valid(
-    [](auto t) -> decltype((void)decltype(t)::type::strings()) {
-    });
+        [](auto t) -> decltype((void)decltype(t)::type::strings()) {});
 
 /// Compile time `to_string` for integer
-#ifdef SERIALIZE_DOXYGEN_INVOKED
+#ifdef YENXO_DOXYGEN_INVOKED
 template <int I>
-constexpr auto cToString(boost::hana::int_<I>) noexcept { ... }
+constexpr auto cToString(boost::hana::int_<I>) noexcept {
+    ...
+}
 #else
 constexpr auto cToString(boost::hana::int_<0>) noexcept {
     return BOOST_HANA_STRING("");
@@ -425,4 +415,4 @@ struct StdArraySizeImpl<std::array<T, N>> {
 };
 
 } // namespace detail
-} // namespace serialize
+} // namespace yenxo
