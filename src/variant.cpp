@@ -928,13 +928,13 @@ struct FromJson : rapidjson::BaseReaderHandler<Encoding, FromJson<Encoding>> {
     void val(T&& x) {
         switch (ptrs.back()->type()) {
         case Variant::TypeTag::map:
-            ptrs.back()->modifyMap()[std::move(key)] = Variant(std::move(x));
+            ptrs.back()->modifyMap()[std::move(key)] = Variant(std::forward<T>(x));
             break;
         case Variant::TypeTag::vec:
-            ptrs.back()->modifyVec().push_back(Variant(std::move(x)));
+            ptrs.back()->modifyVec().push_back(Variant(std::forward<T>(x)));
             break;
         default:
-            *ptrs.back() = Variant(std::move(x));
+            *ptrs.back() = Variant(std::forward<T>(x));
         }
     }
 
@@ -942,12 +942,12 @@ struct FromJson : rapidjson::BaseReaderHandler<Encoding, FromJson<Encoding>> {
     Variant* val2(T&& x) {
         switch (ptrs.back()->type()) {
         case Variant::TypeTag::map:
-            return &(ptrs.back()->modifyMap()[std::move(key)] = Variant(std::move(x)));
+            return &(ptrs.back()->modifyMap()[std::move(key)] = Variant(std::forward<T>(x)));
         case Variant::TypeTag::vec:
-            ptrs.back()->modifyVec().push_back(Variant(std::move(x)));
+            ptrs.back()->modifyVec().push_back(Variant(std::forward<T>(x)));
             return &ptrs.back()->modifyVec().back();
         default:
-            return &(*ptrs.back() = Variant(std::move(x)));
+            return &(*ptrs.back() = Variant(std::forward<T>(x)));
         }
     }
 
