@@ -22,7 +22,11 @@
   SOFTWARE.
 */
 
+#include "matchers.hpp"
+
+#include <serialize/define_struct.hpp>
 #include <serialize/variant_conversion.hpp>
+#include <serialize/variant_traits.hpp>
 
 #include <catch2/catch.hpp>
 
@@ -127,15 +131,17 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
     }
 
     SECTION("std::vector") {
-        REQUIRE_THROWS_WITH(fromVariant<std::vector<E>>(
-                                    Variant(VariantVec{Variant("e1"), Variant("e3")})),
-                            ".1: 'e3' is not of type 'E'");
+        REQUIRE_THROWS_MATCHES(
+                fromVariant<std::vector<E>>(
+                        Variant(VariantVec{Variant("e1"), Variant("e3")})),
+                VariantBadType,
+                ExceptionIs<VariantBadType>("'e3' is not of type 'E'", "/1"));
     }
 
     SECTION("std::set") {
         REQUIRE_THROWS_WITH(fromVariant<std::set<E>>(
                                     Variant(VariantVec{Variant("e1"), Variant("e3")})),
-                            ".1: 'e3' is not of type 'E'");
+                            "'e3' is not of type 'E'");
     }
 
     SECTION("std::array") {
@@ -156,7 +162,7 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
         SECTION("element bad type") {
             Variant const v(VariantVec{Variant{"1"}, Variant(1)});
             REQUIRE_THROWS_WITH((fromVariant<std::array<int, 2>>(v)),
-                                ".0: expected 'int32', actual 'string'");
+                                "expected 'int32', actual 'string'");
         }
     }
 
@@ -165,7 +171,10 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
             boost::hana::make_pair(BOOST_HANA_STRING("a"), E()),
             boost::hana::make_pair(BOOST_HANA_STRING("b"), E()));
 
-        REQUIRE_THROWS_WITH(fromVariant2(tmp, Variant(VariantMap{{"a", Variant("e1")}, {"b", Variant("e3")}})), ".b: 'e3' is not of type 'E'");
+        REQUIRE_THROWS_WITH(fromVariant2(tmp,
+                                         Variant(VariantMap{{"a", Variant("e1")},
+                                                            {"b", Variant("e3")}})),
+                            "'e3' is not of type 'E'");
     }
 
     SECTION("hana::string") {
@@ -195,7 +204,7 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
         SECTION("element bad type") {
             Variant const v(VariantVec{Variant{"1"}, Variant(2)});
             REQUIRE_THROWS_WITH((fromVariant<decltype(tuple)>(v)),
-                                ".0: expected 'int32', actual 'string'");
+                                "expected 'int32', actual 'string'");
         }
 
         REQUIRE(toVariant(tuple) == VariantVec{1, "2"});
@@ -233,6 +242,34 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
                                   }));
         }
     }
+}
+
+namespace {
+
+struct SimpleProperty {
+    SERIALIZE_FROM_VARIANT(SimpleProperty)
+    BOOST_HANA_DEFINE_STRUCT(SimpleProperty, (int, x));
+};
+
+struct SpecialSymbol1 {
+    SERIALIZE_FROM_VARIANT(SpecialSymbol1)
+    DEFINE_STRUCT(SpecialSymbol1, (int, x, Name("x~y~")));
+};
+
+struct SpecialSymbol2 {
+    SERIALIZE_FROM_VARIANT(SpecialSymbol2)
+    DEFINE_STRUCT(SpecialSymbol2, (int, x, Name("~x/y/~"))); };  } // namespace
+
+TEST_CASE("Check VariantErr::path()", "[exception]") {
+    REQUIRE_THROWS_MATCHES(fromVariant<SimpleProperty>(VariantMap{{"x", "1"}}),
+                           VariantBadType,
+                           PathIs<VariantBadType>("/x"));
+    REQUIRE_THROWS_MATCHES(fromVariant<SpecialSymbol1>(VariantMap{{"x~y~", "1"}}),
+                           VariantBadType,
+                           PathIs<VariantBadType>("/x~0y~0"));
+    REQUIRE_THROWS_MATCHES(fromVariant<SpecialSymbol2>(VariantMap{{"~x/y/~", "1"}}),
+                           VariantBadType,
+                           PathIs<VariantBadType>("/~0x~1y~1~0"));
 }
 
 static_assert(toVariantConvertible(boost::hana::type_c<Variant>));

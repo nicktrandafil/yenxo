@@ -30,24 +30,22 @@
 
 #include <exception>
 #include <string>
+#include <string_view>
 
 namespace serialize {
 
 /// An error identifying `Variant` error
 /// \ingroup group-exceptions
-class VariantErr : public std::exception {
+class VariantErr : public std::runtime_error {
 public:
-    explicit VariantErr(std::string const& msg) : what_(msg) {
+    explicit VariantErr(std::string const& msg)
+            : runtime_error(msg) {
     }
 
-    char const* what() const noexcept override {
-        return what_.c_str();
-    }
-
-    void prependPath(std::string const& val) {
-        if (path_.empty()) { what_ = ": " + what_; }
-        what_ = "." + val + what_;
-        path_ += "." + val + path_;
+    void prependPath(std::string val) {
+        replace_all(val, "~", "~0");
+        replace_all(val, "/", "~1");
+        path_ += "/" + val + path_;
     }
 
     std::string const& path() const noexcept {
@@ -55,7 +53,16 @@ public:
     }
 
 private:
-    std::string what_;
+    static void replace_all(std::string& val,
+                            std::string_view old,
+                            std::string_view new_) {
+        size_t i{};
+        while ((i = val.find(old, i)) != std::string::npos) {
+            val.replace(i, 1, new_);
+            i += new_.size();
+        }
+    }
+
     std::string path_;
 };
 
@@ -65,7 +72,7 @@ class VariantEmpty final : public VariantErr {
 public:
     template <class T>
     explicit VariantEmpty(boost::hana::basic_type<T> t)
-        : VariantErr("expected '" + std::string(typeName(t)) + "', actual: 'Empty'") {
+            : VariantErr("expected '" + std::string(typeName(t)) + "', actual: 'Empty'") {
     }
 };
 
@@ -75,17 +82,18 @@ class VariantBadType final : public VariantErr {
 public:
     template <class E, class A>
     VariantBadType(boost::hana::basic_type<E> e, boost::hana::basic_type<A> a)
-        : VariantErr("expected '" + std::string(typeName(e)) + "', actual '" +
-                     std::string(typeName(a)) + "'") {
+            : VariantErr("expected '" + std::string(typeName(e)) + "', actual '"
+                         + std::string(typeName(a)) + "'") {
     }
 
-    VariantBadType(std::string const& msg) : VariantErr(msg) {
+    VariantBadType(std::string const& msg)
+            : VariantErr(msg) {
     }
 
     template <class T>
     VariantBadType(std::string const& value, boost::hana::basic_type<T> t)
-        : VariantErr("'" + value + "'" + " is not of type '" + std::string(typeName(t)) +
-                     "'") {
+            : VariantErr("'" + value + "'" + " is not of type '"
+                         + std::string(typeName(t)) + "'") {
     }
 };
 
@@ -94,8 +102,8 @@ public:
 class VariantIntegralOverflow final : public VariantErr {
 public:
     VariantIntegralOverflow(std::string const& type_name, std::string const& value)
-        : VariantErr("The type '" + type_name + "' can not hold the value '" + value +
-                     "'") {
+            : VariantErr("The type '" + type_name + "' can not hold the value '" + value
+                         + "'") {
     }
 };
 
@@ -106,11 +114,9 @@ public:
 struct StringConversionError : public std::logic_error {
     template <typename T>
     explicit StringConversionError(std::string value, boost::hana::basic_type<T> const&)
-        : std::logic_error(
-              "'" + value + "'" +
-              " is not of type '" +
-              std::string(typeName(boost::hana::type_c<T>)) +
-              "'") {}
+            : std::logic_error("'" + value + "'" + " is not of type '"
+                               + std::string(typeName(boost::hana::type_c<T>)) + "'") {
+    }
 
     explicit StringConversionError(std::string const& msg)
             : std::logic_error(msg) {

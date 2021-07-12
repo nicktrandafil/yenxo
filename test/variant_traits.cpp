@@ -22,6 +22,8 @@
   SOFTWARE.
 */
 
+#include "matchers.hpp"
+
 #include <serialize/comparison_traits.hpp>
 #include <serialize/ostream_traits.hpp>
 #include <serialize/string_conversion.hpp>
@@ -642,12 +644,11 @@ struct Car : trait::Var<Car> {
 BOOST_HANA_ADAPT_STRUCT(Car, name, wheels);
 
 TEST_CASE("Check trait::Var fails", "[variant_traits]") {
-    Variant car_var{Variant::Map{
-        {"name", Variant("saab")},
-        {"wheels", Variant("4")}}};
-
-    REQUIRE_THROWS_AS(Car::fromVariant(car_var), VariantBadType);
-    REQUIRE_THROWS_WITH(Car::fromVariant(car_var), ".wheels: expected 'int32', actual 'string'");
+    Variant car_var{Variant::Map{{"name", Variant("saab")}, {"wheels", Variant("4")}}};
+    REQUIRE_THROWS_MATCHES(
+            Car::fromVariant(car_var),
+            VariantBadType,
+            ExceptionIs<VariantBadType>("expected 'int32', actual 'string'", "/wheels"));
     REQUIRE(hana::equal(int(1), int(1)));
 }
 
@@ -679,7 +680,9 @@ TEST_CASE("Check Policy::Tag", "[variant_traits]") {
 
     SECTION("fail") {
         var.modifyMap().at("__tag") = Variant("foo");
-        REQUIRE_THROWS_WITH(fromVariant<Tagged>(var),
-                            ".__tag: 'foo' is not of type 'a tag literal'");
+        REQUIRE_THROWS_MATCHES(fromVariant<Tagged>(var),
+                               VariantBadType,
+                               ExceptionIs<VariantBadType>(
+                                       "'foo' is not of type 'a tag literal'", "/__tag"));
     }
 }
