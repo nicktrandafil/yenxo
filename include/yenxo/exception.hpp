@@ -45,7 +45,7 @@ public:
     void prependPath(std::string val) {
         replace_all(val, "~", "~0");
         replace_all(val, "/", "~1");
-        path_ += "/" + val + path_;
+        path_ = "/" + val + path_;
     }
 
     std::string const& path() const noexcept {
