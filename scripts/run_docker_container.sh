@@ -18,6 +18,10 @@ CONTAINER=$(docker run --rm -d -P -it \
 	-e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
 	-e DISPLAY \
 	-e "QT_X11_NO_MITSHM=1" \
+	-e QT_STYLE_OVERRIDE \
+	-e QT_AUTO_SCREEN_SCALE_FACTOR \
+	-e QT_SCALE_FACTOR \
+	-e QT_SCREEN_SCALE_FACTORS \
 	--volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
 	--volume="$HOME/.Xauthority:/root/.Xauthority" \
 	--cap-add=SYS_PTRACE \

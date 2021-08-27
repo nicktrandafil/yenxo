@@ -165,13 +165,6 @@ inline constexpr auto isReflectiveEnumWithMultiStringRepresentation = [](auto ty
 };
 
 /// \ingroup group-details
-/// Is `type` a `std::variant`-like type.
-inline constexpr auto isStdVariant = boost::hana::is_valid(
-        [](auto type) -> decltype((void)yenxo::detail::Valid<std::variant_alternative_t<
-                                          0,
-                                          typename decltype(type)::type>>::value) {});
-
-/// \ingroup group-details
 /// Is `type` a collection-like type with `push_back` method.
 inline constexpr auto isCollectionTypeWithPushBack = [](auto type) {
     using T = typename decltype(type)::type;
