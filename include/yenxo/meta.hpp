@@ -44,6 +44,7 @@
 #include <optional>
 #include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace yenxo {
@@ -415,4 +416,12 @@ struct StdArraySizeImpl<std::array<T, N>> {
 };
 
 } // namespace detail
+
+/// \ingroup group-meta
+/// Is `type` a `std::variant`-like type.
+inline constexpr auto isStdVariant = boost::hana::is_valid(
+        [](auto type) -> decltype((void)yenxo::detail::Valid<std::variant_alternative_t<
+                                          0,
+                                          typename decltype(type)::type>>::value) {});
+
 } // namespace yenxo

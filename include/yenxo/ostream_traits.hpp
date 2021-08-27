@@ -34,46 +34,114 @@
 #include <ostream>
 
 namespace yenxo {
+namespace detail {
+
+/// \ingroup group-details
+/// Is `std::ostream& operator<<(std::ostream&, T)` defined.
+constexpr auto const hasOStreamOperator = boost::hana::is_valid(
+        [](auto t) -> decltype(operator<<(std::declval<std::ostream>(),
+                                          std::declval<typename decltype(t)::type>())) {
+        });
+} // namespace detail
+
+struct OStreamT {
+    template <class T>
+    void operator()(std::ostream& os, T const&) const;
+};
+
+inline constexpr OStreamT oStream;
+
+template <class T, class = void>
+struct OStreamImpl : OStreamImpl<T, When<true>> {};
+
+template <class T, bool condition>
+struct OStreamImpl<T, When<condition>> {
+    void apply(std::ostream&, T const&) {
+        static_assert(T::pay_attention_no_ostream_operator_defined_for);
+    }
+};
+
+template <class T>
+struct OStreamImpl<T,
+                   When<!detail::hasOStreamOperator(boost::hana::type_c<T>)
+                        && isOptional(boost::hana::type_c<T>)>> {
+    static void apply(std::ostream& os, T const& val) {
+        if (val.has_value()) {
+            oStream(os, *val);
+        } else {
+            os << "None";
+        }
+    }
+};
+
+template <class T>
+struct OStreamImpl<T,
+                   When<!detail::hasOStreamOperator(boost::hana::type_c<T>)
+                        && isContainer(boost::hana::type_c<T>)>> {
+    static void apply(std::ostream& os, T const& val) {
+        auto const s = size(val);
+        std::size_t i = 0;
+        os << "[";
+        for (auto const& x : val) {
+            oStream(os, x);
+            os << ((i++ == s - 1) ? "" : ", ");
+        }
+        os << "]";
+    }
+};
+
+template <class T>
+struct OStreamImpl<T,
+                   When<!detail::hasOStreamOperator(boost::hana::type_c<T>)
+                        && isPair(boost::hana::type_c<T>)>> {
+    static void apply(std::ostream& os, T const& val) {
+        oStream(os, val.first);
+        os << ": ";
+        oStream(os, val.second);
+    }
+};
+
+#if YENXO_ENABLE_TYPE_SAFE
+template <class T>
+struct OStreamImpl<T,
+                   When<!detail::hasOStreamOperator(boost::hana::type_c<T>)
+                        && strongTypeDef(boost::hana::type_c<T>)>> {
+    static void apply(std::ostream& os, T const& val) {
+        oStream(os, static_cast<type_safe::underlying_type<decltype(val)>>(val));
+    }
+};
+#endif
+
+template <class T>
+struct OStreamImpl<T,
+                   When<!detail::hasOStreamOperator(boost::hana::type_c<T>)
+                        && isStdVariant(boost::hana::type_c<T>)>> {
+    static void apply(std::ostream& os, T const& val) {
+        std::visit([&os](auto const& x) { oStream(os, x); }, val);
+    }
+};
+
+template <class T>
+struct OStreamImpl<T, When<detail::hasOStreamOperator(boost::hana::type_c<T>)>> {
+    static std::ostream& apply(std::ostream& os, T const& val) {
+        return os << val;
+    }
+};
+
+template <class T>
+void OStreamT::operator()(std::ostream& os, T const& val) const {
+    OStreamImpl<T>::apply(os, val);
+}
 
 /// \pre `T` should be a Boost.Hana.Struct.
 template <class T>
 void ostreamImpl(std::ostream& os, T const& x) {
     os << typeName(boost::hana::type_c<T>) << " { ";
-
-    boost::hana::for_each(
-            x, boost::hana::fuse([&](auto name, auto value) {
-                if constexpr (isOptional(boost::hana::type_c<decltype(value)>)) {
-                    if (value.has_value()) {
-                        os << boost::hana::to<char const*>(name) << ": " << *value
-                           << "; ";
-                    }
-                } else if constexpr (isContainer(boost::hana::type_c<decltype(value)>)) {
-                    os << boost::hana::to<char const*>(name);
-                    if constexpr (isPair(boost::hana::type_c<typename decltype(
-                                                 value)::value_type>)) {
-                        os << ": { ";
-                        for (auto const& x : value) {
-                            os << x.first << ": " << x.second << "; ";
-                        }
-                        os << "}; ";
-                    } else {
-                        auto const s = value.size();
-                        std::size_t i = 0;
-                        os << ": [";
-                        for (auto const& x : value) {
-                            os << x << ((i++ == s - 1) ? "" : ", ");
-                        }
-                        os << "]; ";
-                    }
-#if YENXO_ENABLE_TYPE_SAFE
-                } else if constexpr (strongTypeDef(boost::hana::type_c<T>)) {
-                    os << static_cast<type_safe::underlying_type<T>>(x);
-#endif
-                } else {
-                    os << boost::hana::to<char const*>(name) << ": " << value << "; ";
-                }
-            }));
-
+    boost::hana::for_each(x, boost::hana::fuse([&](auto name, auto value) {
+                              os << boost::hana::to<char const*>(name) << ": ";
+                              oStream(os, value);
+                              os << "; ";
+                          }));
     os << "}";
 }
 
