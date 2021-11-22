@@ -77,7 +77,25 @@ struct OStreamImpl<T,
 template <class T>
 struct OStreamImpl<T,
                    When<!detail::hasOStreamOperator(boost::hana::type_c<T>)
-                        && isContainer(boost::hana::type_c<T>)>> {
+                        && isContainer(boost::hana::type_c<T>)
+                        && isPair(boost::hana::type_c<typename T::value_type>)>> {
+    static void apply(std::ostream& os, T const& val) {
+        auto const s = size(val);
+        std::size_t i = 0;
+        os << "{ ";
+        for (auto const& x : val) {
+            oStream(os, x);
+            os << ((i++ == s - 1) ? ";" : "; ");
+        }
+        os << " }";
+    }
+};
+
+template <class T>
+struct OStreamImpl<T,
+                   When<!detail::hasOStreamOperator(boost::hana::type_c<T>)
+                        && isContainer(boost::hana::type_c<T>)
+                        && !isPair(boost::hana::type_c<typename T::value_type>)>> {
     static void apply(std::ostream& os, T const& val) {
         auto const s = size(val);
         std::size_t i = 0;
