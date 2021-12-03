@@ -299,10 +299,7 @@ T fromVariantImpl(yenxo::Variant const& x) {
     using namespace std::literals;
     T ret;
 
-    using MapT = std::conditional_t<Policy::allow_additional_properties,
-                                    decltype(x.map()),
-                                    std::decay_t<decltype(x.map())>>;
-    MapT map = x.map();
+    auto const& map = x.map();
 
     if constexpr (!std::is_same_v<std::remove_const_t<decltype(Policy::tag)>,
                                   typename Policy::NoTag>) {
@@ -312,9 +309,6 @@ T fromVariantImpl(yenxo::Variant const& x) {
             throw std::logic_error("'__tag' is required"s);
         }
         detail::fromVariantWrap(tmp, it->second, "__tag", Policy::from_variant);
-        if constexpr (!Policy::allow_additional_properties) {
-            map.erase(it);
-        }
     }
 
     boost::hana::for_each(
@@ -346,7 +340,6 @@ T fromVariantImpl(yenxo::Variant const& x) {
                                               boost::hana::type_c<decltype(tmp)>))) {
                         throw std::logic_error("'"s + renamed + "' is required"s);
                     }
-
                 } else {
                     if constexpr (isOptional(boost::hana::type_c<decltype(tmp)>)) {
                         std::remove_reference_t<decltype(*tmp)> under;
@@ -357,16 +350,18 @@ T fromVariantImpl(yenxo::Variant const& x) {
                         detail::fromVariantWrap(
                                 tmp, it->second, renamed, Policy::from_variant);
                     }
-
-                    if constexpr (!Policy::allow_additional_properties) {
-                        map.erase(it);
-                    }
                 }
             }));
 
     if constexpr (!Policy::allow_additional_properties) {
-        if (!map.empty()) {
-            throw std::logic_error("'" + map.begin()->first + "' is unknown");
+        const auto expected_keys = boost::hana::keys(ret);
+        for (auto const& p : map) {
+            if (boost::hana::none_of(expected_keys, [&p](auto name) {
+                    auto const renamed = Policy::rename(boost::hana::type_c<T>, name);
+                    return static_cast<std::string_view>(p.first) == renamed;
+                })) {
+                throw std::logic_error("'" + p.first + "' is unknown");
+            }
         }
     }
 
