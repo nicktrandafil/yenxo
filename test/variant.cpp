@@ -268,8 +268,7 @@ TEST_CASE("Check Variant", "[Variant]") {
     }
 
     SECTION("representable integral type conversions") {
-        auto const from = hana::tuple_t<bool,
-                                        char,
+        auto const from = hana::tuple_t<char,
                                         int8_t,
                                         uint8_t,
                                         int16_t,
@@ -352,9 +351,29 @@ TEST_CASE("Check Variant", "[Variant]") {
         });
     }
 
-    SECTION("integral type to double conversions") {
-        auto const types = hana::tuple_t<bool,
+    SECTION("to/from bool conversions restricted") {
+        auto const types = hana::tuple_t<double,
                                          char,
+                                         int8_t,
+                                         uint8_t,
+                                         int16_t,
+                                         uint16_t,
+                                         int32_t,
+                                         uint32_t,
+                                         int64_t,
+                                         uint64_t>;
+        hana::for_each(types, [&](auto x) {
+            REQUIRE_THROWS_WITH(Variant(typename decltype(x)::type()).boolean(),
+                                "expected 'boolean', actual '"
+                                        + static_cast<std::string>(typeName(x)) + "'");
+            REQUIRE_THROWS_WITH(static_cast<typename decltype(x)::type>(Variant(true)),
+                                "expected '" + std::string(typeName(x))
+                                        + "', actual 'boolean'");
+        });
+    }
+
+    SECTION("integral type to double conversions") {
+        auto const types = hana::tuple_t<char,
                                          int8_t,
                                          uint8_t,
                                          int16_t,
@@ -372,8 +391,7 @@ TEST_CASE("Check Variant", "[Variant]") {
     }
 
     SECTION("double to integral type conversions") {
-        auto const types = hana::tuple_t<bool,
-                                         char,
+        auto const types = hana::tuple_t<char,
                                          int8_t,
                                          uint8_t,
                                          int16_t,
@@ -399,6 +417,7 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(Variant(int16_t{}) == Variant(int16_t{}));
         REQUIRE(Variant(uint16_t{}) == Variant(uint16_t{}));
         REQUIRE(Variant(int32_t{}) == Variant(int32_t{}));
+        REQUIRE(Variant(int32_t{}) != Variant(int32_t{1}));
         REQUIRE(Variant(uint32_t{}) == Variant(uint32_t{}));
         REQUIRE(Variant(int64_t{}) == Variant(int64_t{}));
         REQUIRE(Variant(uint64_t{}) == Variant(uint64_t{}));
@@ -567,11 +586,6 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(v2 == Variant(1));
     }
 
-    SECTION("Comparison") {
-        REQUIRE(Variant(1) == Variant(1));
-        REQUIRE(Variant(2) != Variant(1));
-    }
-
     SECTION("From JSON") {
         auto const json = R"(
             [{"abc": 1}]
@@ -624,8 +638,7 @@ TEST_CASE("Check Variant", "[Variant]") {
         }
 
         SECTION("allowed conversions of arithmetic types") {
-            auto const types = hana::tuple_t<bool,
-                                             char,
+            auto const types = hana::tuple_t<char,
                                              int8_t,
                                              uint8_t,
                                              int16_t,
@@ -649,6 +662,22 @@ TEST_CASE("Check Variant", "[Variant]") {
                     REQUIRE(equal(VariantMap{{"0", X(0)}, {"1", X(1)}},
                                   VariantMap{{"0", Y(0)}, {"1", Y(1)}}));
                 });
+            });
+        }
+
+        SECTION("allowed conversions of arithmetic types") {
+            auto const types = hana::tuple_t<char,
+                                             int8_t,
+                                             uint8_t,
+                                             int16_t,
+                                             uint16_t,
+                                             int32_t,
+                                             uint32_t,
+                                             int64_t,
+                                             uint64_t,
+                                             double>;
+            hana::for_each(types, [](auto x) {
+                REQUIRE(!equal(Variant(false), typename decltype(x)::type{}));
             });
         }
     }

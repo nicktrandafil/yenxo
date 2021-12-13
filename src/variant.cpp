@@ -224,8 +224,12 @@ constexpr auto same_sign_v = std::is_signed_v<A> == std::is_signed_v<B>;
 
 struct ThrowVariantIntegralOverflow {
     template <class Type, class Value>
-    [[noreturn]] static typename Type::type apply(Type t, Value const& v) {
+    [[noreturn]] static typename Type::type overflow(Type t, Value v) {
         throw VariantIntegralOverflow(std::string(typeName(t)), std::to_string(v));
+    }
+    template <class Type1, class Type2>
+    [[noreturn]] static typename Type1::type badType(Type1 t1, Type2 t2) {
+        throw VariantBadType(t1, t2);
     }
 };
 
@@ -237,21 +241,31 @@ template <typename T,
           typename = void>
 struct ArithmeticCheckedCast final
         : ArithmeticCheckedCast<T, U, ThrowPolicy, When<true>> {
-    static_assert(std::is_arithmetic_v<T> && std::is_arithmetic_v<U>);
+    static_assert(std::is_arithmetic_v<T> && (std::is_arithmetic_v<U>));
 };
 
 template <typename T, typename U, typename P>
-struct ArithmeticCheckedCast<T, U, P, When<same_sign_v<T, U> && sizeof(T) >= sizeof(U)>> {
+struct ArithmeticCheckedCast<T, U, P, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        same_sign_v<T, U> && sizeof(T) >= sizeof(U)>> {
     static T apply(U x) noexcept {
         return x;
     }
 };
 
 template <typename T, typename U, typename P>
-struct ArithmeticCheckedCast<T, U, P, When<same_sign_v<T, U> && sizeof(T) < sizeof(U)>> {
+struct ArithmeticCheckedCast<T, U, P, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        same_sign_v<T, U> && sizeof(T) < sizeof(U)>> {
     static T apply(U x) {
         if (x < std::numeric_limits<T>::min() || x > std::numeric_limits<T>::max()) {
-            return P::apply(boost::hana::type_c<T>, x);
+            return P::overflow(boost::hana::type_c<T>, x);
         } else {
             return static_cast<T>(x);
         }
@@ -259,22 +273,24 @@ struct ArithmeticCheckedCast<T, U, P, When<same_sign_v<T, U> && sizeof(T) < size
 };
 
 template <typename T, typename U, typename P>
-struct ArithmeticCheckedCast<
-        T,
-        U,
-        P,
-        When<std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) > sizeof(U))>> {
+struct ArithmeticCheckedCast<T, U, P, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) > sizeof(U))>> {
     static T apply(U x) noexcept {
         return x;
     }
 };
 
 template <typename T, typename U, typename P>
-struct ArithmeticCheckedCast<
-        T,
-        U,
-        P,
-        When<std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) <= sizeof(U))>> {
+struct ArithmeticCheckedCast<T, U, P, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) <= sizeof(U))>> {
     static T apply(U x) {
 #if defined(__GNUG__) || defined(__clang__)
 #pragma GCC diagnostic push
@@ -284,21 +300,22 @@ struct ArithmeticCheckedCast<
 #else
 #error The compiler not supported
 #endif
-            return P::apply(boost::hana::type_c<T>, x);
+            return P::overflow(boost::hana::type_c<T>, x);
         }
         return static_cast<T>(x);
     }
 };
 
 template <typename T, typename U, typename P>
-struct ArithmeticCheckedCast<
-        T,
-        U,
-        P,
-        When<std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) >= sizeof(U)>> {
+struct ArithmeticCheckedCast<T, U, P, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) >= sizeof(U)>> {
     static T apply(U x) {
         if (x < 0) {
-            return P::apply(boost::hana::type_c<T>, x);
+            return P::overflow(boost::hana::type_c<T>, x);
         } else {
             return static_cast<T>(x);
         }
@@ -306,11 +323,12 @@ struct ArithmeticCheckedCast<
 };
 
 template <typename T, typename U, typename P>
-struct ArithmeticCheckedCast<
-        T,
-        U,
-        P,
-        When<std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) < sizeof(U)>> {
+struct ArithmeticCheckedCast<T, U, P, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) < sizeof(U)>> {
     static T apply(U x) {
 #if defined(__GNUG__) || defined(__clang__)
 #pragma GCC diagnostic push
@@ -320,78 +338,50 @@ struct ArithmeticCheckedCast<
 #else
 #error The compiler not supported
 #endif
-            return P::apply(boost::hana::type_c<T>, x);
+            return P::overflow(boost::hana::type_c<T>, x);
         }
         return static_cast<T>(x);
     }
 };
 
-template <typename U>
-struct ArithmeticCheckedCast<double, U> {
-    static double apply(U x) noexcept {
+template <typename T, typename U, typename P>
+struct ArithmeticCheckedCast<T, U, P, When<
+        std::is_same_v<T, double> &&
+        !std::is_same_v<U, bool>>> {
+    static T apply(U x) noexcept {
         return x;
     }
 };
 
-template <typename T, typename P>
-struct ArithmeticCheckedCast<T, double, P> {
-    static T apply(double x) {
+template <typename T, typename U, typename P>
+struct ArithmeticCheckedCast<T, U, P, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        std::is_same_v<U, double>>> {
+    static T apply(U x) {
         double iptr;
         if (std::modf(x, &iptr) == 0.0) {
             return ArithmeticCheckedCast<T, int64_t, P>::apply(static_cast<int64_t>(x));
         } else {
-            return P::apply(boost::hana::type_c<T>, x);
+            return P::overflow(boost::hana::type_c<T>, x);
         }
     }
 };
 
-template <>
-struct ArithmeticCheckedCast<double, double> {
-    static double apply(double x) noexcept {
+template <typename T, typename U, typename P>
+struct ArithmeticCheckedCast<T, U, P, When<
+        std::is_same_v<T, bool> ^ std::is_same_v<U, bool>>> {
+    static T apply(U) {
+        return P::badType(boost::hana::type_c<T>, boost::hana::type_c<U>);
+    }
+};
+
+template <typename T, typename U, typename P>
+struct ArithmeticCheckedCast<T, U, P, When<
+        std::is_same_v<T, bool> &&
+        std::is_same_v<U, bool>>> {
+    static T apply(U x) noexcept {
         return x;
-    }
-};
-
-template <typename U, typename P>
-struct ArithmeticCheckedCast<bool, U, P> {
-    static bool apply(U x) {
-        if (x != 0 && x != 1) {
-            return P::apply(boost::hana::type_c<bool>, x);
-        } else {
-            return static_cast<bool>(x);
-        }
-    }
-};
-
-template <typename T>
-struct ArithmeticCheckedCast<T, bool> {
-    static T apply(bool x) noexcept {
-        return x;
-    }
-};
-
-template <>
-struct ArithmeticCheckedCast<bool, bool> {
-    static bool apply(bool x) noexcept {
-        return x;
-    }
-};
-
-template <>
-struct ArithmeticCheckedCast<double, bool> {
-    static double apply(bool x) noexcept {
-        return x;
-    }
-};
-
-template <typename P>
-struct ArithmeticCheckedCast<bool, double, P> {
-    static bool apply(double x) {
-        if (x != 0.0 && x != 1.0) {
-            return P::apply(boost::hana::type_c<bool>, x);
-        } else {
-            return static_cast<bool>(x);
-        }
     }
 };
 
@@ -418,6 +408,12 @@ struct GetHelper<T, When<std::is_arithmetic_v<T>>> {
     static T apply(char x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
         return arithmeticCheckedCast<T>(x);
     }
+    static T apply(int8_t x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
+    }
+    static T apply(uint8_t x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
+        return arithmeticCheckedCast<T>(x);
+    }
     static T apply(int16_t x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
         return arithmeticCheckedCast<T>(x);
     }
@@ -439,13 +435,13 @@ struct GetHelper<T, When<std::is_arithmetic_v<T>>> {
     static T apply(double x) noexcept(noexcept(arithmeticCheckedCast<T>(x))) {
         return arithmeticCheckedCast<T>(x);
     }
-    [[noreturn]] static T apply(std::string) {
+    [[noreturn]] static T apply(std::string const&) {
         throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<std::string>);
     }
-    [[noreturn]] static T apply(Variant::Vec) {
+    [[noreturn]] static T apply(Variant::Vec const&) {
         throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<Variant::Vec>);
     }
-    [[noreturn]] static T apply(Variant::Map) {
+    [[noreturn]] static T apply(Variant::Map const&) {
         throw VariantBadType(boost::hana::type_c<T>, boost::hana::type_c<Variant::Map>);
     }
 };
@@ -707,63 +703,49 @@ struct ArithmeticCheckedEq final : ArithmeticCheckedEq<T, U, When<true>> {
     static_assert(std::is_arithmetic_v<T> && std::is_arithmetic_v<U>);
 };
 
-#if defined(__GNUG__) || defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-template <typename U>
-struct ArithmeticCheckedEq<double, U> {
-    static bool apply(double lhs, U rhs) noexcept {
-        return lhs == rhs;
-    }
-};
-
-template <typename T>
-struct ArithmeticCheckedEq<T, double> {
-    static bool apply(T lhs, double rhs) noexcept {
-        return lhs == rhs;
-    }
-};
-
-template <>
-struct ArithmeticCheckedEq<double, double> {
-    static bool apply(double lhs, double rhs) noexcept {
-        return lhs == rhs;
-    }
-};
-#pragma GCC diagnostic pop
-#else
-#error The compiler not supported
-#endif
-
 template <typename T, typename U>
-struct ArithmeticCheckedEq<T, U, When<same_sign_v<T, U> && sizeof(T) >= sizeof(U)>> {
+struct ArithmeticCheckedEq<T, U, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        same_sign_v<T, U> && sizeof(T) >= sizeof(U)>> {
     static bool apply(T lhs, U rhs) noexcept {
         return lhs == rhs;
     }
 };
 
 template <typename T, typename U>
-struct ArithmeticCheckedEq<T, U, When<same_sign_v<T, U> && sizeof(T) < sizeof(U)>> {
+struct ArithmeticCheckedEq<T, U, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        same_sign_v<T, U> && sizeof(T) < sizeof(U)>> {
     static bool apply(T lhs, U rhs) {
         return lhs == rhs;
     }
 };
 
 template <typename T, typename U>
-struct ArithmeticCheckedEq<
-        T,
-        U,
-        When<std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) > sizeof(U))>> {
+struct ArithmeticCheckedEq<T, U, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) > sizeof(U))>> {
     static bool apply(T lhs, U rhs) noexcept {
         return lhs == rhs;
     }
 };
 
 template <typename T, typename U>
-struct ArithmeticCheckedEq<
-        T,
-        U,
-        When<std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) <= sizeof(U))>> {
+struct ArithmeticCheckedEq<T, U, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        std::is_signed_v<T> && std::is_unsigned_v<U> && (sizeof(T) <= sizeof(U))>> {
     static bool apply(T lhs, U rhs) {
         if (lhs < 0) {
             return false;
@@ -774,20 +756,67 @@ struct ArithmeticCheckedEq<
 };
 
 template <typename T, typename U>
-struct ArithmeticCheckedEq<
-        T,
-        U,
-        When<std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) >= sizeof(U)>> {
+struct ArithmeticCheckedEq<T, U, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) >= sizeof(U)>> {
     static bool apply(T lhs, U rhs) {
         return arithmeticCheckedEq(rhs, lhs);
     }
 };
 
 template <typename T, typename U>
-struct ArithmeticCheckedEq<
-        T,
-        U,
-        When<std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) < sizeof(U)>> {
+struct ArithmeticCheckedEq<T, U, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        !std::is_same_v<U, double> &&
+        !std::is_same_v<U, bool> &&
+        std::is_unsigned_v<T> && std::is_signed_v<U> && sizeof(T) < sizeof(U)>> {
+    static bool apply(T lhs, U rhs) {
+        return lhs == rhs;
+    }
+};
+
+#if defined(__GNUG__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+template <typename T, typename U>
+struct ArithmeticCheckedEq<T, U, When<
+        std::is_same_v<T, double> &&
+        !std::is_same_v<U, bool>>> {
+    static bool apply(T lhs, U rhs) {
+        return lhs == rhs;
+    }
+};
+
+template <typename T, typename U>
+struct ArithmeticCheckedEq<T, U, When<
+        !std::is_same_v<T, double> &&
+        !std::is_same_v<T, bool> &&
+        std::is_same_v<U, double>>> {
+    static bool apply(T lhs, U rhs) {
+        return lhs == rhs;
+    }
+};
+#pragma GCC diagnostic pop
+#else
+#error The compiler not supported
+#endif
+
+template <typename T, typename U>
+struct ArithmeticCheckedEq<T, U, When<
+        std::is_same_v<T, bool> ^ std::is_same_v<U, bool>>> {
+    static bool apply(T, U) {
+        return false;
+    }
+};
+
+template <typename T, typename U>
+struct ArithmeticCheckedEq<T, U, When<
+        std::is_same_v<T, bool> &&
+        std::is_same_v<U, bool>>> {
     static bool apply(T lhs, U rhs) {
         return lhs == rhs;
     }
@@ -1144,7 +1173,7 @@ std::ostream& operator<<(std::ostream& os, Variant const& var) {
         os << "Null";
         break;
     case TypeTag::boolean:
-        os << var.value_.bool_;
+        os  << var.value_.bool_;
         break;
     case TypeTag::char_:
         os << var.value_.char_;
