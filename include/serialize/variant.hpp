@@ -51,6 +51,8 @@ public:
         static std::string_view typeName() noexcept {
             return "NullType";
         }
+
+        bool _fake; // to suppress false warnings
     };
 
     using Map = std::unordered_map<std::string, Variant>;
