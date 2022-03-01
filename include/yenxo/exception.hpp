@@ -28,7 +28,7 @@
 
 #include <boost/hana/type.hpp>
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
