@@ -788,16 +788,22 @@ constexpr FromVariantT2 fromVariant2;
 /// }
 /// \endcode
 inline constexpr auto toVariantConvertible = [](auto type) {
-    return isVariant(type) || hasToVariant(type) || isConvertibleToVariantBuildIn(type)
-        || isMapType(type) || isCollectionType(type) || isReflectiveEnum(type)
+    // clang-format off
+    return    isVariant(type)
+           || hasToVariant(type)
+           || isConvertibleToVariantBuildIn(type)
+           || isMapType(type)
+           || isCollectionType(type)
+           || isReflectiveEnum(type)
 #if YENXO_ENABLE_TYPE_SAFE
-        || (!hasToVariant(type) && strongTypeDef(type)) || constrainedType(type)
-        || integerType(type) || floatingPoint(type) || boolean(type)
+           || (!hasToVariant(type) && strongTypeDef(type)) || constrainedType(type)
+           || integerType(type) || floatingPoint(type) || boolean(type)
 #endif
-        || boost::hana::is_a<
-                   boost::hana::map_tag,
-                   typename decltype(type)::
-                           type> || boost::hana::is_a<boost::hana::string_tag, typename decltype(type)::type> || boost::hana::is_a<boost::hana::tuple_tag, typename decltype(type)::type> || isStdVariant(type);
+           || boost::hana::is_a<boost::hana::map_tag, typename decltype(type)::type>
+           || boost::hana::is_a<boost::hana::string_tag, typename decltype(type)::type>
+           || boost::hana::is_a<boost::hana::tuple_tag, typename decltype(type)::type>
+           || isStdVariant(type);
+    // clang-format on
 };
 
 /// Whether `T` can be constructed from Variant
@@ -819,6 +825,7 @@ inline constexpr auto toVariantConvertible = [](auto type) {
 /// }
 /// \endcode
 inline constexpr auto fromVariantConvertible = [](auto type) {
+    // clang-format off
     return    isVariant(type)
            || hasFromVariant(type)
            || isVariantBuildIn(type)
@@ -841,6 +848,7 @@ inline constexpr auto fromVariantConvertible = [](auto type) {
            || boost::hana::is_a<boost::hana::tuple_tag, typename decltype(type)::type>
            || boost::hana::Constant<typename decltype(type)::type>().value
            || isStdVariant(type);
+    // clang-format on
 };
 
 } // namespace yenxo
