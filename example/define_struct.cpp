@@ -7,7 +7,7 @@ using namespace std;
 using namespace yenxo;
 
 struct A {
-    DEFINE_STRUCT(A,
+    YENXO_DEFINE_STRUCT(A,
                   (int, a),
                   (int, b, Default(10)),
                   (double, c, Name("cc")),

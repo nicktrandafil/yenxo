@@ -39,56 +39,56 @@ using namespace boost::hana::literals;
 namespace {
 
 struct Com {
-    DEFINE_STRUCT(Com, ((std::variant<int, float>), x, Default(1)));
+    YENXO_DEFINE_STRUCT(Com, ((std::variant<int, float>), x, Default(1)));
 };
 
 struct St1 : trait::Var<St1> {
-    DEFINE_STRUCT(St);
+    YENXO_DEFINE_STRUCT(St);
 };
 
 struct St2 : trait::Var<St2> {
-    DEFINE_STRUCT(St2, (int, x, Default(1), Name("y")));
+    YENXO_DEFINE_STRUCT(St2, (int, x, Default(1), Name("y")));
 };
 
 struct St3 : trait::Var<St3> {
-    DEFINE_STRUCT(St3, (int, x, Name("y"), Default(1)));
+    YENXO_DEFINE_STRUCT(St3, (int, x, Name("y"), Default(1)));
 };
 
 struct St4 : trait::Var<St4> {
-    DEFINE_STRUCT(St4, (int, x, Name("y")));
+    YENXO_DEFINE_STRUCT(St4, (int, x, Name("y")));
 };
 
 struct St5 : trait::Var<St5> {
-    DEFINE_STRUCT(St5, (int, x, Default(1)));
+    YENXO_DEFINE_STRUCT(St5, (int, x, Default(1)));
 };
 
 struct St6 : trait::Var<St6> {
-    DEFINE_STRUCT(St6, (int, x));
+    YENXO_DEFINE_STRUCT(St6, (int, x));
 };
 
 struct St7 : trait::Var<St7> {
-    DEFINE_STRUCT(St7, (std::string, x, Default(std::string("xx")), Name("xx")));
+    YENXO_DEFINE_STRUCT(St7, (std::string, x, Default(std::string("xx")), Name("xx")));
 };
 
 struct S1 : trait::Var<S1> {
-    DEFINE_STRUCT(S1, (int, x1, Default(1), Name("xx1")));
+    YENXO_DEFINE_STRUCT(S1, (int, x1, Default(1), Name("xx1")));
 };
 
 struct S2 : trait::Var<S2> {
-    DEFINE_STRUCT(S2,
+    YENXO_DEFINE_STRUCT(S2,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")));
 };
 
 struct S3 : trait::Var<S3> {
-    DEFINE_STRUCT(S3,
+    YENXO_DEFINE_STRUCT(S3,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")));
 };
 
 struct S4 : trait::Var<S4> {
-    DEFINE_STRUCT(S4,
+    YENXO_DEFINE_STRUCT(S4,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -96,7 +96,7 @@ struct S4 : trait::Var<S4> {
 };
 
 struct S5 : trait::Var<S5> {
-    DEFINE_STRUCT(S5,
+    YENXO_DEFINE_STRUCT(S5,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -105,7 +105,7 @@ struct S5 : trait::Var<S5> {
 };
 
 struct S6 : trait::Var<S6> {
-    DEFINE_STRUCT(S6,
+    YENXO_DEFINE_STRUCT(S6,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -115,7 +115,7 @@ struct S6 : trait::Var<S6> {
 };
 
 struct S7 : trait::Var<S7> {
-    DEFINE_STRUCT(S7,
+    YENXO_DEFINE_STRUCT(S7,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -126,7 +126,7 @@ struct S7 : trait::Var<S7> {
 };
 
 struct S8 : trait::Var<S8> {
-    DEFINE_STRUCT(S8,
+    YENXO_DEFINE_STRUCT(S8,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -138,7 +138,7 @@ struct S8 : trait::Var<S8> {
 };
 
 struct S9 : trait::Var<S9> {
-    DEFINE_STRUCT(S9,
+    YENXO_DEFINE_STRUCT(S9,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -151,7 +151,7 @@ struct S9 : trait::Var<S9> {
 };
 
 struct S10 : trait::Var<S10> {
-    DEFINE_STRUCT(S10,
+    YENXO_DEFINE_STRUCT(S10,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -165,7 +165,7 @@ struct S10 : trait::Var<S10> {
 };
 
 struct S11 : trait::Var<S11> {
-    DEFINE_STRUCT(S11,
+    YENXO_DEFINE_STRUCT(S11,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -180,7 +180,7 @@ struct S11 : trait::Var<S11> {
 };
 
 struct S12 : trait::Var<S12> {
-    DEFINE_STRUCT(S12,
+    YENXO_DEFINE_STRUCT(S12,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -196,7 +196,7 @@ struct S12 : trait::Var<S12> {
 };
 
 struct S13 : trait::Var<S13> {
-    DEFINE_STRUCT(S13,
+    YENXO_DEFINE_STRUCT(S13,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -213,7 +213,7 @@ struct S13 : trait::Var<S13> {
 };
 
 struct S14 : trait::Var<S14> {
-    DEFINE_STRUCT(S14,
+    YENXO_DEFINE_STRUCT(S14,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -231,7 +231,7 @@ struct S14 : trait::Var<S14> {
 };
 
 struct S15 : trait::Var<S15> {
-    DEFINE_STRUCT(S15,
+    YENXO_DEFINE_STRUCT(S15,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -250,7 +250,7 @@ struct S15 : trait::Var<S15> {
 };
 
 struct S16 : trait::Var<S16> {
-    DEFINE_STRUCT(S16,
+    YENXO_DEFINE_STRUCT(S16,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -270,7 +270,7 @@ struct S16 : trait::Var<S16> {
 };
 
 struct S17 : trait::Var<S17> {
-    DEFINE_STRUCT(S17,
+    YENXO_DEFINE_STRUCT(S17,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -291,7 +291,7 @@ struct S17 : trait::Var<S17> {
 };
 
 struct S18 : trait::Var<S18> {
-    DEFINE_STRUCT(S18,
+    YENXO_DEFINE_STRUCT(S18,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -313,7 +313,7 @@ struct S18 : trait::Var<S18> {
 };
 
 struct S19 : trait::Var<S19> {
-    DEFINE_STRUCT(S19,
+    YENXO_DEFINE_STRUCT(S19,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -337,7 +337,7 @@ struct S19 : trait::Var<S19> {
 
 } // namespace
 
-TEST_CASE("Check DEFINE_STRUCT", "[define_struct]") {
+TEST_CASE("Check YENXO_DEFINE_STRUCT", "[define_struct]") {
     REQUIRE(St2::defaults()["x"_s] == 1);
     REQUIRE(strcmp(St2::names()["x"_s], "y") == 0);
     REQUIRE(St3::defaults()["x"_s] == 1);

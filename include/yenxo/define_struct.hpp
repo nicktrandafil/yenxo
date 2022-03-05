@@ -88,21 +88,22 @@ struct Ignore {};
 /// -------
 /// @include example/define_struct.cpp
 #ifdef YENXO_DOXYGEN_INVOKED
-auto DEFINE_STRUCT(...) = ;
-#define DEFINE_STRUCT(Type, ...) see documentation
+auto YENXO_DEFINE_STRUCT(...) = ;
+#define YENXO_DEFINE_STRUCT(Type, ...) see documentation
 #else
-#define DEFINE_STRUCT(...)                                                               \
-    DEFINE_STRUCT_IMPL(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__)
+#define YENXO_DEFINE_STRUCT(...)                                                         \
+    YENXO_DEFINE_STRUCT_IMPL(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__)
 #endif
 
-#define DEFINE_STRUCT_IMPL(N, ...)                                                       \
-    BOOST_HANA_PP_CONCAT(DEFINE_STRUCT_IMPL_, N)                                         \
+#define YENXO_DEFINE_STRUCT_IMPL(N, ...)                                                 \
+    BOOST_HANA_PP_CONCAT(YENXO_DEFINE_STRUCT_IMPL_, N)                                   \
     (__VA_ARGS__)
 
-#define DEFINE_STRUCT_IMPL_1(Type) BOOST_HANA_DEFINE_STRUCT_IMPL_1(Type)
+#define YENXO_DEFINE_STRUCT_IMPL_1(Type) BOOST_HANA_DEFINE_STRUCT_IMPL_1(Type)
 
-#define DEFINE_STRUCT_IMPL_2(Type, m1) DEFINE_STRUCT_IMPL_2_(Type, RESOLVE_VALUEs m1)
-#define DEFINE_STRUCT_IMPL_2_(Type, m1)                                                  \
+#define YENXO_DEFINE_STRUCT_IMPL_2(Type, m1)                                             \
+    YENXO_DEFINE_STRUCT_IMPL_2_(Type, RESOLVE_VALUEs m1)
+#define YENXO_DEFINE_STRUCT_IMPL_2_(Type, m1)                                            \
     BOOST_HANA_DEFINE_STRUCT_IMPL_2(Type, EXTRs(NTH1OF2s m1));                           \
     static auto metadata() {                                                             \
         return boost::hana::make_tuple(                                                  \
@@ -120,9 +121,9 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_3(Type, m1, m2)                                               \
-    DEFINE_STRUCT_IMPL_3_(Type, RESOLVE_VALUEs m1, RESOLVE_VALUEs m2)
-#define DEFINE_STRUCT_IMPL_3_(Type, m1, m2)                                              \
+#define YENXO_DEFINE_STRUCT_IMPL_3(Type, m1, m2)                                         \
+    YENXO_DEFINE_STRUCT_IMPL_3_(Type, RESOLVE_VALUEs m1, RESOLVE_VALUEs m2)
+#define YENXO_DEFINE_STRUCT_IMPL_3_(Type, m1, m2)                                        \
     BOOST_HANA_DEFINE_STRUCT_IMPL_3(Type, EXTRs(NTH1OF2s m1), EXTRs(NTH1OF2s m2));       \
     static auto metadata() {                                                             \
         return boost::hana::make_tuple(                                                  \
@@ -143,9 +144,10 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_4(Type, m1, m2, m3)                                           \
-    DEFINE_STRUCT_IMPL_4_(Type, RESOLVE_VALUEs m1, RESOLVE_VALUEs m2, RESOLVE_VALUEs m3)
-#define DEFINE_STRUCT_IMPL_4_(Type, m1, m2, m3)                                          \
+#define YENXO_DEFINE_STRUCT_IMPL_4(Type, m1, m2, m3)                                     \
+    YENXO_DEFINE_STRUCT_IMPL_4_(                                                         \
+            Type, RESOLVE_VALUEs m1, RESOLVE_VALUEs m2, RESOLVE_VALUEs m3)
+#define YENXO_DEFINE_STRUCT_IMPL_4_(Type, m1, m2, m3)                                    \
     BOOST_HANA_DEFINE_STRUCT_IMPL_4(                                                     \
             Type, EXTRs(NTH1OF2s m1), EXTRs(NTH1OF2s m2), EXTRs(NTH1OF2s m3));           \
     static auto metadata() {                                                             \
@@ -170,13 +172,13 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_5(Type, m1, m2, m3, m4)                                       \
-    DEFINE_STRUCT_IMPL_5_(Type,                                                          \
-                          RESOLVE_VALUEs m1,                                             \
-                          RESOLVE_VALUEs m2,                                             \
-                          RESOLVE_VALUEs m3,                                             \
-                          RESOLVE_VALUEs m4)
-#define DEFINE_STRUCT_IMPL_5_(Type, m1, m2, m3, m4)                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_5(Type, m1, m2, m3, m4)                                 \
+    YENXO_DEFINE_STRUCT_IMPL_5_(Type,                                                    \
+                                RESOLVE_VALUEs m1,                                       \
+                                RESOLVE_VALUEs m2,                                       \
+                                RESOLVE_VALUEs m3,                                       \
+                                RESOLVE_VALUEs m4)
+#define YENXO_DEFINE_STRUCT_IMPL_5_(Type, m1, m2, m3, m4)                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_5(Type,                                                \
                                     EXTRs(NTH1OF2s m1),                                  \
                                     EXTRs(NTH1OF2s m2),                                  \
@@ -207,14 +209,14 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_6(Type, m1, m2, m3, m4, m5)                                   \
-    DEFINE_STRUCT_IMPL_6_(Type,                                                          \
-                          RESOLVE_VALUEs m1,                                             \
-                          RESOLVE_VALUEs m2,                                             \
-                          RESOLVE_VALUEs m3,                                             \
-                          RESOLVE_VALUEs m4,                                             \
-                          RESOLVE_VALUEs m5)
-#define DEFINE_STRUCT_IMPL_6_(Type, m1, m2, m3, m4, m5)                                  \
+#define YENXO_DEFINE_STRUCT_IMPL_6(Type, m1, m2, m3, m4, m5)                             \
+    YENXO_DEFINE_STRUCT_IMPL_6_(Type,                                                    \
+                                RESOLVE_VALUEs m1,                                       \
+                                RESOLVE_VALUEs m2,                                       \
+                                RESOLVE_VALUEs m3,                                       \
+                                RESOLVE_VALUEs m4,                                       \
+                                RESOLVE_VALUEs m5)
+#define YENXO_DEFINE_STRUCT_IMPL_6_(Type, m1, m2, m3, m4, m5)                            \
     BOOST_HANA_DEFINE_STRUCT_IMPL_6(Type,                                                \
                                     EXTRs(NTH1OF2s m1),                                  \
                                     EXTRs(NTH1OF2s m2),                                  \
@@ -249,15 +251,15 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_7(Type, m1, m2, m3, m4, m5, m6)                               \
-    DEFINE_STRUCT_IMPL_7_(Type,                                                          \
-                          RESOLVE_VALUEs m1,                                             \
-                          RESOLVE_VALUEs m2,                                             \
-                          RESOLVE_VALUEs m3,                                             \
-                          RESOLVE_VALUEs m4,                                             \
-                          RESOLVE_VALUEs m5,                                             \
-                          RESOLVE_VALUEs m6)
-#define DEFINE_STRUCT_IMPL_7_(Type, m1, m2, m3, m4, m5, m6)                              \
+#define YENXO_DEFINE_STRUCT_IMPL_7(Type, m1, m2, m3, m4, m5, m6)                         \
+    YENXO_DEFINE_STRUCT_IMPL_7_(Type,                                                    \
+                                RESOLVE_VALUEs m1,                                       \
+                                RESOLVE_VALUEs m2,                                       \
+                                RESOLVE_VALUEs m3,                                       \
+                                RESOLVE_VALUEs m4,                                       \
+                                RESOLVE_VALUEs m5,                                       \
+                                RESOLVE_VALUEs m6)
+#define YENXO_DEFINE_STRUCT_IMPL_7_(Type, m1, m2, m3, m4, m5, m6)                        \
     BOOST_HANA_DEFINE_STRUCT_IMPL_7(Type,                                                \
                                     EXTRs(NTH1OF2s m1),                                  \
                                     EXTRs(NTH1OF2s m2),                                  \
@@ -296,16 +298,16 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_8(Type, m1, m2, m3, m4, m5, m6, m7)                           \
-    DEFINE_STRUCT_IMPL_8_(Type,                                                          \
-                          RESOLVE_VALUEs m1,                                             \
-                          RESOLVE_VALUEs m2,                                             \
-                          RESOLVE_VALUEs m3,                                             \
-                          RESOLVE_VALUEs m4,                                             \
-                          RESOLVE_VALUEs m5,                                             \
-                          RESOLVE_VALUEs m6,                                             \
-                          RESOLVE_VALUEs m7)
-#define DEFINE_STRUCT_IMPL_8_(Type, m1, m2, m3, m4, m5, m6, m7)                          \
+#define YENXO_DEFINE_STRUCT_IMPL_8(Type, m1, m2, m3, m4, m5, m6, m7)                     \
+    YENXO_DEFINE_STRUCT_IMPL_8_(Type,                                                    \
+                                RESOLVE_VALUEs m1,                                       \
+                                RESOLVE_VALUEs m2,                                       \
+                                RESOLVE_VALUEs m3,                                       \
+                                RESOLVE_VALUEs m4,                                       \
+                                RESOLVE_VALUEs m5,                                       \
+                                RESOLVE_VALUEs m6,                                       \
+                                RESOLVE_VALUEs m7)
+#define YENXO_DEFINE_STRUCT_IMPL_8_(Type, m1, m2, m3, m4, m5, m6, m7)                    \
     BOOST_HANA_DEFINE_STRUCT_IMPL_8(Type,                                                \
                                     EXTRs(NTH1OF2s m1),                                  \
                                     EXTRs(NTH1OF2s m2),                                  \
@@ -348,17 +350,17 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_9(Type, m1, m2, m3, m4, m5, m6, m7, m8)                       \
-    DEFINE_STRUCT_IMPL_9_(Type,                                                          \
-                          RESOLVE_VALUEs m1,                                             \
-                          RESOLVE_VALUEs m2,                                             \
-                          RESOLVE_VALUEs m3,                                             \
-                          RESOLVE_VALUEs m4,                                             \
-                          RESOLVE_VALUEs m5,                                             \
-                          RESOLVE_VALUEs m6,                                             \
-                          RESOLVE_VALUEs m7,                                             \
-                          RESOLVE_VALUEs m8)
-#define DEFINE_STRUCT_IMPL_9_(Type, m1, m2, m3, m4, m5, m6, m7, m8)                      \
+#define YENXO_DEFINE_STRUCT_IMPL_9(Type, m1, m2, m3, m4, m5, m6, m7, m8)                 \
+    YENXO_DEFINE_STRUCT_IMPL_9_(Type,                                                    \
+                                RESOLVE_VALUEs m1,                                       \
+                                RESOLVE_VALUEs m2,                                       \
+                                RESOLVE_VALUEs m3,                                       \
+                                RESOLVE_VALUEs m4,                                       \
+                                RESOLVE_VALUEs m5,                                       \
+                                RESOLVE_VALUEs m6,                                       \
+                                RESOLVE_VALUEs m7,                                       \
+                                RESOLVE_VALUEs m8)
+#define YENXO_DEFINE_STRUCT_IMPL_9_(Type, m1, m2, m3, m4, m5, m6, m7, m8)                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_9(Type,                                                \
                                     EXTRs(NTH1OF2s m1),                                  \
                                     EXTRs(NTH1OF2s m2),                                  \
@@ -405,18 +407,18 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_10(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9)                  \
-    DEFINE_STRUCT_IMPL_10_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9)
-#define DEFINE_STRUCT_IMPL_10_(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9)                 \
+#define YENXO_DEFINE_STRUCT_IMPL_10(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9)            \
+    YENXO_DEFINE_STRUCT_IMPL_10_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9)
+#define YENXO_DEFINE_STRUCT_IMPL_10_(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9)           \
     BOOST_HANA_DEFINE_STRUCT_IMPL_10(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -467,19 +469,19 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_11(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10)             \
-    DEFINE_STRUCT_IMPL_11_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10)
-#define DEFINE_STRUCT_IMPL_11_(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10)            \
+#define YENXO_DEFINE_STRUCT_IMPL_11(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10)       \
+    YENXO_DEFINE_STRUCT_IMPL_11_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10)
+#define YENXO_DEFINE_STRUCT_IMPL_11_(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10)      \
     BOOST_HANA_DEFINE_STRUCT_IMPL_11(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -534,20 +536,20 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_12(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11)        \
-    DEFINE_STRUCT_IMPL_12_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11)
-#define DEFINE_STRUCT_IMPL_12_(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11)       \
+#define YENXO_DEFINE_STRUCT_IMPL_12(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11)  \
+    YENXO_DEFINE_STRUCT_IMPL_12_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11)
+#define YENXO_DEFINE_STRUCT_IMPL_12_(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11) \
     BOOST_HANA_DEFINE_STRUCT_IMPL_12(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -606,21 +608,23 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_13(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12)   \
-    DEFINE_STRUCT_IMPL_13_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12)
-#define DEFINE_STRUCT_IMPL_13_(Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12)  \
+#define YENXO_DEFINE_STRUCT_IMPL_13(                                                     \
+        Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12)                         \
+    YENXO_DEFINE_STRUCT_IMPL_13_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12)
+#define YENXO_DEFINE_STRUCT_IMPL_13_(                                                    \
+        Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12)                         \
     BOOST_HANA_DEFINE_STRUCT_IMPL_13(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -683,23 +687,23 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_14(                                                           \
+#define YENXO_DEFINE_STRUCT_IMPL_14(                                                     \
         Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13)                    \
-    DEFINE_STRUCT_IMPL_14_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13)
-#define DEFINE_STRUCT_IMPL_14_(                                                          \
+    YENXO_DEFINE_STRUCT_IMPL_14_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13)
+#define YENXO_DEFINE_STRUCT_IMPL_14_(                                                    \
         Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13)                    \
     BOOST_HANA_DEFINE_STRUCT_IMPL_14(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
@@ -767,24 +771,24 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_15(                                                           \
+#define YENXO_DEFINE_STRUCT_IMPL_15(                                                     \
         Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14)               \
-    DEFINE_STRUCT_IMPL_15_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14)
-#define DEFINE_STRUCT_IMPL_15_(                                                          \
+    YENXO_DEFINE_STRUCT_IMPL_15_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14)
+#define YENXO_DEFINE_STRUCT_IMPL_15_(                                                    \
         Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14)               \
     BOOST_HANA_DEFINE_STRUCT_IMPL_15(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
@@ -856,25 +860,25 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_16(                                                           \
+#define YENXO_DEFINE_STRUCT_IMPL_16(                                                     \
         Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15)          \
-    DEFINE_STRUCT_IMPL_16_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15)
-#define DEFINE_STRUCT_IMPL_16_(                                                          \
+    YENXO_DEFINE_STRUCT_IMPL_16_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15)
+#define YENXO_DEFINE_STRUCT_IMPL_16_(                                                    \
         Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15)          \
     BOOST_HANA_DEFINE_STRUCT_IMPL_16(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
@@ -950,26 +954,26 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_17(                                                           \
+#define YENXO_DEFINE_STRUCT_IMPL_17(                                                     \
         Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16)     \
-    DEFINE_STRUCT_IMPL_17_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16)
-#define DEFINE_STRUCT_IMPL_17_(                                                          \
+    YENXO_DEFINE_STRUCT_IMPL_17_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16)
+#define YENXO_DEFINE_STRUCT_IMPL_17_(                                                    \
         Type, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16)     \
     BOOST_HANA_DEFINE_STRUCT_IMPL_17(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
@@ -1049,60 +1053,60 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_18(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17)                                                       \
-    DEFINE_STRUCT_IMPL_18_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17)
-#define DEFINE_STRUCT_IMPL_18_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_18(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_18_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17)
+#define YENXO_DEFINE_STRUCT_IMPL_18_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_18(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -1185,63 +1189,63 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_19(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18)                                                       \
-    DEFINE_STRUCT_IMPL_19_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18)
-#define DEFINE_STRUCT_IMPL_19_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_19(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_19_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18)
+#define YENXO_DEFINE_STRUCT_IMPL_19_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_19(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -1328,66 +1332,66 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_20(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19)                                                       \
-    DEFINE_STRUCT_IMPL_20_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19)
-#define DEFINE_STRUCT_IMPL_20_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_20(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_20_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19)
+#define YENXO_DEFINE_STRUCT_IMPL_20_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_20(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -1478,69 +1482,69 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_21(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20)                                                       \
-    DEFINE_STRUCT_IMPL_21_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20)
-#define DEFINE_STRUCT_IMPL_21_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_21(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_21_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20)
+#define YENXO_DEFINE_STRUCT_IMPL_21_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_21(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -1635,72 +1639,72 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_22(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21)                                                       \
-    DEFINE_STRUCT_IMPL_22_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21)
-#define DEFINE_STRUCT_IMPL_22_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_22(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_22_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21)
+#define YENXO_DEFINE_STRUCT_IMPL_22_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_22(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -1799,75 +1803,75 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_23(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22)                                                       \
-    DEFINE_STRUCT_IMPL_23_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22)
-#define DEFINE_STRUCT_IMPL_23_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_23(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_23_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22)
+#define YENXO_DEFINE_STRUCT_IMPL_23_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_23(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -1970,78 +1974,78 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_24(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23)                                                       \
-    DEFINE_STRUCT_IMPL_24_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23)
-#define DEFINE_STRUCT_IMPL_24_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_24(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_24_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23)
+#define YENXO_DEFINE_STRUCT_IMPL_24_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_24(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -2148,81 +2152,81 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_25(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24)                                                       \
-    DEFINE_STRUCT_IMPL_25_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24)
-#define DEFINE_STRUCT_IMPL_25_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_25(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_25_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24)
+#define YENXO_DEFINE_STRUCT_IMPL_25_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_25(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -2333,84 +2337,84 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_26(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25)                                                       \
-    DEFINE_STRUCT_IMPL_26_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25)
-#define DEFINE_STRUCT_IMPL_26_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_26(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_26_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25)
+#define YENXO_DEFINE_STRUCT_IMPL_26_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_26(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -2525,87 +2529,87 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_27(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26)                                                       \
-    DEFINE_STRUCT_IMPL_27_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26)
-#define DEFINE_STRUCT_IMPL_27_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_27(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_27_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26)
+#define YENXO_DEFINE_STRUCT_IMPL_27_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_27(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -2724,90 +2728,90 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_28(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27)                                                       \
-    DEFINE_STRUCT_IMPL_28_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27)
-#define DEFINE_STRUCT_IMPL_28_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_28(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_28_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27)
+#define YENXO_DEFINE_STRUCT_IMPL_28_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_28(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -2930,93 +2934,93 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_29(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27,                                                       \
-                              m28)                                                       \
-    DEFINE_STRUCT_IMPL_29_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27,                                           \
-                           RESOLVE_VALUEs m28)
-#define DEFINE_STRUCT_IMPL_29_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27,                                                      \
-                               m28)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_29(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27,                                                 \
+                                    m28)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_29_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27,                                     \
+                                 RESOLVE_VALUEs m28)
+#define YENXO_DEFINE_STRUCT_IMPL_29_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27,                                                \
+                                     m28)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_29(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -3143,96 +3147,96 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_30(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27,                                                       \
-                              m28,                                                       \
-                              m29)                                                       \
-    DEFINE_STRUCT_IMPL_30_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27,                                           \
-                           RESOLVE_VALUEs m28,                                           \
-                           RESOLVE_VALUEs m29)
-#define DEFINE_STRUCT_IMPL_30_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27,                                                      \
-                               m28,                                                      \
-                               m29)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_30(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27,                                                 \
+                                    m28,                                                 \
+                                    m29)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_30_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27,                                     \
+                                 RESOLVE_VALUEs m28,                                     \
+                                 RESOLVE_VALUEs m29)
+#define YENXO_DEFINE_STRUCT_IMPL_30_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27,                                                \
+                                     m28,                                                \
+                                     m29)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_30(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -3363,99 +3367,99 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_31(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27,                                                       \
-                              m28,                                                       \
-                              m29,                                                       \
-                              m30)                                                       \
-    DEFINE_STRUCT_IMPL_31_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27,                                           \
-                           RESOLVE_VALUEs m28,                                           \
-                           RESOLVE_VALUEs m29,                                           \
-                           RESOLVE_VALUEs m30)
-#define DEFINE_STRUCT_IMPL_31_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27,                                                      \
-                               m28,                                                      \
-                               m29,                                                      \
-                               m30)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_31(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27,                                                 \
+                                    m28,                                                 \
+                                    m29,                                                 \
+                                    m30)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_31_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27,                                     \
+                                 RESOLVE_VALUEs m28,                                     \
+                                 RESOLVE_VALUEs m29,                                     \
+                                 RESOLVE_VALUEs m30)
+#define YENXO_DEFINE_STRUCT_IMPL_31_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27,                                                \
+                                     m28,                                                \
+                                     m29,                                                \
+                                     m30)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_31(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -3590,102 +3594,102 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_32(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27,                                                       \
-                              m28,                                                       \
-                              m29,                                                       \
-                              m30,                                                       \
-                              m31)                                                       \
-    DEFINE_STRUCT_IMPL_32_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27,                                           \
-                           RESOLVE_VALUEs m28,                                           \
-                           RESOLVE_VALUEs m29,                                           \
-                           RESOLVE_VALUEs m30,                                           \
-                           RESOLVE_VALUEs m31)
-#define DEFINE_STRUCT_IMPL_32_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27,                                                      \
-                               m28,                                                      \
-                               m29,                                                      \
-                               m30,                                                      \
-                               m31)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_32(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27,                                                 \
+                                    m28,                                                 \
+                                    m29,                                                 \
+                                    m30,                                                 \
+                                    m31)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_32_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27,                                     \
+                                 RESOLVE_VALUEs m28,                                     \
+                                 RESOLVE_VALUEs m29,                                     \
+                                 RESOLVE_VALUEs m30,                                     \
+                                 RESOLVE_VALUEs m31)
+#define YENXO_DEFINE_STRUCT_IMPL_32_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27,                                                \
+                                     m28,                                                \
+                                     m29,                                                \
+                                     m30,                                                \
+                                     m31)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_32(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -3824,105 +3828,105 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_33(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27,                                                       \
-                              m28,                                                       \
-                              m29,                                                       \
-                              m30,                                                       \
-                              m31,                                                       \
-                              m32)                                                       \
-    DEFINE_STRUCT_IMPL_33_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27,                                           \
-                           RESOLVE_VALUEs m28,                                           \
-                           RESOLVE_VALUEs m29,                                           \
-                           RESOLVE_VALUEs m30,                                           \
-                           RESOLVE_VALUEs m31,                                           \
-                           RESOLVE_VALUEs m32)
-#define DEFINE_STRUCT_IMPL_33_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27,                                                      \
-                               m28,                                                      \
-                               m29,                                                      \
-                               m30,                                                      \
-                               m31,                                                      \
-                               m32)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_33(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27,                                                 \
+                                    m28,                                                 \
+                                    m29,                                                 \
+                                    m30,                                                 \
+                                    m31,                                                 \
+                                    m32)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_33_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27,                                     \
+                                 RESOLVE_VALUEs m28,                                     \
+                                 RESOLVE_VALUEs m29,                                     \
+                                 RESOLVE_VALUEs m30,                                     \
+                                 RESOLVE_VALUEs m31,                                     \
+                                 RESOLVE_VALUEs m32)
+#define YENXO_DEFINE_STRUCT_IMPL_33_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27,                                                \
+                                     m28,                                                \
+                                     m29,                                                \
+                                     m30,                                                \
+                                     m31,                                                \
+                                     m32)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_33(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -4065,108 +4069,108 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_34(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27,                                                       \
-                              m28,                                                       \
-                              m29,                                                       \
-                              m30,                                                       \
-                              m31,                                                       \
-                              m32,                                                       \
-                              m33)                                                       \
-    DEFINE_STRUCT_IMPL_34_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27,                                           \
-                           RESOLVE_VALUEs m28,                                           \
-                           RESOLVE_VALUEs m29,                                           \
-                           RESOLVE_VALUEs m30,                                           \
-                           RESOLVE_VALUEs m31,                                           \
-                           RESOLVE_VALUEs m32,                                           \
-                           RESOLVE_VALUEs m33)
-#define DEFINE_STRUCT_IMPL_34_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27,                                                      \
-                               m28,                                                      \
-                               m29,                                                      \
-                               m30,                                                      \
-                               m31,                                                      \
-                               m32,                                                      \
-                               m33)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_34(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27,                                                 \
+                                    m28,                                                 \
+                                    m29,                                                 \
+                                    m30,                                                 \
+                                    m31,                                                 \
+                                    m32,                                                 \
+                                    m33)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_34_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27,                                     \
+                                 RESOLVE_VALUEs m28,                                     \
+                                 RESOLVE_VALUEs m29,                                     \
+                                 RESOLVE_VALUEs m30,                                     \
+                                 RESOLVE_VALUEs m31,                                     \
+                                 RESOLVE_VALUEs m32,                                     \
+                                 RESOLVE_VALUEs m33)
+#define YENXO_DEFINE_STRUCT_IMPL_34_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27,                                                \
+                                     m28,                                                \
+                                     m29,                                                \
+                                     m30,                                                \
+                                     m31,                                                \
+                                     m32,                                                \
+                                     m33)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_34(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -4313,111 +4317,111 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_35(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27,                                                       \
-                              m28,                                                       \
-                              m29,                                                       \
-                              m30,                                                       \
-                              m31,                                                       \
-                              m32,                                                       \
-                              m33,                                                       \
-                              m34)                                                       \
-    DEFINE_STRUCT_IMPL_35_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27,                                           \
-                           RESOLVE_VALUEs m28,                                           \
-                           RESOLVE_VALUEs m29,                                           \
-                           RESOLVE_VALUEs m30,                                           \
-                           RESOLVE_VALUEs m31,                                           \
-                           RESOLVE_VALUEs m32,                                           \
-                           RESOLVE_VALUEs m33,                                           \
-                           RESOLVE_VALUEs m34)
-#define DEFINE_STRUCT_IMPL_35_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27,                                                      \
-                               m28,                                                      \
-                               m29,                                                      \
-                               m30,                                                      \
-                               m31,                                                      \
-                               m32,                                                      \
-                               m33,                                                      \
-                               m34)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_35(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27,                                                 \
+                                    m28,                                                 \
+                                    m29,                                                 \
+                                    m30,                                                 \
+                                    m31,                                                 \
+                                    m32,                                                 \
+                                    m33,                                                 \
+                                    m34)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_35_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27,                                     \
+                                 RESOLVE_VALUEs m28,                                     \
+                                 RESOLVE_VALUEs m29,                                     \
+                                 RESOLVE_VALUEs m30,                                     \
+                                 RESOLVE_VALUEs m31,                                     \
+                                 RESOLVE_VALUEs m32,                                     \
+                                 RESOLVE_VALUEs m33,                                     \
+                                 RESOLVE_VALUEs m34)
+#define YENXO_DEFINE_STRUCT_IMPL_35_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27,                                                \
+                                     m28,                                                \
+                                     m29,                                                \
+                                     m30,                                                \
+                                     m31,                                                \
+                                     m32,                                                \
+                                     m33,                                                \
+                                     m34)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_35(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -4568,114 +4572,114 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_36(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27,                                                       \
-                              m28,                                                       \
-                              m29,                                                       \
-                              m30,                                                       \
-                              m31,                                                       \
-                              m32,                                                       \
-                              m33,                                                       \
-                              m34,                                                       \
-                              m35)                                                       \
-    DEFINE_STRUCT_IMPL_36_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27,                                           \
-                           RESOLVE_VALUEs m28,                                           \
-                           RESOLVE_VALUEs m29,                                           \
-                           RESOLVE_VALUEs m30,                                           \
-                           RESOLVE_VALUEs m31,                                           \
-                           RESOLVE_VALUEs m32,                                           \
-                           RESOLVE_VALUEs m33,                                           \
-                           RESOLVE_VALUEs m34,                                           \
-                           RESOLVE_VALUEs m35)
-#define DEFINE_STRUCT_IMPL_36_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27,                                                      \
-                               m28,                                                      \
-                               m29,                                                      \
-                               m30,                                                      \
-                               m31,                                                      \
-                               m32,                                                      \
-                               m33,                                                      \
-                               m34,                                                      \
-                               m35)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_36(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27,                                                 \
+                                    m28,                                                 \
+                                    m29,                                                 \
+                                    m30,                                                 \
+                                    m31,                                                 \
+                                    m32,                                                 \
+                                    m33,                                                 \
+                                    m34,                                                 \
+                                    m35)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_36_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27,                                     \
+                                 RESOLVE_VALUEs m28,                                     \
+                                 RESOLVE_VALUEs m29,                                     \
+                                 RESOLVE_VALUEs m30,                                     \
+                                 RESOLVE_VALUEs m31,                                     \
+                                 RESOLVE_VALUEs m32,                                     \
+                                 RESOLVE_VALUEs m33,                                     \
+                                 RESOLVE_VALUEs m34,                                     \
+                                 RESOLVE_VALUEs m35)
+#define YENXO_DEFINE_STRUCT_IMPL_36_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27,                                                \
+                                     m28,                                                \
+                                     m29,                                                \
+                                     m30,                                                \
+                                     m31,                                                \
+                                     m32,                                                \
+                                     m33,                                                \
+                                     m34,                                                \
+                                     m35)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_36(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -4830,117 +4834,117 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_37(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27,                                                       \
-                              m28,                                                       \
-                              m29,                                                       \
-                              m30,                                                       \
-                              m31,                                                       \
-                              m32,                                                       \
-                              m33,                                                       \
-                              m34,                                                       \
-                              m35,                                                       \
-                              m36)                                                       \
-    DEFINE_STRUCT_IMPL_37_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27,                                           \
-                           RESOLVE_VALUEs m28,                                           \
-                           RESOLVE_VALUEs m29,                                           \
-                           RESOLVE_VALUEs m30,                                           \
-                           RESOLVE_VALUEs m31,                                           \
-                           RESOLVE_VALUEs m32,                                           \
-                           RESOLVE_VALUEs m33,                                           \
-                           RESOLVE_VALUEs m34,                                           \
-                           RESOLVE_VALUEs m35,                                           \
-                           RESOLVE_VALUEs m36)
-#define DEFINE_STRUCT_IMPL_37_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27,                                                      \
-                               m28,                                                      \
-                               m29,                                                      \
-                               m30,                                                      \
-                               m31,                                                      \
-                               m32,                                                      \
-                               m33,                                                      \
-                               m34,                                                      \
-                               m35,                                                      \
-                               m36)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_37(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27,                                                 \
+                                    m28,                                                 \
+                                    m29,                                                 \
+                                    m30,                                                 \
+                                    m31,                                                 \
+                                    m32,                                                 \
+                                    m33,                                                 \
+                                    m34,                                                 \
+                                    m35,                                                 \
+                                    m36)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_37_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27,                                     \
+                                 RESOLVE_VALUEs m28,                                     \
+                                 RESOLVE_VALUEs m29,                                     \
+                                 RESOLVE_VALUEs m30,                                     \
+                                 RESOLVE_VALUEs m31,                                     \
+                                 RESOLVE_VALUEs m32,                                     \
+                                 RESOLVE_VALUEs m33,                                     \
+                                 RESOLVE_VALUEs m34,                                     \
+                                 RESOLVE_VALUEs m35,                                     \
+                                 RESOLVE_VALUEs m36)
+#define YENXO_DEFINE_STRUCT_IMPL_37_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27,                                                \
+                                     m28,                                                \
+                                     m29,                                                \
+                                     m30,                                                \
+                                     m31,                                                \
+                                     m32,                                                \
+                                     m33,                                                \
+                                     m34,                                                \
+                                     m35,                                                \
+                                     m36)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_37(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \
@@ -5099,120 +5103,120 @@ auto DEFINE_STRUCT(...) = ;
     }                                                                                    \
     struct ANONYMOUS_STRUCT
 
-#define DEFINE_STRUCT_IMPL_38(Type,                                                      \
-                              m1,                                                        \
-                              m2,                                                        \
-                              m3,                                                        \
-                              m4,                                                        \
-                              m5,                                                        \
-                              m6,                                                        \
-                              m7,                                                        \
-                              m8,                                                        \
-                              m9,                                                        \
-                              m10,                                                       \
-                              m11,                                                       \
-                              m12,                                                       \
-                              m13,                                                       \
-                              m14,                                                       \
-                              m15,                                                       \
-                              m16,                                                       \
-                              m17,                                                       \
-                              m18,                                                       \
-                              m19,                                                       \
-                              m20,                                                       \
-                              m21,                                                       \
-                              m22,                                                       \
-                              m23,                                                       \
-                              m24,                                                       \
-                              m25,                                                       \
-                              m26,                                                       \
-                              m27,                                                       \
-                              m28,                                                       \
-                              m29,                                                       \
-                              m30,                                                       \
-                              m31,                                                       \
-                              m32,                                                       \
-                              m33,                                                       \
-                              m34,                                                       \
-                              m35,                                                       \
-                              m36,                                                       \
-                              m37)                                                       \
-    DEFINE_STRUCT_IMPL_38_(Type,                                                         \
-                           RESOLVE_VALUEs m1,                                            \
-                           RESOLVE_VALUEs m2,                                            \
-                           RESOLVE_VALUEs m3,                                            \
-                           RESOLVE_VALUEs m4,                                            \
-                           RESOLVE_VALUEs m5,                                            \
-                           RESOLVE_VALUEs m6,                                            \
-                           RESOLVE_VALUEs m7,                                            \
-                           RESOLVE_VALUEs m8,                                            \
-                           RESOLVE_VALUEs m9,                                            \
-                           RESOLVE_VALUEs m10,                                           \
-                           RESOLVE_VALUEs m11,                                           \
-                           RESOLVE_VALUEs m12,                                           \
-                           RESOLVE_VALUEs m13,                                           \
-                           RESOLVE_VALUEs m14,                                           \
-                           RESOLVE_VALUEs m15,                                           \
-                           RESOLVE_VALUEs m16,                                           \
-                           RESOLVE_VALUEs m17,                                           \
-                           RESOLVE_VALUEs m18,                                           \
-                           RESOLVE_VALUEs m19,                                           \
-                           RESOLVE_VALUEs m20,                                           \
-                           RESOLVE_VALUEs m21,                                           \
-                           RESOLVE_VALUEs m22,                                           \
-                           RESOLVE_VALUEs m23,                                           \
-                           RESOLVE_VALUEs m24,                                           \
-                           RESOLVE_VALUEs m25,                                           \
-                           RESOLVE_VALUEs m26,                                           \
-                           RESOLVE_VALUEs m27,                                           \
-                           RESOLVE_VALUEs m28,                                           \
-                           RESOLVE_VALUEs m29,                                           \
-                           RESOLVE_VALUEs m30,                                           \
-                           RESOLVE_VALUEs m31,                                           \
-                           RESOLVE_VALUEs m32,                                           \
-                           RESOLVE_VALUEs m33,                                           \
-                           RESOLVE_VALUEs m34,                                           \
-                           RESOLVE_VALUEs m35,                                           \
-                           RESOLVE_VALUEs m36,                                           \
-                           RESOLVE_VALUEs m37)
-#define DEFINE_STRUCT_IMPL_38_(Type,                                                     \
-                               m1,                                                       \
-                               m2,                                                       \
-                               m3,                                                       \
-                               m4,                                                       \
-                               m5,                                                       \
-                               m6,                                                       \
-                               m7,                                                       \
-                               m8,                                                       \
-                               m9,                                                       \
-                               m10,                                                      \
-                               m11,                                                      \
-                               m12,                                                      \
-                               m13,                                                      \
-                               m14,                                                      \
-                               m15,                                                      \
-                               m16,                                                      \
-                               m17,                                                      \
-                               m18,                                                      \
-                               m19,                                                      \
-                               m20,                                                      \
-                               m21,                                                      \
-                               m22,                                                      \
-                               m23,                                                      \
-                               m24,                                                      \
-                               m25,                                                      \
-                               m26,                                                      \
-                               m27,                                                      \
-                               m28,                                                      \
-                               m29,                                                      \
-                               m30,                                                      \
-                               m31,                                                      \
-                               m32,                                                      \
-                               m33,                                                      \
-                               m34,                                                      \
-                               m35,                                                      \
-                               m36,                                                      \
-                               m37)                                                      \
+#define YENXO_DEFINE_STRUCT_IMPL_38(Type,                                                \
+                                    m1,                                                  \
+                                    m2,                                                  \
+                                    m3,                                                  \
+                                    m4,                                                  \
+                                    m5,                                                  \
+                                    m6,                                                  \
+                                    m7,                                                  \
+                                    m8,                                                  \
+                                    m9,                                                  \
+                                    m10,                                                 \
+                                    m11,                                                 \
+                                    m12,                                                 \
+                                    m13,                                                 \
+                                    m14,                                                 \
+                                    m15,                                                 \
+                                    m16,                                                 \
+                                    m17,                                                 \
+                                    m18,                                                 \
+                                    m19,                                                 \
+                                    m20,                                                 \
+                                    m21,                                                 \
+                                    m22,                                                 \
+                                    m23,                                                 \
+                                    m24,                                                 \
+                                    m25,                                                 \
+                                    m26,                                                 \
+                                    m27,                                                 \
+                                    m28,                                                 \
+                                    m29,                                                 \
+                                    m30,                                                 \
+                                    m31,                                                 \
+                                    m32,                                                 \
+                                    m33,                                                 \
+                                    m34,                                                 \
+                                    m35,                                                 \
+                                    m36,                                                 \
+                                    m37)                                                 \
+    YENXO_DEFINE_STRUCT_IMPL_38_(Type,                                                   \
+                                 RESOLVE_VALUEs m1,                                      \
+                                 RESOLVE_VALUEs m2,                                      \
+                                 RESOLVE_VALUEs m3,                                      \
+                                 RESOLVE_VALUEs m4,                                      \
+                                 RESOLVE_VALUEs m5,                                      \
+                                 RESOLVE_VALUEs m6,                                      \
+                                 RESOLVE_VALUEs m7,                                      \
+                                 RESOLVE_VALUEs m8,                                      \
+                                 RESOLVE_VALUEs m9,                                      \
+                                 RESOLVE_VALUEs m10,                                     \
+                                 RESOLVE_VALUEs m11,                                     \
+                                 RESOLVE_VALUEs m12,                                     \
+                                 RESOLVE_VALUEs m13,                                     \
+                                 RESOLVE_VALUEs m14,                                     \
+                                 RESOLVE_VALUEs m15,                                     \
+                                 RESOLVE_VALUEs m16,                                     \
+                                 RESOLVE_VALUEs m17,                                     \
+                                 RESOLVE_VALUEs m18,                                     \
+                                 RESOLVE_VALUEs m19,                                     \
+                                 RESOLVE_VALUEs m20,                                     \
+                                 RESOLVE_VALUEs m21,                                     \
+                                 RESOLVE_VALUEs m22,                                     \
+                                 RESOLVE_VALUEs m23,                                     \
+                                 RESOLVE_VALUEs m24,                                     \
+                                 RESOLVE_VALUEs m25,                                     \
+                                 RESOLVE_VALUEs m26,                                     \
+                                 RESOLVE_VALUEs m27,                                     \
+                                 RESOLVE_VALUEs m28,                                     \
+                                 RESOLVE_VALUEs m29,                                     \
+                                 RESOLVE_VALUEs m30,                                     \
+                                 RESOLVE_VALUEs m31,                                     \
+                                 RESOLVE_VALUEs m32,                                     \
+                                 RESOLVE_VALUEs m33,                                     \
+                                 RESOLVE_VALUEs m34,                                     \
+                                 RESOLVE_VALUEs m35,                                     \
+                                 RESOLVE_VALUEs m36,                                     \
+                                 RESOLVE_VALUEs m37)
+#define YENXO_DEFINE_STRUCT_IMPL_38_(Type,                                               \
+                                     m1,                                                 \
+                                     m2,                                                 \
+                                     m3,                                                 \
+                                     m4,                                                 \
+                                     m5,                                                 \
+                                     m6,                                                 \
+                                     m7,                                                 \
+                                     m8,                                                 \
+                                     m9,                                                 \
+                                     m10,                                                \
+                                     m11,                                                \
+                                     m12,                                                \
+                                     m13,                                                \
+                                     m14,                                                \
+                                     m15,                                                \
+                                     m16,                                                \
+                                     m17,                                                \
+                                     m18,                                                \
+                                     m19,                                                \
+                                     m20,                                                \
+                                     m21,                                                \
+                                     m22,                                                \
+                                     m23,                                                \
+                                     m24,                                                \
+                                     m25,                                                \
+                                     m26,                                                \
+                                     m27,                                                \
+                                     m28,                                                \
+                                     m29,                                                \
+                                     m30,                                                \
+                                     m31,                                                \
+                                     m32,                                                \
+                                     m33,                                                \
+                                     m34,                                                \
+                                     m35,                                                \
+                                     m36,                                                \
+                                     m37)                                                \
     BOOST_HANA_DEFINE_STRUCT_IMPL_38(Type,                                               \
                                      EXTRs(NTH1OF2s m1),                                 \
                                      EXTRs(NTH1OF2s m2),                                 \

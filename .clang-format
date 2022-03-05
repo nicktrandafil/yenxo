@@ -108,4 +108,4 @@ SpacesInSquareBrackets: false
 Standard: c++20
 TabWidth: 8
 UseTab: Never
-WhitespaceSensitiveMacros: ["BOOST_HANA_DEFINE_STRUCT", "DEFINE_STRUCT"]
+WhitespaceSensitiveMacros: ["BOOST_HANA_DEFINE_STRUCT", "YENXO_DEFINE_STRUCT", "YENXO_DEFINE_ENUM"]

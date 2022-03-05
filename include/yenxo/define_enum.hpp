@@ -136,7 +136,7 @@ public:
 /// @include example/define_enum.cpp
 #ifdef YENXO_DOXYGEN_INVOKED
 auto YENXO_DEFINE_ENUM(...) = ;
-#define DEFINE_STRUCT(Type, ...) see documentation
+#define YENXO_DEFINE_ENUM(Type, ...) see documentation
 #else
 #define YENXO_DEFINE_ENUM(Type, ...)                                                     \
     YENXO_DEFINE_ENUM_IMPL(BOOST_HANA_PP_NARG(__VA_ARGS__), Type, __VA_ARGS__)

@@ -36,7 +36,7 @@ using namespace boost::hana::literals;
 namespace {
 
 struct S31 : trait::Var<S31> {
-    DEFINE_STRUCT(S31,
+    YENXO_DEFINE_STRUCT(S31,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -71,7 +71,7 @@ struct S31 : trait::Var<S31> {
 };
 
 struct S32 : trait::Var<S32> {
-    DEFINE_STRUCT(S32,
+    YENXO_DEFINE_STRUCT(S32,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -107,7 +107,7 @@ struct S32 : trait::Var<S32> {
 };
 
 struct S33 : trait::Var<S33> {
-    DEFINE_STRUCT(S33,
+    YENXO_DEFINE_STRUCT(S33,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -144,7 +144,7 @@ struct S33 : trait::Var<S33> {
 };
 
 struct S34 : trait::Var<S34> {
-    DEFINE_STRUCT(S34,
+    YENXO_DEFINE_STRUCT(S34,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -182,7 +182,7 @@ struct S34 : trait::Var<S34> {
 };
 
 struct S35 : trait::Var<S35> {
-    DEFINE_STRUCT(S35,
+    YENXO_DEFINE_STRUCT(S35,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -221,7 +221,7 @@ struct S35 : trait::Var<S35> {
 };
 
 struct S36 : trait::Var<S36> {
-    DEFINE_STRUCT(S36,
+    YENXO_DEFINE_STRUCT(S36,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -261,7 +261,7 @@ struct S36 : trait::Var<S36> {
 };
 
 struct S37 : trait::Var<S37> {
-    DEFINE_STRUCT(S37,
+    YENXO_DEFINE_STRUCT(S37,
                   (int, x1, Default(1), Name("xx1")),
                   (int, x2, Default(2), Name("xx2")),
                   (int, x3, Default(3), Name("xx3")),
@@ -303,7 +303,7 @@ struct S37 : trait::Var<S37> {
 
 } // namespace
 
-TEST_CASE("Check DEFINE_STRUCT part 3", "[define_struct]") {
+TEST_CASE("Check YENXO_DEFINE_STRUCT part 3", "[define_struct]") {
     auto const tests = boost::hana::make_tuple(
             boost::hana::make_pair(boost::hana::type_c<S31>, boost::hana::int_c<31>),
             boost::hana::make_pair(boost::hana::type_c<S32>, boost::hana::int_c<32>),

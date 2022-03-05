@@ -264,12 +264,12 @@ struct SimpleProperty {
 
 struct SpecialSymbol1 {
     YENXO_FROM_VARIANT(SpecialSymbol1)
-    DEFINE_STRUCT(SpecialSymbol1, (int, x, Name("x~y~")));
+    YENXO_DEFINE_STRUCT(SpecialSymbol1, (int, x, Name("x~y~")));
 };
 
 struct SpecialSymbol2 {
     YENXO_FROM_VARIANT(SpecialSymbol2)
-    DEFINE_STRUCT(SpecialSymbol2, (int, x, Name("~x/y/~"))); };  } // namespace
+    YENXO_DEFINE_STRUCT(SpecialSymbol2, (int, x, Name("~x/y/~"))); };  } // namespace
 
 TEST_CASE("Check VariantErr::path()", "[exception]") {
     REQUIRE_THROWS_MATCHES(fromVariant<SimpleProperty>(VariantMap{{"x", "1"}}),

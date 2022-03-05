@@ -51,7 +51,7 @@ namespace yenxo {
 /// Providing a default value the member implicitly becomes optional.
 ///
 /// \code
-/// DEFINE_STRUCT(MyStruct
+/// YENXO_DEFINE_STRUCT(MyStruct
 ///     (string, name, Default("Siri"))
 /// );
 /// \endcode
@@ -85,7 +85,7 @@ Default(T) -> Default<T>;
 /// This directive can be used to provide different name for a struct member.
 ///
 /// \code
-/// DEFINE_STRUCT(MyStruct
+/// YENXO_DEFINE_STRUCT(MyStruct
 ///     (string, name, Name("surname"))
 /// );
 /// \endcode
@@ -120,8 +120,8 @@ auto filterDefaults(M&& m) {
                                                                         [](auto const&
                                                                                    x) {
                                                                             return std::negation<WrappedInDefault<
-                                                                                    std::remove_cv_t<std::remove_reference_t<decltype(
-                                                                                            x)>>>>();
+                                                                                    std::remove_cv_t<std::remove_reference_t<
+                                                                                            decltype(x)>>>>();
                                                                         }),
                                                                 boost::hana::at_c<0>(x));
                                                     }),

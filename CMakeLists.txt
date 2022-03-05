@@ -28,7 +28,7 @@ else()
     set(_${PROJECT_NAME}_ENABLE_TYPE_SAFE 0)
 endif()
 
-option(${PROJECT_NAME}_TEST_DEFINE_STRUCT "Enable testing of DEFINE_STRUCT" OFF)
+option(${PROJECT_NAME}_TEST_DEFINE_STRUCT "Enable testing of YENXO_DEFINE_STRUCT" OFF)
 
 option(${PROJECT_NAME}_BUILD_DOC "Enable building documentation" OFF)
 
