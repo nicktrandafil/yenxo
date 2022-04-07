@@ -36,8 +36,10 @@
 #endif
 
 #include <boost/hana.hpp>
+#include <boost/hana/ext/std/tuple.hpp>
 
 #include <sstream>
+#include <tuple>
 #include <type_traits>
 #include <variant>
 
@@ -253,7 +255,7 @@ struct ToVariantImpl<T, When<isMapType(boost::hana::type_c<T>)>> {
     }
 };
 
-// Specialization for pair
+// Specialization for `std::pair`
 template <typename T>
 struct ToVariantImpl<T, When<isPair(boost::hana::type_c<T>)>> {
     static Variant apply(T const& pair) {
@@ -261,6 +263,17 @@ struct ToVariantImpl<T, When<isPair(boost::hana::type_c<T>)>> {
         tmp["first"] = toVariant(pair.first);
         tmp["second"] = toVariant(pair.second);
         return Variant(tmp);
+    }
+};
+
+// Specialization for `std::pair`.
+template <typename T>
+struct ToVariantImpl<T, When<isTuple(boost::hana::type_c<T>)>> {
+    static Variant apply(T const& tuple) {
+        VariantVec tmp;
+        tmp.reserve(std::tuple_size<T>::value);
+        boost::hana::for_each(tuple, [&tmp](auto const& x) { tmp.push_back(toVariant(x)); });
+        return tmp;
     }
 };
 
@@ -795,9 +808,13 @@ inline constexpr auto toVariantConvertible = [](auto type) {
            || isMapType(type)
            || isCollectionType(type)
            || isReflectiveEnum(type)
+           || isPair(type)
+           || isTuple(type)
 #if YENXO_ENABLE_TYPE_SAFE
            || (!hasToVariant(type) && strongTypeDef(type)) || constrainedType(type)
-           || integerType(type) || floatingPoint(type) || boolean(type)
+           || integerType(type)
+           || floatingPoint(type)
+           || boolean(type)
 #endif
            || boost::hana::is_a<boost::hana::map_tag, typename decltype(type)::type>
            || boost::hana::is_a<boost::hana::string_tag, typename decltype(type)::type>
@@ -829,13 +846,13 @@ inline constexpr auto fromVariantConvertible = [](auto type) {
     return    isVariant(type)
            || hasFromVariant(type)
            || isVariantBuildIn(type)
+           || isMapType(type)
            || boost::hana::template_<detail::IsStdArrayImpl>(type)
            || isCollectionTypeWithPushBack(type)
            || isCollectionTypeWithEmplace(type)
-           || isMapType(type)
-           || isPair(type)
            || isReflectiveEnumWithSingleStringRepresentation(type)
            || isReflectiveEnumWithMultiStringRepresentation(type)
+           || isPair(type)
 #if YENXO_ENABLE_TYPE_SAFE
            || (!hasToVariant(type) && strongTypeDef(type))
            || constrainedType(type)

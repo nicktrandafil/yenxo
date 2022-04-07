@@ -129,6 +129,10 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
                 == Variant(VariantMap{{"first", Variant(1)}, {"second", Variant("1")}}));
     }
 
+    SECTION("std::tuple") {
+        REQUIRE(toVariant(std::tuple(1, "1", true)) == VariantVec{1, "1", true});
+    }
+
     SECTION("std::variant") {
         using V = std::variant<int, std::string>;
         REQUIRE(toVariant(V("a")) == Variant("a"));
