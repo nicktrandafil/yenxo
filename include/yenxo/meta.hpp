@@ -425,4 +425,24 @@ inline constexpr auto isStdVariant = boost::hana::is_valid(
                                           0,
                                           typename decltype(type)::type>>::value) {});
 
+namespace detail {
+
+template <typename T>
+struct IsTuple : std::false_type {};
+
+template <class... Args>
+struct IsTuple<std::tuple<Args...>> : std::true_type {};
+
+}  // namespace detail
+
+/// Test if `T` is `std::tuple`
+/// \ingroup group-meta
+template <typename T>
+constexpr auto isTuple(boost::hana::basic_type<T> const&) {
+    return detail::IsTuple<T>::value;
+}
+
+template <class T>
+using IsTuple = detail::IsTuple<T>;
+
 } // namespace yenxo
