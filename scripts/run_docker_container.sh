@@ -4,7 +4,7 @@ IMG=$1
 shift
 
 if [ -z "$IMG" ]; then
-    IMG=yenxo
+    IMG=ntrandafil/yenxo:dev
 fi
 
 CONTAINER=$(docker run --rm -d -P -it \

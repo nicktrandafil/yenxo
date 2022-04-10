@@ -42,8 +42,13 @@ constexpr auto const hasOStreamOperator = boost::hana::is_valid(
         [](auto t) -> decltype(operator<<(std::declval<std::ostream>(),
                                           std::declval<typename decltype(t)::type>())) {
         });
+
 } // namespace detail
 
+
+#ifdef YENXO_DOXYGEN_INVOKED
+auto oStream = [](std::ostream& os, T const& val) { return return os << val; };
+#else
 struct OStreamT {
     template <class T>
     void operator()(std::ostream& os, T const&) const;
@@ -150,6 +155,7 @@ template <class T>
 void OStreamT::operator()(std::ostream& os, T const& val) const {
     OStreamImpl<T>::apply(os, val);
 }
+#endif
 
 /// \pre `T` should be a Boost.Hana.Struct.
 template <class T>

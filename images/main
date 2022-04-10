@@ -1,0 +1,75 @@
+FROM ubuntu:21.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get -y update
+RUN apt-get -y install cmake lcov doxygen curl wget git gcc-11 g++-11 clang-12
+
+# Download dependencies
+ARG BOOST_URL
+WORKDIR /tmp
+RUN mkdir boost \
+ && wget -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ./boost
+RUN git clone https://github.com/Tencent/rapidjson.git
+RUN git clone https://github.com/catchorg/Catch2.git
+RUN git clone https://github.com/foonathan/debug_assert.git
+RUN git clone https://github.com/foonathan/type_safe.git
+RUN git clone https://github.com/google/benchmark.git
+
+# Select compilers
+RUN update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-11 100 \
+ && update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-11 100 \
+ && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 \
+ && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100 \
+ && update-alternatives --install /usr/bin/clang clang /usr/bin/clang-12 100 \
+ && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-12 \
+    100 \
+ && update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-11 100
+
+# Boost
+WORKDIR /tmp/boost
+RUN ./bootstrap.sh --with-libraries=headers \
+ && ./b2 headers \
+ && ./b2 install
+
+ARG BUILD_TYPE
+
+# RapidJSON
+WORKDIR /tmp/rapidjson
+RUN mkdir build/ && cd build/ \
+ && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DRAPIDJSON_BUILD_TESTS=OFF \
+          -DRAPIDJSON_BUILD_EXAMPLES=OFF -DRAPIDJSON_BUILD_DOC=OFF .. \
+ && cmake --build . \
+ && cmake --build . --target install
+
+# Catch2
+WORKDIR /tmp/Catch2
+RUN git checkout v2.13.2 \
+ && mkdir build/ && cd build/ \
+ && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCATCH_BUILD_TESTING=OFF \
+          -DCATCH_INSTALL_DOCS=OFF .. \
+ && cmake --build . \
+ && cmake --build . --target install
+
+# debug_assert
+WORKDIR /tmp/debug_assert
+RUN mkdir build/ && cd build/ \
+ && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. \
+ && cmake --build . \
+ && cmake --build . --target install
+
+# type_safe
+WORKDIR /tmp/type_safe
+RUN mkdir build/ && cd build/ \
+ && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. \
+ && cmake --build . \
+ && cmake --build . --target install
+
+# benchmark
+WORKDIR /tmp/benchmark
+RUN mkdir build && cd build \
+  && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+           -DBENCHMARK_ENABLE_GTEST_TESTS=OFF ../ \
+  && cmake --build . \
+  && cmake --build . --target install
+
