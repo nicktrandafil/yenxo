@@ -266,7 +266,7 @@ struct ToVariantImpl<T, When<isPair(boost::hana::type_c<T>)>> {
     }
 };
 
-// Specialization for `std::pair`.
+// Specialization for `std::tuple`.
 template <typename T>
 struct ToVariantImpl<T, When<isTuple(boost::hana::type_c<T>)>> {
     static Variant apply(T const& tuple) {

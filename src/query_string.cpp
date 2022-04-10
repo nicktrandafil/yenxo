@@ -28,7 +28,7 @@
 
 #include <boost/fusion/adapted/struct/define_struct_inline.hpp>
 #include <boost/fusion/include/define_struct_inline.hpp>
-#include <boost/spirit/include/phoenix.hpp>
+#include <boost/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 namespace qi = boost::spirit::qi;

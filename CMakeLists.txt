@@ -5,9 +5,6 @@ cmake_policy(SET CMP0022 NEW)
 project(yenxo VERSION 0.1)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-include(yenxo)
-
-
 # If inside subdirectory.
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(${PROJECT_NAME}_sub OFF)
@@ -48,6 +45,9 @@ cmake_dependent_option(${PROJECT_NAME}_COVERAGE
     "Enable binary instrumentation to collect test coverage information in the DEBUG configuration"
     ON "NOT ${PROJECT_NAME}_sub AND ${PROJECT_NAME}_TESTING AND ${CMAKE_BUILD_TYPE} STREQUAL Debug" OFF
 )
+
+
+include(yenxo)
 
 
 # CCache

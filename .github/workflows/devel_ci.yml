@@ -1,0 +1,79 @@
+name: C/C++ CI
+
+on: [push, pull_request]
+
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type:
+          - Debug
+          - Release
+        compiler:
+          - cxx: g++
+            cc: gcc
+          - cxx: clang++
+            cc: clang
+
+    runs-on: ubuntu-latest
+    container:
+      image: ntrandafil/yenxo:main
+      options: --user root
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create Build Environment
+        run: cmake -E make_directory build
+
+      - name: CMake configure
+        working-directory: build
+        run: |
+          cmake -E make_directory build
+          cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+        env:
+          CC: ${{matrix.compiler.cc}}
+          CXX: ${{matrix.compiler.cxx}}
+
+      - name: Enable doc target and coverage
+        if: matrix.compiler.cc == 'gcc' && matrix.build_type == 'Debug'
+        working-directory: build
+        run: cmake . -Dyenxo_COVERAGE=ON -Dyenxo_BUILD_DOC=ON
+
+      - name: Build
+        working-directory: build
+        run: cmake --build . --config ${{matrix.build_type}}
+
+      - name: Test
+        working-directory: build
+        run: ctest -C ${{matrix.build_type}} --output-on-failure
+
+      - name: Build documentation
+        if: matrix.compiler.cc == 'gcc' && matrix.build_type == 'Debug'
+        working-directory: build
+        run: cmake --build . --target doc
+
+      - name: Deploy documentation
+        if: |
+          matrix.compiler.cc == 'gcc' &&
+          matrix.build_type == 'Debug' &&
+          github.ref == 'refs/heads/master' &&
+          github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: build/doc/YES
+
+      - name: Generate coverage report
+        if: matrix.compiler.cc == 'gcc' && matrix.build_type == 'Debug'
+        working-directory: build
+        run: |
+          lcov --directory . --capture --output-file coverage.info
+          lcov --remove coverage.info '/usr/*' --output-file coverage.info
+
+      - name: Deploy coverage
+        if: matrix.compiler.cc == 'gcc' && matrix.build_type == 'Debug'
+        uses: codecov/codecov-action@v2
+        with:
+          files: coverage.info
