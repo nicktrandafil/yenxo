@@ -154,6 +154,12 @@ TEST_CASE("Check Variant", "[Variant]") {
         REQUIRE(Variant().strOr("abc") == "abc");
     }
 
+    SECTION("string_view") {
+        std::string_view const sv = "ab";
+        std::string const s = static_cast<std::string>(sv);
+        REQUIRE(Variant(sv) == s);
+    }
+
     SECTION("Variant::Vec") {
         auto const expected = Variant::Vec{Variant(1), Variant("ab")};
         auto const x = Variant(expected);

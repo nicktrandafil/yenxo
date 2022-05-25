@@ -31,6 +31,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
@@ -97,6 +98,7 @@ public:
     Variant(char const* const&);
     Variant(std::string const&);
     Variant(std::string&&);
+    Variant(std::string_view);
 
     Variant(Vec const&);
     Variant(Vec&&);
