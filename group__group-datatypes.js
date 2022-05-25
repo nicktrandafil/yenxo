@@ -1,7 +1,6 @@
 var group__group_datatypes =
 [
     [ "Variant", "classyenxo_1_1Variant.html", [
-      [ "equal", "classyenxo_1_1Variant.html#af05c5b068e0b9ced1c656d5a99d89b90", null ],
       [ "operator NullType", "classyenxo_1_1Variant.html#afa848fb405812224c98406ee534a06df", null ],
       [ "asOr", "classyenxo_1_1Variant.html#a9dcad97dae3224699630c779cd1b4d0a", null ],
       [ "boolean", "classyenxo_1_1Variant.html#a45997074c39b00dc9a21975d33c6ff28", null ],
@@ -33,6 +32,7 @@ var group__group_datatypes =
       [ "map", "classyenxo_1_1Variant.html#a972a5f6f58489875d6b446342889849b", null ],
       [ "mapOr", "classyenxo_1_1Variant.html#a24446734636b6e52ee440571e7255d21", null ],
       [ "null", "classyenxo_1_1Variant.html#ab2b57b8ffef983e4bb9bbf70ce4a0f2b", null ],
-      [ "isScalar", "classyenxo_1_1Variant.html#a9f17f4ca649f75dc4e4a1e48cd1aee00", null ]
+      [ "isScalar", "classyenxo_1_1Variant.html#a9f17f4ca649f75dc4e4a1e48cd1aee00", null ],
+      [ "equal", "classyenxo_1_1Variant.html#af05c5b068e0b9ced1c656d5a99d89b90", null ]
     ] ]
 ];

@@ -1,5 +1,5 @@
 var group__group_struct =
 [
     [ "Directives", "group__group-directives.html", "group__group-directives" ],
-    [ "DEFINE_STRUCT", "group__group-struct.html#ga04fcc77f68b3ba3910071b1428f0e043", null ]
+    [ "YENXO_DEFINE_STRUCT", "group__group-struct.html#gaaabe9998ed34256248ed29b6ac98e470", null ]
 ];

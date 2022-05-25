@@ -26,7 +26,8 @@ var searchData=
   ['isreflectiveenumwithmultistringrepresentation_70',['isReflectiveEnumWithMultiStringRepresentation',['../group__group-details.html#ga48542c52bbc326ee4d8204dc2bbeb329',1,'yenxo']]],
   ['isreflectiveenumwithsinglestringrepresentation_71',['isReflectiveEnumWithSingleStringRepresentation',['../group__group-details.html#ga8954179d0bdd7c937619d90287baa55b',1,'yenxo']]],
   ['isscalar_72',['isScalar',['../classyenxo_1_1Variant.html#a9f17f4ca649f75dc4e4a1e48cd1aee00',1,'yenxo::Variant']]],
-  ['isstdvariant_73',['isStdVariant',['../group__group-details.html#ga84973a84048ac76e675e30d3fe7e9d6b',1,'yenxo']]],
-  ['isvariant_74',['isVariant',['../group__group-details.html#ga5f12ca596e9a6f5327313c68ac03b606',1,'yenxo']]],
-  ['isvariantbuildin_75',['isVariantBuildIn',['../group__group-details.html#ga7d50726f6dc4b3e6c60b0fa2c8775230',1,'yenxo']]]
+  ['isstdvariant_73',['isStdVariant',['../group__group-meta.html#ga84973a84048ac76e675e30d3fe7e9d6b',1,'yenxo']]],
+  ['istuple_74',['isTuple',['../group__group-meta.html#ga898ed22d8e1e5bcb2ddfb7e6b3fbf9dc',1,'yenxo']]],
+  ['isvariant_75',['isVariant',['../group__group-details.html#ga5f12ca596e9a6f5327313c68ac03b606',1,'yenxo']]],
+  ['isvariantbuildin_76',['isVariantBuildIn',['../group__group-details.html#ga7d50726f6dc4b3e6c60b0fa2c8775230',1,'yenxo']]]
 ];

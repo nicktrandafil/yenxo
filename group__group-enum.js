@@ -1,5 +1,5 @@
 var group__group_enum =
 [
     [ "EnumTraits", "structyenxo_1_1EnumTraits.html", null ],
-    [ "DEFINE_ENUM", "group__group-enum.html#ga64d7cea808976176115a500c4c769c68", null ]
+    [ "YENXO_DEFINE_ENUM", "group__group-enum.html#gaf5eb375f4e08e46533aa2b8055c49458", null ]
 ];

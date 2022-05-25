@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['map_204',['map',['../classyenxo_1_1Variant.html#a972a5f6f58489875d6b446342889849b',1,'yenxo::Variant']]],
-  ['mapor_205',['mapOr',['../classyenxo_1_1Variant.html#a24446734636b6e52ee440571e7255d21',1,'yenxo::Variant']]]
+  ['null_209',['null',['../classyenxo_1_1Variant.html#ab2b57b8ffef983e4bb9bbf70ce4a0f2b',1,'yenxo::Variant']]]
 ];
