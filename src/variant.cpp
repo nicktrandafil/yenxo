@@ -122,6 +122,10 @@ Variant::Variant(std::string&& x)
         : type_tag_(TypeTag::string)
         , value_(new std::string(std::move(x))) {
 }
+Variant::Variant(std::string_view x)
+        : type_tag_(TypeTag::string)
+        , value_(new std::string(x)) {
+}
 
 Variant::Variant(Vec const& x)
         : type_tag_(TypeTag::vec)
