@@ -1,6 +1,6 @@
 # yenxo
 
-![Build Status](https://github.com/nicktrandafil/yenxo/actions/workflows/main_ci.yml/badge.svg?branch=master)
+[![Build Status](https://github.com/nicktrandafil/yenxo/actions/workflows/main_ci.yml/badge.svg?branch=master)](https://github.com/nicktrandafil/yenxo/actions/workflows/main_ci.yml)
 [![codecov](https://codecov.io/gh/nicktrandafil/yenxo/branch/master/graph/badge.svg)](https://codecov.io/gh/nicktrandafil/yenxo)
 [![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](https://nicktrandafil.github.io/yenxo)
 
