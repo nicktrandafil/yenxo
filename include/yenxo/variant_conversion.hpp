@@ -48,7 +48,7 @@ namespace yenxo {
 /// \ingroup group-details
 /// Tests if type `T` has `static Variant T::toVariant(T)`.
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto hasToVariant = [](auto type) {
+inline constexpr auto hasToVariant = [](auto type) {
     return exists(static Variant type::toVariant(type));
 };
 #else
@@ -68,7 +68,7 @@ struct HasToVariantT {
     }
 };
 
-constexpr HasToVariantT hasToVariant;
+inline constexpr HasToVariantT hasToVariant;
 #endif
 
 /// \ingroup group-details
@@ -95,7 +95,7 @@ struct HasFromVariantT {
     }
 };
 
-constexpr HasFromVariantT hasFromVariant;
+inline constexpr HasFromVariantT hasFromVariant;
 #endif
 
 /// \ingroup group-details
@@ -197,14 +197,14 @@ inline constexpr auto isCollectionTypeWithEmplace = [](auto type) {
 /// The function object is enabled for any type `T` for which
 /// `toVariantConvertible(boost::hana::type_c<T>)` returns `true`.
 #ifdef YENXO_DOXYGEN_INVOKED
-auto toVariant = [](auto value) { return Variant(yenxo(value)); };
+inline auto toVariant = [](auto value) { return Variant(yenxo(value)); };
 #else
 struct ToVariantT {
     template <typename T>
     auto operator()(T&& args) const;
 };
 
-constexpr ToVariantT toVariant;
+inline constexpr ToVariantT toVariant;
 
 // Unified conversion of T to Variant
 template <typename T, typename = void>
@@ -400,7 +400,7 @@ auto ToVariantT::operator()(T&& val) const {
 /// `toVariantConvertible(boost::hana::type_c<T>)` returns `true`.
 #ifdef YENXO_DOXYGEN_INVOKED
 template <class T>
-constexpr auto fromVariant = [](Variant const& var) { return T(deserialize(var)); };
+inline constexpr auto fromVariant = [](Variant const& var) { return T(deserialize(var)); };
 #else
 template <typename T>
 struct FromVariantT {
@@ -409,7 +409,7 @@ struct FromVariantT {
 
 // Convenient shortcut function
 template <typename T>
-constexpr FromVariantT<T> fromVariant;
+inline constexpr FromVariantT<T> fromVariant;
 
 // Unified conversion of Variant to T
 template <typename T, typename = void>
@@ -761,14 +761,14 @@ struct ToVariantT2 {
     }
 };
 
-constexpr ToVariantT2 toVariant2;
+inline constexpr ToVariantT2 toVariant2;
 #endif
 
 /// From `Variant` conversion function object
 /// \ingroup group-function
 /// \see fromVariant
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto fromVariant2 = [](auto& value, Variant const& var) {
+inline constexpr auto fromVariant2 = [](auto& value, Variant const& var) {
     value = fromVariant<decltype(type)>(var);
 };
 #else
@@ -779,7 +779,7 @@ struct FromVariantT2 {
     }
 };
 
-constexpr FromVariantT2 fromVariant2;
+inline constexpr FromVariantT2 fromVariant2;
 #endif
 
 /// Whether `T` can be converted to Variant

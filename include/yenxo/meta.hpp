@@ -251,14 +251,14 @@ using IsKeyValue = std::conjunction<IsPair<T>, IsString<typename T::first_type>>
 
 /// Test if `type` is has `push_back` method
 /// \ingroup group-meta
-constexpr auto hasPushBack = boost::hana::is_valid(
+inline constexpr auto hasPushBack = boost::hana::is_valid(
         [](auto type)
                 -> decltype((void)boost::hana::traits::declval(type).push_back(
                         std::declval<typename decltype(type)::type::value_type>())) {});
 
 /// Test if `type` is has `emplace` method
 /// \ingroup group-meta
-constexpr auto hasEmplace = boost::hana::is_valid(
+inline constexpr auto hasEmplace = boost::hana::is_valid(
         [](auto x) -> decltype((void)boost::hana::traits::declval(x).emplace(
                            std::declval<typename decltype(x)::type::value_type>())) {});
 
@@ -266,7 +266,7 @@ constexpr auto hasEmplace = boost::hana::is_valid(
 /// Tests if type is `type_safe::strong_typedef`
 /// \ingroup group-meta
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto strongTypeDef = [](auto type) { return isStrongTypeDef(type); };
+inline constexpr auto strongTypeDef = [](auto type) { return isStrongTypeDef(type); };
 #else
 template <typename T>
 struct StrongTypeDefImpl {
@@ -283,13 +283,13 @@ struct StrongTypedefT {
     }
 };
 
-constexpr StrongTypedefT strongTypeDef;
+inline constexpr StrongTypedefT strongTypeDef;
 #endif
 
 /// Tests if type is `type_safe::constrained_type`
 /// \ingroup group-meta
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto constrainedType = [](auto type) { return isConstrainedType(type); };
+inline constexpr auto constrainedType = [](auto type) { return isConstrainedType(type); };
 #else
 template <typename T>
 struct ConstrainedTypeImpl {
@@ -306,13 +306,13 @@ struct ConstrainedTypeT {
     }
 };
 
-constexpr ConstrainedTypeT constrainedType;
+inline constexpr ConstrainedTypeT constrainedType;
 #endif
 
 /// Tests if type is `type_safe::integer`
 /// \ingroup group-meta
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto integerType = [](auto type) { return isIntegerType(type); };
+inline constexpr auto integerType = [](auto type) { return isIntegerType(type); };
 #else
 template <typename T>
 struct IntegerTypeImpl {
@@ -329,13 +329,13 @@ struct IntegerTypeT {
     }
 };
 
-constexpr IntegerTypeT integerType;
+inline constexpr IntegerTypeT integerType;
 #endif
 
 /// Tests if type is `type_safe::floating_point`
 /// \ingroup group-meta
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto floatingPoint = [](auto type) { return isFloatingPoint(type); };
+inline constexpr auto floatingPoint = [](auto type) { return isFloatingPoint(type); };
 #else
 template <typename T>
 struct FloatingPointTypeImpl {
@@ -352,13 +352,13 @@ struct FloatingPointTypeT {
     }
 };
 
-constexpr FloatingPointTypeT floatingPoint;
+inline constexpr FloatingPointTypeT floatingPoint;
 #endif
 
 /// Tests if type is `type_safe::boolean`
 /// \ingroup group-meta
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto boolean = [](auto type) { return isBoolean(type); };
+inline constexpr auto boolean = [](auto type) { return isBoolean(type); };
 #else
 template <typename T>
 struct BooleanTypeImpl : std::false_type {};
@@ -373,13 +373,13 @@ struct BooleanTypeT {
     }
 };
 
-constexpr BooleanTypeT boolean;
+inline constexpr BooleanTypeT boolean;
 #endif
 #endif
 
 /// Test if `T` has `T::strings()` static member
 /// \ingroup group-meta
-constexpr auto const hasStrings = boost::hana::is_valid(
+inline constexpr auto const hasStrings = boost::hana::is_valid(
         [](auto t) -> decltype((void)decltype(t)::type::strings()) {});
 
 /// Compile time `to_string` for integer

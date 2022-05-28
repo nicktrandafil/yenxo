@@ -102,7 +102,7 @@ struct WrappedInDefault : std::false_type {};
 template <class T>
 struct WrappedInDefault<Default<T>> : std::true_type {};
 
-constexpr auto const unwrap = [](auto const& x) {
+inline constexpr auto const unwrap = [](auto const& x) {
     return boost::hana::make_pair(boost::hana::at_c<0>(x), boost::hana::at_c<1>(x).value);
 };
 

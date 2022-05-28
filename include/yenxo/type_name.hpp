@@ -67,7 +67,7 @@ namespace yenxo {
 ///
 /// \ingroup group-utility
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto typeName = [](type) { return TypeNameImpl<type>::apply(); };
+inline constexpr auto typeName = [](type) { return TypeNameImpl<type>::apply(); };
 #else
 template <class T, class = void>
 struct TypeNameImpl : TypeNameImpl<T, When<true>> {};
@@ -77,7 +77,7 @@ struct TypeNameT {
     constexpr auto operator()(boost::hana::basic_type<T>) const;
 };
 
-constexpr TypeNameT typeName;
+inline constexpr TypeNameT typeName;
 
 template <class T, bool condition>
 struct TypeNameImpl<T, When<condition>> {

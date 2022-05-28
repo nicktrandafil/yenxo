@@ -67,7 +67,7 @@ namespace yenxo {
 /// If `T` supports trait `X`, and trait `X` supports `names()`, then trait `X`
 /// should use name "y" for member `x` in serialized Variant representation.
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto names = [] { ... };
+inline constexpr auto names = [] { ... };
 #endif
 
 /// Provide default values for members in the traits that support defaulting.
@@ -92,7 +92,7 @@ constexpr auto names = [] { ... };
 /// should specify value `1` for member `x` during `Variant` to `T` conversion in case
 /// if input Variant have no value for `x`.
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto defaults = [] { ... };
+inline constexpr auto defaults = [] { ... };
 #endif
 
 namespace trait {
@@ -100,7 +100,7 @@ namespace detail {
 
 /// \ingroup group-details
 /// Has member `updateVar(yenxo::Variant const&)`.
-constexpr auto const hasUpdateVar = boost::hana::is_valid(
+inline constexpr auto const hasUpdateVar = boost::hana::is_valid(
         [](auto t) -> decltype((void)std::declval<typename decltype(t)::type>().updateVar(
                            std::declval<Variant>())) {});
 
