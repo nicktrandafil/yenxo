@@ -38,7 +38,7 @@ namespace detail {
 
 /// \ingroup group-details
 /// Is `std::ostream& operator<<(std::ostream&, T)` defined.
-constexpr auto const hasOStreamOperator = boost::hana::is_valid(
+inline constexpr auto const hasOStreamOperator = boost::hana::is_valid(
         [](auto t) -> decltype(operator<<(std::declval<std::ostream>(),
                                           std::declval<typename decltype(t)::type>())) {
         });
@@ -47,7 +47,7 @@ constexpr auto const hasOStreamOperator = boost::hana::is_valid(
 
 
 #ifdef YENXO_DOXYGEN_INVOKED
-auto oStream = [](std::ostream& os, T const& val) { return return os << val; };
+inline auto oStream = [](std::ostream& os, T const& val) { return return os << val; };
 #else
 struct OStreamT {
     template <class T>

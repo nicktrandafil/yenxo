@@ -43,7 +43,7 @@ namespace yenxo {
 /// \ingroup group-function
 /// Converts the `type` to string
 #ifdef YENXO_DOXYGEN_INVOKED
-constexpr auto toString = [](auto&& type) { return type - dispatched; };
+inline constexpr auto toString = [](auto&& type) { return type - dispatched; };
 #else
 // To string conversion implementation
 template <typename T, typename = void>
@@ -95,7 +95,7 @@ struct ToStringT {
     }
 };
 
-constexpr ToStringT const toString{};
+inline constexpr ToStringT const toString{};
 
 #endif
 
@@ -105,7 +105,7 @@ constexpr ToStringT const toString{};
 /// Converts the `string` to type
 #ifdef YENXO_DOXYGEN_INVOKED
 template <class T>
-constexpr auto fromString = [](std::string const&) { return type - dispatched; };
+inline constexpr auto fromString = [](std::string const&) { return type - dispatched; };
 #else
 // From string conversion implementation
 template <typename T, typename = void>
@@ -184,7 +184,7 @@ struct FromStringT {
 
 // From string conversion
 template <typename T>
-constexpr FromStringT<T> const fromString;
+inline constexpr FromStringT<T> const fromString;
 
 #endif
 
