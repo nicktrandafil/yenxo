@@ -122,7 +122,7 @@ public:
 
     // move
     Variant(Variant&& rhs) noexcept;
-    Variant& operator=(Variant&& rhs);
+    Variant& operator=(Variant&& rhs) noexcept;
 
     /// Get `NullType`
     /// \throw VariantBadType
@@ -297,7 +297,7 @@ public:
     /// Check if two `Variant`s are equal
     ///
     /// Unlike `operator==` this function performs conversion of arithmetic types.
-    friend bool equal(Variant const& lhs, Variant const& rhs) noexcept;
+    friend bool equal(Variant const& lhs, Variant const& rhs);
 
     /// \ingroup group-json
     /// @{

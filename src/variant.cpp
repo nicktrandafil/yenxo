@@ -186,7 +186,7 @@ Variant::Variant(Variant&& rhs) noexcept
     rhs.value_.null_ = {};
 }
 
-Variant& Variant::operator=(Variant&& rhs) {
+Variant& Variant::operator=(Variant&& rhs) noexcept {
     this->~Variant();
     new (this) Variant(std::move(rhs));
     return *this;
@@ -512,7 +512,7 @@ decltype(auto) getHelper(Variant::TypeTag tag, U value_) {
 } // namespace
 
 #define GET_HELPER(T, tag, value, x)                                                     \
-    if (tag == TypeTag::null) {                                                          \
+    if ((tag) == TypeTag::null) {                                                        \
         return x;                                                                        \
     } else {                                                                             \
         return getHelper<T>(tag, value);                                                 \
@@ -873,7 +873,7 @@ bool equalArithmetic(T lhs, Variant::TypeTag tag, U const& rhs) {
 
 } // namespace
 
-bool equal(Variant const& lhs, Variant const& rhs) noexcept {
+bool equal(Variant const& lhs, Variant const& rhs) {
     using TypeTag = Variant::TypeTag;
     using Map = Variant::Map;
 
