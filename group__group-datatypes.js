@@ -33,6 +33,6 @@ var group__group_datatypes =
       [ "mapOr", "classyenxo_1_1Variant.html#a24446734636b6e52ee440571e7255d21", null ],
       [ "null", "classyenxo_1_1Variant.html#ab2b57b8ffef983e4bb9bbf70ce4a0f2b", null ],
       [ "isScalar", "classyenxo_1_1Variant.html#a9f17f4ca649f75dc4e4a1e48cd1aee00", null ],
-      [ "equal", "classyenxo_1_1Variant.html#af05c5b068e0b9ced1c656d5a99d89b90", null ]
+      [ "equal", "classyenxo_1_1Variant.html#aae7fb929ea49143fe0d6330c26c3abc2", null ]
     ] ]
 ];
