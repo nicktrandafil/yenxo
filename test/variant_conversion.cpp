@@ -28,12 +28,13 @@
 #include <yenxo/variant_conversion.hpp>
 #include <yenxo/variant_traits.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <boost/hana/fuse.hpp>
 
 #include <map>
 #include <set>
+#include <string_view>
 
 using namespace yenxo;
 using namespace boost::hana::literals;

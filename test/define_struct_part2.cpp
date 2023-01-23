@@ -27,7 +27,7 @@
 #include <yenxo/variant_traits.hpp>
 
 // 3rd
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 using namespace yenxo;
 using namespace boost;

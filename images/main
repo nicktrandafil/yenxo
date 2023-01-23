@@ -1,4 +1,4 @@
-FROM ubuntu:21.04
+FROM ubuntu:22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -44,7 +44,7 @@ RUN mkdir build/ && cd build/ \
 
 # Catch2
 WORKDIR /tmp/Catch2
-RUN git checkout v2.13.2 \
+RUN git checkout v3.3.0 \
  && mkdir build/ && cd build/ \
  && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCATCH_BUILD_TESTING=OFF \
           -DCATCH_INSTALL_DOCS=OFF .. \

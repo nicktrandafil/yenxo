@@ -25,7 +25,7 @@
 #include <yenxo/ostream_traits.hpp>
 #include <yenxo/variant_traits.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <sstream>
 

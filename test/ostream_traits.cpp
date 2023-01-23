@@ -26,7 +26,7 @@
 #include <yenxo/ostream_traits.hpp>
 
 // 3rd
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 using namespace yenxo;
 

@@ -26,7 +26,7 @@
 #include <yenxo/string_conversion.hpp>
 #include <yenxo/variant_conversion.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <sstream>
 

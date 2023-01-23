@@ -24,7 +24,7 @@
 
 #include <yenxo/variant_traits.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 namespace {
 

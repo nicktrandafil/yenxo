@@ -35,7 +35,7 @@
 #include <type_safe/types.hpp>
 
 // 3rd
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 namespace ts = type_safe;
 

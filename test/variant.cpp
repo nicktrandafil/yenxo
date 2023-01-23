@@ -26,7 +26,7 @@
 #include <yenxo/type_name.hpp>
 #include <yenxo/variant.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <rapidjson/document.h>
 
