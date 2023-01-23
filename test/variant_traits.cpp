@@ -31,7 +31,7 @@
 #include <yenxo/variant.hpp>
 #include <yenxo/variant_traits.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <boost/hana.hpp>
 

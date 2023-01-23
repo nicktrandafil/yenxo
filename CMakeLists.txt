@@ -208,8 +208,6 @@ if(${PROJECT_NAME}_TESTING)
         test/meta.cpp
         test/variant.cpp
 
-        test/main.cpp
-
         test/variant_traits.cpp
         test/variant_traits_macros.cpp
         test/variant_traits_non_intrusive.cpp
@@ -239,7 +237,7 @@ if(${PROJECT_NAME}_TESTING)
         test_${PROJECT_NAME}
         PRIVATE
 
-        Catch2::Catch2
+        Catch2::Catch2WithMain
         ${PROJECT_NAME}
         ${PROJECT_NAME}_development
     )

@@ -26,7 +26,7 @@
 
 #include <yenxo/exception.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/matchers/catch_matchers_all.hpp>
 
 namespace Catch {
 
@@ -41,7 +41,7 @@ struct StringMaker<yenxo::VariantBadType> {
 } // namespace Catch
 
 template <class T>
-struct PathIsMatcher : Catch::MatcherBase<T> {
+struct PathIsMatcher : Catch::Matchers::MatcherBase<T> {
     explicit PathIsMatcher(std::string path)
             : path(std::move(path)) {
     }
@@ -58,7 +58,7 @@ struct PathIsMatcher : Catch::MatcherBase<T> {
 };
 
 template <class T>
-struct ExceptionIsMatcher : Catch::MatcherBase<T> {
+struct ExceptionIsMatcher : Catch::Matchers::MatcherBase<T> {
     explicit ExceptionIsMatcher(std::string what, std::string path)
             : what(std::move(what))
             , path(std::move(path)) {
