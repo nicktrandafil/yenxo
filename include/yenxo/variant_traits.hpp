@@ -389,9 +389,6 @@ struct Var {
     static Derived fromVariant(Variant const& x) {
         return fromVariantImpl<Derived, Policy>(x);
     }
-
-protected:
-    ~Var() = default;
 };
 
 template <typename Derived, typename Policy = VarPolicy>
@@ -451,9 +448,6 @@ struct UpdateFromVar {
     void updateVar(Variant const& x) {
         updateVarImpl<Derived, Policy>(static_cast<Derived&>(*this), x);
     }
-
-protected:
-    ~UpdateFromVar() = default;
 };
 
 /// Updates the specified fields.
@@ -485,9 +479,6 @@ struct UpdateFromOpt {
     void updateOpt(Opt const& x) {
         updateOptImpl(static_cast<Derived&>(*this), x);
     }
-
-protected:
-    ~UpdateFromOpt() = default;
 };
 
 } // namespace trait

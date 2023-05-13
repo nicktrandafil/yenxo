@@ -66,9 +66,6 @@ struct EqualityComparison {
     friend bool operator!=(Derived const& lhs, Derived const& rhs) {
         return operatorNotEqual(lhs, rhs);
     }
-
-protected:
-    ~EqualityComparison() = default;
 };
 
 } // namespace trait
