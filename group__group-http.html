@@ -94,6 +94,7 @@ $(document).ready(function(){initNavTree('group__group-http.html',''); initResiz
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">HTTP utility</div>  </div>
@@ -103,17 +104,23 @@ $(document).ready(function(){initNavTree('group__group-http.html',''); initResiz
 <p>HTTP utilities.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyenxo_1_1QueryStringParseSettings.html">yenxo::QueryStringParseSettings</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides settings used by the query string parser.  <a href="structyenxo_1_1QueryStringParseSettings.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gaabe9fcb61524770f65542f9b08dc5e76"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyenxo_1_1Variant.html">Variant</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">yenxo::query_string</a> (std::string const &amp;str)</td></tr>
-<tr class="memdesc:gaabe9fcb61524770f65542f9b08dc5e76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a query string.  <a href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">More...</a><br /></td></tr>
-<tr class="separator:gaabe9fcb61524770f65542f9b08dc5e76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4d85aa82fbd45abfef3fa66d2bf34e97"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyenxo_1_1Variant.html">Variant</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">yenxo::query_string</a> (std::string const &amp;str, <a class="el" href="structyenxo_1_1QueryStringParseSettings.html">QueryStringParseSettings</a> const &amp;parse_settings={})</td></tr>
+<tr class="memdesc:ga4d85aa82fbd45abfef3fa66d2bf34e97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a query string.  <a href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">More...</a><br /></td></tr>
+<tr class="separator:ga4d85aa82fbd45abfef3fa66d2bf34e97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>HTTP utilities. </p>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="gaabe9fcb61524770f65542f9b08dc5e76"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaabe9fcb61524770f65542f9b08dc5e76">&#9670;&nbsp;</a></span>query_string()</h2>
+<a id="ga4d85aa82fbd45abfef3fa66d2bf34e97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4d85aa82fbd45abfef3fa66d2bf34e97">&#9670;&nbsp;</a></span>query_string()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -122,8 +129,18 @@ Functions</h2></td></tr>
           <td class="memname"><a class="el" href="classyenxo_1_1Variant.html">Variant</a> yenxo::query_string </td>
           <td>(</td>
           <td class="paramtype">std::string const &amp;&#160;</td>
-          <td class="paramname"><em>str</em></td><td>)</td>
+          <td class="paramname"><em>str</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="structyenxo_1_1QueryStringParseSettings.html">QueryStringParseSettings</a> const &amp;&#160;</td>
+          <td class="paramname"><em>parse_settings</em> = <code>{}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -131,25 +148,28 @@ Functions</h2></td></tr>
 <p><code>#include &lt;yenxo/query_string.hpp&gt;</code></p>
 
 <p>Parse a query string. </p>
-<p>Supports deep objects and arrays. The function, for overhead reasons, limits the resulting object dimensions:</p><ul>
-<li>object_property_count_limit=20;</li>
-<li>object_depth_limit=20;</li>
-<li>array_length_limit=20.</li>
-</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">&lt;tt&gt;str&lt;/tt&gt;</td><td>- query string to be parsed </td></tr>
+    <tr><td class="paramname">&lt;tt&gt;parse_settings&lt;/tt&gt;</td><td>- an instance of <a class="el" href="structyenxo_1_1QueryStringParseSettings.html" title="Provides settings used by the query string parser.">QueryStringParseSettings</a> used to apply custom constraints</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Supports deep objects and arrays.</p>
 <h2><a class="anchor" id="autotoc_md4"></a>
 Examples</h2>
-<p>Scalar parameter: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">query_string</a>(<span class="stringliteral">&quot;a=b&quot;</span>) == R<span class="stringliteral">&quot;({&quot;a&quot;: &quot;b&quot;})&quot;_j);</span></div>
-<div class="ttc" id="agroup__group-http_html_gaabe9fcb61524770f65542f9b08dc5e76"><div class="ttname"><a href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">yenxo::query_string</a></div><div class="ttdeci">Variant query_string(std::string const &amp;str)</div><div class="ttdoc">Parse a query string.</div></div>
+<p>Scalar parameter: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">query_string</a>(<span class="stringliteral">&quot;a=b&quot;</span>) == R<span class="stringliteral">&quot;({&quot;a&quot;: &quot;b&quot;})&quot;_j);</span></div>
+<div class="ttc" id="agroup__group-http_html_ga4d85aa82fbd45abfef3fa66d2bf34e97"><div class="ttname"><a href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">yenxo::query_string</a></div><div class="ttdeci">Variant query_string(std::string const &amp;str, QueryStringParseSettings const &amp;parse_settings={})</div><div class="ttdoc">Parse a query string.</div></div>
 </div><!-- fragment --><p>The <code>_j</code> string literal produces <code><a class="el" href="classyenxo_1_1Variant.html" title="Serialized object representation. Think of it as a DOM object.">Variant</a></code> from a JSON. The literal is introduced just to shorten examples and is not available in the library interface.</p>
-<p>Array parameter by duplicating the parameter's name: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">query_string</a>(<span class="stringliteral">&quot;a=b&amp;a=c&quot;</span>) == R<span class="stringliteral">&quot;({&quot;a&quot;: [&quot;b&quot;, &quot;c&quot;]})&quot;_j);</span></div>
-</div><!-- fragment --><p> Array parameter by using empty square brackets: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">query_string</a>(<span class="stringliteral">&quot;a[]=b&quot;</span>) == R<span class="stringliteral">&quot;({&quot;a&quot;: [&quot;b&quot;]})&quot;_j);</span></div>
-</div><!-- fragment --><p> For Array parameters indexes can be specified (0 - first index): </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">query_string</a>(<span class="stringliteral">&quot;a[1]=b&quot;</span>_b) == R<span class="stringliteral">&quot;({&quot;a&quot;: [null, &quot;b&quot;]})&quot;_j);</span></div>
+<p>Array parameter by duplicating the parameter's name: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">query_string</a>(<span class="stringliteral">&quot;a=b&amp;a=c&quot;</span>) == R<span class="stringliteral">&quot;({&quot;a&quot;: [&quot;b&quot;, &quot;c&quot;]})&quot;_j);</span></div>
+</div><!-- fragment --><p> Array parameter by using empty square brackets: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">query_string</a>(<span class="stringliteral">&quot;a[]=b&quot;</span>) == R<span class="stringliteral">&quot;({&quot;a&quot;: [&quot;b&quot;]})&quot;_j);</span></div>
+</div><!-- fragment --><p> For Array parameters indexes can be specified (0 - first index): </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">query_string</a>(<span class="stringliteral">&quot;a[1]=b&quot;</span>_b) == R<span class="stringliteral">&quot;({&quot;a&quot;: [null, &quot;b&quot;]})&quot;_j);</span></div>
 </div><!-- fragment --><p>The array have size of max index plus one. The array have <code>null</code>-values for unspecified indexes.</p>
-<p>Object parameter: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">query_string</a>(<span class="stringliteral">&quot;a[b]=c&quot;</span>) == R<span class="stringliteral">&quot;({&quot;a&quot;: {&quot;b&quot;: &quot;c&quot;}})&quot;_j);</span></div>
-</div><!-- fragment --><p> Brackets can be (and recommended to be) percent-encoded: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">query_string</a>(<span class="stringliteral">&quot;a%5bb%5d=c&quot;</span>) == R<span class="stringliteral">&quot;({&quot;a&quot;: {&quot;b&quot;: &quot;c&quot;}})&quot;_j);</span></div>
-</div><!-- fragment --><p> Array indexes (<code>[2]</code>) and object keys (<code>[b]</code>) can be composed in any way: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">query_string</a>(<span class="stringliteral">&quot;a[b][1]=1&amp;a[b]=2&quot;</span>_b)</div>
+<p>Object parameter: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">query_string</a>(<span class="stringliteral">&quot;a[b]=c&quot;</span>) == R<span class="stringliteral">&quot;({&quot;a&quot;: {&quot;b&quot;: &quot;c&quot;}})&quot;_j);</span></div>
+</div><!-- fragment --><p> Brackets can be (and recommended to be) percent-encoded: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">query_string</a>(<span class="stringliteral">&quot;a%5bb%5d=c&quot;</span>) == R<span class="stringliteral">&quot;({&quot;a&quot;: {&quot;b&quot;: &quot;c&quot;}})&quot;_j);</span></div>
+</div><!-- fragment --><p> Array indexes (<code>[2]</code>) and object keys (<code>[b]</code>) can be composed in any way: </p><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">query_string</a>(<span class="stringliteral">&quot;a[b][1]=1&amp;a[b]=2&quot;</span>_b)</div>
 <div class="line">                == R<span class="stringliteral">&quot;({&quot;a&quot;: {&quot;b&quot;: [null, &quot;1&quot;, &quot;2&quot;]}})&quot;_j);</span></div>
-</div><!-- fragment --><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#gaabe9fcb61524770f65542f9b08dc5e76">query_string</a>(<span class="stringliteral">&quot;a[1][b]=1&amp;a[1][c]=2&quot;</span>_b)</div>
+</div><!-- fragment --><div class="fragment"><div class="line">        REQUIRE(<a class="code" href="group__group-http.html#ga4d85aa82fbd45abfef3fa66d2bf34e97">query_string</a>(<span class="stringliteral">&quot;a[1][b]=1&amp;a[1][c]=2&quot;</span>_b)</div>
 <div class="line">                == R<span class="stringliteral">&quot;({&quot;a&quot;: [null, {&quot;b&quot;: &quot;1&quot;, &quot;c&quot;: &quot;2&quot;}]})&quot;_j);</span></div>
 </div><!-- fragment --><p>Empty brackets can occur only on a key ending.</p>
 <p>Error message may refer to <a href="https://www.ietf.org/rfc/rfc3986.txt">ABNF grammar</a></p>
