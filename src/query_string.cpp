@@ -89,8 +89,9 @@ QueryStringError makeObjectDepthError(std::string const& key, uint8_t len) {
 template <class Iterator>
 class Grammar : public qi::grammar<Iterator> {
 public:
-    Grammar()
-            : Grammar::base_type(query_string) {
+    explicit Grammar(QueryStringParseSettings const& parse_settings)
+            : Grammar::base_type(query_string)
+            , parse_settings(parse_settings) {
         using phx::at_c;
         using qi::alnum;
         using qi::char_;
@@ -181,15 +182,18 @@ private:
     }
 
     void incDepth() {
-        if (++this->depth > object_depth_limit) {
-            throw makeObjectDepthError(this->param_name, object_depth_limit);
+        ++depth;
+        if (depth > parse_settings.object_depth_limit) {
+            throw makeObjectDepthError(this->param_name,
+                                       parse_settings.object_depth_limit);
         }
     }
 
     void paramName(std::string const& name) {
         param = &out[name];
-        if (out.size() > object_property_count_limit) {
-            throw makeObjectPropertyCountError(object_property_count_limit);
+        if (out.size() > parse_settings.object_property_count_limit) {
+            throw makeObjectPropertyCountError(
+                    parse_settings.object_property_count_limit);
         }
         this->param_key = name;
         this->param_name = name;
@@ -197,8 +201,8 @@ private:
     }
 
     void indexOp(uint64_t i) {
-        if (i >= array_length_limit) {
-            throw makeArrayIndexError(this->param_key, array_length_limit);
+        if (i >= parse_settings.array_length_limit) {
+            throw makeArrayIndexError(this->param_key, parse_settings.array_length_limit);
         }
         switch (param->type()) {
         case Variant::TypeTag::null:
@@ -234,8 +238,9 @@ private:
         }
         auto& map = param->modifyMap();
         param = &map[key];
-        if (map.size() > object_property_count_limit) {
-            throw makeObjectPropertyCountError(param_key, object_property_count_limit);
+        if (map.size() > parse_settings.object_property_count_limit) {
+            throw makeObjectPropertyCountError(
+                    param_key, parse_settings.object_property_count_limit);
         }
         this->param_key += "[" + key + "]";
         incDepth();
@@ -270,8 +275,9 @@ private:
             break;
         case Variant::TypeTag::vec:
             param->modifyVec().push_back(std::move(x));
-            if (param->vec().size() > array_length_limit) {
-                throw makeArrayLengthError(this->param_key, array_length_limit);
+            if (param->vec().size() > parse_settings.array_length_limit) {
+                throw makeArrayLengthError(this->param_key,
+                                           parse_settings.array_length_limit);
             }
             break;
         case Variant::TypeTag::map:
@@ -311,10 +317,8 @@ private:
     std::string param_key;
     uint16_t depth;
 
-    // constraints
-    static constexpr uint8_t const array_length_limit{20};
-    static constexpr uint8_t const object_depth_limit{20};
-    static constexpr uint8_t const object_property_count_limit{20};
+    // parse settings
+    QueryStringParseSettings const parse_settings;
 };
 
 } // namespace
@@ -335,8 +339,9 @@ std::string QueryStringError::prettyParseError() const {
     return line + "\n" + highlight;
 }
 
-Variant query_string(std::string const& str) {
-    Grammar<std::string::const_iterator> grammar;
+Variant query_string(std::string const& str,
+                     QueryStringParseSettings const& parse_settings) {
+    Grammar<std::string::const_iterator> grammar{parse_settings};
     auto const res = qi::parse(str.begin(), str.end(), grammar);
     if (!res) {
         throw QueryStringError("expecting " + grammar.errorExpectation() + " here: \""
