@@ -64,14 +64,27 @@ private:
     std::size_t error_pos;
 };
 
+/// Provides settings used by the query string parser
+/// \ingroup group-http
+///
+/// For overhead reasons, sets reasonable default constraints corresponding to the
+/// dimensions of the resulting object.
+///
+struct QueryStringParseSettings {
+    // constraints
+    uint8_t array_length_limit{20};
+    uint8_t object_depth_limit{20};
+    uint8_t object_property_count_limit{20};
+};
+
 /// Parse a query string
 /// \ingroup group-http
 ///
-/// Supports deep objects and arrays. The function, for overhead reasons,
-/// limits the resulting object dimensions:
-/// * object_property_count_limit=20;
-/// * object_depth_limit=20;
-/// * array_length_limit=20.
+/// \param `str` - query string to be parsed
+/// \param `parse_settings` - an instance of QueryStringParseSettings used to apply custom
+/// constraints
+///
+/// Supports deep objects and arrays.
 ///
 /// Examples
 /// --------
@@ -107,6 +120,7 @@ private:
 ///
 /// \throw QueryStringError
 /// \return VariantMap
-Variant query_string(std::string const& str);
+Variant query_string(std::string const& str,
+                     QueryStringParseSettings const& parse_settings = {});
 
 } // namespace yenxo
