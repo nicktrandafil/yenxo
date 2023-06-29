@@ -124,7 +124,7 @@ public:
         index %= omit[open_bracket] >> ulong_long > omit[close_bracket];
         property %= omit[open_bracket] >> +pchar > omit[close_bracket];
         empty_index = open_bracket > close_bracket;
-        name %= pchar;
+        name %= +pchar;
 
         key = name[phx::bind(&Grammar::paramName, this, _1)]
             > *(index[phx::bind(&Grammar::indexOp, this, _1)]
