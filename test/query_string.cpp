@@ -294,7 +294,7 @@ TEST_CASE("Check query_string", "[query]") {
         REQUIRE(query_string("a+b=1&a+b=2") == R"({"a b": ["1", "2"]})"_j);
     }
 
-    SECTION("parsing precend encoded plus as plus") {
+    SECTION("parsing perecent encoded plus as plus") {
         REQUIRE(query_string("a%2bb=1") == R"({"a+b": "1"})"_j);
     }
 }

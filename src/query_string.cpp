@@ -116,9 +116,7 @@ public:
                     - (open_bracket | close_bracket);
 
         sub_delims %= char_('!') | char_('$') | char_('\'') | char_('(') | char_(')')
-                    | char_('*') | char_('+') | char_(',') | char_(';');
-
-        plus_as_space %= lit('+')[_val = ' '];
+                    | char_('*') | char_(',') | char_(';') | lit('+')[_val = ' '];
 
         unreserved %= alnum | char_('-') | char_(".") | char_("_") | char_("~");
         pchar %= unreserved | pct_encoded | sub_delims | char_(':') | char_('@');
@@ -126,7 +124,7 @@ public:
         index %= omit[open_bracket] >> ulong_long > omit[close_bracket];
         property %= omit[open_bracket] >> +pchar > omit[close_bracket];
         empty_index = open_bracket > close_bracket;
-        name %= +(plus_as_space | pchar);
+        name %= pchar;
 
         key = name[phx::bind(&Grammar::paramName, this, _1)]
             > *(index[phx::bind(&Grammar::indexOp, this, _1)]
@@ -134,7 +132,7 @@ public:
             > -empty_index[phx::bind(&Grammar::emptyIndexOp, this)];
 
         empty_value = &lit('&') | eoi;
-        value %= +(plus_as_space | pchar | open_bracket | close_bracket);
+        value %= +(pchar | open_bracket | close_bracket);
 
         empty_parameter = &lit('&') | eoi;
         parameter = key > lit('=') > (value[phx::bind(&Grammar::val, this, _1)]
@@ -297,7 +295,6 @@ private:
     qi::rule<Iterator, char()> sub_delims;
     qi::rule<Iterator, char()> open_bracket;
     qi::rule<Iterator, char()> close_bracket;
-    qi::rule<Iterator, char()> plus_as_space;
     qi::rule<Iterator, std::string()> property;
     qi::rule<Iterator, uint16_t()> index;
     qi::rule<Iterator> empty_index;
