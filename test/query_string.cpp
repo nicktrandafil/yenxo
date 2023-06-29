@@ -288,4 +288,13 @@ TEST_CASE("Check query_string", "[query]") {
         REQUIRE_THROWS_WITH(query_string("a[x]=1&a[]=2"),
                             R"(mixed types for a: vec and map)");
     }
+
+    SECTION("parsing plus as space") {
+        REQUIRE(query_string("a+b=1") == R"({"a b": "1"})"_j);
+        REQUIRE(query_string("a+b=1&a+b=2") == R"({"a b": ["1", "2"]})"_j);
+    }
+
+    SECTION("parsing perecent encoded plus as plus") {
+        REQUIRE(query_string("a%2bb=1") == R"({"a+b": "1"})"_j);
+    }
 }

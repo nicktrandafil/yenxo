@@ -116,7 +116,7 @@ public:
                     - (open_bracket | close_bracket);
 
         sub_delims %= char_('!') | char_('$') | char_('\'') | char_('(') | char_(')')
-                    | char_('*') | char_('+') | char_(',') | char_(';');
+                    | char_('*') | char_(',') | char_(';') | lit('+')[_val = ' '];
 
         unreserved %= alnum | char_('-') | char_(".") | char_("_") | char_("~");
         pchar %= unreserved | pct_encoded | sub_delims | char_(':') | char_('@');
