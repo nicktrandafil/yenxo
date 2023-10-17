@@ -457,7 +457,7 @@ struct S1 {
     explicit S1(std::string const& str)
             : v(str) {
     }
-    explicit operator std::string const &() const noexcept {
+    explicit operator std::string const&() const noexcept {
         return v;
     }
     bool operator==(S1 const& rhs) const noexcept {
@@ -677,5 +677,100 @@ TEST_CASE("Check Policy::Tag", "[variant_traits]") {
                                VariantBadType,
                                ExceptionIs<VariantBadType>(
                                        "'foo' is not of type 'a tag literal'", "/__tag"));
+    }
+}
+
+namespace {
+
+struct NonEmptyPolicy : trait::VarPolicy {
+    static size_t constexpr min_properties = 1;
+};
+
+struct NonEmpty : trait::Var<NonEmpty, NonEmptyPolicy> {
+    NonEmpty() = default;
+    explicit NonEmpty(int val)
+            : value{val} {
+    }
+    BOOST_HANA_DEFINE_STRUCT(NonEmpty, (std::optional<int>, value));
+};
+
+} // namespace
+
+TEST_CASE("Check Policy::min_properties=1", "[variant_traits]") {
+    Variant var(VariantMap{{"value", Variant(1)}});
+
+    SECTION("ok") {
+        NonEmpty val{1};
+        REQUIRE(toVariant(val) == var);
+        REQUIRE(val.value == fromVariant<NonEmpty>(var).value);
+    }
+
+    SECTION("fail") {
+        var.modifyMap().clear();
+        REQUIRE_THROWS_WITH(fromVariant<NonEmpty>(var),
+                            "The object should contain at least 1 property");
+    }
+}
+
+namespace {
+
+struct SinglePropertyPolicy : trait::VarPolicy {
+    static size_t constexpr min_properties = 1;
+    static size_t constexpr max_properties = 1;
+    static constexpr auto allow_additional_properties = false;
+};
+
+struct SingleProperty : trait::Var<SingleProperty, SinglePropertyPolicy> {
+    SingleProperty() = default;
+    explicit SingleProperty(int val)
+            : x{val} {
+    }
+    BOOST_HANA_DEFINE_STRUCT(SingleProperty, (std::optional<int>, x), (std::optional<int>, y));
+};
+
+} // namespace
+
+TEST_CASE("Check Policy::min_properties=1 and Policy::max_properties=1",
+          "[variant_traits]") {
+
+    SECTION("ok") {
+        Variant var(VariantMap{{"x", Variant(1)}});
+        SingleProperty val{1};
+        REQUIRE(toVariant(val) == var);
+        REQUIRE(val.x == fromVariant<SingleProperty>(var).x);
+    }
+
+    SECTION("fail") {
+        Variant::Map var{{"x", Variant(1)}, {"y", Variant(2)}};
+        REQUIRE_THROWS_WITH(fromVariant<SingleProperty>(var),
+                            "The object should not contain more than 1 property");
+    }
+}
+
+namespace {
+
+struct EmptyPolicy : trait::VarPolicy {
+    static size_t constexpr max_properties = 0;
+};
+
+struct Empty : trait::Var<Empty, EmptyPolicy> {
+    Empty() = default;
+    BOOST_HANA_DEFINE_STRUCT(Empty, (std::optional<int>, dummy));
+};
+
+} // namespace
+
+TEST_CASE("Check Policy::Policy::max_properties=0", "[variant_traits]") {
+
+    SECTION("ok") {
+        VariantMap var;
+        Empty val;
+        REQUIRE(toVariant(val) == var);
+        REQUIRE(val.dummy == fromVariant<Empty>(var).dummy);
+    }
+
+    SECTION("fail") {
+        Variant::Map var{{"dummy", Variant(1)}};
+        REQUIRE_THROWS_WITH(fromVariant<Empty>(var), "The object must be empty");
     }
 }

@@ -30,6 +30,7 @@
 
 #include <boost/hana.hpp>
 
+#include <limits>
 #include <type_traits>
 
 namespace yenxo {
@@ -203,6 +204,12 @@ struct VarPolicy {
     /// allow extra properties in `Variant`
     static auto constexpr allow_additional_properties = true;
 
+    /// defines minProperties
+    static size_t constexpr min_properties = 0;
+
+    /// defines maxProperties
+    static size_t constexpr max_properties = std::numeric_limits<size_t>::max();
+
     /// from variant conversion functional object
     static constexpr auto from_variant = fromVariant2;
 
@@ -324,8 +331,8 @@ T fromVariantImpl(yenxo::Variant const& x) {
                             static_assert(std::is_convertible_v<
                                                   decltype(Policy::Defaults::value(
                                                           boost::hana::type_c<T>, name)),
-                                                  std::remove_reference_t<decltype(
-                                                          value(std::declval<T>()))>>,
+                                                  std::remove_reference_t<decltype(value(
+                                                          std::declval<T>()))>>,
                                           "Default value should be convertible to field "
                                           "type");
                             tmp = Policy::Defaults::value(boost::hana::type_c<T>, name);
@@ -353,8 +360,8 @@ T fromVariantImpl(yenxo::Variant const& x) {
                 }
             }));
 
+    const auto expected_keys = boost::hana::keys(ret);
     if constexpr (!Policy::allow_additional_properties) {
-        const auto expected_keys = boost::hana::keys(ret);
         for (auto const& p : map) {
             if (boost::hana::none_of(expected_keys, [&p](auto name) {
                     auto const renamed = Policy::rename(boost::hana::type_c<T>, name);
@@ -362,6 +369,45 @@ T fromVariantImpl(yenxo::Variant const& x) {
                 })) {
                 throw std::logic_error("'" + p.first + "' is unknown");
             }
+        }
+    }
+
+    size_t passed_keys{};
+    for (auto const& p : map) {
+        if (const auto cnt = boost::hana::count_if(
+                    expected_keys,
+                    [&p](auto name) {
+                        auto const renamed = Policy::rename(boost::hana::type_c<T>, name);
+                        return static_cast<std::string_view>(p.first) == renamed;
+                    });
+            cnt) {
+            ++passed_keys;
+        }
+    }
+
+    if (passed_keys < boost::hana::size_c<Policy::min_properties>) {
+        throw std::logic_error(
+                "The object should contain at least "
+                + std::to_string(Policy::min_properties)
+                + (Policy::min_properties == 1 ? " property" : " properties"));
+    } else if (passed_keys > boost::hana::size_c<Policy::max_properties>) {
+        if constexpr (!Policy::max_properties) {
+            throw std::logic_error("The object must be empty");
+        } else {
+            throw std::logic_error(
+                    "The object should not contain more than "
+                    + std::to_string(Policy::max_properties)
+                    + (Policy::max_properties == 1 ? " property" : " properties"));
+        }
+    }
+
+    if (map.empty()) {
+        if constexpr (Policy::min_properties > 0
+                      && static_cast<size_t>(boost::hana::size(expected_keys)) > 0) {
+            throw std::logic_error(
+                    "The object should contain at least "
+                    + std::to_string(Policy::min_properties)
+                    + (Policy::min_properties == 1 ? " property" : " properties"));
         }
     }
 
