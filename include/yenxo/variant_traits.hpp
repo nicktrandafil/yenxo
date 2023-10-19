@@ -212,6 +212,9 @@ struct VarPolicy {
     /// rename function object
     static constexpr detail::Rename rename{};
 
+    /// An optional hook extending from_variant behavior
+    static constexpr auto post_from_variant = [](auto&, auto const&) {};
+
     /// defaults policy
     using Defaults = detail::Default;
 
@@ -324,8 +327,8 @@ T fromVariantImpl(yenxo::Variant const& x) {
                             static_assert(std::is_convertible_v<
                                                   decltype(Policy::Defaults::value(
                                                           boost::hana::type_c<T>, name)),
-                                                  std::remove_reference_t<decltype(
-                                                          value(std::declval<T>()))>>,
+                                                  std::remove_reference_t<decltype(value(
+                                                          std::declval<T>()))>>,
                                           "Default value should be convertible to field "
                                           "type");
                             tmp = Policy::Defaults::value(boost::hana::type_c<T>, name);
@@ -365,6 +368,7 @@ T fromVariantImpl(yenxo::Variant const& x) {
         }
     }
 
+    Policy::post_from_variant(ret, x);
     return ret;
 }
 
