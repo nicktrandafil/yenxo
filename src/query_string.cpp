@@ -31,6 +31,8 @@
 #include <boost/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
 
+#include <sstream>
+
 namespace qi = boost::spirit::qi;
 namespace phx = boost::phoenix;
 

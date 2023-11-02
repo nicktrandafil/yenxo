@@ -26,6 +26,7 @@
 
 #include <yenxo/variant_fwd.hpp>
 
+#include <cstdint>
 #include <stdexcept>
 
 namespace yenxo {
@@ -80,8 +81,8 @@ struct QueryStringParseSettings {
 /// Parse a query string
 /// \ingroup group-http
 ///
-/// \param `str` - query string to be parsed
-/// \param `parse_settings` - an instance of QueryStringParseSettings used to apply custom
+/// \param str - query string to be parsed
+/// \param parse_settings - an instance of QueryStringParseSettings used to apply custom
 /// constraints
 ///
 /// Supports deep objects and arrays.
