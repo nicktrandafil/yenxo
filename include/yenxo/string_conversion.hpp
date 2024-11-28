@@ -86,6 +86,29 @@ struct ToStringImpl<T,
     static char const* apply(T x) {
         return EnumTraits<T>::toString(x);
     }
+
+    template <size_t I>
+    static char const* apply(T x) {
+        char const* ret = nullptr;
+        size_t i = 0;
+
+        boost::hana::for_each(EnumTraits<T>::strings(), [&](auto s) {
+            if (EnumTraits<T>::values[i++] == x) {
+                if constexpr (boost::hana::length(s) > I) {
+                    ret = boost::hana::at_c<I>(s);
+                }
+            }
+        });
+
+        if (ret == nullptr) {
+            throw StringConversionError(
+                    std::string("enum variant '") + apply(x)
+                    + std::string("' doesn't have string representation ")
+                    + std::to_string(I));
+        }
+
+        return ret;
+    }
 };
 
 struct ToStringT {
@@ -93,9 +116,19 @@ struct ToStringT {
     std::string operator()(T&& x) const {
         return ToStringImpl<std::decay_t<T>>::apply(std::forward<T>(x));
     }
+
+    template <size_t I, typename T>
+    std::string operator()(T&& x) const {
+        return ToStringImpl<std::decay_t<T>>::template apply<I>(std::forward<T>(x));
+    }
 };
 
 inline constexpr ToStringT const toString{};
+
+template <size_t I, class T>
+inline std::string toStrings(T&& x) {
+    return toString.operator()<I>(std::forward<T>(x));
+}
 
 #endif
 

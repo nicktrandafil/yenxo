@@ -78,6 +78,14 @@ YENXO_DEFINE_ENUM(E,
 
 TEST_CASE("Check YENXO_DEFINE_ENUM", "[define_enum]") {
     REQUIRE(toString(E1_1::e1) == "e_1");
+    REQUIRE(toStrings<0>(E1_1::e1) == "e_1");
+    REQUIRE(toStrings<1>(E1_1::e1) == "e_2");
+    REQUIRE(toStrings<9>(E1_1::e1) == "e_10");
+    REQUIRE(toString.operator()<0>(E1_1::e1) == "e_1");
+    REQUIRE_THROWS_AS(toStrings<10>(E1_1::e1), StringConversionError);
+    REQUIRE_THROWS_WITH(toStrings<10>(E1_1::e1),
+                        "enum variant 'e_1' doesn't have string representation 10");
+
     REQUIRE(fromString<E1_1>("e_2") == E1_1::e1);
     REQUIRE(fromString<E1_1>("e_3") == E1_1::e1);
     REQUIRE(fromString<E1_1>("e_4") == E1_1::e1);
