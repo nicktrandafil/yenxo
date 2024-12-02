@@ -94,7 +94,7 @@ struct ToStringImpl<T,
 
         boost::hana::for_each(EnumTraits<T>::strings(), [&](auto s) {
             if (EnumTraits<T>::values[i++] == x) {
-                if constexpr (boost::hana::length(s) > I) {
+                if constexpr (static_cast<size_t>(boost::hana::length(s)) > I) {
                     ret = boost::hana::at_c<I>(s);
                 }
             }
