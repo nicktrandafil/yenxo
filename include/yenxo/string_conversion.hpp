@@ -34,6 +34,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 namespace yenxo {
@@ -161,6 +162,10 @@ struct FromStringImpl<
     static T apply(std::string const& x) {
         return T(x);
     }
+
+    static T apply(std::string_view x) {
+        return T(x);
+    }
 };
 
 // Types with specialized EnumTraits
@@ -211,6 +216,10 @@ struct FromStringImpl<T, When<detail::Valid<decltype(EnumTraits<T>::strings())>:
 template <typename T>
 struct FromStringT {
     auto operator()(std::string const& x) const {
+        return FromStringImpl<std::remove_cv_t<std::remove_reference_t<T>>>::apply(x);
+    }
+
+    auto operator()(std::string_view x) const {
         return FromStringImpl<std::remove_cv_t<std::remove_reference_t<T>>>::apply(x);
     }
 };
