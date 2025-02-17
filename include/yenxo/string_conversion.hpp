@@ -82,8 +82,8 @@ struct ToStringImpl<
 // Types with specialized EnumTraits
 template <typename T>
 struct ToStringImpl<T,
-                    When<detail::Valid<decltype(
-                            EnumTraits<T>::toString(std::declval<T>()))>::value>> {
+                    When<detail::Valid<decltype(EnumTraits<T>::toString(
+                            std::declval<T>()))>::value>> {
     static char const* apply(T x) {
         return EnumTraits<T>::toString(x);
     }
@@ -174,13 +174,17 @@ struct FromStringImpl<
         T,
         When<detail::Valid<decltype(EnumTraits<T>::toString(std::declval<T>()))>::value
              && !hasStrings(boost::hana::type_c<EnumTraits<T>>)>> {
-    static T apply(std::string const& x) {
+    static T apply(std::string_view const& x) {
         for (auto e : EnumTraits<T>::values) {
             if (x == EnumTraits<T>::toString(e)) {
                 return e;
             }
         }
         throw StringConversionError(x, boost::hana::type_c<T>);
+    }
+
+    static T apply(std::string const& x) {
+        apply(std::string_view{x});
     }
 };
 
@@ -189,10 +193,10 @@ template <class T>
 struct FromStringImpl<T, When<detail::Valid<decltype(EnumTraits<T>::strings())>::value>> {
     template <size_t I>
     static typename EnumTraits<T>::Enum applyImpl(boost::hana::size_t<I>,
-                                                  std::string const& x) {
+                                                  std::string_view x) {
         bool found{false};
         boost::hana::for_each(boost::hana::at_c<I>(EnumTraits<T>::strings()),
-                              [&](auto s) { found |= strcmp(s, x.c_str()) == 0; });
+                              [&](auto s) { found |= s == x; });
         if (found) {
             return EnumTraits<T>::values[I];
         } else {
@@ -204,12 +208,16 @@ struct FromStringImpl<T, When<detail::Valid<decltype(EnumTraits<T>::strings())>:
 
     static typename EnumTraits<T>::Enum applyImpl(
             boost::hana::size_t<EnumTraits<T>::count>,
-            std::string const& x) {
+            std::string_view x) {
         throw StringConversionError(x, boost::hana::type_c<T>);
     }
 
-    static T apply(std::string const& x) {
+    static T apply(std::string_view x) {
         return applyImpl(boost::hana::size_c<0>, x);
+    }
+
+    static T apply(std::string const& x) {
+        return applyImpl(boost::hana::size_c<0>, std::string_view{x});
     }
 };
 
@@ -221,6 +229,10 @@ struct FromStringT {
 
     auto operator()(std::string_view x) const {
         return FromStringImpl<std::remove_cv_t<std::remove_reference_t<T>>>::apply(x);
+    }
+
+    auto operator()(char const* x) const {
+        return (*this)(std::string_view{x});
     }
 };
 
