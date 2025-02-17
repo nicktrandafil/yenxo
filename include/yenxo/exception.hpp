@@ -113,8 +113,9 @@ public:
 /// An error during `toString`/`fromString` conversion
 struct StringConversionError : public std::logic_error {
     template <typename T>
-    explicit StringConversionError(std::string value, boost::hana::basic_type<T> const&)
-            : std::logic_error("'" + value + "'" + " is not of type '"
+    explicit StringConversionError(std::string_view value,
+                                   boost::hana::basic_type<T> const&)
+            : std::logic_error("'" + std::string{value} + "'" + " is not of type '"
                                + std::string(typeName(boost::hana::type_c<T>)) + "'") {
     }
 
