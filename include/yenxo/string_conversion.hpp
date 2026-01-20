@@ -122,6 +122,12 @@ struct ToStringT {
     std::string operator()(T&& x) const {
         return ToStringImpl<std::decay_t<T>>::template apply<I>(std::forward<T>(x));
     }
+
+    template <typename T, typename... Args>
+    std::string operator()(T&& x, Args&&... args) const {
+        return ToStringImpl<std::decay_t<T>>::apply(std::forward<T>(x),
+                                                    std::forward<Args>(args)...);
+    }
 };
 
 inline constexpr ToStringT const toString{};
