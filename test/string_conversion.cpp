@@ -104,6 +104,62 @@ struct EnumTraits<E2> {
         return "E2";
     }
 };
+
+enum class TestFormat { test1, test2 };
+struct TestArgsStruct {
+    int value;
+
+    // Implicit construction from int
+    TestArgsStruct(int v)
+            : value(v) {
+    }
+
+    // Implicit conversion to int (for streaming)
+    operator int() const {
+        return value;
+    }
+};
+
+template <>
+struct ToStringImpl<TestArgsStruct> {
+    // simple double-arg test
+    static std::string apply(TestArgsStruct const& x, TestArgsStruct const& y) {
+        std::ostringstream oss;
+        oss << x << ' ' << y;
+        return oss.str();
+    }
+    // simple test for double-arg (format string)
+    template <typename T>
+    static std::string apply(T const& x, std::string const& format) {
+        std::ostringstream oss;
+        oss << format << ' ' << x;
+        return oss.str();
+    }
+    // harder 4-arg test
+    template <typename T>
+    static std::string apply(T const& x,
+                             T const& y,
+                             std::string const& format,
+                             bool concatenate) {
+        std::ostringstream oss;
+        if (concatenate) {
+            oss << format << x << y;
+        } else {
+            oss << format << ' ' << x << ' ' << y;
+        }
+        return oss.str();
+    }
+    template <typename T>
+    static std::string apply(T const& x, TestFormat const& format) {
+        std::ostringstream oss;
+        if (format == TestFormat::test1) {
+            oss << "test1" << ' ' << x;
+        } else {
+            oss << "test2" << ' ' << x;
+        }
+        return oss.str();
+    }
+};
 } // namespace yenxo
 /// [enum1_traits]
 
@@ -131,4 +187,20 @@ TEST_CASE("Check toString/fromString", "[string_conversion]") {
 
     // std::to_string
     REQUIRE(toString(int(1)) == "1");
+
+    TestArgsStruct a{10}, b{20};
+
+    // double-arg (int, int) - uses implicit conversion to int
+    REQUIRE(toString(a, b) == "10 20");
+
+    // double-arg with format string
+    REQUIRE(toString(a, std::string("fmt:")) == "fmt: 10");
+
+    // 4-arg test
+    REQUIRE(toString(a, b, std::string("vals:"), true) == "vals:1020");
+    REQUIRE(toString(a, b, std::string("vals:"), false) == "vals: 10 20");
+
+    // double-arg with TestFormat enum
+    REQUIRE(toString(a, TestFormat::test1) == "test1 10");
+    REQUIRE(toString(a, TestFormat::test2) == "test2 10");
 }
