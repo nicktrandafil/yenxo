@@ -63,7 +63,8 @@ struct ToStringImpl<T, When<condition>> {
 template <typename T>
 struct ToStringImpl<
         T,
-        When<detail::Valid<decltype(std::to_string(std::declval<T>()))>::value>> {
+        When<!std::is_convertible_v<T, std::string>
+             && detail::Valid<decltype(std::to_string(std::declval<T>()))>::value>> {
     static std::string apply(T const& x) {
         return std::to_string(x);
     }
