@@ -83,7 +83,7 @@ struct ToStringImpl<
 // Types with specialized EnumTraits
 template <typename T>
 struct ToStringImpl<T,
-                    When<detail::Valid<decltype(EnumTraits<T>::toString(
+                    When<!std::is_convertible_v<T, std::string> && detail::Valid<decltype(EnumTraits<T>::toString(
                             std::declval<T>()))>::value>> {
     static char const* apply(T x) {
         return EnumTraits<T>::toString(x);
