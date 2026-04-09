@@ -289,10 +289,13 @@ struct ToVariantImpl<T, When<isCollectionType(boost::hana::type_c<T>)>> {
         return Variant(ret);
     }
 };
-
+template <typename T>
+struct HasCustomToVariant : std::false_type {};
 // Specialization for types with specialized EnumTraits
 template <class T>
-struct ToVariantImpl<T, When<isReflectiveEnum(boost::hana::type_c<T>)>> {
+struct ToVariantImpl<
+        T,
+        When<isReflectiveEnum(boost::hana::type_c<T>) && !HasCustomToVariant<T>::value>> {
     static Variant apply(T e) {
         return Variant(EnumTraits<T>::toString(e));
     }
