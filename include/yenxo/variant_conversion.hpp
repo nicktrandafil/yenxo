@@ -290,12 +290,12 @@ struct ToVariantImpl<T, When<isCollectionType(boost::hana::type_c<T>)>> {
     }
 };
 template <typename T>
-struct HasCustomToVariant : std::false_type {};
+struct DisableDefaultToVariant : std::false_type {};
 // Specialization for types with specialized EnumTraits
 template <class T>
 struct ToVariantImpl<
         T,
-        When<isReflectiveEnum(boost::hana::type_c<T>) && !HasCustomToVariant<T>::value>> {
+        When<isReflectiveEnum(boost::hana::type_c<T>) && !DisableDefaultToVariant<T>::value>> {
     static Variant apply(T e) {
         return Variant(EnumTraits<T>::toString(e));
     }
@@ -811,6 +811,7 @@ inline constexpr auto toVariantConvertible = [](auto type) {
            || isMapType(type)
            || isCollectionType(type)
            || isReflectiveEnum(type)
+           || DisableDefaultToVariant<typename decltype(type)::type>::value
            || isPair(type)
            || isTuple(type)
 #if YENXO_ENABLE_TYPE_SAFE

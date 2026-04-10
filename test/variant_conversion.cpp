@@ -97,7 +97,59 @@ struct E2Traits {
 
 [[maybe_unused]] E2Traits traits(E2) {
     return {};
-}
+
+    enum class PlainE { a, b };
+    enum class ConceptE { x, y };
+
+    struct PlainETraits {
+        using Enum = PlainE;
+        static char const* toString(Enum x) {
+            switch (x) {
+            case Enum::a:
+                return "a";
+            case Enum::b:
+                return "b";
+            }
+            throw 1;
+        }
+    };
+
+    struct ConceptETraits {
+        using Enum = ConceptE;
+        static char const* toString(Enum x) {
+            switch (x) {
+            case Enum::x:
+                return "x";
+            case Enum::y:
+                return "y";
+            }
+            throw 1;
+        }
+        static std::string_view custom_call() {
+            return "custom";
+        }
+    };
+
+    [[maybe_unused]] PlainETraits traits(PlainE) {
+        return {};
+    }
+    [[maybe_unused]] ConceptETraits traits(ConceptE) {
+        return {};
+    }
+
+    template <typename T>
+    concept HasCustomCall = requires { EnumTraits<T>::custom_call(); };
+
+    template <HasCustomCall T>
+    struct yenxo::DisableDefaultToVariant<T> : std::true_type {};
+
+    template <HasCustomCall T>
+    struct yenxo::ToVariantImpl<T, yenxo::When<true>> {
+        static Variant apply(T e) {
+            return Variant(std::string(EnumTraits<T>::custom_call()) + "_"
+                           + EnumTraits<T>::toString(e));
+        }
+    };
 
 } // namespace
 
@@ -258,6 +310,13 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
                                   }));
         }
     }
+    SECTION("plain reflective enum uses default path") {
+        REQUIRE(toVariant(PlainE::a) == Variant("a"));
+    }
+
+    SECTION("concept-matched enum uses custom path") {
+        REQUIRE(toVariant(ConceptE::x) == Variant("custom_x"));
+    }
 }
 
 namespace {
@@ -274,7 +333,9 @@ struct SpecialSymbol1 {
 
 struct SpecialSymbol2 {
     YENXO_FROM_VARIANT(SpecialSymbol2)
-    YENXO_DEFINE_STRUCT(SpecialSymbol2, (int, x, Name("~x/y/~"))); };  } // namespace
+    YENXO_DEFINE_STRUCT(SpecialSymbol2, (int, x, Name("~x/y/~")));
+};
+} // namespace
 
 TEST_CASE("Check VariantErr::path()", "[exception]") {
     REQUIRE_THROWS_MATCHES(fromVariant<SimpleProperty>(VariantMap{{"x", "1"}}),
@@ -293,3 +354,6 @@ static_assert(toVariantConvertible(boost::hana::type_c<int>));
 static_assert(
         toVariantConvertible(boost::hana::type_c<std::unordered_map<std::string, int>>));
 static_assert(toVariantConvertible(boost::hana::type_c<E>));
+static_assert(!HasCustomCall<PlainE>);
+static_assert(HasCustomCall<ConceptE>);
+static_assert(toVariantConvertible(boost::hana::type_c<ConceptE>));
