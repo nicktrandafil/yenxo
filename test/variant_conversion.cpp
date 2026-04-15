@@ -97,59 +97,59 @@ struct E2Traits {
 
 [[maybe_unused]] E2Traits traits(E2) {
     return {};
+};
+enum class PlainE { a, b };
+enum class ConceptE { x, y };
 
-    enum class PlainE { a, b };
-    enum class ConceptE { x, y };
-
-    struct PlainETraits {
-        using Enum = PlainE;
-        static char const* toString(Enum x) {
-            switch (x) {
-            case Enum::a:
-                return "a";
-            case Enum::b:
-                return "b";
-            }
-            throw 1;
+struct PlainETraits {
+    using Enum = PlainE;
+    static char const* toString(Enum x) {
+        switch (x) {
+        case Enum::a:
+            return "a";
+        case Enum::b:
+            return "b";
         }
-    };
-
-    struct ConceptETraits {
-        using Enum = ConceptE;
-        static char const* toString(Enum x) {
-            switch (x) {
-            case Enum::x:
-                return "x";
-            case Enum::y:
-                return "y";
-            }
-            throw 1;
-        }
-        static std::string_view custom_call() {
-            return "custom";
-        }
-    };
-
-    [[maybe_unused]] PlainETraits traits(PlainE) {
-        return {};
+        throw 1;
     }
-    [[maybe_unused]] ConceptETraits traits(ConceptE) {
-        return {};
-    }
+};
 
-    template <typename T>
-    concept HasCustomCall = requires { EnumTraits<T>::custom_call(); };
-
-    template <HasCustomCall T>
-    struct yenxo::DisableDefaultToVariant<T> : std::true_type {};
-
-    template <HasCustomCall T>
-    struct yenxo::ToVariantImpl<T, yenxo::When<true>> {
-        static Variant apply(T e) {
-            return Variant(std::string(EnumTraits<T>::custom_call()) + "_"
-                           + EnumTraits<T>::toString(e));
+struct ConceptETraits {
+    using Enum = ConceptE;
+    static char const* toString(Enum x) {
+        switch (x) {
+        case Enum::x:
+            return "x";
+        case Enum::y:
+            return "y";
         }
-    };
+        throw 1;
+    }
+    static std::string_view custom_call() {
+        return "custom";
+    }
+};
+
+[[maybe_unused]] PlainETraits traits(PlainE) {
+    return {};
+}
+[[maybe_unused]] ConceptETraits traits(ConceptE) {
+    return {};
+}
+
+template <typename T>
+concept HasCustomCall = requires { EnumTraits<T>::custom_call(); };
+
+template <HasCustomCall T>
+struct yenxo::DisableDefaultToVariant<T> : std::true_type {};
+
+template <HasCustomCall T>
+struct yenxo::ToVariantImpl<T, yenxo::When<true>> {
+    static Variant apply(T e) {
+        return Variant(std::string(EnumTraits<T>::custom_call()) + "_"
+                       + EnumTraits<T>::toString(e));
+    }
+};
 
 } // namespace
 
