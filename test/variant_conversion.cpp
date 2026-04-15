@@ -97,7 +97,8 @@ struct E2Traits {
 
 [[maybe_unused]] E2Traits traits(E2) {
     return {};
-};
+}
+
 enum class PlainE { a, b };
 enum class ConceptE { x, y };
 
@@ -137,21 +138,31 @@ struct ConceptETraits {
     return {};
 }
 
+template <typename T, typename = void>
+struct HasCustomCallImpl : std::false_type {};
+
 template <typename T>
-concept HasCustomCall = requires { EnumTraits<T>::custom_call(); };
+struct HasCustomCallImpl<T, std::void_t<decltype(EnumTraits<T>::custom_call())>>
+    : std::true_type {};
 
-template <HasCustomCall T>
-struct yenxo::DisableDefaultToVariant<T> : std::true_type {};
+template <typename T>
+constexpr bool HasCustomCall = HasCustomCallImpl<T>::value;
 
-template <HasCustomCall T>
-struct yenxo::ToVariantImpl<T, yenxo::When<true>> {
+} // namespace
+
+template <typename T>
+struct yenxo::DisableDefaultToVariant<T, std::enable_if_t<HasCustomCall<T>>>
+    : std::true_type {};
+
+template <typename T>
+struct yenxo::ToVariantImpl<T, yenxo::When<HasCustomCall<T>>> {
     static Variant apply(T e) {
         return Variant(std::string(EnumTraits<T>::custom_call()) + "_"
                        + EnumTraits<T>::toString(e));
     }
 };
 
-} // namespace
+namespace {
 
 TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
     SECTION("`toVariant`/`fromVariant` static member functions") {
@@ -310,6 +321,7 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
                                   }));
         }
     }
+
     SECTION("plain reflective enum uses default path") {
         REQUIRE(toVariant(PlainE::a) == Variant("a"));
     }
@@ -318,8 +330,6 @@ TEST_CASE("Check toVariant/fromVariant", "[variant_conversion]") {
         REQUIRE(toVariant(ConceptE::x) == Variant("custom_x"));
     }
 }
-
-namespace {
 
 struct SimpleProperty {
     YENXO_FROM_VARIANT(SimpleProperty)
@@ -335,6 +345,7 @@ struct SpecialSymbol2 {
     YENXO_FROM_VARIANT(SpecialSymbol2)
     YENXO_DEFINE_STRUCT(SpecialSymbol2, (int, x, Name("~x/y/~")));
 };
+
 } // namespace
 
 TEST_CASE("Check VariantErr::path()", "[exception]") {
