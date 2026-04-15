@@ -150,15 +150,14 @@ constexpr bool HasCustomCall = HasCustomCallImpl<T>::value;
 
 } // namespace
 
-template <typename T>
-struct yenxo::DisableDefaultToVariant<T, std::enable_if_t<HasCustomCall<T>>>
-    : std::true_type {};
+template <>
+struct yenxo::DisableDefaultToVariant<ConceptE> : std::true_type {};
 
-template <typename T>
-struct yenxo::ToVariantImpl<T, yenxo::When<HasCustomCall<T>>> {
-    static Variant apply(T e) {
-        return Variant(std::string(EnumTraits<T>::custom_call()) + "_"
-                       + EnumTraits<T>::toString(e));
+template <>
+struct yenxo::ToVariantImpl<ConceptE, void> {
+    static Variant apply(ConceptE e) {
+        return Variant(std::string(EnumTraits<ConceptE>::custom_call()) + "_"
+                       + EnumTraits<ConceptE>::toString(e));
     }
 };
 
