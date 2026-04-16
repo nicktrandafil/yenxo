@@ -144,6 +144,7 @@ Variables</h2></td></tr>
 <div class="line">           || <a class="code" href="group__group-details.html#ga5a47b5082eb47fd32edc6e276e25a961">isMapType</a>(type)</div>
 <div class="line">           || <a class="code" href="group__group-details.html#ga9075ec939dabff04f25dc391c3c03127">isCollectionType</a>(type)</div>
 <div class="line">           || <a class="code" href="group__group-details.html#ga8a17e8074a5fd5532138250bc11a4560">isReflectiveEnum</a>(type)</div>
+<div class="line">           || DisableDefaultToVariant&lt;<span class="keyword">typename</span> decltype(type)::type&gt;::value</div>
 <div class="line">           || <a class="code" href="group__group-meta.html#ga4f85f1d8eb09bd1bd5a24ebf1f422974">isPair</a>(type)</div>
 <div class="line">           || <a class="code" href="group__group-meta.html#ga898ed22d8e1e5bcb2ddfb7e6b3fbf9dc">isTuple</a>(type)</div>
 <div class="line"> </div>
@@ -152,7 +153,7 @@ Variables</h2></td></tr>
 <div class="line">           || <a class="code" href="group__group-meta.html#gad2c8a182d31afa3d2d523ebcdbdd40d2">floatingPoint</a>(type)</div>
 <div class="line">           || <a class="code" href="group__group-meta.html#gadfd302b4ecdfea9252319ddd45334929">boolean</a>(type)</div>
 <div class="line"> </div>
-<div class="line">           || boost::hana::is_a&lt;boost::hana::map_tag, <span class="keyword">typename</span> decltype(type)::type&gt;</div>
+<div class="line">           || boost::hana::is_a&lt;boost::hana::map_tag, typename decltype(type)::type&gt;</div>
 <div class="line">           || boost::hana::is_a&lt;boost::hana::string_tag, typename decltype(type)::type&gt;</div>
 <div class="line">           || boost::hana::is_a&lt;boost::hana::tuple_tag, typename decltype(type)::type&gt;</div>
 <div class="line">           || <a class="code" href="group__group-meta.html#ga84973a84048ac76e675e30d3fe7e9d6b">isStdVariant</a>(type);</div>
